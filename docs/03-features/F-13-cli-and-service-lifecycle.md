@@ -4,7 +4,8 @@ Status: Draft
 Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 Requirements: OPS-001, OPS-002, OPS-003, OPS-004, OPS-005, OPS-006, OPS-007, OPS-008,
-OPS-009, OPS-010, OPS-011, OPS-012, OPS-013, OPS-014, OPS-015
+OPS-009, OPS-010, OPS-011, OPS-012, OPS-013, OPS-014, OPS-015, LIFE-001, LIFE-002,
+LIFE-003, LIFE-004, LIFE-005, LIFE-006, LIFE-007, LIFE-008, LIFE-009, LIFE-011
 
 ## 1. Purpose and user story
 
@@ -47,6 +48,10 @@ system service, so that my television can find it after a reboot without me logg
 - Signal handling and the graceful shutdown sequence (OPS-008).
 - The service integration on macOS, Linux and Windows (OPS-009) and the instance
   identity that lets a second instance run beside the first (OPS-010).
+- The service lifecycle states and the network-recovery behaviour of the daemon
+  (LIFE-001 … LIFE-009, LIFE-011): starting, serving, sleeping and waking, an
+  interface that disappears, a volume that goes away, a crash, and the recovery
+  after it.
 - The help and version output (OPS-011) and the exit-code scheme (OPS-014).
 
 **Explicitly out of scope**
@@ -202,6 +207,86 @@ PLT-017, PLT-018). *How the two reconcile on macOS is raised in §12.*
   data directory, the ports, the device identity and the control channel name
   (OPS-010).
 
+### 4.1 Service lifecycle and network recovery
+
+A server is not a program that runs: it is a thing with a life. It starts, it serves,
+the operating system puts it to sleep, the network changes under it, a volume
+disappears, somebody kills it — and it has to come back honestly. The states below are
+the vocabulary the daemon, the status command and the administration surface share.
+
+**LIFE-001** — The server shall expose the distinct states *Starting*, *Ready*,
+*Degraded*, *Suspended*, *Recovering*, *Stopping*, *Stopped* and *Failed*, and every
+transition shall carry a reason, a timestamp and a user-facing explanation. [DESIGN]
+The state is one value, never a set of flags: the server is *Ready* or it is not. A
+transition is written to the log as one record carrying the new state, the reason, the
+timestamp and the sentence the user would read (UX-004), and it is reflected in the
+status output (OPS-002) and in the administration surface (F-14).
+
+**LIFE-002** — The server shall handle a sleep/wake cycle without spinning, leaking
+resources or reporting a "ready" state it does not have; on wake it shall refresh the
+active interfaces, rebind its listeners as required and re-advertise only on permitted
+interfaces. [DESIGN] The sleep and the wake are events reported by the platform layer;
+how they are detected belongs to the adapter, not to the core. On the way down the
+server releases its workers and file handles predictably (RES-009) and stops
+answering; on the way up it re-reads the interface list, rebinds what has to be
+rebound, and advertises again — on the permitted interfaces only, never on all of them.
+
+**LIFE-003** — The server shall handle a change of interface, address, subnet or
+route, and shall never widen its network exposure beyond the configured policy.
+[DESIGN] The configured interface policy (CFG-006) is re-evaluated after every change:
+an excluded interface stays excluded, and an interface the user did not configure is
+never adopted. Exposure is a decision of the configuration; a change in the network is
+not a reason to change it.
+
+**LIFE-004** — When a configured interface disappears the server shall enter the
+*Degraded* or *Recovering* state and shall not automatically expose itself on another
+interface. [DESIGN] The disappearance is a transition with a reason — "the interface
+`en0` disappeared" — and not a silent degradation. The server keeps whatever it still
+has and advertises nothing new.
+
+**LIFE-005** — The server shall detect the loss and the return of a network or
+removable volume, shall preserve the configured roots and the index, and shall mark
+the affected entries as unavailable rather than deleting them. [DESIGN] The volume
+events are the first-class events of F-08 (FUN-017, PLT-011): the root stays in the
+configuration, the index rows stay, and the entries carry an *unavailable* marker
+until the volume comes back (REL-002).
+
+**LIFE-006** — A transfer interrupted by a real sleep or a real network loss shall end
+in a way that is truthful for the protocol; the server shall not promise a transparent
+continuation that the client cannot achieve. [DESIGN] The connection ends the way a
+client can recognise: a truncated response or a closed connection, never a body that
+simply stops in the middle without saying so. The transfer slot is released
+(INT-089, FUN-046), and the client can ask for the bytes it did not receive with an
+ordinary byte-range request (INT-081). Nothing is "resumed" behind the client's back.
+
+**LIFE-007** — The server shall retry discovery and rebinding with a bounded backoff
+and jitter, and shall not produce a multicast storm or a tight retry loop. [DESIGN]
+The retry schedule has a documented first delay, a documented maximum delay and a
+random jitter, and it is reset only when the interface comes back. The bounds are
+published so that the recovery time is predictable; the numbers are raised in §12.
+
+**LIFE-008** — The server shall recover from an abnormal termination with an atomic
+state and either a consistent catalogue or a safe repair, and shall not require a user
+interface to be running. [DESIGN] The headless daemon alone is enough: the index is
+checked at start-up and rebuilt if it is damaged (FUN-010), the media originals are
+never touched (REL-001), and the recovery is reported in the log and in the status
+output. The user interface may be absent.
+
+**LIFE-009** — The administration surface and the user interface shall reflect the
+effective interface, address, listener state and the last recovery event, with the
+technical detail available on demand. [DESIGN] The status command (OPS-002) and the
+administration surface (F-14) show the *effective* values — the address the server is
+really reachable at, not the one it was configured with — and the last recovery event
+in plain language; the technical detail (the raw interface table, the retry counters)
+is available on request.
+
+**LIFE-011** — The server shall keep a local, redacted timeline of network changes and
+recovery events that the user may export after reviewing it. [DESIGN] The timeline is a
+bounded local file in the instance's data directory, in the same redacted form as the
+rest of the log (OPS-007, SEC-094): paths, addresses and identifiers appear as
+pseudonyms. The user reads it before it is exported, and the export is a diagnostic
+document like any other (OPS-013, UX-011).
+
 ## 5. Performance requirements
 
 All figures below are **targets** with a measurement method; none is a measured value.
@@ -281,6 +366,13 @@ qa-performance §2.
 | `interfaces` finds no usable interface | the command lists the interfaces it found and says that the server would not advertise | CFG-006 |
 | The log file cannot be written | the daemon reports it on standard error and continues; the log goes to standard error instead | OPS-001 |
 | The sandbox child of F-10 dies unexpectedly | the parent records it and quarantines the file; the daemon continues | SEC-066 |
+| The machine sleeps | the server suspends its work and releases workers and file handles; it does not report *Ready* while it is suspended | LIFE-002, RES-009 |
+| The machine wakes | the interfaces are refreshed, the listeners are rebound and discovery is re-advertised on the permitted interfaces only | LIFE-002 |
+| An interface, an address or a route changes | the configured interface policy is re-evaluated and the listeners rebound; the exposure never widens beyond the configuration | LIFE-003 |
+| A configured interface disappears | the server enters *Degraded* or *Recovering* with a reason and does not expose itself on another interface | LIFE-004 |
+| A removable or network volume disappears | the root and its index rows are preserved and the entries are marked unavailable; the other roots keep serving | LIFE-005, REL-002 |
+| A transfer is interrupted by a sleep or a network loss | the connection ends truthfully for the protocol and the transfer slot is released | LIFE-006, INT-089 |
+| The daemon is killed | on restart the index is consistent or is rebuilt and reported; no user interface is needed and no media original is touched | LIFE-008, REL-001 |
 
 No failure of this feature may produce a panic message without context (UX-005), and no
 command may leave a half-written index behind (FUN-009).
@@ -377,6 +469,66 @@ a runtime failure from "nothing to do", and the distinction is stable across rel
 configured roots. Requirements: OPS-015, PLT-018, PRD-007 · Verification: automated test plus a manual
 protocol check · Planned location: `crates/phairdlna-cli/tests/cli_commands.rs` and `qa/device-matrix.toml`
 
+**AC-19** — *Given* a daemon that starts, serves, is interrupted and stops, *when* each transition happens, *then*
+the server reports exactly one of the eight documented states, and every transition is written to the log with the
+new state, a reason, a timestamp and a user-facing explanation. Requirements: LIFE-001, UX-004 · Verification:
+automated CLI test · Planned location: `crates/phairdlna-cli/tests/service_lifecycle.rs`
+
+**AC-20** — *Given* a running server, *when* the platform reports a sleep and later a wake, *then* the server does
+not report the *Ready* state while it is suspended, it releases its workers and file handles on the way down, it
+refreshes the interfaces and rebinds its listeners on the way up, and it re-advertises only on the permitted
+interfaces; no listener and no task is leaked. Requirements: LIFE-002, RES-009, REL-003 · Verification: automated
+test with a scripted sleep/wake event source, plus the manual trial of the resilience plan · Planned location:
+`crates/phairdlna-core/tests/network_recovery.rs` and `docs/05-quality/RESILIENCE-ACCEPTANCE-PLAN.md` (case
+LIFE-A02, result `NOT RUN`)
+
+**AC-21** — *Given* a configuration that selects the interfaces used for discovery and for media, *when* the
+address, the subnet or the route of one of them changes, *then* the server rebinds what it must, the configured
+policy is re-evaluated, and the server is not reachable on an interface the configuration excludes. Requirements:
+LIFE-003, CFG-006, INT-009 · Verification: automated test with a scripted interface change, plus the manual trial
+of the resilience plan · Planned location: `crates/phairdlna-core/tests/network_recovery.rs` and
+`docs/05-quality/RESILIENCE-ACCEPTANCE-PLAN.md` (case LIFE-A01, result `NOT RUN`)
+
+**AC-22** — *Given* a configured interface that disappears, *when* the server notices, *then* it enters the
+*Degraded* or *Recovering* state with a reason naming the interface, and it does not begin advertising on another
+interface. Requirements: LIFE-004, LIFE-003 · Verification: automated test with a scripted interface removal ·
+Planned location: `crates/phairdlna-core/tests/network_recovery.rs`
+
+**AC-23** — *Given* a configured root on a removable or network volume, *when* the volume disappears and later
+returns, *then* the root stays in the configuration, the index rows are preserved, the entries are marked
+unavailable while the volume is gone, and they are served again when it returns. Requirements: LIFE-005, REL-002,
+FUN-017 · Verification: automated test with a scripted volume event, plus the manual trial of the resilience plan
+· Planned location: `crates/phairdlna-core/tests/network_recovery.rs` and
+`docs/05-quality/RESILIENCE-ACCEPTANCE-PLAN.md` (case LIFE-A03, result `NOT RUN`)
+
+**AC-24** — *Given* an active transfer, *when* a real sleep or a real network loss interrupts it, *then* the
+connection ends truthfully for the protocol, the transfer slot is released, and the client can obtain the missing
+bytes with a byte-range request. Requirements: LIFE-006, INT-089, INT-081 · Verification: fault injection ·
+Planned location: `crates/phairdlna-core/tests/transfer_interruption.rs`
+
+**AC-25** — *Given* an interface that does not come back, *when* the server retries discovery and rebinding,
+*then* the delay between attempts grows to the documented bound, carries a random jitter, and the number of
+advertisement datagrams sent per unit of time stays within the documented bound; neither a tight retry loop nor a
+multicast storm occurs. Requirements: LIFE-007 · Verification: automated test with a scripted clock · Planned
+location: `crates/phairdlna-core/tests/retry_backoff.rs`
+
+**AC-26** — *Given* a daemon that was killed, *when* it is started again with no user interface running, *then* the
+index is consistent or is rebuilt automatically and reported, and no media original was modified. Requirements:
+LIFE-008, REL-001, FUN-010 · Verification: fault injection, plus the manual trial of the resilience plan ·
+Planned location: `crates/phairdlna-cli/tests/service_lifecycle.rs` and
+`docs/05-quality/RESILIENCE-ACCEPTANCE-PLAN.md` (case LIFE-A04, result `NOT RUN`)
+
+**AC-27** — *Given* a server that has recovered from an interface or a volume event, *when* the status output and
+the administration surface are read, *then* they show the effective interface, the address the server is actually
+reachable at, the listener state and the last recovery event in plain language, and the technical detail is
+available on demand. Requirements: LIFE-009, OPS-002, UX-004 · Verification: automated CLI test · Planned
+location: `crates/phairdlna-cli/tests/cli_status.rs`
+
+**AC-28** — *Given* a series of network changes and recovery events, *when* the local timeline is inspected,
+*then* it holds the events in order with their reasons, it contains no unredacted path, address or identifier,
+and the user can export it after reviewing it. Requirements: LIFE-011, SEC-094, UX-011 · Verification: automated
+CLI test · Planned location: `crates/phairdlna-cli/tests/recovery_timeline.rs`
+
 ## 11. Test strategy and dependencies
 
 **Planned test locations** (none of these files exists yet):
@@ -389,8 +541,15 @@ protocol check · Planned location: `crates/phairdlna-cli/tests/cli_commands.rs`
 | Description and diagnostic output | `crates/phairdlna-cli/tests/cli_diagnostics.rs` |
 | Two instances side by side | `crates/phairdlna-cli/tests/cli_instances.rs` |
 | Shipped service files | `crates/phairdlna-cli/tests/service_units.rs` |
+| Lifecycle states and transitions, crash recovery | `crates/phairdlna-cli/tests/service_lifecycle.rs` |
+| Sleep/wake, interface change, volume loss and recovery | `crates/phairdlna-core/tests/network_recovery.rs` |
+| Retry backoff and the advertisement rate | `crates/phairdlna-core/tests/retry_backoff.rs` |
+| A transfer interrupted by a sleep or a network loss | `crates/phairdlna-core/tests/transfer_interruption.rs` |
+| Recovery-event timeline and its export | `crates/phairdlna-cli/tests/recovery_timeline.rs` |
+| Effective interface, address and listener state in the status output | `crates/phairdlna-cli/tests/cli_status.rs` |
 | Signal, exit-code and format unit tests | `crates/phairdlna-cli/src/main.rs`, `crates/phairdlna-cli/src/commands/` (inline `#[cfg(test)]` modules) |
 | Behaviour on a real service manager | `qa/device-matrix.toml` |
+| Behaviour across a real sleep/wake cycle and a real network change | `docs/05-quality/RESILIENCE-ACCEPTANCE-PLAN.md` (cases LIFE-A01 … LIFE-A04, all `NOT RUN`) |
 
 **Method.** The commands are thin wrappers over typed functions, so most of them are
 exercised by calling the function and inspecting the rendered output. The shutdown
@@ -399,13 +558,21 @@ it, sending the signal and asserting the order of the observable effects — the
 `ssdp:byebye` datagram, the closed transfer, the flushed index and the exit code. The
 shipped `launchd`, `systemd` and Windows service files are checked by a test that
 parses them, so that a broken unit file fails the build rather than the user's machine.
+The lifecycle and the recovery are exercised by driving the same interface the
+platform adapter implements with scripted events — a sleep, a removed interface, a lost
+volume — so that the recovery logic is testable without unplugging a cable; the real
+sleep/wake cycle and the real network change remain manual checks (the resilience
+acceptance plan, cases LIFE-A01 … LIFE-A04, all `NOT RUN`).
 
 **Dependencies.** F-01 (the SSDP headers the description command prints, and the
 `ssdp:byebye` of the shutdown), F-02 (the device description), F-09 (the catalogue
 statistics and the last scan result), F-12 (the configuration and the instance name),
 F-14 (the source offer referenced by the diagnostic report, and the token of the
 control channel) and the platform trait for interface enumeration and per-user
-directories (ARCHITECTURE §12).
+directories (ARCHITECTURE §12). The lifecycle and recovery cases depend on the
+volume events of F-08 and on the resilience acceptance plan
+(`../05-quality/RESILIENCE-ACCEPTANCE-PLAN.md`, cases LIFE-A01 … LIFE-A04), whose
+results are all `NOT RUN`.
 
 ## 12. Open questions and decisions
 
@@ -447,3 +614,10 @@ directories (ARCHITECTURE §12).
    folders (platform §5.4), and the research leaves open whether a root daemon can use
    a security-scoped bookmark created by the user agent. *Closes when:* a device test
    settles it; until then the design assumes the agent mediates folder access.
+8. **[OPEN] The recovery backoff bounds.** LIFE-007 requires a bounded backoff with
+   jitter and names no numbers. *Proposed reading:* the first retry waits 1 s, each
+   further attempt doubles the delay up to a maximum of 60 s, and every attempt carries
+   a random jitter of up to 20 % of the current delay; the schedule is reset when the
+   interface comes back. The same numbers govern the rebinding attempts and the
+   advertisement re-sends. *Closes when:* the owner fixes the numbers and they are
+   published next to the state machine.

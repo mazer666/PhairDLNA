@@ -3,7 +3,7 @@
 Status: Draft
 Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
-Requirements: FUN-001, FUN-002, FUN-003, FUN-004, FUN-005, FUN-006, FUN-007, FUN-017, FUN-018, FUN-019, FUN-023, FUN-024, SEC-001, SEC-002, SEC-003, SEC-004, SEC-005, SEC-006, SEC-007, SEC-008, PLT-005, PLT-011, PLT-012, PLT-017
+Requirements: FUN-001, FUN-002, FUN-003, FUN-004, FUN-005, FUN-006, FUN-007, FUN-017, FUN-018, FUN-019, FUN-023, FUN-024, SEC-001, SEC-002, SEC-003, SEC-004, SEC-005, SEC-006, SEC-007, SEC-008, PLT-003, PLT-005, PLT-006, PLT-007, PLT-011, PLT-012, PLT-015, PLT-017
 
 ## 1. Purpose and user story
 
@@ -27,7 +27,10 @@ want it to never read a file outside those folders, even if a link inside one of
   containment rule and everything it implies for opening a file; the symbolic-link policy; the treatment of hidden
   files, macOS sidecars and aliases; removable volumes, network shares and the events they raise; the quarantine of
   a subtree the user has not consented to; the per-root detection of case sensitivity, Unicode normalisation
-  behaviour and volume identity; the scan schedule; and the reporting of a root that is missing.
+  behaviour and volume identity; the scan schedule; the reporting of a root that is missing; the platform traits
+  that keep the core portable (PLT-003); and the path handling of names with spaces, non-ASCII characters and emoji
+  (PLT-006), of Windows traversal attempts written with either separator (PLT-007) and of Windows long paths
+  (PLT-015).
 
 **Explicitly out of scope** — metadata extraction (F-09), thumbnails and artwork (F-10), media delivery over
   HTTP (F-06), the DIDL-Lite rendering of the catalogue (F-05) and the `Browse` action (F-03); the identity key
@@ -125,11 +128,32 @@ want it to never read a file outside those folders, even if a link inside one of
   directory. [DESIGN] The scanner and the HTTP layer open read-only; the server never needs write access to the
   user's media and never asks for it (OPS-015, PLT-018).
 
+**PLT-003** — All OS-specific behaviour shall be reachable through a documented trait with a default
+implementation for unsupported platforms. [DESIGN] The platform layer is a set of small, orthogonal traits — the
+filesystem facts, the volume identity, the volume events, the consent mechanism — and every trait has a default
+implementation that reports "not supported here", so that the core compiles and runs on a platform for which no
+adapter exists yet (platform-integration §10.1 rules 2 and 4). The traits are the only place where an operating
+system type may appear in a signature; the core speaks in project-owned types and never asks "which platform is
+this?" (platform-integration §10.1 rule 1; ARCHITECTURE §12).
+
 **PLT-005** — The server shall detect the case sensitivity, the Unicode normalisation behaviour and the volume
   identity of each media root instead of assuming them. [DESIGN] The detection is per root and is stored with the
   root, because one server may serve a case-sensitive Linux root and a case-insensitive APFS volume at the same
   time (ADR-0003; platform-integration §5.1); the platform reports the facts, the core decides what to do with
   them (ADR-0003 rule 1).
+
+**PLT-006** — The server shall run correctly when the user's home directory or a media root contains spaces,
+  non-ASCII characters or emoji. [DESIGN] A path is never assembled by string concatenation and never
+  percent-encoded by hand: the components are joined with the platform's own path type and encoded once, on the way
+  into a URL, by one function (SEC-015, INT-098). The identity key is computed on the NFC form, so a folder whose
+  name contains an emoji or an accented character is indexed and served exactly like any other folder (FUN-019).
+
+**PLT-007** — Windows path handling shall support long paths and shall reject path traversal attempts using both
+  separator characters. [DESIGN] On Windows the separator is the backslash, so a traversal attempt may arrive as
+  `..\` as well as `../`; the rejection rule (SEC-002) is applied to both characters before any filesystem call is
+  made. Long paths need two things at once — the executable must declare `longPathAware` and the machine must have
+  the `LongPathsEnabled` registry value set (platform-integration §9.4; PLT-015) — so the path handling alone is
+  not enough.
 
 **PLT-011** — The server shall treat the mount, unmount and remount of a volume as a first-class event and shall
   re-key the affected catalogue entries when a volume reappears under a different identity. [DESIGN] The event bus
@@ -140,6 +164,16 @@ want it to never read a file outside those folders, even if a link inside one of
   and shall continue indexing the rest of the root. [DESIGN] A quarantined subtree is not an error state: it is
   listed in diagnostics, it is not served, and it can be released once the operating system has granted access
   (PLT-017).
+
+**PLT-015** — The Windows installation shall declare long-path support in the executable manifest and shall document
+  that the system-wide `LongPathsEnabled` setting is also required. [DESIGN] The Windows executable embeds an
+  application manifest that contains `<ws2:longPathAware>true</ws2:longPathAware>`, and the installation
+  documentation states that the registry value
+  `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled` must be `1` for the opt-in to
+  take effect (platform-integration §9.4). Both conditions are needed: the manifest alone does not raise the legacy
+  limit of 260 UTF-16 code units, and the registry value alone does not opt the application in. Because the registry
+  value is machine-wide and cached per process, it can only be set by an installer that runs with administrator
+  rights — the per-user installation cannot set it (platform-integration §9.4, §11.1 D9).
 
 **PLT-017** — The server shall obtain the user's consent for folders that the operating system protects (macOS
   privacy prompts, Linux polkit, Windows elevation), and shall explain the denial instead of failing silently.
