@@ -1,5 +1,18 @@
-PhairDLNA is licensed under GNU Affero General Public License version 3 or later (AGPL-3.0-or-later).
+PhairDLNA is free software: you can redistribute it and/or modify it under the terms
+of the GNU Affero General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version.
 
-The complete authoritative license text is at https://www.gnu.org/licenses/agpl-3.0.txt
+PhairDLNA is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
 
-IMPORTANT: This is not the complete license text. Add the unmodified full text as LICENSE before any public code release. See docs/project/RELEASE-BLOCKERS.md.
+You should have received a copy of the GNU Affero General Public License along with
+this program. The complete, unmodified licence text is shipped in the file LICENSE in
+the root of this repository, and is also available at:
+
+    https://www.gnu.org/licenses/agpl-3.0.txt
+
+Section 13 of that licence requires a modified version of the program to offer its
+corresponding source to the users who interact with it over a network. PhairDLNA
+implements that offer as a product feature: the running server serves the
+corresponding source of the exact build it was built from.
