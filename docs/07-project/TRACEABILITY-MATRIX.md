@@ -66,6 +66,7 @@ there is no implementation yet, and an empty cell means *not implemented*, not
 | `FUN-022` | `F-11` | M2 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Protocol conformance + device test | — | Not implemented |
 | `FUN-023` | `F-08` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
 | `FUN-024` | `F-08` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
+| `FUN-025` | `—` | M0 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
 | `FUN-040` | `F-06` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
 | `FUN-041` | `F-06` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
 | `FUN-042` | `F-06` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
@@ -220,6 +221,7 @@ there is no implementation yet, and an empty cell means *not implemented*, not
 | `PERF-012` | `F-09` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
 | `PERF-013` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
 | `PERF-014` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
+| `PERF-015` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
 | `PLT-001` | `—` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
 | `PLT-002` | `—` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
 | `PLT-003` | `—` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
@@ -253,6 +255,12 @@ there is no implementation yet, and an empty cell means *not implemented*, not
 | `PRD-013` | `cross-cutting` | M0 | `—` | Manual acceptance protocol | — | Not implemented |
 | `PRD-014` | `cross-cutting` | M0 | `—` | Manual acceptance protocol | — | Not implemented |
 | `PRD-015` | `cross-cutting` | M0 | `—` | Manual acceptance protocol | — | Not implemented |
+| `REL-001` | `F-18` | M1 | `crates/phairdlna-core/tests/soak, crates/phairdlna-cli` | Fault-injection and soak test | — | Not implemented |
+| `REL-002` | `F-18` | M1 | `crates/phairdlna-core/tests/soak, crates/phairdlna-cli` | Fault-injection and soak test | — | Not implemented |
+| `REL-003` | `F-18` | M1 | `crates/phairdlna-core/tests/soak, crates/phairdlna-cli` | Fault-injection and soak test | — | Not implemented |
+| `REL-004` | `F-18` | M1 | `crates/phairdlna-core/tests/soak, crates/phairdlna-cli` | Fault-injection and soak test | — | Not implemented |
+| `REL-005` | `F-18` | M1 | `crates/phairdlna-core/tests/soak, crates/phairdlna-cli` | Fault-injection and soak test | — | Not implemented |
+| `REL-006` | `F-18` | M1 | `crates/phairdlna-core/tests/soak, crates/phairdlna-cli` | Fault-injection and soak test | — | Not implemented |
 | `SEC-001` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
 | `SEC-002` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
 | `SEC-003` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
@@ -298,6 +306,7 @@ there is no implementation yet, and an empty cell means *not implemented*, not
 | `SUP-006` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |
 | `SUP-007` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |
 | `SUP-008` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |
+| `SUP-009` | `—` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |
 | `UX-001` | `F-15` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
 | `UX-002` | `F-15` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
 | `UX-003` | `F-15` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
@@ -311,6 +320,13 @@ there is no implementation yet, and an empty cell means *not implemented*, not
 | `UX-011` | `F-14` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
 | `UX-012` | `F-14` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
 | `UX-013` | `F-15` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-014` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-015` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-016` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-017` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-018` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-019` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-020` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
 
 ---
 

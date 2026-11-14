@@ -196,6 +196,7 @@ guidelines require of a media server.
 | FUN-022 | The server shall support multiple roots that point to the same underlying volume without producing duplicate catalogue entries. | SHOULD |
 | FUN-023 | The server shall expose the free space of a root through the ContentDirectory service when the file system provides it. | COULD |
 | FUN-024 | The server shall allow the user to configure a scan schedule (interval, or manual only). | SHOULD |
+| FUN-025 | The server shall make a newly added file visible in the catalogue within 30 seconds on a file system that delivers reliable change events, and shall document the fallback behaviour when it does not. | SHOULD |
 
 ## 9. Playback and streaming
 
@@ -345,6 +346,7 @@ guidelines require of a media server.
 | PERF-012 | The server shall degrade gracefully when a catalogue is larger than the tested envelope: it shall remain responsive and shall not exhaust memory. | MUST |
 | PERF-013 | The CPU usage of an idle server shall be negligible (below 1 % averaged over one minute on the reference hardware). | SHOULD |
 | PERF-014 | The server shall survive a scan of a root that contains a broken or slow network share without blocking browse requests. | MUST |
+| PERF-015 | A client shall discover the server within 10 seconds at the 95th percentile over 30 trials on a documented single-subnet LAN. | SHOULD |
 
 ## 15. Usability and accessibility
 
@@ -363,6 +365,13 @@ guidelines require of a media server.
 | UX-011 | Diagnostics shall be copyable in one action and shall not contain personal data unless the user enables redaction off deliberately. | SHOULD |
 | UX-012 | The server shall tell the user which client is currently connected and what it is streaming. | SHOULD |
 | UX-013 | Long-running operations shall report progress and allow cancellation. | MUST |
+| UX-014 | The user interface shall present the server state, the scan progress, the shared folders and the last observed client activity in one view. | SHOULD |
+| UX-015 | The product shall provide a simple presentation mode and an advanced presentation mode over one configuration schema; switching between them shall never reset a setting, restart the server or interrupt a transfer. | SHOULD |
+| UX-016 | A safety-critical warning raised in the advanced mode shall remain visible in the simple mode. | MUST |
+| UX-017 | The user interface shall be operable with the keyboard alone, shall expose accessible labels and a deterministic focus order, and shall respect the system's text size and contrast settings. | MUST |
+| UX-018 | The user interface shall expose the status of the server as text for assistive technologies, not only as an icon. | MUST |
+| UX-019 | The user shall be able to start and stop the server, pause and resume indexing, and remove a shared folder without touching the source files. | MUST |
+| UX-020 | All user-facing strings shall be prepared for translation, and the set of supported locales shall be decided before the first release. | SHOULD |
 
 ## 16. Platform and portability
 
@@ -387,7 +396,18 @@ guidelines require of a media server.
 | PLT-017 | The server shall obtain the user's consent for folders that the operating system protects (macOS privacy prompts, Linux polkit, Windows elevation), and shall explain the denial instead of failing silently. | MUST |
 | PLT-018 | The server shall not require elevated privileges to serve media from the user's own directories. | MUST |
 
-## 17. Documentation and developer experience
+## 17. Reliability
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| REL-001 | An abrupt termination of the server shall never modify a media original; after a restart the catalogue shall be consistent or safely rebuildable. | MUST |
+| REL-002 | A media root that is offline shall be reported as unavailable and shall not be silently removed from the configuration or the catalogue. | MUST |
+| REL-003 | A network interface change, a sleep/wake cycle and a client disconnect shall not leak sockets or tasks, and the server shall recover within a documented interval. | MUST |
+| REL-004 | The server shall survive a seven-day soak on a defined mixed workload without a crash, an unbounded memory growth or an unbounded descriptor growth. | MUST |
+| REL-005 | A configuration change shall be validated, applied atomically and recoverable; an invalid configuration shall never silently change the network exposure. | MUST |
+| REL-006 | Active transfers shall survive a change of the presentation mode in the user interface, and the headless service shall remain independent of the life cycle of any user interface. | MUST |
+
+## 18. Documentation and developer experience
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
@@ -404,7 +424,7 @@ guidelines require of a media server.
 | DOC-011 | Broken internal links shall be detected by an automated gate. | MUST |
 | DOC-012 | Contribution guidance shall state the standards, the gates and the expectations for evidence. | MUST |
 
-## 18. Supply chain, licensing and provenance
+## 19. Supply chain, licensing and provenance
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
@@ -416,10 +436,11 @@ guidelines require of a media server.
 | SUP-006 | Any dependency that requires a native toolchain or ships a licence with distribution obligations shall be approved by the owner before it is adopted. | MUST |
 | SUP-007 | The project shall not vendor third-party source code into the repository without a record of its licence and origin. | MUST |
 | SUP-008 | The core shall carry no `unsafe` code unless an ADR approves it with a written safety argument. | MUST |
+| SUP-009 | The macOS distribution shall carry a defined code-signing and notarisation plan before the first stable release, and the plan shall be recorded here. | MUST |
 
 ---
 
-## 19. Requirement-level priorities
+## 20. Requirement-level priorities
 
 - **MUST** — required for correctness, safety or the promise of the product. A milestone
   with an open `MUST` cannot be accepted.

@@ -1,5 +1,14 @@
 # Usability and accessibility requirements
 
+> **Non-normative.** This document is research and strategy. It defines **no**
+> requirement IDs and creates no obligation. The binding requirements are in
+> [`../01-product/TECHNICAL-REQUIREMENTS.md`](../01-product/TECHNICAL-REQUIREMENTS.md)
+> and the cross-cutting view in
+> [`../01-product/REQUIREMENTS-INDEX.md`](../01-product/REQUIREMENTS-INDEX.md).
+> Where this document names an identifier that looks like a requirement ID, it is a
+> **local proposal identifier**, not a canonical one.
+
+
 Status: Draft — thresholds require validation.
 
 UX-001 First run: nontechnical user can select a media folder and make it available on a supported LAN without editing config files or knowing SSDP/UPnP. Proposed acceptance: >=90% of at least 10 representative novices complete within 3 minutes on a prepared test environment; record failures and time.

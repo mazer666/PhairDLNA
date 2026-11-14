@@ -1,25 +1,54 @@
-# Feature catalog — proposed v1 baseline
+# Feature catalog — PhairDLNA
 
-Status: Draft, requires owner approval.
+Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Product Owner
 
-## P0: v1 essentials
-- F-DISC: SSDP/UPnP discovery, description, lifecycle and network selection.
-- F-CAT: ContentDirectory browse, stable IDs, correct DIDL-Lite metadata and pagination.
-- F-STREAM: HTTP direct play, HEAD, byte ranges, seek, cancellation and backpressure.
-- F-LIB: multiple local and mounted media roots, incremental index, recovery and media metadata.
-- F-VIDEO: video browsing, MIME/protocolInfo, sidecar subtitles where client-supported.
-- F-AUDIO: albums, artists, genres, cover art, playlists and metadata.
-- F-PHOTO: image folders, thumbnails and orientation.
-- F-DEVICE: client compatibility profiles and diagnostic traces.
-- F-MAC: native macOS menu-bar UI, setup, status, login start and headless server lifecycle.
-- F-ADMIN: simple/advanced settings, local admin and diagnostics.
-- F-SEC: safe local defaults, media read-only, bounded parsing and no telemetry.
-- F-OPS: packaging, updates policy, backup/restore, log privacy and recovery.
+This is the **index of features**. The normative content of a feature is in its
+specification under `../03-features/`; the requirement IDs it owns are listed in
+`../01-product/REQUIREMENTS-INDEX.md`.
 
-## P1: post-v1 candidates
-- Optional bounded transcoding and hardware acceleration.
-- Advanced subtitle conversion and client workarounds.
-- Enhanced duplicate detection, smart collections and remote admin (opt-in only).
-- Native Linux/Windows UX beyond headless support, per roadmap.
+A feature specification exists for every feature below. The product areas on the left
+are the vocabulary used in the strategy documents; the canonical identifiers on the
+right are the ones that appear in the requirements index, the traceability matrix and
+the code.
 
-Priority is subject to feasibility and actual client interoperability. Do not equate file recognition with playable client support.
+| Product area | Feature | Specification | Milestone | Priority |
+| --- | --- | --- | --- | --- |
+| Discovery | F-01 SSDP discovery and advertisement | `F-01-ssdp-discovery.md` | M1 | MUST |
+| Description | F-02 UPnP device and service description | `F-02-upnp-device-description.md` | M1 | MUST |
+| Browsing | F-03 ContentDirectory browsing and search | `F-03-content-directory.md` | M1 | MUST |
+| Transfer | F-04 ConnectionManager and transfer protocols | `F-04-connection-manager.md` | M1 | MUST |
+| Metadata | F-05 DIDL-Lite metadata generation | `F-05-didl-lite-metadata.md` | M1 | MUST |
+| Playback | F-06 HTTP media delivery, byte ranges and seeking | `F-06-http-media-delivery.md` | M1 | MUST |
+| Compatibility | F-07 Client compatibility profiles | `F-07-client-compatibility.md` | M4 | MUST |
+| Library | F-08 Media roots and filesystem safety | `F-08-media-roots-and-filesystem.md` | M1 | MUST |
+| Library | F-09 Catalogue index and incremental scanning | `F-09-catalogue-index.md` | M1 | MUST |
+| Library | F-10 Metadata extraction and artwork | `F-10-metadata-and-artwork.md` | M2 | MUST |
+| Library | F-11 Playlists, subtitles and organisation | `F-11-playlists-and-subtitles.md` | M2 | SHOULD |
+| Configuration | F-12 Configuration | `F-12-configuration.md` | M2 | MUST |
+| Operations | F-13 Command line and service lifecycle | `F-13-cli-and-service-lifecycle.md` | M0 | MUST |
+| Administration | F-14 Local administration and diagnostics | `F-14-local-administration-and-diagnostics.md` | M2 | MUST |
+| User experience | F-15 Native macOS experience | `F-15-macos-native-experience.md` | M2 | MUST |
+| Security | F-16 Security hardening and privacy guarantees | `F-16-security-and-privacy.md` | M1 | MUST |
+| Optional | F-17 Optional transcoding | `F-17-optional-transcoding.md` | M5 | COULD |
+| Quality | F-18 Performance and reliability budgets | — (see `../05-quality/`) | M1 | MUST |
+| Quality | F-19 Quality gates and developer experience | — (see `../05-quality/`) | M0 | MUST |
+| Proposed | F-20 Compatibility Inspector (proposed, deferred) | `F-20-compatibility-inspector.md` | — | COULD |
+| Proposed | F-21 Playback Doctor (proposed, deferred) | `F-21-playback-doctor.md` | — | COULD |
+
+## Scope summary
+
+**In the baseline (M0–M3):** discovery, description, browsing, transfer negotiation,
+metadata, direct play with seeking, the library with indexing, configuration, the
+headless daemon, the local administration surface, the native macOS application, and
+the security and privacy guarantees.
+
+**Deferred (M4):** the client compatibility profiles and the real-device matrix.
+
+**Deferred (M5):** transcoding.
+
+**Proposed beyond the baseline:** the Compatibility Inspector and the Playback
+Doctor, described in `DIFFERENTIATION-STRATEGY.md`.
+
+**Explicitly out of scope:** internet-facing streaming, cloud accounts, remote
+administration by default, DRM, advertising, telemetry and writing to the user's
+media.

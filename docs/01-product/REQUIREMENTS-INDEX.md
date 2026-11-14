@@ -69,6 +69,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-022` | Support multiple roots that point to the same underlying volume without producing duplicate… | SHOULD | `F-11` | M2 | Protocol conformance + device test | Baseline |
 | `FUN-023` | Expose the free space of a root through the ContentDirectory service when the file system… | COULD | `F-08` | M1 | Automated test | Baseline |
 | `FUN-024` | Allow the user to configure a scan schedule (interval | SHOULD | `F-08` | M1 | Automated test | Baseline |
+| `FUN-025` | Make a newly added file visible in the catalogue within 30 seconds on a file system that… | SHOULD | `—` | M0 | Automated test | Baseline |
 | `FUN-040` | Serve media by byte range from the original file without transcoding whenever the client… | MUST | `F-06` | M1 | Automated test | Baseline |
 | `FUN-041` | Report the container and codec of a file in a way a client can use to decide whether it can… | MUST | `F-06` | M1 | Automated test | Baseline |
 | `FUN-042` | Support multiple simultaneous direct-play streams | MUST | `F-06` | M1 | Automated test | Baseline |
@@ -250,6 +251,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `PERF-012` | Degrade gracefully when a catalogue is larger than the tested envelope: it shall remain… | MUST | `F-09` | M1 | Benchmark | Baseline |
 | `PERF-013` | The CPU usage of an idle server shall be negligible (below 1 % averaged over one minute on the… | SHOULD | `F-18` | M1 | Benchmark | Baseline |
 | `PERF-014` | Survive a scan of a root that contains a broken or slow network share without blocking browse… | MUST | `F-18` | M1 | Benchmark | Baseline |
+| `PERF-015` | A client shall discover the server within 10 seconds at the 95th percentile over 30 trials on a… | SHOULD | `F-18` | M1 | Benchmark | Baseline |
 
 ## UX — Usability and accessibility
 
@@ -268,6 +270,13 @@ Requirement method, ID rules and the traceability chain are defined in
 | `UX-011` | Diagnostics shall be copyable in one action and shall not contain personal data unless the user… | SHOULD | `F-14` | M2 | Manual usability protocol | Baseline |
 | `UX-012` | Tell the user which client is currently connected and what it is streaming. | SHOULD | `F-14` | M2 | Manual usability protocol | Baseline |
 | `UX-013` | Long-running operations shall report progress and allow cancellation. | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-014` | Present the server state, the scan progress, the shared folders and the last observed client… | SHOULD | `—` | M0 | Manual usability protocol | Baseline |
+| `UX-015` | Provide a simple presentation mode and an advanced presentation mode over one configuration… | SHOULD | `—` | M0 | Manual usability protocol | Baseline |
+| `UX-016` | A safety-critical warning raised in the advanced mode shall remain visible in the simple mode. | MUST | `—` | M0 | Manual usability protocol | Baseline |
+| `UX-017` | Be operable with the keyboard alone, shall expose accessible labels and a deterministic focus… | MUST | `—` | M0 | Manual usability protocol | Baseline |
+| `UX-018` | Expose the status of the server as text for assistive technologies | MUST | `—` | M0 | Manual usability protocol | Baseline |
+| `UX-019` | Be able to start and stop the server, pause and resume indexing, and remove a shared folder… | MUST | `—` | M0 | Manual usability protocol | Baseline |
+| `UX-020` | All user-facing strings shall be prepared for translation | SHOULD | `—` | M0 | Manual usability protocol | Baseline |
 
 ## OPS — Operations and administration
 
@@ -371,11 +380,23 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SUP-006` | Any dependency that requires a native toolchain or ships a licence with distribution… | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
 | `SUP-007` | Not vendor third-party source code into the repository without a record of its licence and… | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
 | `SUP-008` | Carry no `unsafe` code unless an ADR approves it with a written safety argument. | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
+| `SUP-009` | Carry a defined code-signing and notarisation plan before the first stable release | MUST | `—` | M0 | Licence and advisory gate | Baseline |
+
+## REL — Reliability
+
+| ID | Requirement | Priority | Feature | Milestone | Verification | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| `REL-001` | An abrupt termination of the server shall never modify a media original; after a restart the… | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
+| `REL-002` | A media root that is offline shall be reported as unavailable and shall not be silently removed… | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
+| `REL-003` | A network interface change, a sleep/wake cycle and a client disconnect shall not leak sockets… | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
+| `REL-004` | Survive a seven-day soak on a defined mixed workload without a crash | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
+| `REL-005` | A configuration change shall be validated, applied atomically and recoverable; an invalid… | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
+| `REL-006` | Active transfers shall survive a change of the presentation mode in the user interface | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
 
 ---
 
 
-**Totals:** 296 requirements — 5 COULD, 244 MUST, 47 SHOULD.
+**Totals:** 312 requirements — 5 COULD, 255 MUST, 52 SHOULD.
 
 
 ## Coverage check

@@ -1,6 +1,11 @@
-# F-COMPAT — Explainable Compatibility Inspector
+# F-20 — Explainable Compatibility Inspector (proposed)
 
-Status: Proposed signature feature, not yet approved.
+Status: **Proposed — deferred beyond the v1.0 baseline**, awaiting owner approval.
+Owner role: Product Owner
+Version/date: 0.1 / 2026-11-14
+Baseline: not part of the approved requirement baseline; it carries no canonical
+requirement IDs and blocks no milestone. The `COMP-*` identifiers are local to this
+proposal.
 
 COMP-001 Track capability assertions by source: standards, declared device response, known profile, observed playback or user override.
 COMP-002 Each assertion has confidence and provenance; unknown remains unknown.

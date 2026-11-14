@@ -1,5 +1,14 @@
 # Competitive landscape and differentiation — 2026-11-14
 
+> **Non-normative.** This document is research and strategy. It defines **no**
+> requirement IDs and creates no obligation. The binding requirements are in
+> [`../01-product/TECHNICAL-REQUIREMENTS.md`](../01-product/TECHNICAL-REQUIREMENTS.md)
+> and the cross-cutting view in
+> [`../01-product/REQUIREMENTS-INDEX.md`](../01-product/REQUIREMENTS-INDEX.md).
+> Where this document names an identifier that looks like a requirement ID, it is a
+> **local proposal identifier**, not a canonical one.
+
+
 Status: Research / strategic proposal, **not approved requirements**. Research is based primarily on publicly documented product claims, not hands-on comparative testing. Never present vendor performance numbers as independent benchmarks.
 
 ## Competitive landscape
