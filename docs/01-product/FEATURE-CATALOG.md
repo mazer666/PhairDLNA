@@ -52,3 +52,30 @@ Doctor, described in `DIFFERENTIATION-STRATEGY.md`.
 **Explicitly out of scope:** internet-facing streaming, cloud accounts, remote
 administration by default, DRM, advertising, telemetry and writing to the user's
 media.
+
+---
+
+## Product commitment coverage
+
+The `PRD-*` requirements are **cross-cutting**: they are promises about the product as
+a whole rather than about one feature. Each is therefore delivered by several
+features and verified by more than one method. This table is the mapping; the
+normative text is in `PRODUCT-REQUIREMENTS.md`.
+
+| Commitment | Requirement | Delivered by | Verified by |
+| --- | --- | --- | --- |
+| Public and AGPL-3.0-or-later, with the full licence text | `PRD-001` | F-19 | Repository inspection, licence gate (QG-08) |
+| Free of charge, no advertising, no telemetry, no account | `PRD-002` | F-16, F-19 | Outbound-connection audit, dependency review |
+| No internet dependency in normal operation | `PRD-003` | F-16, F-13 | Offline-run test, egress counter |
+| Never exposed to the public internet automatically | `PRD-004` | F-01, F-16 | Port and interface inspection, IGD absence test |
+| A portable Rust core with a clean platform boundary | `PRD-005` | F-08, F-19 | Build matrix, crate-boundary check |
+| The headless server is the complete product | `PRD-006` | F-13 | Headless-only test |
+| Media is read-only unless the user consents | `PRD-007` | F-08, F-16 | Filesystem-permission test, media checksums |
+| macOS first, Linux and Windows designed in from the start | `PRD-008` | F-08, F-15, F-19 | Build matrix |
+| Safe, working defaults with no configuration | `PRD-009` | F-12, F-13 | First-run test on a clean machine |
+| Usable by a first-time DLNA user | `PRD-010` | F-13, F-15 | Usability study protocol |
+| Documentation is a product deliverable | `PRD-011` | F-19 | Documentation gate (QG-11, QG-13) |
+| Every claim has evidence | `PRD-012` | F-19 | Documentation review, gate outputs |
+| No advertising or third-party calls of any kind | `PRD-013` | F-16 | Outbound-connection audit |
+| Local status, diagnostics and configuration | `PRD-014` | F-14, F-15 | Administration-surface test |
+| Direct play is the default; no silent transcoding | `PRD-015` | F-06, F-17 | Protocol trace of a playback session |
