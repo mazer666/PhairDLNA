@@ -372,6 +372,15 @@ guidelines require of a media server.
 | UX-018 | The user interface shall expose the status of the server as text for assistive technologies, not only as an icon. | MUST |
 | UX-019 | The user shall be able to start and stop the server, pause and resume indexing, and remove a shared folder without touching the source files. | MUST |
 | UX-020 | All user-facing strings shall be prepared for translation, and the set of supported locales shall be decided before the first release. | SHOULD |
+| MB-001 | The server shall be able to run headless independently of the user interface; the interface shall reconnect and reflect the actual server state rather than a cached assumption. | MUST |
+| MB-002 | The user interface shall acknowledge every action visibly, report progress and explain errors, and shall never block its event loop with scanning, metadata or network input/output. | MUST |
+| MB-003 | The user interface shall support keyboard navigation, assistive-technology labels, scalable text, sufficient contrast and the reduced-motion preference. | MUST |
+| MB-004 | The user interface shall open no popover or settings view that starts an index or a network scan it does not need. | MUST |
+| MB-005 | The user interface shall communicate with the server only over the local administration surface by default, and shall use the authenticated and authorised model defined for that surface. | MUST |
+| MB-006 | The menu bar status shall remain legible in light and dark appearance, on a small display and when the menu bar is crowded, and shall not rely on colour alone. | SHOULD |
+| MB-007 | The first-run assistant shall offer an optional verification step that shows whether a television can discover and play the server, without assuming that a television is present. | SHOULD |
+| MB-008 | Uninstalling and stopping shall be safe and obvious, and the auto-start setting shall be visible; no hidden persistent helper shall remain. | MUST |
+| MB-009 | The menu bar application shall ship as a bundle with the metadata the operating system requires for its local-network and folder-access permissions. | MUST |
 
 ## 16. Platform and portability
 
@@ -396,6 +405,20 @@ guidelines require of a media server.
 | PLT-017 | The server shall obtain the user's consent for folders that the operating system protects (macOS privacy prompts, Linux polkit, Windows elevation), and shall explain the denial instead of failing silently. | MUST |
 | PLT-018 | The server shall not require elevated privileges to serve media from the user's own directories. | MUST |
 
+## 17. Adaptive resource management
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| RES-001 | The server shall arbitrate streaming, discovery, metadata reading, indexing, artwork generation, optional transcoding and maintenance through one scheduler with explicit priority classes; streaming correctness and control-plane responsiveness shall take precedence over background indexing. | MUST |
+| RES-002 | Every worker pool, queue, cache and connection count shall have a documented bound, a cancellation policy and a defined overload behaviour. | MUST |
+| RES-003 | Indexing shall yield when streaming latency, CPU, disk input/output or memory pressure crosses a documented threshold, and shall use hysteresis so that it does not oscillate. | SHOULD |
+| RES-004 | A slow client shall not be mistaken for server overload, and the server shall not treat one client's slowness as a reason to degrade another client's stream. | MUST |
+| RES-005 | The resource policy shall live in the shared core and not in a user interface; platform adapters shall supply operating-system hints, not policy decisions. | MUST |
+| RES-006 | Local resource metrics shall be opt-in to view and export, shall be privacy-preserving and shall never be transmitted off the machine. | MUST |
+| RES-007 | When resources are insufficient the server shall fail gracefully with a meaningful explanation; it shall never silently drop an active stream, corrupt state or alter a source file. | MUST |
+| RES-008 | On a battery-powered or thermally constrained machine the server may reduce background work, but it shall never silently change which media is exposed and never disable an active playback. | SHOULD |
+| RES-009 | Start-up, scanning, sleep/wake and shutdown shall release workers and file handles predictably. | MUST |
+
 ## 17. Reliability
 
 | ID | Requirement | Priority |
@@ -407,7 +430,23 @@ guidelines require of a media server.
 | REL-005 | A configuration change shall be validated, applied atomically and recoverable; an invalid configuration shall never silently change the network exposure. | MUST |
 | REL-006 | Active transfers shall survive a change of the presentation mode in the user interface, and the headless service shall remain independent of the life cycle of any user interface. | MUST |
 
-## 18. Documentation and developer experience
+## 18. Service lifecycle and network recovery
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| LIFE-001 | The server shall expose the distinct states *Starting*, *Ready*, *Degraded*, *Suspended*, *Recovering*, *Stopping*, *Stopped* and *Failed*, and every transition shall carry a reason, a timestamp and a user-facing explanation. | MUST |
+| LIFE-002 | The server shall handle a sleep/wake cycle without spinning, leaking resources or reporting a "ready" state it does not have; on wake it shall refresh the active interfaces, rebind its listeners as required and re-advertise only on permitted interfaces. | MUST |
+| LIFE-003 | The server shall handle a change of interface, address, subnet or route, and shall never widen its network exposure beyond the configured policy. | MUST |
+| LIFE-004 | When a configured interface disappears the server shall enter the *Degraded* or *Recovering* state and shall not automatically expose itself on another interface. | MUST |
+| LIFE-005 | The server shall detect the loss and the return of a network or removable volume, shall preserve the configured roots and the index, and shall mark the affected entries as unavailable rather than deleting them. | MUST |
+| LIFE-006 | A transfer interrupted by a real sleep or a real network loss shall end in a way that is truthful for the protocol; the server shall not promise a transparent continuation that the client cannot achieve. | MUST |
+| LIFE-007 | The server shall retry discovery and rebinding with a bounded backoff and jitter, and shall not produce a multicast storm or a tight retry loop. | MUST |
+| LIFE-008 | The server shall recover from an abnormal termination with an atomic state and either a consistent catalogue or a safe repair, and shall not require a user interface to be running. | MUST |
+| LIFE-009 | The administration surface and the user interface shall reflect the effective interface, address, listener state and the last recovery event, with the technical detail available on demand. | MUST |
+| LIFE-010 | The installation of the login-item service and the permissions it needs shall be explicit and reversible, and the server shall not install a hidden privileged helper or bypass the firewall. | MUST |
+| LIFE-011 | The server shall keep a local, redacted timeline of network changes and recovery events that the user may export after reviewing it. | SHOULD |
+
+## 19. Documentation and developer experience
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
@@ -424,7 +463,7 @@ guidelines require of a media server.
 | DOC-011 | Broken internal links shall be detected by an automated gate. | MUST |
 | DOC-012 | Contribution guidance shall state the standards, the gates and the expectations for evidence. | MUST |
 
-## 19. Supply chain, licensing and provenance
+## 20. Supply chain, licensing and provenance
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
@@ -440,7 +479,7 @@ guidelines require of a media server.
 
 ---
 
-## 20. Requirement-level priorities
+## 21. Requirement-level priorities
 
 - **MUST** — required for correctness, safety or the promise of the product. A milestone
   with an open `MUST` cannot be accepted.

@@ -22,7 +22,7 @@ TECHNICAL = REPO / "docs/01-product/TECHNICAL-REQUIREMENTS.md"
 INDEX_OUT = REPO / "docs/01-product/REQUIREMENTS-INDEX.md"
 TRACE_OUT = REPO / "docs/07-project/TRACEABILITY-MATRIX.md"
 
-ROW = re.compile(r"^\|\s*((?:PRD|FUN|INT|SEC|PERF|UX|OPS|CFG|PLT|DOC|SUP|REL)-\d{3})\s*\|(.*)\|\s*(MUST|SHOULD|COULD)\s*\|")
+ROW = re.compile(r"^\|\s*((?:PRD|FUN|INT|SEC|PERF|UX|OPS|CFG|PLT|DOC|SUP|REL|RES|LIFE|MB)-\d{3})\s*\|(.*)\|\s*(MUST|SHOULD|COULD)\s*\|")
 HEADING = re.compile(r"^##\s+(.*)$")
 
 # --- feature allocation -------------------------------------------------------
@@ -42,15 +42,16 @@ FEATURES = [
     ("F-10", "metadata-artwork", ["FUN-013..FUN-014", "PERF-004"]),
     ("F-11", "playlists-subtitles", ["FUN-015..FUN-016", "FUN-020..FUN-022"]),
     ("F-12", "configuration", ["CFG-001..CFG-015"]),
-    ("F-13", "cli-service-lifecycle", ["OPS-001..OPS-015"]),
+    ("F-13", "cli-service-lifecycle", ["OPS-001..OPS-015", "LIFE-001..LIFE-011"]),
     ("F-14", "local-administration", ["OPS-020..OPS-027", "UX-011..UX-012"]),
-    ("F-15", "macos-native-experience", ["UX-001..UX-010", "UX-013", "PLT-004"]),
+    ("F-15", "macos-native-experience", ["UX-001..UX-010", "UX-013", "UX-014..UX-020",
+                                          "MB-001..MB-009", "PLT-004"]),
     ("F-16", "security-hardening-privacy", ["SEC-010..SEC-018", "SEC-060..SEC-065",
                                           "SEC-090..SEC-096"]),
     ("F-17", "transcoding-optional", ["FUN-047..FUN-049"]),
     ("F-18", "performance-and-reliability", ["PERF-001..PERF-002", "PERF-006..PERF-007",
                                      "PERF-010..PERF-011", "PERF-013..PERF-015",
-                                     "REL-001..REL-006"]),
+                                     "REL-001..REL-006", "RES-001..RES-009"]),
     ("F-19", "quality-gates-developer-experience", ["DOC-001..DOC-012", "SUP-001..SUP-008"]),
 ]
 
@@ -86,6 +87,9 @@ VERIFICATION = {
     "DOC": "Documentation gate",
     "SUP": "Licence and advisory gate",
     "REL": "Fault-injection and soak test",
+    "RES": "Resource-pressure test",
+    "LIFE": "Lifecycle and recovery test",
+    "MB": "Manual macOS usability protocol",
 }
 
 # Verification overrides for requirements whose primary proof is a real device.
@@ -212,6 +216,9 @@ def render_index(rows: list[dict]) -> str:
         ("DOC", "Documentation and developer experience"),
         ("SUP", "Supply chain and licensing"),
         ("REL", "Reliability"),
+        ("RES", "Adaptive resource management"),
+        ("LIFE", "Service lifecycle and network recovery"),
+        ("MB", "macOS menu bar application"),
     ]:
         selected = [r for r in rows if r["domain"] == domain]
         if not selected:
@@ -270,6 +277,9 @@ def render_trace(rows: list[dict]) -> str:
         "PLT": "crates/phairdlna-core/src/platform",
         "DOC": "docs/**", "SUP": "Cargo.toml, deny.toml, .github/workflows",
         "REL": "crates/phairdlna-core/tests/soak, crates/phairdlna-cli",
+        "RES": "crates/phairdlna-core/src/scheduler",
+        "LIFE": "crates/phairdlna-core/src/lifecycle, crates/phairdlna-cli",
+        "MB": "crates/phairdlna-mac, docs/05-quality",
     }
     for r in rows:
         out.append(

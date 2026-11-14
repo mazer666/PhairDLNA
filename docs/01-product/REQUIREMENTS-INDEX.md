@@ -270,13 +270,13 @@ Requirement method, ID rules and the traceability chain are defined in
 | `UX-011` | Diagnostics shall be copyable in one action and shall not contain personal data unless the user… | SHOULD | `F-14` | M2 | Manual usability protocol | Baseline |
 | `UX-012` | Tell the user which client is currently connected and what it is streaming. | SHOULD | `F-14` | M2 | Manual usability protocol | Baseline |
 | `UX-013` | Long-running operations shall report progress and allow cancellation. | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-014` | Present the server state, the scan progress, the shared folders and the last observed client… | SHOULD | `—` | M0 | Manual usability protocol | Baseline |
-| `UX-015` | Provide a simple presentation mode and an advanced presentation mode over one configuration… | SHOULD | `—` | M0 | Manual usability protocol | Baseline |
-| `UX-016` | A safety-critical warning raised in the advanced mode shall remain visible in the simple mode. | MUST | `—` | M0 | Manual usability protocol | Baseline |
-| `UX-017` | Be operable with the keyboard alone, shall expose accessible labels and a deterministic focus… | MUST | `—` | M0 | Manual usability protocol | Baseline |
-| `UX-018` | Expose the status of the server as text for assistive technologies | MUST | `—` | M0 | Manual usability protocol | Baseline |
-| `UX-019` | Be able to start and stop the server, pause and resume indexing, and remove a shared folder… | MUST | `—` | M0 | Manual usability protocol | Baseline |
-| `UX-020` | All user-facing strings shall be prepared for translation | SHOULD | `—` | M0 | Manual usability protocol | Baseline |
+| `UX-014` | Present the server state, the scan progress, the shared folders and the last observed client… | SHOULD | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-015` | Provide a simple presentation mode and an advanced presentation mode over one configuration… | SHOULD | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-016` | A safety-critical warning raised in the advanced mode shall remain visible in the simple mode. | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-017` | Be operable with the keyboard alone, shall expose accessible labels and a deterministic focus… | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-018` | Expose the status of the server as text for assistive technologies | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-019` | Be able to start and stop the server, pause and resume indexing, and remove a shared folder… | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-020` | All user-facing strings shall be prepared for translation | SHOULD | `F-15` | M2 | Manual usability protocol | Baseline |
 
 ## OPS — Operations and administration
 
@@ -393,10 +393,54 @@ Requirement method, ID rules and the traceability chain are defined in
 | `REL-005` | A configuration change shall be validated, applied atomically and recoverable; an invalid… | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
 | `REL-006` | Active transfers shall survive a change of the presentation mode in the user interface | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
 
+## RES — Adaptive resource management
+
+| ID | Requirement | Priority | Feature | Milestone | Verification | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| `RES-001` | Arbitrate streaming, discovery, metadata reading, indexing, artwork generation, optional… | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
+| `RES-002` | Every worker pool, queue, cache and connection count shall have a documented bound, a… | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
+| `RES-003` | Indexing shall yield when streaming latency, CPU, disk input/output or memory pressure crosses… | SHOULD | `F-18` | M1 | Resource-pressure test | Baseline |
+| `RES-004` | A slow client shall not be mistaken for server overload | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
+| `RES-005` | Live in the shared core and not in a user interface; platform adapters shall supply… | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
+| `RES-006` | Local resource metrics shall be opt-in to view and export | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
+| `RES-007` | When resources are insufficient the server shall fail gracefully with a meaningful explanation;… | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
+| `RES-008` | On a battery-powered or thermally constrained machine the server may reduce background work | SHOULD | `F-18` | M1 | Resource-pressure test | Baseline |
+| `RES-009` | Start-up, scanning, sleep/wake and shutdown shall release workers and file handles predictably. | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
+
+## LIFE — Service lifecycle and network recovery
+
+| ID | Requirement | Priority | Feature | Milestone | Verification | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| `LIFE-001` | Expose the distinct states *Starting*, *Ready*, *Degraded*, *Suspended*, *Recovering*,… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
+| `LIFE-002` | Handle a sleep/wake cycle without spinning, leaking resources or reporting a "ready" state it… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
+| `LIFE-003` | Handle a change of interface, address, subnet or route, and shall never widen its network… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
+| `LIFE-004` | When a configured interface disappears the server shall enter the *Degraded* or *Recovering*… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
+| `LIFE-005` | Detect the loss and the return of a network or removable volume | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
+| `LIFE-006` | A transfer interrupted by a real sleep or a real network loss shall end in a way that is… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
+| `LIFE-007` | Retry discovery and rebinding with a bounded backoff and jitter | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
+| `LIFE-008` | Recover from an abnormal termination with an atomic state and either a consistent catalogue or… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
+| `LIFE-009` | The administration surface and the user interface shall reflect the effective interface | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
+| `LIFE-010` | The installation of the login-item service and the permissions it needs shall be explicit and… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
+| `LIFE-011` | Keep a local, redacted timeline of network changes and recovery events that the user may export… | SHOULD | `F-13` | M0 | Lifecycle and recovery test | Baseline |
+
+## MB — macOS menu bar application
+
+| ID | Requirement | Priority | Feature | Milestone | Verification | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| `MB-001` | Be able to run headless independently of the user interface; the interface shall reconnect and… | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-002` | Acknowledge every action visibly, report progress and explain errors, and shall never block its… | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-003` | Support keyboard navigation, assistive-technology labels, scalable text, sufficient contrast… | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-004` | Open no popover or settings view that starts an index or a network scan it does not need. | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-005` | Communicate with the server only over the local administration surface by default | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-006` | Remain legible in light and dark appearance, on a small display and when the menu bar is… | SHOULD | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-007` | The first-run assistant shall offer an optional verification step that shows whether a… | SHOULD | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-008` | Uninstalling and stopping shall be safe and obvious | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-009` | Ship as a bundle with the metadata the operating system requires for its local-network and… | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+
 ---
 
 
-**Totals:** 312 requirements — 5 COULD, 255 MUST, 52 SHOULD.
+**Totals:** 341 requirements — 5 COULD, 279 MUST, 57 SHOULD.
 
 
 ## Coverage check

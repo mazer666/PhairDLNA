@@ -182,6 +182,26 @@ there is no implementation yet, and an empty cell means *not implemented*, not
 | `INT-102` | `F-07` | M4 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance + device test | — | Not implemented |
 | `INT-103` | `F-07` | M4 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance + device test | — | Not implemented |
 | `INT-104` | `F-07` | M4 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
+| `LIFE-001` | `F-13` | M0 | `crates/phairdlna-core/src/lifecycle, crates/phairdlna-cli` | Lifecycle and recovery test | — | Not implemented |
+| `LIFE-002` | `F-13` | M0 | `crates/phairdlna-core/src/lifecycle, crates/phairdlna-cli` | Lifecycle and recovery test | — | Not implemented |
+| `LIFE-003` | `F-13` | M0 | `crates/phairdlna-core/src/lifecycle, crates/phairdlna-cli` | Lifecycle and recovery test | — | Not implemented |
+| `LIFE-004` | `F-13` | M0 | `crates/phairdlna-core/src/lifecycle, crates/phairdlna-cli` | Lifecycle and recovery test | — | Not implemented |
+| `LIFE-005` | `F-13` | M0 | `crates/phairdlna-core/src/lifecycle, crates/phairdlna-cli` | Lifecycle and recovery test | — | Not implemented |
+| `LIFE-006` | `F-13` | M0 | `crates/phairdlna-core/src/lifecycle, crates/phairdlna-cli` | Lifecycle and recovery test | — | Not implemented |
+| `LIFE-007` | `F-13` | M0 | `crates/phairdlna-core/src/lifecycle, crates/phairdlna-cli` | Lifecycle and recovery test | — | Not implemented |
+| `LIFE-008` | `F-13` | M0 | `crates/phairdlna-core/src/lifecycle, crates/phairdlna-cli` | Lifecycle and recovery test | — | Not implemented |
+| `LIFE-009` | `F-13` | M0 | `crates/phairdlna-core/src/lifecycle, crates/phairdlna-cli` | Lifecycle and recovery test | — | Not implemented |
+| `LIFE-010` | `F-13` | M0 | `crates/phairdlna-core/src/lifecycle, crates/phairdlna-cli` | Lifecycle and recovery test | — | Not implemented |
+| `LIFE-011` | `F-13` | M0 | `crates/phairdlna-core/src/lifecycle, crates/phairdlna-cli` | Lifecycle and recovery test | — | Not implemented |
+| `MB-001` | `F-15` | M2 | `crates/phairdlna-mac, docs/05-quality` | Manual macOS usability protocol | — | Not implemented |
+| `MB-002` | `F-15` | M2 | `crates/phairdlna-mac, docs/05-quality` | Manual macOS usability protocol | — | Not implemented |
+| `MB-003` | `F-15` | M2 | `crates/phairdlna-mac, docs/05-quality` | Manual macOS usability protocol | — | Not implemented |
+| `MB-004` | `F-15` | M2 | `crates/phairdlna-mac, docs/05-quality` | Manual macOS usability protocol | — | Not implemented |
+| `MB-005` | `F-15` | M2 | `crates/phairdlna-mac, docs/05-quality` | Manual macOS usability protocol | — | Not implemented |
+| `MB-006` | `F-15` | M2 | `crates/phairdlna-mac, docs/05-quality` | Manual macOS usability protocol | — | Not implemented |
+| `MB-007` | `F-15` | M2 | `crates/phairdlna-mac, docs/05-quality` | Manual macOS usability protocol | — | Not implemented |
+| `MB-008` | `F-15` | M2 | `crates/phairdlna-mac, docs/05-quality` | Manual macOS usability protocol | — | Not implemented |
+| `MB-009` | `F-15` | M2 | `crates/phairdlna-mac, docs/05-quality` | Manual macOS usability protocol | — | Not implemented |
 | `OPS-001` | `F-13` | M0 | `crates/phairdlna-cli, crates/phairdlna-admin` | Automated CLI test | — | Not implemented |
 | `OPS-002` | `F-13` | M0 | `crates/phairdlna-cli, crates/phairdlna-admin` | Automated CLI test | — | Not implemented |
 | `OPS-003` | `F-13` | M0 | `crates/phairdlna-cli, crates/phairdlna-admin` | Automated CLI test | — | Not implemented |
@@ -261,6 +281,15 @@ there is no implementation yet, and an empty cell means *not implemented*, not
 | `REL-004` | `F-18` | M1 | `crates/phairdlna-core/tests/soak, crates/phairdlna-cli` | Fault-injection and soak test | — | Not implemented |
 | `REL-005` | `F-18` | M1 | `crates/phairdlna-core/tests/soak, crates/phairdlna-cli` | Fault-injection and soak test | — | Not implemented |
 | `REL-006` | `F-18` | M1 | `crates/phairdlna-core/tests/soak, crates/phairdlna-cli` | Fault-injection and soak test | — | Not implemented |
+| `RES-001` | `F-18` | M1 | `crates/phairdlna-core/src/scheduler` | Resource-pressure test | — | Not implemented |
+| `RES-002` | `F-18` | M1 | `crates/phairdlna-core/src/scheduler` | Resource-pressure test | — | Not implemented |
+| `RES-003` | `F-18` | M1 | `crates/phairdlna-core/src/scheduler` | Resource-pressure test | — | Not implemented |
+| `RES-004` | `F-18` | M1 | `crates/phairdlna-core/src/scheduler` | Resource-pressure test | — | Not implemented |
+| `RES-005` | `F-18` | M1 | `crates/phairdlna-core/src/scheduler` | Resource-pressure test | — | Not implemented |
+| `RES-006` | `F-18` | M1 | `crates/phairdlna-core/src/scheduler` | Resource-pressure test | — | Not implemented |
+| `RES-007` | `F-18` | M1 | `crates/phairdlna-core/src/scheduler` | Resource-pressure test | — | Not implemented |
+| `RES-008` | `F-18` | M1 | `crates/phairdlna-core/src/scheduler` | Resource-pressure test | — | Not implemented |
+| `RES-009` | `F-18` | M1 | `crates/phairdlna-core/src/scheduler` | Resource-pressure test | — | Not implemented |
 | `SEC-001` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
 | `SEC-002` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
 | `SEC-003` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
@@ -320,13 +349,13 @@ there is no implementation yet, and an empty cell means *not implemented*, not
 | `UX-011` | `F-14` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
 | `UX-012` | `F-14` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
 | `UX-013` | `F-15` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
-| `UX-014` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
-| `UX-015` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
-| `UX-016` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
-| `UX-017` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
-| `UX-018` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
-| `UX-019` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
-| `UX-020` | `—` | M0 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-014` | `F-15` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-015` | `F-15` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-016` | `F-15` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-017` | `F-15` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-018` | `F-15` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-019` | `F-15` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
+| `UX-020` | `F-15` | M2 | `crates/phairdlna-cli, crates/phairdlna-mac` | Manual usability protocol | — | Not implemented |
 
 ---
 
