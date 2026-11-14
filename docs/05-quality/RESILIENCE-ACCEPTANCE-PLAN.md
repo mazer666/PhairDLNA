@@ -1,6 +1,14 @@
 # Cross-cutting resilience and usability acceptance plan
 
-Status: Draft. All results NOT RUN.
+> **Non-normative plan.** This is a proposed acceptance plan. The identifiers below
+> (`RES-*`, `LIFE-*`, `MB-*`) are **local to this document** and are not canonical
+> requirement IDs. The binding requirements live in
+> [`../01-product/TECHNICAL-REQUIREMENTS.md`](../01-product/TECHNICAL-REQUIREMENTS.md);
+> the case identifiers of the quality gates are in
+> [`QUALITY-GATES.md`](QUALITY-GATES.md).
+
+
+Status: Draft proposal, pending owner approval. **All results NOT RUN.**
 
 ## Release evidence bundles
 Each acceptance case has stable ID, setup, fixtures, reference hardware, expected result, actual result, logs/traces, commit, reviewer and status (NOT RUN/PASS/FAIL/BLOCKED). No design intent counts as PASS.
