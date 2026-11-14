@@ -1,0 +1,71 @@
+# Manual-only continuous integration.
+#
+# Policy: docs/07-project/CI-POLICY.md
+#   * workflow_dispatch only - no push, no pull_request, no schedule
+#   * every action pinned to a commit SHA
+#   * no secrets
+#
+# A workflow that was never triggered is not a green workflow.
+name: CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      strict:
+        description: "Run every gate, including the ones that are advisory"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    name: Quality gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4.2.2
+
+      - name: Install the Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Install the auxiliary tools
+        run: |
+          cargo install cargo-nextest cargo-audit cargo-deny --locked
+
+      - name: QG-01 formatting
+        run: cargo fmt --all -- --check
+
+      - name: QG-02 lints
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: QG-04 build
+        run: cargo build --workspace --all-targets
+
+      - name: QG-05 unit and integration tests
+        run: cargo nextest run --workspace
+
+      - name: QG-07 doctests
+        run: cargo test --workspace --doc
+
+      - name: QG-08 licences
+        run: cargo deny check licenses
+
+      - name: QG-09 advisories
+        run: cargo audit
+
+      - name: QG-10 bans and sources
+        run: cargo deny check bans sources
+
+      - name: QG-11 documentation links
+        run: ./scripts/check-doc-links.sh
+
+      - name: QG-13 file size
+        run: ./scripts/check-file-size.sh
+
+      - name: Requirement views are current
+        run: python3 scripts/generate_requirement_views.py --check

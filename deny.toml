@@ -1,0 +1,62 @@
+# Gate QG-08 / QG-10: licence, advisory, ban and source policy.
+#
+# Rationale and the licence data behind each entry are in
+# docs/04-security/DEPENDENCY-LICENSE-REVIEW.md.
+
+[graph]
+targets = [
+    { triple = "x86_64-apple-darwin" },
+    { triple = "aarch64-apple-darwin" },
+    { triple = "x86_64-unknown-linux-gnu" },
+    { triple = "x86_64-pc-windows-msvc" },
+]
+all-features = true
+
+[advisories]
+version = 2
+yanked = "deny"
+ignore = []
+
+[licenses]
+version = 2
+# The project is AGPL-3.0-or-later. Permissive licences are allowed without a
+# review. MPL-2.0 is allowed because it is file-level copyleft: the MPL files keep
+# their licence and their source must be part of the source offer (see
+# docs/04-security/DEPENDENCY-LICENSE-REVIEW.md section 3).
+allow = [
+    "AGPL-3.0-or-later",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "MIT",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-3.0",
+    "Zlib",
+    "CC0-1.0",
+    "Unlicense",
+    "MPL-2.0",
+]
+confidence-threshold = 0.8
+unused-allowed-license = "warn"
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+highlight = "all"
+deny = [
+    # Copied from the "crates we deliberately do not use" table of the dependency
+    # review. Each entry has a recorded reason there.
+    { name = "ffmpeg-next" },
+    { name = "ffmpeg-sys" },
+    { name = "cocoa" },
+    { name = "dispatch" },
+    { name = "rumperd" },
+    { name = "libupnp-sys" },
+    { name = "cargo-lint" },
+]
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

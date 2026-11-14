@@ -4,5 +4,7 @@ members = ["crates/phairdlna-core", "crates/phairdlna-cli"]
 
 [workspace.package]
 edition = "2021"
+# Minimum supported Rust version. The CI matrix tests this version as well as stable.
+rust-version = "1.89"
 license = "AGPL-3.0-or-later"
 repository = "https://github.com/mazer666/PhairDLNA"
