@@ -121,4 +121,4 @@ specification is also explained here; the specification is the detailed version.
 | What must it do? | [../01-product/TECHNICAL-REQUIREMENTS.md](../01-product/TECHNICAL-REQUIREMENTS.md) |
 | How is it built? | [../02-architecture/ARCHITECTURE.md](../02-architecture/ARCHITECTURE.md) |
 | What can go wrong? | [../04-security/SECURITY-MODEL.md](../04-security/SECURITY-MODEL.md) |
-| Where did a rule come from? | [../09-research/](09-research/) |
+| Where did a rule come from? | [../09-research/](../09-research/) |

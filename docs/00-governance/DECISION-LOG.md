@@ -46,7 +46,20 @@ Architectural decisions with options and trade-offs live as ADRs in
 | DEC-014 | The Rust core is platform-neutral; everything OS-specific lives behind a narrow platform-adapter trait | Accepted | 2026-11-14 | Lead (ADR-0003) |
 | DEC-015 | SSDP and the UPnP control layer are implemented in-project; no third-party UPnP/SSDP stack is taken as a dependency | Accepted | 2026-11-14 | Lead (ADR-0005) |
 | DEC-016 | The SQLite index is the single source of truth for the catalogue; the index is rebuildable and never authoritative for file contents | Accepted | 2026-11-14 | Lead (ADR-0006) |
-| DEC-017 | Transcoding is optional, isolated in its own process boundary, and off by default | Accepted | 2026-11-14 | Lead (ADR-0008) |
+| DEC-017 | Transcoding is optional, isolated in its own process boundary, and off by default | Accepted | 2026-11-14 | Lead (ADR-0009) |
+| DEC-018 | Media metadata and thumbnails are parsed in a sandboxed child process, never in the server process | Accepted | 2026-11-14 | Lead (ADR-0008) |
+| DEC-019 | The runtime, HTTP server and XML parser are Tokio, Hyper/Axum, quick-xml and rusqlite, with the HTTP framing policy and the XML policy owned by the project | Accepted | 2026-11-14 | Lead (ADR-0002) |
+| DEC-020 | The AGPL network-source offer is a product feature (an unauthenticated route on the running server), and the server never updates itself over the network | Accepted | 2026-11-14 | Lead (ADR-0010) |
+| DEC-021 | `docs/05-quality/QUALITY-GATES.md` is the single register of the gate identifiers; every other document refers to a gate by the ID defined there | Accepted | 2026-11-15 | Lead |
+| DEC-022 | The research briefs the specifications cite are committed under `docs/09-research/` as evidence, not as norm; a citation such as `standards §8.3 C12` resolves there | Accepted | 2026-11-15 | Lead |
+| DEC-023 | The documentation carries one identifier scheme only. A draft that introduced its own IDs is archived or explicitly marked as non-normative | Accepted | 2026-11-15 | Lead |
+
+## Reviews and evidence
+
+| Review | Date | Result |
+| --- | --- | --- |
+| Independent beginner-experience review | 2026-11-14 | 6 blocker, 16 major, 11 minor, 4 info findings — **all addressed**; the report is kept at `../05-quality/reviews/BEGINNER-REVIEW-2026-11-14.md` |
+| Independent consistency review (round 2) | 2026-11-15 | See `../05-quality/reviews/` |
 
 ## Open decisions requiring owner approval
 

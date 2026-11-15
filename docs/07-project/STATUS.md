@@ -27,6 +27,8 @@ documentation baseline and the gates that will hold the implementation honest.
 | Roadmap | **Complete** | Six milestones with exit criteria — `ROADMAP.md` |
 | Risk register | **Complete** | 13 risks with mitigations and owners — `RISK-REGISTER.md` |
 | Open decisions | **12 awaiting the owner** | `OPEN-DECISIONS.md` |
+| Glossary | **Complete** | The protocol, product, platform, security and project vocabulary — `../01-product/GLOSSARY.md` |
+| Research inputs | **Complete** | The briefs the specifications cite — `../09-research/` |
 | Implementation | **Not started** | The workspace is a scaffold by design |
 | Device evidence | **None** | Every device row reads `NOT TESTED` |
 | Release | **Not releasable** | `RELEASE-BLOCKERS.md` |
@@ -40,6 +42,10 @@ documentation baseline and the gates that will hold the implementation honest.
 | `cargo fmt --all -- --check` | clean (it failed before this phase — the CLI entry point was reformatted) |
 | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
 | `cargo test --workspace` | 1 passed, 0 failed, 0 ignored |
+| `scripts/check-file-size.sh` | `RESULT: PASS` |
+| `scripts/check-doc-links.sh` | `RESULT: PASS` (118 relative links checked) |
+| `scripts/check-no-unsafe.sh` | `RESULT: PASS` (no unsafe code in 2 tracked Rust files) |
+| `python3 scripts/generate_requirement_views.py --check` | up to date; 341 requirements indexed |
 | `python3 scripts/generate_requirement_views.py` | 341 requirements indexed; index and traceability matrix regenerated |
 
 Toolchain used: rustc 1.100.0, cargo 1.100.0, clippy 0.1.100, rustfmt 1.11.0-stable.
@@ -60,6 +66,8 @@ Everything else in this repository is **documented and unmeasured**. In particul
 | --- | --- |
 | Requirements | 341 (MUST / SHOULD / COULD per the index totals) |
 | Feature specifications | 21 (F-01 … F-19 plus two proposals, F-20 / F-21) |
+| Glossary entries | 90 terms across five vocabularies |
+| Independent reviews | 2 (a beginner-experience review and a consistency review) |
 | Acceptance criteria | > 300 across the feature specifications |
 | Protocol conformance checks | 26 (`PC-01` … `PC-26`) |
 | Threats modelled | 28 (`SEC-TH-01` … `SEC-TH-28`) |
@@ -69,6 +77,7 @@ Everything else in this repository is **documented and unmeasured**. In particul
 | Open owner decisions | 12 (`OD-01` … `OD-12`) |
 | Risks | 13 (`R-01` … `R-13`) |
 | Archived baselines | 2 snapshots, each with a SHA-256 manifest |
+| Research briefs committed | 9 documents under `../09-research/` |
 
 ---
 
