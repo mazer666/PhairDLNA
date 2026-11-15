@@ -220,6 +220,20 @@ clients, is exposed through a documented vendor extension action absent from the
 (INT-048); it is also part of the local diagnostics output (F-14). The configuration carries either a scan
 interval or "manual only" (FUN-024); the catalogue task owns the timer and the explicit scan command (OPS-003)
 enters the same path.
+- **Platform traits.** [DESIGN] Every operating-system-specific fact the core needs arrives through a small,
+documented trait, and every trait has a default implementation that reports "not supported here" so that the core
+compiles and runs on a platform with no adapter (PLT-003; platform-integration §10.1 rules 2 and 4). The traits
+expose *capabilities* — "case sensitivity of this volume", "this volume's identity" — and never platform names.
+The core owns the semantics and the adapter owns the mechanism (platform-integration §10.1 rule 3).
+- **Path assembly and encoding.** [DESIGN] A path is built from path components with the platform's own path type
+and is never concatenated as a string; percent-encoding happens exactly once, on the way into a URL, in one
+function (SEC-015, PLT-006). A name with a space, an accented character or an emoji therefore needs no special
+case anywhere: the raw path is used verbatim for I/O and the NFC identity is used for the key (FUN-019, FUN-020).
+- **Windows path handling.** [DESIGN] The traversal rejection covers both separator characters — `../` and `..\` —
+because on Windows the backslash is the separator, and a check that only knows the forward slash is a check that
+can be bypassed (SEC-002, PLT-007). Long paths additionally need the `longPathAware` manifest element and the
+`LongPathsEnabled` registry value on the machine (PLT-015; platform-integration §9.4); the server does not work
+around a path that is still too long, it reports the error (UX-004).
 
 ## 5. Performance requirements
 
@@ -295,6 +309,8 @@ whether an "external volume allowlist" should exist as a user setting. See §12.
 | Path contains `..`, an encoded separator or a NUL | rejected before canonicalisation; no filesystem call is made | SEC-002 |
 | File is deleted while it is being scanned | the entry is skipped; no error is raised | FUN-006 |
 | File cannot be read | the file is quarantined; the rest of the scan continues | PLT-012, SEC-007 |
+| A media URL carries a traversal attempt written with a backslash separator | it is rejected before canonicalisation, exactly as the forward-slash form is; no filesystem call is made | SEC-002, PLT-007 |
+| A path is longer than the operating system's path limit | the open fails with the platform's own error, which is reported with the path redacted; the server does not shorten or rewrite the path to make it fit | PLT-007, PLT-015, OPS-007 |
 
 A filesystem problem never takes down the HTTP or SSDP tasks: a bad root produces a diagnostic, never a panic
 (UX-005).
@@ -383,6 +399,32 @@ assumption leaks into the other. Requirements: PLT-005 · Verification: automate
   process is spawned and no command line is built from any file name or metadata value. Requirements: SEC-005 ·
   Verification: automated test · Planned location: `crates/phairdlna-core/tests/path_containment.rs`
 
+**AC-17** — *Given* the platform layer, *when* the operating-system-specific behaviours the core needs are
+enumerated, *then* each one is reached through a documented trait, no operating-system type appears in a core
+signature, and a trait that the current platform does not implement has a default implementation that reports
+"not supported" instead of failing to compile. Requirements: PLT-003, PLT-001 · Verification: reviewer check plus
+an automated test of the default implementations · Planned location:
+`crates/phairdlna-core/tests/platform_traits.rs`
+
+**AC-18** — *Given* a media root whose path contains a space, a non-ASCII character and an emoji, *when* the root
+is configured, scanned and served, *then* the folder appears in the catalogue under its own name, the file is served
+over its media URL, and the media URL contains no unescaped character and no path fragment. Requirements: PLT-006,
+FUN-001, INT-098, SEC-015 · Verification: automated test · Planned location:
+`crates/phairdlna-core/tests/path_containment.rs`
+
+**AC-19** — *Given* a media URL that carries a traversal attempt written with a backslash separator, *when* it is
+requested on Windows, *then* it is rejected before any filesystem call, exactly as the forward-slash form is; and
+*given* a path longer than the legacy path limit, *then* the server opens it when the long-path opt-in is in force
+and reports a clear error when it is not. Requirements: PLT-007, SEC-002, PLT-015 · Verification: negative test
+plus a manual Windows check · Planned location: `crates/phairdlna-core/tests/path_containment.rs` and
+`qa/device-matrix.toml`
+
+**AC-20** — *Given* the Windows build, *when* the executable manifest is inspected, *then* it declares
+`longPathAware` as true, and the installation documentation states that the `LongPathsEnabled` registry value must
+be set to `1` for the opt-in to take effect. Requirements: PLT-015, PLT-007 · Verification: automated test over
+the shipped manifest plus a reviewer check of the installation documentation · Planned location:
+`crates/phairdlna-cli/tests/windows_manifest.rs` and `docs/06-development/BUILD-AND-TEST.md`
+
 ## 11. Test strategy and dependencies
 
 **Planned test locations** (none of these files exists yet):
@@ -397,6 +439,9 @@ assumption leaks into the other. Requirements: PLT-005 · Verification: automate
 | Scanner unit tests | `crates/phairdlna-core/src/catalogue/scanner.rs` (inline `#[cfg(test)]` module) |
 | Scan command and schedule | `crates/phairdlna-cli/tests/cli_scan.rs` |
 | Device behaviour on removable volumes and protected folders | `qa/device-matrix.toml` |
+| Platform traits and their default implementations | `crates/phairdlna-core/tests/platform_traits.rs` |
+| Names with spaces, non-ASCII characters and emoji | `crates/phairdlna-core/tests/path_containment.rs` |
+| Windows long-path manifest, backslash traversal, long paths | `crates/phairdlna-cli/tests/windows_manifest.rs` |
 
 **Method.** The scanner and the containment rules are exercised against a temporary directory tree created by the
 test itself, which makes symlinks, aliases and permission errors reproducible on every platform. The volume
@@ -404,6 +449,10 @@ events are driven through the `VolumeWatcher` trait with a scripted event source
 is tested without a physical drive; the physical drive remains a manual device check. Containment tests are
 negative tests: they assert that no file outside the root was opened, using an instrumented open hook rather
 than by inspecting the response alone.
+The platform traits are exercised through their default implementations, so that a
+platform without an adapter is covered by the same test as one with it; the Windows-specific
+behaviour — the manifest element and the long-path opt-in — is a Windows-only check and is
+recorded as `NOT RUN — no Windows host` elsewhere.
 
 **Dependencies.** F-03 (the browse that reads the catalogue), F-05 (the DIDL-Lite rendering of root names), F-06
 (the media URL that the containment rule guards), F-09 (the metadata extraction the scanner triggers), F-11 (the
@@ -440,7 +489,13 @@ disabling containment — is not acceptable. *Closes when:* the owner accepts or
 relative path (ADR-0007). When a volume reappears under a different identity, the ids of its entries change by
 construction, and a client holding an old id receives `701 No Such Object` (INT-039). *Closes when:* the owner
 decides whether a grace-period mapping from the old volume identity to the new one is required.
-6. **[OPEN] The quarantine vocabulary.** "Quarantined subtree that needs consent" (PLT-012) is used here for a
+6. **[OPEN] Where the Windows installation requirements are documented.** PLT-015
+   requires the `LongPathsEnabled` setting to be documented, and the repository has no installation
+   guide yet — only `docs/06-development/BUILD-AND-TEST.md`. *Proposed reading:* the Windows
+   installation section of that document carries the `longPathAware` manifest note and the
+   `LongPathsEnabled` instruction, until a dedicated installation guide exists.
+   *Closes when:* the owner decides where the installation documentation lives.
+7. **[OPEN] The quarantine vocabulary.** "Quarantined subtree that needs consent" (PLT-012) is used here for a
 permission error, while the same word is used by the security research for a file whose metadata parsing failed
 (SEC-066). *Proposed decision:* keep one word and one meaning, or distinguish "not readable" from "not
 parseable" in the user-facing text. *Closes when:* the owner picks one.

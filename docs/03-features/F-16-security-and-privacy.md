@@ -133,7 +133,7 @@ both a token and a header the browser will not add (M-06; SEC-TH-24). Implementa
 dependency graph: a dependency that opens a network connection on its own is prohibited (PRIVACY §8).
 
 **SEC-091** — The product shall make no outbound network connection other than the SSDP multicast announcements and responses, and the media
-connections it serves, unless the user explicitly starts a feature that requires internet access. [DESIGN] This is verified by an
+connections it serves, unless the user explicitly starts a feature that requires internet access. [DESIGN] This is checked by an
 **outbound-connection audit** — the server runs with egress blocked except the local network, and a normal browse-and-play session must produce zero
 unexpected connections (PRIVACY §4). The eventing opt-in of INT-057 is the only feature in the baseline that can create an outbound connection, and it
 is off by default.
@@ -172,6 +172,11 @@ remote-code-execution vulnerability (CVE-2014-8361) (security-landscape §3.1; S
 **INT-059** — The server shall not implement a network self-update mechanism; updates shall be installed by the user through their platform's package
 manager. [DESIGN] A self-update channel is a supply-chain vector and each applied update is a new "modified version" with a fresh AGPL §13 obligation
 (security-landscape §9.4; SEC-TH-27).
+
+**[OPEN] SEC-019 is assigned to this feature but is not defined in the baseline.** The approved catalogue's network-and-parsing block runs `SEC-010` …
+`SEC-018`; there is no `SEC-019` anywhere in the baseline, so there is no requirement text to elaborate here. This specification therefore covers
+`SEC-010` … `SEC-018` and leaves `SEC-019` unresolved rather than inventing a requirement for it. *Closes when:* the owner either withdraws the
+identifier or adds a defined requirement with that ID to the catalogue. See §12 item 9.
 
 ## 4. Technical requirements
 
@@ -468,3 +473,6 @@ administration surface), F-19 (`SUP-001` … `SUP-009`, the supply-chain gates),
 8. **[OPEN] Redaction default.** SEC-094 requires redaction to be *possible*; it does not say whether it is on by default. The privacy model describes
    redaction as a user choice. *Proposed reading, used here:* redaction is on for anything the user exports and off for the local log, which the user
    alone can read. *Closes when:* the owner fixes the default.
+9. **[OPEN] SEC-019 has no requirement text.** The identifier is assigned to this feature, but the approved baseline defines no `SEC-019` — the
+   network-and-parsing block runs `SEC-010` … `SEC-018`. *Proposed reading, used here:* the identifier is left unelaborated rather than filled with an
+   invented requirement. *Closes when:* the owner withdraws the identifier or defines a requirement for it in the catalogue.

@@ -6,7 +6,8 @@ Owner role: Product/Requirements
 
 Version/date: 0.1 / 2026-11-14
 
-Requirements: DOC-001, DOC-002, DOC-003, DOC-004, DOC-005, DOC-006, DOC-007, DOC-008, DOC-009, DOC-010, DOC-011, DOC-012, SUP-001, SUP-002, SUP-003, SUP-004, SUP-005, SUP-006, SUP-007, SUP-008, SUP-009
+Requirements: DOC-001, DOC-002, DOC-003, DOC-004, DOC-005, DOC-006, DOC-007, DOC-008, DOC-009, DOC-010, DOC-011, DOC-012,
+SUP-001, SUP-002, SUP-003, SUP-004, SUP-005, SUP-006, SUP-007, SUP-008, SUP-009, PLT-001, PLT-002, PLT-009, PLT-016
 
 ## 1. Purpose and user story
 
@@ -33,7 +34,9 @@ so that I can trust the project without trusting anybody's word.
 **In scope** — the gate matrix (QG-01 … QG-27) with its commands, severities and result labels; the negative test that each gate must have; the
 code-size, complexity and error-handling standards the gates enforce; the documentation structure, the navigation path, the link check and the archive
 rule; the supply-chain controls (licence, advisory, ban, source, lock file, SBOM, checksum, `unsafe`, vendoring); the macOS signing and notarisation
-plan; and the traceability chain from requirement to evidence.
+plan; the traceability chain from requirement to evidence; and the portability rules that keep the core buildable on the three supported
+platforms — the crate boundary (PLT-001), the build matrix (PLT-002), the native-toolchain rule (PLT-009) and the Linux packaging channel
+(PLT-016).
 
 **Explicitly out of scope** — the *content* of the feature specifications (each feature owns its own; DOC-001 states only that they exist and have the
 ten mandatory sections); the performance budgets themselves (F-18, `../05-quality/PERFORMANCE-BUDGETS.md`); the interoperability matrix rows and the
@@ -259,6 +262,42 @@ The plan is recorded here, as the requirement says, and is the only place it is 
    cheap now and expensive later.
 4. **Open.** Whether the project buys the membership, and who holds the account, is an owner decision (§12 item 3). Until it is made, option 1 ships.
 
+### 4.9 Portability: the crate boundary, the build matrix and the packaging channel
+
+A gate is only worth something if it runs on the machine the project claims to support. The
+rules below are the ones that keep that claim honest.
+
+**PLT-001** — The core crate shall not depend on any OS-specific crate and shall compile on macOS, Linux and Windows from the same source.
+[DESIGN] The core depends on portable crates only; every operating-system fact reaches it through a documented trait with a default
+implementation (PLT-003, F-08). The ban list of the supply-chain gate (QG-10) names the crates that must never enter the core, and a crate
+that wraps an operating-system API belongs to an adapter, not to the core. There is no per-platform fork of the core: the same source builds
+everywhere, and a behaviour that differs per platform is a different code path behind a trait, not a different file.
+
+**PLT-002** — The project shall provide a build matrix covering macOS (arm64, x86_64), Linux (x86_64) and Windows (x86_64). [DESIGN] The
+matrix is the set of targets the build gate runs on: `aarch64-apple-darwin`, `x86_64-apple-darwin`, `x86_64-unknown-linux-gnu` and
+`x86_64-pc-windows-msvc`. Every one of them builds the workspace and runs the tests; a target that was not run is reported as
+`NOT RUN — <reason>` and never as a pass (§4.2). The matrix is recorded in the CI policy and in the build documentation; a workflow that was
+never triggered is not a green workflow (`../07-project/CI-POLICY.md` §5).
+
+**PLT-009** — The build shall not require a C toolchain beyond what the platform already provides, and any native dependency shall be
+documented. [DESIGN] A dependency that needs a C compiler, a `build.rs` that compiles C, or a system library beyond the platform's own is
+approved by the owner before it is adopted (SUP-006) and recorded in the dependency review with its purpose, its licence and its build
+requirement. The build matrix therefore runs on a machine that has the platform toolchain and the pinned Rust toolchain, and nothing else.
+
+**PLT-016** — The Linux distribution shall provide native packages and shall not use a filesystem-sandboxed package format as its primary
+distribution channel, because such a sandbox blocks access to arbitrary media folders. [DESIGN] The primary channel is the native package of
+the distribution — `deb` and `rpm` — with the `systemd` unit, the `polkit` policy and the `udev` rules installed alongside it
+(platform-integration §8.5). A filesystem-sandboxed format is not the primary channel, because its access to the filesystem is a permission
+list: the default sandbox exposes the application's own directories and the XDG directories, and reaching `/media` or a network share needs
+an explicit and brittle set of grants that a server for arbitrary user folders cannot ask for (platform-integration §8.5).
+
+| Target | Platform | Built and tested by | Status |
+| --- | --- | --- | --- |
+| `aarch64-apple-darwin` | macOS, Apple Silicon | build matrix gate | planned |
+| `x86_64-apple-darwin` | macOS, Intel | build matrix gate | planned |
+| `x86_64-unknown-linux-gnu` | Linux | build matrix gate | planned |
+| `x86_64-pc-windows-msvc` | Windows | build matrix gate | planned |
+
 ## 5. Performance requirements
 
 The gates are not a product feature with a latency budget, but three performance rules apply to them:
@@ -394,6 +433,24 @@ the definitions and no hand-edited drift exists. Requirements: DOC-006, DOC-010 
 owner decision is recorded in the decision log; and *given* vendored third-party source, *then* a record of its licence and origin exists.
 Requirements: SUP-006, SUP-007 · Verification: reviewer check · Planned location: `docs/00-governance/DECISION-LOG.md`
 
+**AC-20** — *Given* the dependency graph of the core crate, *when* the ban and licence checks run, *then* no OS-specific crate is a dependency
+of the core, and the same source builds on macOS, Linux and Windows with no per-platform fork of the core. Requirements: PLT-001, PLT-003 ·
+Verification: automated dependency check plus the build matrix · Planned location: `crates/phairdlna-core/Cargo.toml` and
+`.github/workflows/ci-matrix.yml`
+
+**AC-21** — *Given* the build matrix, *when* it is run, *then* it builds and tests macOS on arm64, macOS on x86_64, Linux on x86_64 and
+Windows on x86_64, and a target that was not run is reported as `NOT RUN — <reason>` rather than as a pass. Requirements: PLT-002 ·
+Verification: build matrix run · Planned location: `.github/workflows/ci-matrix.yml` and `docs/07-project/CI-POLICY.md`
+
+**AC-22** — *Given* a machine with only the platform's own toolchain and the pinned Rust toolchain, *when* the workspace is built, *then* no
+C toolchain beyond the platform's own is required, and every dependency that needs a native toolchain is recorded in the dependency review
+with its purpose and carries an owner approval. Requirements: PLT-009, SUP-006 · Verification: reviewer check plus the build matrix run ·
+Planned location: `docs/04-security/DEPENDENCY-LICENSE-REVIEW.md` and `crates/phairdlna-core/Cargo.toml`
+
+**AC-23** — *Given* the Linux distribution, *when* its packaging is inspected, *then* native packages are provided as the primary channel,
+no filesystem-sandboxed package format is offered as the primary channel, and the packaging documentation states the reason. Requirements:
+PLT-016 · Verification: reviewer check · Planned location: `docs/06-development/BUILD-AND-TEST.md`
+
 ## 11. Test strategy and dependencies
 
 **Planned test locations** (the first three exist in the repository today; the rest are planned):
@@ -409,6 +466,10 @@ Requirements: SUP-006, SUP-007 · Verification: reviewer check · Planned locati
 | Licence, advisory, ban, source and artefact checks | `scripts/quality-gates.sh` (planned) |
 | Spelling (QG-12) | `scripts/quality-gates.sh` (planned) |
 | Gate documentation and negative-test records | `docs/05-quality/QUALITY-GATES.md` |
+| Core crate boundary and the OS-specific dependency ban | `crates/phairdlna-core/Cargo.toml`, `.github/workflows/ci-matrix.yml` |
+| Build matrix over the four required targets | `.github/workflows/ci-matrix.yml` |
+| Native-toolchain review | `docs/04-security/DEPENDENCY-LICENSE-REVIEW.md` |
+| Linux packaging channel | `docs/06-development/BUILD-AND-TEST.md` |
 
 **Method.** A gate is a script with three exit codes — `0` pass, `1` fail, `77` skipped — that prints the command, the result and the relevant output.
 The *negative* test of a gate is part of the gate's own definition and must be demonstrated before the gate can be trusted; the demonstration is
@@ -451,6 +512,11 @@ layers), `../00-governance/` (the standards, the documentation policy, the requi
    documents, and its rule that "no duplicate normative statement" may be read as forbidding a generated copy of the requirement table. *Proposed
    reading, used here:* a generated view is not a duplicate normative statement, because the definition lives only in the requirement catalogue and
    the generator refuses to drift from it. *Closes when:* the policy states the rule for generated documents.
-8. **[OPEN] The CI workflow file names.** `CI-POLICY.md` §2 names `ci.yml` and `ci-matrix.yml` as "skeletons with the commands listed but the
+8. **[OPEN] The build matrix does not yet name the Intel macOS target.** PLT-002 requires macOS on arm64 **and** macOS on x86_64, but
+   `ci-matrix.yml` names three operating systems — `macos-latest`, `ubuntu-latest`, `windows-latest` — and no Intel macOS target, so half of
+   the required matrix is not covered by the workflow as it stands. *Proposed reading:* the matrix gains an explicit `x86_64-apple-darwin`
+   entry, and an entry the runner set cannot provide is reported as `NOT RUN — <reason>` rather than being quietly left out. *Closes when:* the
+   owner decides how the Intel target is run.
+9. **[OPEN] The CI workflow file names.** `CI-POLICY.md` §2 names `ci.yml` and `ci-matrix.yml` as "skeletons with the commands listed but the
    implementation not yet present", and names `scripts/check-requirement-views.sh` — a file that does not exist; the script in the repository is
    `scripts/generate_requirement_views.py`. *Closes when:* the policy is corrected to match the tree.

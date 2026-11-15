@@ -3,8 +3,8 @@
 Status: Draft
 Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
-Requirements: FUN-008, FUN-009, FUN-010, FUN-011, FUN-012, PERF-003, PERF-004, PERF-005,
-PERF-008, PERF-009, PERF-012
+Requirements: FUN-008, FUN-009, FUN-010, FUN-011, FUN-012, FUN-025, PERF-003, PERF-004,
+PERF-005, PERF-008, PERF-009, PERF-012
 
 ## 1. Purpose and user story
 
@@ -46,6 +46,8 @@ disposable, so that a damaged database costs me a re-scan and never my collectio
   needed (FUN-012). Artwork and thumbnails are F-10.
 - The index behaviour the browse path depends on: availability during a scan (FUN-008),
   no filesystem access while browsing (PERF-008) and a bounded first page (PERF-005).
+- The visibility bound for a newly added file and the fallback used when the file system
+  does not deliver reliable change events (FUN-025).
 
 **Explicitly out of scope**
 
@@ -105,6 +107,15 @@ yields *no* duration, dimension or codec value — the server never guesses and 
 reports a value it did not read. The probing itself runs in the out-of-process sandbox
 child described in F-10 (SEC-066, security §8), so that a malformed file cannot harm the
 server process.
+
+**FUN-025** — The server shall make a newly added file visible in the catalogue within 30 seconds on a file
+system that delivers reliable change events, and shall document the fallback behaviour when it does not.
+[DESIGN] The catalogue follows the filesystem event stream, so the bound is the time from the event to the
+committed index row — not the duration of a scan. The server never depends on events alone: the fallback is the
+scheduled rescan (FUN-024) together with the explicit scan command (OPS-003), and the fallback that is in force
+for a root is documented in the user documentation and named in the diagnostics report. When the event stream
+loses events — an `IN_Q_OVERFLOW` on Linux, for example — the affected root is re-scanned rather than left
+stale (platform-integration §8.2). The fallback interval is raised in §12.
 
 **PERF-003** — An incremental rescan of a tree with 10 000 unchanged files shall complete
 without re-reading file contents. [DESIGN] Change detection compares size and
@@ -194,6 +205,11 @@ the reference profile of qa-performance §2.
 - [DESIGN] Target (PERF-005): the first page of a browse over a container with 10 000
   children is returned in under 100 ms. Method: timed at the browse handler, excluding
   network time (qa-performance §3.2).
+- [DESIGN] Target (FUN-025): a newly added file is visible in the catalogue within 30 seconds of its
+  creation on a file system that delivers reliable change events. Method: create a file in a temporary root,
+  poll the catalogue until the object appears and record the elapsed time; the fallback path is exercised
+  separately with the event source replaced by a stub that delivers nothing, and the elapsed time in that
+  case is reported against the fallback interval rather than against the 30-second bound.
 - [DESIGN] Target (PERF-008): zero directory scans during a browse. Method: a filesystem
   audit hook that records every directory read; the count must be zero.
 - [DESIGN] Target (PERF-009): an index scan over 100 000 objects stays within a
@@ -266,6 +282,7 @@ the reference profile of qa-performance §2.
 | A file disappears between the scan and the index write | the row is removed by the next scan; a stale row is never served | FUN-006 (F-08) |
 | A media file cannot be parsed | the sandbox quarantines the file; the object carries no duration or dimensions | FUN-012, SEC-066 |
 | A scan is cancelled mid-way | the committed rows stay; the scan stops at the next batch boundary | UX-013 |
+| The file system delivers no change events, or loses them (event-queue overflow) | the affected root falls back to the scheduled rescan, the fallback in force for that root is named in the diagnostics, and the catalogue is never left knowingly stale | FUN-025, FUN-024, platform §8.2 |
 
 No failure of this feature may take down the HTTP task or the SSDP task: a database
 error produces a diagnostic and a degraded catalogue, never a panic (UX-005).
@@ -350,6 +367,14 @@ inside a media root has been created, modified, renamed or deleted by the server
 FUN-018, PRD-007 · Verification: automated test (filesystem audit hook) · Planned location:
 `crates/phairdlna-core/tests/catalogue_rebuild.rs`
 
+**AC-17** — *Given* a root on a file system that delivers reliable change events, *when* a media file is created
+in it, *then* the object appears in the catalogue within 30 seconds of the creation; and *given* a file system
+that delivers no change events, *when* the same file is created, *then* the file appears through the documented
+fallback — the scheduled rescan or the explicit scan command — and the diagnostics name the fallback in force for
+that root. Requirements: FUN-025, FUN-024, OPS-003 · Verification: automated test with a scripted event source
+plus an automated test of the fallback path · Planned location:
+`crates/phairdlna-core/tests/catalogue_incremental.rs`
+
 ## 11. Test strategy and dependencies
 
 **Planned test locations** (none of these files exists yet):
@@ -359,7 +384,7 @@ FUN-018, PRD-007 · Verification: automated test (filesystem audit hook) · Plan
 | Index behaviour, browse-during-scan, no filesystem access | `crates/phairdlna-core/tests/catalogue_index.rs` |
 | Rebuild, corruption recovery, no-writes-to-media | `crates/phairdlna-core/tests/catalogue_rebuild.rs` |
 | Identifier stability, de-duplication by device identity | `crates/phairdlna-core/tests/catalogue_identifiers.rs` |
-| Incremental scan, change detection | `crates/phairdlna-core/tests/catalogue_incremental.rs` |
+| Incremental scan, change detection, visibility bound and its fallback | `crates/phairdlna-core/tests/catalogue_incremental.rs` |
 | Media probing and quarantine | `crates/phairdlna-core/tests/catalogue_metadata.rs`, `crates/phairdlna-core/tests/media_sandbox.rs` |
 | Scanner and indexer unit tests | `crates/phairdlna-core/src/catalogue/scanner.rs`, `crates/phairdlna-core/src/catalogue/index.rs`, `crates/phairdlna-core/src/catalogue/identifiers.rs` (inline `#[cfg(test)]` modules) |
 | Throughput and latency benchmarks | `crates/phairdlna-bench/benches/indexing.rs`, `.../browse.rs`, `.../index_scan.rs`, `.../large_catalogue.rs` |
@@ -407,7 +432,13 @@ size and worker limits) and the platform trait for volume identity and volume ev
    never invoked in the baseline (ADR-0008)", but `docs/02-architecture/adr/` contains no
    ADR-0008. FUN-012 depends on that decision being recorded. *Closes when:* the ADR is
    written or the reference is corrected.
-6. **[OPEN] Where the index lives when the data directory is not writable.** The index
+6. **[OPEN] The fallback interval when the file system does not deliver change events.**
+   FUN-025 requires the fallback behaviour to be documented but names no interval. *Proposed
+   reading:* the fallback is the scan schedule already configured for the root (FUN-024); when the
+   schedule is "manual only", the fallback is the explicit scan command (OPS-003), and the
+   diagnostics report says so instead of leaving the user with a catalogue that silently ages.
+   *Closes when:* the owner confirms the reading or fixes a separate fallback interval.
+7. **[OPEN] Where the index lives when the data directory is not writable.** The index
    needs a writable directory; on macOS a system-context daemon writes to
    `/var/lib`/`/var/log` while a user instance writes to the user's data directory
    (platform §4.2). *Closes when:* the platform adapter documents the per-instance data

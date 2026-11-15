@@ -75,6 +75,12 @@ because it is dominated by the media format and not by the index.
 its first page within 100 ms. [DESIGN] Measured at the SOAP handler, excluding
 network time, so that the number describes the server rather than the LAN.
 
+**PERF-006** — The server shall sustain 10 simultaneous direct-play streams without unbounded memory
+growth. [DESIGN] Ten clients each receive a byte range from their own file at the same time,
+without transcoding (FUN-040); the resident memory does not grow without bound as the number
+of streams rises, and the memory attributable to one stream stays inside the bound that
+PERF-007 documents. The measurement is described in §5.
+
 **PERF-008** — A browse request shall never trigger a directory scan. [DESIGN] A
 structural property, verified with an audit hook that counts filesystem operations
 during a browse.
@@ -178,6 +184,13 @@ documented value. [DESIGN] The value is not fixed here: it is measured first and
 written down. Until then the requirement is "bounded", and the bound is enforced by
 the buffer limit in the transfer path.
 
+**PERF-006** is measured with ten simultaneous direct-play clients against the reference
+profile: the resident set is sampled before the streams start, while they are running and
+after they have been closed, and the growth between the first and the last sample is the
+number the requirement is about. The memory attributable to a single stream is the number
+PERF-007 documents. A growth that does not flatten is a defect to be explained, in the same
+way as a non-flat trend in the soak test.
+
 ### The measurement rules
 
 1. Release builds only. A debug build is never a measurement.
@@ -272,6 +285,7 @@ explained, not a footnote.
 | AC-14 | Given an invalid configuration, when the server starts, then it refuses to start and names the offending field, and the previous configuration is unchanged | `REL-005` | Negative test | `crates/phairdlna-cli/tests/invalid_configuration.rs` |
 | AC-15 | Given an active transfer, when the user switches the presentation mode, then the transfer continues uninterrupted | `REL-006` | Integration test | `crates/phairdlna-mac/tests/mode_switch.rs` |
 | AC-16 | Given the same workload on two machines with different storage, when both are measured with the same method, then the numbers are comparable because the hardware profile is recorded | `PERF-010`, `PERF-011` | Manual review | `docs/05-quality/PERFORMANCE-BUDGETS.md` |
+| AC-17 | Given ten simultaneous direct-play clients, when the streams run and are then closed, then the resident memory does not grow without bound and the memory attributable to one stream stays within the documented bound | `PERF-006`, `PERF-007` | Benchmark | `crates/phairdlna-core/benches/ten_streams.rs` |
 
 ---
 
