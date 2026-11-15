@@ -319,7 +319,9 @@ A filesystem problem never takes down the HTTP or SSDP tasks: a bad root produce
 
 ## 10. Acceptance criteria and traceability
 
-All criteria below are *planned*; no test file exists yet.
+The criteria below were *planned* when this document was written. The rows that carry a
+**Result** line were checked by a test that exists; the rows that carry **NOT RUN** name
+the reason. The implementation decisions are in § 12.1.
 
 **AC-01** — *Given* two configured roots, *when* the catalogue is browsed, *then* one tree is returned whose
   top-level containers are named after the roots, and the union of both roots' contents is present. Requirements:
@@ -429,21 +431,23 @@ the shipped manifest plus a reviewer check of the installation documentation · 
 
 ## 11. Test strategy and dependencies
 
-**Planned test locations** (none of these files exists yet):
+**Test locations.** A file that exists today says *exists*; a file that does not exist
+yet says *planned*.
 
-| Purpose | Planned path |
-| --- | --- |
-| Root configuration, union catalogue, hidden-file rules | `crates/phairdlna-core/tests/media_roots.rs` |
-| Containment: traversal, NUL, encoded separators, re-check after resolution | `crates/phairdlna-core/tests/path_containment.rs` |
-| Symbolic-link and alias policy | `crates/phairdlna-core/tests/symlink_policy.rs` |
-| Mount, unmount, remount and re-keying | `crates/phairdlna-core/tests/volume_events.rs` |
-| Incremental rescan behaviour | `crates/phairdlna-core/tests/incremental_scan.rs` |
-| Scanner unit tests | `crates/phairdlna-core/src/catalogue/scanner.rs` (inline `#[cfg(test)]` module) |
-| Scan command and schedule | `crates/phairdlna-cli/tests/cli_scan.rs` |
-| Device behaviour on removable volumes and protected folders | `qa/device-matrix.toml` |
-| Platform traits and their default implementations | `crates/phairdlna-core/tests/platform_traits.rs` |
-| Names with spaces, non-ASCII characters and emoji | `crates/phairdlna-core/tests/path_containment.rs` |
-| Windows long-path manifest, backslash traversal, long paths | `crates/phairdlna-cli/tests/windows_manifest.rs` |
+| Purpose | Path | State |
+| --- | --- | --- |
+| Root configuration, union catalogue, hidden-file rules | `crates/phairdlna-core/tests/media_roots.rs` | exists |
+| What the scanner reports when it cannot read | `crates/phairdlna-core/tests/media_diagnostics.rs` | exists |
+| Symbolic-link and alias policy | `crates/phairdlna-core/tests/symlink_policy.rs` | exists |
+| Containment: traversal, NUL, encoded separators, re-check after resolution | `crates/phairdlna-core/tests/path_containment.rs` | planned (F-16) |
+| Mount, unmount, remount and re-keying | `crates/phairdlna-core/tests/volume_events.rs` | planned (F-13) |
+| Incremental rescan behaviour | `crates/phairdlna-core/tests/incremental_scan.rs` | planned (M2) |
+| Scanner unit tests | `crates/phairdlna-core/src/catalogue/scanner/mod.rs`, `.../scanner/walk.rs` | exists |
+| Scan command and schedule | `crates/phairdlna-cli/tests/cli_scan.rs` | planned (M1.11) |
+| Device behaviour on removable volumes and protected folders | `qa/device-matrix.toml` | planned |
+| Platform traits and their default implementations | `crates/phairdlna-core/tests/platform_traits.rs` | planned |
+| Names with spaces, non-ASCII characters and emoji | `crates/phairdlna-core/tests/media_roots.rs` | exists |
+| Windows long-path manifest, backslash traversal, long paths | `crates/phairdlna-cli/tests/windows_manifest.rs` | planned (M3) |
 
 **Method.** The scanner and the containment rules are exercised against a temporary directory tree created by the
 test itself, which makes symlinks, aliases and permission errors reproducible on every platform. The volume
@@ -462,6 +466,128 @@ identity key and de-duplication that share the raw path), F-14 (the diagnostics 
 `platform` traits of ADR-0003, and the macOS privacy behaviour of PLT-017.
 
 ## 12. Open questions and decisions
+
+### 12.1 Decisions taken by the implementation (WP5)
+
+These decisions are implemented and covered by a test. The one marked **[owner decision]** changes a
+documented behaviour and is reported to the owner with this work package.
+
+**D-01 — The scanner reads the disk once, and the catalogue answers from memory (FUN-005, PERF-008).**
+The scan walks the root, reads the metadata of every entry and reads the first bytes of a file whose name
+says nothing. The result is an in-memory tree; a browse touches nothing on the disk. *Implemented.*
+
+**D-02 — The object identifier is the blake3 hash of volume, root key and relative identity, cut to 128 bits
+(INT-062, ADR-0007). [owner decision]** The owner directed blake3. The hash input is
+
+```text
+volume identity ‖ 0x00 ‖ root key ‖ 0x00 ‖ relative identity
+```
+
+and the identifier is the first 32 hexadecimal characters of the digest. The zero byte separates the parts,
+so no two different triples can produce the same input. The identifier carries no part of the path: a file
+called `Secret Documentary.mkv` yields an identifier that contains neither the name nor the format
+(`SEC-005`). "Opaque" means *carries no part of the path* and not *is unreadable*: a reader who knows the
+volume identity, the root key and a file name can confirm a guess, because the hash is not a secret
+(ADR-0007). *Implemented.*
+
+**D-03 — The volume identity of the portable adapter is the constant `local`.** No adapter reports a volume
+identity yet, and an identity that changed with every remount would break every identifier a client cached
+(`INT-062`). The portable adapter therefore answers `local` for every path, and the identifier of a file does
+not change when the volume is remounted or the library is moved to another machine. The cost is that two roots
+on two different volumes share a volume identity; the root key keeps them apart (D-04). *Implemented; the
+volume identity of the platform adapter is still to come (F-13, `PLT-005`).*
+
+**D-04 — The root key is the position of the root in the configuration.** The name of a root is a label for a
+person and is not part of the identifier, so renaming a root does not invalidate the identifiers below it. Two
+roots of the same configuration keep their files apart because their keys differ. *Implemented.*
+
+**D-05 — A folder of the library is a container and not an item (INT-042).** The ContentDirectory service
+lists the children of a container as items, so the catalogue model gained `MediaKind::Folder` and
+`ContentItem::child_count`; the DIDL writer turns an item of that kind into a `container` element that carries
+the number of its children. *Implemented.*
+
+**D-06 — The case sensitivity of a volume is asked of the platform (PLT-005).** The `FileSystem` trait gained
+`case_sensitivity` for the identity, and the portable adapter answers per platform: a Unix volume is assumed
+to be case-sensitive, a Windows volume case-insensitive. The safe direction was chosen: folding two names that
+a case-sensitive volume keeps apart would merge two files into one, while keeping them apart splits at most a
+file in two. The identity of a path is computed by `platform::identity_of_with`, which folds only when the
+volume is insensitive. *Implemented; the per-volume detection of the macOS adapter is still to come.*
+
+**D-07 — A hidden file is a name that begins with a dot, and an AppleDouble sidecar is hidden as well
+(FUN-004).** The question is asked of the platform through the new `FileSystem::is_hidden`, whose default is
+the dot convention; the scanner additionally treats a name that begins with `._` as hidden, because that is
+what the resource fork of a macOS file is called. *Implemented.*
+
+**D-08 — A file is placed by its extension first and by its content second (FUN-005).** The extension is what
+the person who named the file meant; a file whose extension says nothing is sniffed (JPEG, PNG, Matroska, ISO
+base media, MPEG audio, MPEG transport stream). A file the sniffer cannot place stays out of the tree, because
+a file the client cannot play is worse than a file the client does not see. A playlist is the one exception:
+it is indexed, although the server cannot deliver it. *Implemented.*
+
+**D-09 — The scanner never writes, never leaves the root and is bounded (FUN-018, SEC-003).** The walk opens
+directories and files to read them and writes nothing. A symbolic link is followed only when the policy says
+so, and only when its target lies inside the canonical root. The depth of the walk is limited (32 by default),
+and a folder that is reached twice is not walked again, so a cycle of links cannot make the server disappear.
+A folder that is deeper than the limit is **reported** in the diagnostics and not read: the cut is never
+silent. *Implemented.*
+
+**D-10 — The diagnostics of the server name no path of the disk (SEC-094, `UX-011`).**
+A diagnostic says which folder below the root it is about — "the folder "a/b" is reached twice" — and
+never the path of the disk. The name of the root is part of the message, because the owner named it. The
+command line prints the path of a root in clear text, because it shows the owner the configuration he
+asked for; that is a local display and not a log. *Implemented.*
+
+**D-11 — The link policy is a setting of the root, and the setting of the server is its default
+(`CFG-007`).** A root may name a policy of its own; a root that names none follows the setting of the
+server. The two roots of one library may therefore behave differently, which is what the requirement
+asks for. *Implemented.*
+
+**D-12 — The catalogue holds the target of a link, and not the link (`SEC-001`).**
+A link that is indexed as its own entry keeps the name of the link, but the path the catalogue holds is
+the path of the **target**. A link that is repointed after the scan therefore cannot change what the
+catalogue serves. The containment is checked again when the file is opened; that check belongs to the
+delivery layer (F-16). *Implemented.*
+
+**D-13 — Two names of one file are one object (`FUN-011`, ADR-0007).**
+The scanner asks the platform for the identity of a file and keeps one object per identity, so a hard
+link is not counted twice. A file system that gives no identity to its files is not asked to answer, and
+the file is indexed as it is. *Implemented.*
+
+**D-14 — A root that cannot be read is reported, and the rest of the library stays browsable (FUN-007).**
+A root that is missing, unreadable or not a folder is reported in the diagnostics and marked absent; the
+content directory and the other roots stay browsable. What the implementation cannot yet detect is a root that is *replaced* by
+another volume: that needs a volume identity the portable adapter does not have (D-03). *Implemented with the
+stated limit.*
+
+**What is verified, and what is not.** Every criterion of § 10 is listed. A criterion
+that is *implemented* has a test that fails when the behaviour breaks; a criterion
+that is *partly implemented* says what is missing; a criterion that is **NOT RUN**
+names the reason, because a skip is never a pass.
+
+| Criterion | Result | Where |
+| --- | --- | --- |
+| AC-01 (two roots, one tree) | implemented | `crates/phairdlna-core/tests/media_roots.rs`, `crates/phairdlna-core/tests/catalogue_identifiers.rs` |
+| AC-02 (a link out of the root) | implemented | `crates/phairdlna-core/tests/symlink_policy.rs` |
+| AC-03 (hidden files, content sniffing) | implemented | `crates/phairdlna-core/tests/media_roots.rs` |
+| AC-04 (incremental rescan) | **NOT RUN** — M1.9 has no index and no incremental scan; the criterion belongs to the index (F-09, M2) |
+| AC-05 (an unmounted volume) | **NOT RUN** — a root that is missing or unreadable is reported and the library stays browsable (`crates/phairdlna-core/tests/media_roots.rs`), but the *unmounted volume* needs the volume identity of the platform adapter (F-13) |
+| AC-06 (a volume that reappears under a new identity) | **NOT RUN** — needs the volume identity and the volume watcher of the platform adapter (F-13) |
+| AC-07 (nothing is written) | implemented | `crates/phairdlna-core/tests/media_roots.rs::the_scanner_never_writes_to_the_library` |
+| AC-08 (the free space of a root) | **NOT RUN** — `FUN-023` and the vendor extension of open question 1 below; not part of M1.9 |
+| AC-09 (the scan schedule) | **NOT RUN** — the scheduler is M1.11, and the schedule of a root is not configured yet |
+| AC-10 (a media URL that walks out) | **NOT RUN** — the containment of a client-supplied path is F-16 and is not part of M1.9 |
+| AC-11 (a link repointed after the scan) | partly implemented — the catalogue holds the **target** of a link, so a link that is repointed after the scan cannot change what the catalogue serves (`crates/phairdlna-core/tests/symlink_policy.rs::a_link_that_is_repointed_after_the_scan_cannot_escape_the_root`); the re-check of the path when the file is opened is F-16 |
+| AC-12 (a name that is not valid UTF-8) | **NOT RUN** — the scanner reads a name with `to_string_lossy`, so two names that differ only in an unreadable byte would collapse into one identity; macOS refuses such names, and the Linux behaviour needs a fixture (qa/device-matrix) |
+| AC-13 (two roots with different case sensitivity) | **NOT RUN** — the portable adapter answers per platform (`crates/phairdlna-core/src/platform/local.rs`), the per-volume detection of the macOS adapter is missing (F-13) |
+| AC-14 (a subtree the system refuses to read) | partly implemented — the folder is reported in the diagnostics (`crates/phairdlna-core/tests/media_diagnostics.rs`); the list of quarantined subtrees that need consent does not exist yet |
+| AC-15 (a protected folder) | partly implemented — the refusal is recorded as a diagnostic; the quarantine list of AC-14 does not exist yet |
+| AC-16 (no shell is involved) | implemented by construction — the scanner starts no process and takes no command; there is no test, because the test would only assert the absence of a dependency |
+| AC-17 (the platform layer) | partly implemented — the traits carry the facts the scanner needs and the portable adapter answers them (`crates/phairdlna-core/src/platform/local.rs`); the macOS adapter is missing (F-13) |
+| AC-18 (a root path with a space, a non-ASCII character and an emoji) | implemented | `crates/phairdlna-core/tests/media_roots.rs::a_root_with_an_awkward_name_is_scanned` |
+| AC-19 (a traversal attempt with a backslash) | **NOT RUN** — the containment of a client-supplied path is F-16 |
+| AC-20 (the Windows manifest) | **NOT RUN** — the Windows build is M3 |
+
+### 12.2 Open questions
 
 1. **[OPEN] FUN-023 versus INT-048 — a genuine tension in the baseline.** FUN-023 asks for the free space of a
 root "through the ContentDirectory service"; `GetFreeSpace` is **not** a ContentDirectory 1–4 action, and INT-048

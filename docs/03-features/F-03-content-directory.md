@@ -324,8 +324,8 @@ schema (interoperability matrix PC-14), which makes AC-12 and AC-13 depend on F-
 ## 12. Open questions and decisions
 
 > **The capability lists are smaller than the design of §3, until the catalogue exists.**
-> The design of INT-035 names `dc:creator`, `dc:date` and `res@size` as searchable and `dc:creator`, `dc:date` as sortable. The placeholder catalogue
-> cannot search in them or sort by them, and INT-035 asks for *only the capabilities the server actually implements*, so the lists are `dc:title` and
+> The design of INT-035 names `dc:creator`, `dc:date` and `res@size` as searchable and `dc:creator`, `dc:date` as sortable. The catalogue
+> of F-08 and F-09 cannot search in them or sort by them yet — it searches in `dc:title` alone — and INT-035 asks for *only the capabilities the server actually implements*, so the lists are `dc:title` and
 > `dc:title,upnp:class`. The lists grow with the catalogue module (F-08, F-09). *Closes when:* the catalogue can search and sort by the other properties,
 > or the owner decides that the lists shall name the design of §3 regardless.
 

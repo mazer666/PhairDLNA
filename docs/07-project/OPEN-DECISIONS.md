@@ -1,6 +1,6 @@
 # Open decisions requiring owner approval — PhairDLNA
 
-Status: **Open** · Owner role: Project Owner · Compiled: 2026-11-14
+Status: **Open — OD-05 decided on 2026-11-15** · Owner role: Project Owner · Compiled: 2026-11-14
 Related: `DECISION-LOG.md` (decisions already taken), `../01-product/TECHNICAL-REQUIREMENTS.md`
 
 These are the decisions that materially affect **product scope, architecture,
@@ -23,7 +23,7 @@ the momentum.
 | OD-02 | FFmpeg and transcoding | Never ship FFmpeg; a user-supplied binary only, out of process | No FFmpeg |
 | OD-03 | macOS interface technology | Pure Rust with `objc2` + `objc2-app-kit` | Option A |
 | OD-04 | Administration authentication | A `0600` bearer token plus CSRF, a custom header and a `Host` allowlist | The same model |
-| OD-05 | Minimum macOS version | macOS 15 and later | macOS 15 |
+| OD-05 | Minimum macOS version | macOS 15 and later — **decided 2026-11-15** | macOS 15 |
 | OD-06 | Prebuilt binary or source only | Source always, plus a signed macOS binary | The same |
 | OD-07 | The mandatory device matrix | The ten priority client families; three clients before stable | The ten families |
 | OD-08 | Local administration surface | Yes, minimal, alongside the native app | Yes, minimal |
@@ -33,9 +33,9 @@ the momentum.
 | OD-12 | Outside contributions | Accepted, with a requirement ID, a test and documentation | Accepted |
 | OD-13 | The Apple media libraries | Own folders only; the libraries stay opt-in and unbuilt | Option A |
 
-**The only decision that blocks work is OD-05** (the minimum macOS version), because
-the service model and the first-run flow depend on it. Everything else can be
-answered while M1 is already running.
+**The only decision that blocked work was OD-05** (the minimum macOS version), because
+the service model and the first-run flow depend on it. It was decided on 2026-11-15
+(macOS 15 and later). Everything else can be answered while M1 is already running.
 
 ---
 
@@ -138,6 +138,12 @@ diagnostics worse, not better. One model instead of two.
 **Default, if no decision is made:** macOS 15 and later, with the launchd daemon model throughout.
 
 **If deferred:** the macOS service design and the first-run flow cannot be finalised.
+
+**Decision (2026-11-15, owner): macOS 15 and later (Sequoia).** The recommendation is taken as it stands:
+the local-network privacy prompt exists only on macOS 15 and later, the always-on server runs as a
+launchd **daemon** rather than an agent (`PLT-013`), and the first-run flow is designed for that prompt.
+The decision is recorded as DEC-032 in the decision log; this entry stays as the record of the question and
+of the reasoning behind the answer.
 
 ---
 

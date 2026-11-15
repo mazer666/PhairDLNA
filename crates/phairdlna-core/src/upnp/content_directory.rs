@@ -16,7 +16,7 @@
 
 use crate::catalogue::{ContentContainer, ContentItem, ContentSource};
 use crate::didl::{
-    container_from_catalogue, item_from_catalogue, render_for_soap_result, DidlDocument,
+    folder_from_catalogue, item_from_catalogue, render_for_soap_result, DidlDocument,
     ProtocolPolicy, SUPPORTED_PROPERTIES,
 };
 use crate::upnp::browse::{
@@ -24,6 +24,7 @@ use crate::upnp::browse::{
     BrowseFlag,
 };
 use crate::upnp::error::UpnpError;
+use crate::upnp::metadata::{item_answer, metadata_answer};
 use crate::upnp::page::{page, sort_items};
 use crate::upnp::soap::{response_body, response_body_with_result, SoapRequest, SoapResponse};
 
@@ -102,12 +103,9 @@ pub fn browse(
     policy: &ProtocolPolicy,
 ) -> Result<SoapResponse, UpnpError> {
     let arguments = read_browse_arguments(request)?;
-    let container =
-        source
-            .container(&arguments.object_id)
-            .ok_or_else(|| UpnpError::NoSuchObject {
-                object_id: arguments.object_id.clone(),
-            })?;
+    let Some(container) = source.container(&arguments.object_id) else {
+        return item_answer(&arguments, source, base_url, policy);
+    };
     match arguments.flag {
         BrowseFlag::Metadata => Ok(metadata_answer(
             &container,
@@ -120,34 +118,12 @@ pub fn browse(
     }
 }
 
-/// The answer of a metadata browse: the container itself (`INT-033`).
-///
-/// A container carries no file, so the answer needs neither the address of
-/// the server nor the protocol policy.
-fn metadata_answer(
-    container: &ContentContainer,
-    source: &dyn ContentSource,
-    filter: Option<&[String]>,
-) -> SoapResponse {
-    let document = DidlDocument::with_containers(vec![container_from_catalogue(container)]);
-    let result = render_for_soap_result(&document, filter);
-    answer_with_result(
-        "Browse",
-        &result,
-        &[
-            ("NumberReturned", "1"),
-            ("TotalMatches", "1"),
-            ("UpdateID", &update_id_of(container, source).to_string()),
-        ],
-    )
-}
-
 /// The identifier a browse reports.
 ///
 /// A browse of the root container reports the identifier of the whole
 /// catalogue; a browse of another container reports the identifier of that
 /// container (`INT-043`).
-fn update_id_of(container: &ContentContainer, source: &dyn ContentSource) -> u32 {
+pub(super) fn update_id_of(container: &ContentContainer, source: &dyn ContentSource) -> u32 {
     if container.id == ROOT_OBJECT_ID {
         source.system_update_id()
     } else {
@@ -189,12 +165,21 @@ fn children_answer(
 }
 
 /// The document of a page of items.
+///
+/// A folder of the library is a container and not an item: the schema says
+/// that a client opens a folder by its identifier, and the folder carries the
+/// number of children it holds (`INT-042`).
 fn document_of(page: &[ContentItem], base_url: &str, policy: &ProtocolPolicy) -> DidlDocument {
-    DidlDocument::with_items(
-        page.iter()
+    let (folders, files): (Vec<&ContentItem>, Vec<&ContentItem>) = page
+        .iter()
+        .partition(|item| item.kind == crate::catalogue::MediaKind::Folder);
+    DidlDocument {
+        containers: folders.into_iter().map(folder_from_catalogue).collect(),
+        items: files
+            .into_iter()
             .map(|item| item_from_catalogue(item, base_url, policy))
             .collect(),
-    )
+    }
 }
 
 /// The children in the order the client asked for.
@@ -258,7 +243,11 @@ fn answer(action: &str, arguments: &[(&str, &str)]) -> SoapResponse {
 ///
 /// The document is already escaped for the text of an element, because the
 /// `didl` module owns that escaping (`INT-073`).
-fn answer_with_result(action: &str, result: &str, arguments: &[(&str, &str)]) -> SoapResponse {
+pub(super) fn answer_with_result(
+    action: &str,
+    result: &str,
+    arguments: &[(&str, &str)],
+) -> SoapResponse {
     SoapResponse::ok(response_body_with_result(
         crate::upnp::services::CONTENT_DIRECTORY.service_type,
         action,

@@ -20,6 +20,8 @@ Commands:
   config validate          Check a configuration file and report the first problem
   config show              Print the effective configuration
   ssdp headers             Print the SSDP headers the server would send
+  catalogue scan           Print the tree of the library with the client identifiers
+  catalogue browse <id>    Print the document a client receives for a container
   serve                    Start the server (not implemented yet)
 
 Options:
@@ -75,6 +77,7 @@ fn command_from(rest: &[&str], config_path: Option<PathBuf>) -> Result<Command, 
         Some("version") => Ok(Command::Version),
         Some("config") => config_command(&rest[1..], config_path),
         Some("ssdp") => ssdp_command(&rest[1..], config_path),
+        Some("catalogue") => catalogue_command(&rest[1..], config_path),
         Some("serve") => Ok(Command::Serve { path: config_path }),
         Some(other) => Err(format!("unknown command \"{other}\"")),
     }
@@ -86,6 +89,25 @@ fn ssdp_command(rest: &[&str], config_path: Option<PathBuf>) -> Result<Command, 
         Some("headers") => Ok(Command::SsdpHeaders { path: config_path }),
         Some(other) => Err(format!("unknown ssdp command \"{other}\"")),
         None => Err("ssdp needs a subcommand: headers".to_owned()),
+    }
+}
+
+/// Builds a `catalogue` subcommand.
+fn catalogue_command(rest: &[&str], config_path: Option<PathBuf>) -> Result<Command, String> {
+    match rest.first().copied() {
+        Some("scan") => Ok(Command::CatalogueScan { path: config_path }),
+        Some("browse") => {
+            let object_id = rest
+                .get(1)
+                .copied()
+                .ok_or("catalogue browse needs an object id")?;
+            Ok(Command::CatalogueBrowse {
+                object_id: object_id.to_owned(),
+                path: config_path,
+            })
+        }
+        Some(other) => Err(format!("unknown catalogue command \"{other}\"")),
+        None => Err("catalogue needs a subcommand: scan or browse".to_owned()),
     }
 }
 

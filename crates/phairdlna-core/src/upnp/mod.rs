@@ -35,9 +35,9 @@ mod device;
 mod device_model;
 mod dispatcher;
 mod error;
+mod metadata;
 mod mime;
 mod page;
-mod placeholder;
 mod scpd;
 mod scpd_connection_manager;
 mod scpd_content_directory;
@@ -65,7 +65,6 @@ pub use dispatcher::Dispatcher;
 pub use error::{fault_description, UpnpError};
 pub use mime::{sink_list, source_list, source_protocol_info};
 pub use page::PAGE_LIMIT;
-pub use placeholder::PlaceholderCatalogue;
 pub use scpd::{
     ActionSpec, ArgumentSpec, Direction, ServiceSpec, StateVariableSpec, SCPD_NAMESPACE,
 };

@@ -39,15 +39,16 @@
 | `crates/phairdlna-core/src/lib.rs` | The portable domain core — the crate root and the error type | — |
 | `crates/phairdlna-core/src/error.rs` | The core error type | F-12 |
 | `crates/phairdlna-core/src/xml/` | The one XML writer of the project — the escaping, the length rules and the writer | F-02, F-05 |
-| `crates/phairdlna-core/src/platform/` | The eight capability traits, the path model and the default implementation | F-08, F-13, F-15 |
+| `crates/phairdlna-core/src/platform/` | The eight capability traits, the path model, the portable filesystem adapter and the default implementation | F-08, F-13, F-15 |
 | `crates/phairdlna-core/src/ssdp/` | The discovery protocol: parsing a search, matching the targets, building the bytes | F-01 |
 | `crates/phairdlna-core/src/identity.rs` | The persistent device identity | F-01, F-02 |
-| `crates/phairdlna-core/src/catalogue/` | The catalogue model — the items, the containers, the metadata and the registry of the formats the server serves | F-05, F-08, F-09 |
+| `crates/phairdlna-core/src/catalogue/` | The catalogue — the model of the items and containers, the scanner of a root, the opaque identifiers, the sniffer of a file and the registry of the formats the server serves | F-05, F-08, F-09 |
 | `crates/phairdlna-core/src/didl/` | The DIDL-Lite document — the object model, the `protocolInfo`, the value rules and the writer | F-05 |
 | `crates/phairdlna-core/src/http/` | The delivery of media over HTTP — the `Range` header, the headers of a media answer, the containment of a media URL and the evaluator of a request | F-06 |
 | `crates/phairdlna-core/src/upnp/` | The device description, the service descriptions (SCPD), the SOAP dispatcher and the ContentDirectory and ConnectionManager actions | F-02, F-03, F-04 |
 | `crates/phairdlna-core/src/config/` | The typed, validated, versioned configuration | F-12 |
 | `crates/phairdlna-cli/src/lib.rs` | The commands, as pure functions over their arguments | F-13 |
+| `crates/phairdlna-cli/src/catalogue.rs` | The catalogue commands — the tree of the library and the document a client receives | F-08, F-09, F-13 |
 | `crates/phairdlna-cli/src/main.rs` | The argument parsing and the exit code | F-13 |
 | `crates/phairdlna-admin/src/lib.rs` | The optional administration surface — the token path so far | F-14 |
 | `crates/phairdlna-mac/src/main.rs` | The optional macOS application — a banner so far | F-15 |
@@ -66,7 +67,7 @@ visible and so that a contributor can see where their change will land.
 | Planned path | Responsibility | Feature |
 | --- | --- | --- |
 | `crates/phairdlna-core/src/ssdp/` | SSDP discovery, advertisement, interface selection | F-01 |
-| `crates/phairdlna-core/src/catalogue/` | The index, the scanning and the opaque identifiers of the library | F-08, F-09 |
+| `crates/phairdlna-core/src/catalogue/index.rs` | The index of the catalogue on disk, the rebuild and the event-driven scan | F-09 |
 | `crates/phairdlna-core/src/media/` | Media inspection, metadata, artwork | F-10, F-11 |
 | `crates/phairdlna-core/src/security/` | Path containment, redaction, limits | F-16 |
 | `crates/phairdlna-core/src/platform/` | Platform traits and per-OS implementations | F-08, F-13, F-15 |

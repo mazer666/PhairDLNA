@@ -291,7 +291,9 @@ error produces a diagnostic and a degraded catalogue, never a panic (UX-005).
 
 ## 10. Acceptance criteria and traceability
 
-All criteria below are *planned*; no test file exists yet.
+The criteria below were *planned* when this document was written. The rows that carry a
+**Result** line were checked by a test that exists; the rows that carry **NOT RUN** name
+the reason. The implementation decisions are in § 12.1.
 
 **AC-01** — *Given* an indexed library, *when* a rescan starts and a browse is issued while the scan is running, *then*
 the browse returns the previously indexed content, the scan is not blocked by the browse, and the browse
@@ -379,18 +381,19 @@ plus an automated test of the fallback path · Planned location:
 
 ## 11. Test strategy and dependencies
 
-**Planned test locations** (none of these files exists yet):
+**Test locations.** A file that exists today says *exists*; a file that does not exist
+yet says *planned*.
 
-| Purpose | Planned path |
-| --- | --- |
-| Index behaviour, browse-during-scan, no filesystem access | `crates/phairdlna-core/tests/catalogue_index.rs` |
-| Rebuild, corruption recovery, no-writes-to-media | `crates/phairdlna-core/tests/catalogue_rebuild.rs` |
-| Identifier stability, de-duplication by device identity | `crates/phairdlna-core/tests/catalogue_identifiers.rs` |
-| Incremental scan, change detection, visibility bound and its fallback | `crates/phairdlna-core/tests/catalogue_incremental.rs` |
-| Media probing and quarantine | `crates/phairdlna-core/tests/catalogue_metadata.rs`, `crates/phairdlna-core/tests/media_sandbox.rs` |
-| Scanner and indexer unit tests | `crates/phairdlna-core/src/catalogue/scanner.rs`, `crates/phairdlna-core/src/catalogue/index.rs`, `crates/phairdlna-core/src/catalogue/identifiers.rs` (inline `#[cfg(test)]` modules) |
-| Throughput and latency benchmarks | `crates/phairdlna-bench/benches/indexing.rs`, `.../browse.rs`, `.../index_scan.rs`, `.../large_catalogue.rs` |
-| Removable-volume behaviour | `qa/device-matrix.toml` |
+| Purpose | Path | State |
+| --- | --- | --- |
+| Index behaviour, browse-during-scan, no filesystem access | `crates/phairdlna-core/tests/catalogue_index.rs` | exists |
+| Rebuild, corruption recovery, no-writes-to-media | `crates/phairdlna-core/tests/catalogue_rebuild.rs` | planned (M2) |
+| Identifier stability, de-duplication by device identity | `crates/phairdlna-core/tests/catalogue_identifiers.rs` | exists |
+| Incremental scan, change detection, visibility bound and its fallback | `crates/phairdlna-core/tests/catalogue_incremental.rs` | planned (M2) |
+| Media probing and quarantine | `crates/phairdlna-core/tests/catalogue_metadata.rs`, `crates/phairdlna-core/tests/media_sandbox.rs` | planned (F-10, F-11) |
+| Scanner and indexer unit tests | `crates/phairdlna-core/src/catalogue/scanner/mod.rs`, `.../scanner/walk.rs`, `.../identifier.rs`, `.../update_id.rs` (inline `#[cfg(test)]` modules) | exists; `.../index.rs` is planned |
+| Throughput and latency benchmarks | `crates/phairdlna-bench/benches/indexing.rs`, `.../browse.rs`, `.../index_scan.rs`, `.../large_catalogue.rs` | planned |
+| Removable-volume behaviour | `qa/device-matrix.toml` | planned |
 
 **Method.** The scanner and the indexer are separated (ADR-0006), so the scanner is
 exercised against an in-memory filesystem and the indexer against an in-memory database;
@@ -406,6 +409,114 @@ size and worker limits) and the platform trait for volume identity and volume ev
 (ADR-0003, ARCHITECTURE §12).
 
 ## 12. Open questions and decisions
+
+### 12.1 Decisions taken by the implementation (WP5)
+
+These decisions are implemented and covered by a test. The one marked **[owner decision]** changes a
+documented behaviour and is reported to the owner with this work package.
+
+**D-01 — The catalogue of M1.9 lives in memory; the index on disk is not part of it (ADR-0006, FUN-009).**
+The catalogue is built from a scan, kept in memory and answered from there. Nothing is written to a data
+directory, so there is no index to rebuild, no index to corrupt and no index format to keep stable — and the
+criterion of a rebuild (AC-02) has nothing to rebuild yet. The scan is the only way the catalogue is filled,
+and it happens when the owner asks for it (`catalogue scan`) or when the server starts. *Implemented.*
+
+> **The scope of M1.9 and the requirements it leaves open.** The owner defined the scope of
+> M1.9 as the scanner, the opaque identifiers and the browse over one root; the index on
+> disk was not part of that scope. The approved roadmap (`ROADMAP.md` § M1) assigns
+> `FUN-008`, `FUN-009` and `FUN-010` to M1.9, and those three requirements ask for a
+> SQLite index that survives a rescan, that can be rebuilt and that recovers from
+> corruption. **They are therefore not implemented by this milestone and remain open.**
+> The owner decides whether they come into M1.9 (with `rusqlite` and a database format)
+> or move to M2 together with the rest of the index work. Nothing in this document
+> reports them as done.
+
+**D-02 — The identifier of an object is the hash of the volume, the root key and the relative identity
+(INT-062, ADR-0007). [owner decision]** The owner directed blake3; the hash input and the length are
+described in F-08 § 12.1 (D-02). The identifier of a file is the same after a second scan and after the
+library has been moved to another directory — the volume identity of the portable adapter is the constant
+`local`, and the relative identity is normalised and case-folded according to the volume. *Implemented.*
+
+**D-03 — The root key is part of the identifier (FUN-022).** The open question 1 below asks whether the
+formula uses the root id or the volume id. The implementation follows ADR-0007 — the volume identity — and
+adds the key of the root, which is the position of the root in the configuration. The addition is needed
+because two roots of one configuration may live on the same volume: without the key, the same relative path
+in two roots would be one object. The name of a root is *not* part of the identifier, so renaming a root
+does not invalidate the objects below it. *Implemented; the question is still open for the owner.*
+
+**D-04 — The update identifier of a container covers the size and the moment of every child (INT-037).**
+A container whose content changes gets a new update identifier, and a container whose content does not
+change keeps the old one. The identifier of a container is the hash of the identifiers, the sizes and the
+modification times of its children, so a file that is replaced by a file with other content changes the
+identifier of its container. *Implemented.*
+
+**D-05 — The system update identifier is a counter that never goes backwards (INT-037).**
+The identifier of the whole catalogue is not a hash — a hash is not monotonic — but a counter that is
+raised whenever the catalogue of that library changes. The value therefore never decreases while the server
+runs, and it changes whenever the catalogue changes: a file that was added, a file that was removed and a
+file whose content changed all raise it. **The deviation:** the counter is not written to the disk, so it
+starts again after a restart. `INT-037` asks for a value that is monotonically non-decreasing; the
+persistence that would carry it over a restart belongs to the index (`FUN-009`, `ADR-0006`) and is therefore
+open. *Implemented with the stated deviation.*
+
+**D-06 — A browse reads nothing from the disk (PERF-008, FUN-008).** The browse path goes through the
+`ContentSource` trait, which the in-memory catalogue implements; no file, directory or index is opened while
+a browse is answered. A catalogue that was built once still answers a browse after the library it came from
+is gone — the test that proves it deletes the library first. *Implemented.*
+
+**D-07 — The catalogue answers for an item and not only for a container (`INT-033`).**
+A client that has listed a container often asks for the metadata of one of the items it found, by the
+identifier of that item. The catalogue therefore knows its items, and a browse of an item identifier
+answers with that item instead of `701 No Such Object`. *Implemented.*
+
+**D-08 — The root container has no parent, and says so with `-1`.**
+The container `0` is the root of the hierarchy; its parent identifier is `-1`, the convention of the
+schema. *Implemented.*
+
+**D-09 — The search of the catalogue runs over the children of the container (FUN-012).** The default
+implementation of `ContentSource::search` filters the children of the container by `dc:title`, ignoring the
+case. The search does not yet reach into the folders below the container; that is the work of the index
+(M2). *Implemented for the container, not for the whole tree.*
+
+**D-10 — A page that mixes folders and files is written with the folders first.**
+The DIDL-Lite document carries the containers and the items in two lists, and the writer
+writes the containers first. A client that asks for a page sorted by `dc:title` therefore
+receives the folders of that page before the files of that page, although the page itself
+was sorted by title. The schema allows any order, and the order of the catalogue — the
+folders first, then the files, each by name — is the order a client without a sort
+criterion receives. *Implemented; the order across the two lists is a known limitation of
+the document model and is fixed together with the index (M2).*
+
+**D-11 — A playlist is in the catalogue but has no resource (INT-064).** A playlist is a file the client
+shows; the server cannot deliver it, so the document names no format for it. The rule that a document must
+not name a format the server does not serve is unchanged.
+
+**What is verified, and what is not.** Every criterion of § 10 is listed. A criterion
+that is *implemented* has a test that fails when the behaviour breaks; a criterion
+that is *partly implemented* says what is missing; a criterion that is **NOT RUN**
+names the reason, because a skip is never a pass.
+
+| Criterion | Result | Where |
+| --- | --- | --- |
+| AC-01 (a browse during a scan) | **NOT RUN** — M1.9 scans once and synchronously; there is no scan to run beside a browse. The criterion belongs to the event-driven scanner (M2) |
+| AC-02 (the index is deleted and rebuilt) | **NOT RUN** — M1.9 has no index (D-01) |
+| AC-03 (a corrupted index) | **NOT RUN** — M1.9 has no index (D-01) |
+| AC-04 (the identifiers survive a rebuild) | partly implemented — the identifiers are the same after a second scan and after the library has been moved (`crates/phairdlna-core/tests/catalogue_identifiers.rs`); the *rebuild* of an index is M2 (D-01) |
+| AC-05 (a hard link is one file) | implemented | `crates/phairdlna-core/tests/catalogue_identifiers.rs::a_hard_link_is_not_a_second_object` |
+| AC-06 (the metadata of the file) | **NOT RUN** — no media parser exists yet; the catalogue reads the format, the size and the moment of the change, and nothing else (F-10, F-11) |
+| AC-07 (a file no parser can read) | **NOT RUN** — no media parser exists yet (F-10, F-11) |
+| AC-08 (the incremental rescan) | **NOT RUN** — M1.9 has no index and no incremental scan (M2) |
+| AC-09 (100 000 files indexed) | **NOT RUN** — a benchmark at the tested envelope; no measurement has been taken (PERF-004) |
+| AC-10 (the first page of a large container) | partly implemented — the paging of a container is implemented and tested (`crates/phairdlna-core/tests/content_directory.rs`); the measurement at 10 000 children is **NOT RUN** (PERF-009) |
+| AC-11 (a browse reads no directory) | implemented | `crates/phairdlna-core/tests/catalogue_index.rs::a_browse_reads_nothing_from_the_disk` |
+| AC-12 (the budget of the children query) | **NOT RUN** — a benchmark; no measurement has been taken (PERF-009) |
+| AC-13 (the memory envelope) | **NOT RUN** — a measurement at four times the envelope; no measurement has been taken (PERF-012) |
+| AC-14 (a subtree that cannot be read) | partly implemented — the folder is reported in the diagnostics (`crates/phairdlna-core/tests/media_diagnostics.rs`); the list of quarantined subtrees that need consent does not exist yet |
+| AC-15 (a removable volume) | **NOT RUN** — needs the volume identity and the volume watcher of the platform adapter (F-13) |
+| AC-16 (nothing is written) | implemented | `crates/phairdlna-core/tests/media_roots.rs::the_scanner_never_writes_to_the_library` |
+| AC-17 (a change event) | **NOT RUN** — the watcher of the platform layer is M2 (FUN-025) |
+
+### 12.2 Open questions
 
 1. **[OPEN] "Root id" or "volume id" in the identifier formula.** ADR-0006 and
    ARCHITECTURE §8 describe the identifier as a hash of the *root id* and the path

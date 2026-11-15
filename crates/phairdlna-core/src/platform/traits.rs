@@ -110,6 +110,21 @@ pub trait FileSystem {
 
     /// The stable identity of a file.
     fn file_identity(&self, path: &Path) -> PlatformResult<FileId>;
+
+    /// Whether the platform considers the path hidden.
+    ///
+    /// The default is the convention every platform understands: a name that
+    /// begins with a dot. A platform that has a real "hidden" flag — the
+    /// `UF_HIDDEN` flag of macOS — overrides it, because only the platform knows
+    /// what its own flag means (`PLT-003`, `FUN-004`).
+    ///
+    /// The question is asked about the **name**, not about the path: a file is
+    /// hidden because of its name, not because of the folder it sits in.
+    fn is_hidden(&self, path: &Path) -> bool {
+        path.file_name()
+            .and_then(|name| name.to_str())
+            .is_some_and(|name| name.starts_with('.'))
+    }
 }
 
 /// What happened to a volume.

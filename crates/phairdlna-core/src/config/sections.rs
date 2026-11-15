@@ -58,6 +58,12 @@ pub struct MediaRoot {
     /// Sub-folders of this root that are not indexed.
     #[serde(default)]
     pub exclude: Vec<String>,
+    /// How symbolic links inside this root are treated.
+    ///
+    /// `None` means the setting of the server applies. A root may therefore
+    /// follow links that another root does not follow (`CFG-007`).
+    #[serde(default)]
+    pub symlink_policy: Option<SymlinkPolicy>,
 }
 
 /// The media library.

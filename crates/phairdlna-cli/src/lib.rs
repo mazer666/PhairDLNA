@@ -7,9 +7,18 @@
 //! Example: `run(ConfigCommand::Validate { .. })` prints what is wrong with a
 //!      configuration file, or says that it is valid.
 
+mod catalogue;
+
 use std::path::PathBuf;
 
 use phairdlna_core::config::{resolve_path, Config};
+
+/// The address the documents are built with.
+///
+/// The address is a placeholder: the server replaces it with the address of the
+/// interface a request arrived on. The commands print it so that the shape of
+/// the document can be looked at (`INT-065`).
+pub const BASE_URL: &str = "http://192.168.0.10:8200";
 
 /// The commands the command line offers.
 #[derive(Debug, Clone, PartialEq)]
@@ -30,6 +39,18 @@ pub enum Command {
     },
     /// Print the SSDP headers the server would send.
     SsdpHeaders {
+        /// The configuration file to read.
+        path: Option<PathBuf>,
+    },
+    /// Print the tree of the library with the identifiers a client would see.
+    CatalogueScan {
+        /// The configuration file to read.
+        path: Option<PathBuf>,
+    },
+    /// Print the document a client would receive for a container.
+    CatalogueBrowse {
+        /// The identifier of the container to browse.
+        object_id: String,
         /// The configuration file to read.
         path: Option<PathBuf>,
     },
@@ -78,6 +99,10 @@ pub fn run(command: &Command) -> Outcome {
         Command::ConfigValidate { path } => config_validate(path.as_deref()),
         Command::ConfigShow { path } => config_show(path.as_deref()),
         Command::SsdpHeaders { path } => ssdp_headers(path.as_deref()),
+        Command::CatalogueScan { path } => catalogue::scan(&resolve(path.as_deref())),
+        Command::CatalogueBrowse { object_id, path } => {
+            catalogue::browse(&resolve(path.as_deref()), object_id)
+        }
         Command::Serve { path } => serve(path.as_deref()),
     }
 }

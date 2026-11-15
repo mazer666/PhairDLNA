@@ -36,7 +36,10 @@ if ! type mapfile >/dev/null 2>&1; then
 fi
 
 # Excluded from the gate: generated code, fixtures and non-Rust files.
-mapfile -t FILES < <(git ls-files 'crates/**/*.rs' 'crates/*.rs' 2>/dev/null | grep -v -E '(^|/)(generated|fixtures?)/' || true)
+# The list holds the tracked sources *and* the sources that are not tracked
+# yet: a file that is new in the working tree is measured like every other,
+# so that the gate cannot be passed by not committing yet.
+mapfile -t FILES < <(git ls-files -co --exclude-standard 'crates/**/*.rs' 'crates/*.rs' 2>/dev/null | sort -u | grep -v -E '(^|/)(generated|fixtures?)/' || true)
 
 if [ "${#FILES[@]}" -eq 0 ]; then
     echo "SKIPPED (exit 77) - no tracked Rust sources found"

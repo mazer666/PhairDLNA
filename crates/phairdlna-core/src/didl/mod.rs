@@ -34,7 +34,7 @@ pub mod uri;
 pub mod value;
 pub mod vocabulary;
 
-pub use mapping::{class_of, container_from_catalogue, item_from_catalogue};
+pub use mapping::{class_of, container_from_catalogue, folder_from_catalogue, item_from_catalogue};
 pub use model::{Container, DidlDocument, Item, ObjectClass, Resource};
 pub use policy::{ProtocolMode, ProtocolPolicy};
 pub use protocol_info::{

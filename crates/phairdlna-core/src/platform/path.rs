@@ -132,7 +132,25 @@ impl MediaPath {
 /// The case folding is the full Unicode case folding, not a lowercase mapping. That
 /// matters: on a case-insensitive volume, `Straße` and `STRASSE` are the same file,
 /// and a simple lowercase mapping would treat them as two.
+///
+/// Use [`identity_of_with`] when the case sensitivity of the volume is known: on a
+/// case-sensitive volume two names that differ only in case are two different
+/// files, and folding them would merge them into one (`PLT-005`). **The catalogue
+/// uses `identity_of_with`; this function is the case-insensitive variant and is
+/// kept for callers that do not know the volume.**
 pub fn identity_of(relative: &Path) -> String {
+    identity_of_with(relative, CaseSensitivity::Insensitive)
+}
+
+/// Computes the identity of a path relative to a root, for a known volume.
+///
+/// The identity is the path with every component normalised to Unicode NFC, then
+/// case-folded **only when the volume is case-insensitive**, joined with `/`.
+///
+/// The case folding is the full Unicode case folding, not a lowercase mapping. That
+/// matters: on a case-insensitive volume, `Straße` and `STRASSE` are the same file,
+/// and a simple lowercase mapping would treat them as two.
+pub fn identity_of_with(relative: &Path, sensitivity: CaseSensitivity) -> String {
     relative
         .components()
         .filter_map(|component| match component {
@@ -140,16 +158,21 @@ pub fn identity_of(relative: &Path) -> String {
             std::path::Component::RootDir => Some(String::new()),
             _ => None,
         })
-        .map(|part| fold_component(&part))
+        .map(|part| fold_component(&part, sensitivity))
         .collect::<Vec<_>>()
         .join("/")
 }
 
 /// Normalises and case-folds one component.
-fn fold_component(component: &str) -> String {
+fn fold_component(component: &str, sensitivity: CaseSensitivity) -> String {
     let normalised: String = component.nfc().collect();
-    let folded = UniCase::new(normalised.as_str()).to_folded_case();
-    folded.nfc().collect()
+    match sensitivity {
+        CaseSensitivity::Sensitive => normalised,
+        CaseSensitivity::Insensitive => {
+            let folded = UniCase::new(normalised.as_str()).to_folded_case();
+            folded.nfc().collect()
+        }
+    }
 }
 
 /// The display name of a path: its last component, normalised for reading.

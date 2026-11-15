@@ -56,6 +56,12 @@ Architectural decisions with options and trade-offs live as ADRs in
 | DEC-024 | The competitive bar is the macOS media player **Elmedia**: PhairDLNA must be the better macOS media *server* and must not be the worse macOS media *tool*. The bar is expressed as eleven testable criteria, not as a slogan | Owner direction | 2026-11-15 | Owner |
 | DEC-025 | A competitor feature is adopted only after an evaluation record: source, user problem, our independent better outcome, architecture fit, security and privacy analysis, resource budget and acceptance tests. The record decides CORE / OPTIONAL / LATER / REJECT | Accepted | 2026-11-15 | Lead |
 | DEC-026 | The Apple media libraries stay out of the baseline. They are a deliberate, per-library opt-in (OD-13), never a default | Accepted | 2026-11-15 | Lead |
+| DEC-027 | The object identifiers of the catalogue are the blake3 hash of the volume identity, the root key and the relative identity, cut to 128 bits and rendered as hexadecimal | Owner direction | 2026-11-15 | Owner |
+| DEC-028 | The portable filesystem adapter of the core reports the constant volume identity `local`, so that the object identifiers survive a remount and a move of the library; the real volume identity arrives with the platform adapter of F-13 | Accepted | 2026-11-15 | Lead (ADR-0007, `PLT-005`) |
+| DEC-029 | The root key — the position of the root in the configuration — is part of the object identifier, so that two roots of one configuration keep their files apart; the name of a root is a label and is not part of it | Accepted | 2026-11-15 | Lead (FUN-022, ADR-0007) |
+| DEC-030 | A folder of the library is a container in the DIDL-Lite document and not an item; the catalogue model carries `MediaKind::Folder` and the number of children | Accepted | 2026-11-15 | Lead (INT-042) |
+| DEC-031 | The requirements baseline of the v1.0 documents is approved, so feature implementation may proceed | Owner direction | 2026-11-15 | Owner |
+| DEC-032 | The minimum supported macOS version is macOS 15 (Sequoia) and later, with the launchd daemon model throughout (OD-05) | Owner direction | 2026-11-15 | Owner |
 
 ## Reviews and evidence
 
@@ -63,11 +69,13 @@ Architectural decisions with options and trade-offs live as ADRs in
 | --- | --- | --- |
 | Independent beginner-experience review | 2026-11-14 | 6 blocker, 16 major, 11 minor, 4 info findings — **all addressed**; the report is kept at `../05-quality/reviews/BEGINNER-REVIEW-2026-11-14.md` |
 | Independent consistency review (round 2) | 2026-11-15 | 2 blocker, 6 major, 15 minor, 4 info findings — **all addressed**; the report is kept at `../05-quality/reviews/CONSISTENCY-REVIEW-2026-11-15.md` |
+| Independent review of M1.9 (the catalogue over one root) | 2026-11-15 | 3 blocker, 7 major, 11 minor, 3 info findings — the blockers and the majors are addressed by the milestone: the update identifier is monotonic and content-sensitive, the hard links are one object, the link policy is per root, the catalogue holds the target of a link, the diagnostics name no path, the root container has the parent `-1`, a browse answers for an item, and the tables of F-08 and F-09 name every criterion with its result |
 
 ## Open decisions requiring owner approval
 
 These are collected in `../07-project/OPEN-DECISIONS.md` with options and consequences.
 Summary: **OD-01** macOS distribution/signing model · **OD-02** transcoding dependency
 policy (FFmpeg) · **OD-03** macOS UI technology (pure Rust vs. native Swift helper) ·
-**OD-04** admin authentication model · **OD-05** minimum supported macOS version ·
-**OD-06** policy on shipping a prebuilt binary vs. source-only distribution.
+**OD-04** admin authentication model · **OD-06** policy on shipping a prebuilt binary vs.
+source-only distribution. **OD-05** (the minimum supported macOS version) was decided on
+2026-11-15: macOS 15 and later (DEC-032).

@@ -32,22 +32,28 @@ file never moved.
 An object id is computed as:
 
 ```
-object_id = encode( hash( volume_id || 0x00 || identity ) )
+object_id = encode( hash( volume_id || 0x00 || root_key || 0x00 || identity ) )
 ```
 
 where
 
 - `volume_id` is the stable identity of the volume the object lives on (ADR-0003,
-  `MediaPath.volume`), and
+  `MediaPath.volume`),
+- `root_key` is the position of the root in the configuration, as text, and
 - `identity` is the **normalised** path relative to the root: Unicode NFC with a
   per-component case fold, computed per root according to that root's detected case
   sensitivity (ADR-0003, rule 3).
 
 Rules:
 
-- The hash is a fast, non-cryptographic 128-bit function rendered in a fixed
-  lowercase alphabet. It is not a security boundary: the id is not a secret, it is
-  merely opaque and stable.
+- The hash is a fast 128-bit function rendered in a fixed lowercase alphabet. It is
+  not a security boundary: the id is not a secret, it is merely opaque and stable.
+  A reader who knows the volume identity, the root key and a file name can confirm
+  a guess; "opaque" means that the id carries no part of the path, not that it is
+  unreadable.
+- The `root_key` keeps two roots of one configuration apart: the same relative path
+  in two roots is two objects. The **name** of a root is not part of the id, so
+  renaming a root does not invalidate the objects below it.
 - The standard containers have **reserved ids**: `0` for the root container and `1`
   for the content directory, because some clients start browsing at a hard-coded id.
 - The id of a container is derived exactly like an item's, so the parent/child
@@ -85,6 +91,24 @@ two paths.
   unstable when a folder is renamed.
 - **A hash of the raw path.** Rejected: the normalisation trap described above makes
   it unstable on macOS volumes.
+
+## Amendment 2026-11-15 (M1.9)
+
+The implementation of M1.9 filled two gaps this decision left open, and the owner
+confirmed both as decisions (`DEC-027`, `DEC-029` in the decision log):
+
+- The hash is **blake3**, cut to 128 bits and rendered as hexadecimal. The decision
+  above asked for a "fast, non-cryptographic" function; the owner directed a
+  cryptographic one, because the ids of a library are handed to every client on the
+  network and a 128-bit cryptographic digest is the cheaper guarantee.
+- The hash input carries the **root key** between the volume identity and the
+  relative identity, for the reason given in the rules above.
+
+Nothing else of this decision changes. The parts that M1.9 does not implement yet are
+named in the feature specification F-09 § 12.1: the volume identity of the platform
+adapter, the persistence of the identifiers across a restart, and the de-duplication
+of hard-linked files (which M1.9 does implement, on the `(volume id, device id)`
+pair, as this decision requires).
 
 ## Revisit condition
 

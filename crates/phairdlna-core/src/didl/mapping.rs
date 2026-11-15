@@ -29,6 +29,7 @@ pub fn class_of(kind: MediaKind) -> ObjectClass {
         MediaKind::Movie => ObjectClass::Movie,
         MediaKind::VideoBroadcast => ObjectClass::VideoBroadcast,
         MediaKind::Photo => ObjectClass::Photo,
+        MediaKind::Folder => ObjectClass::StorageFolder,
         MediaKind::Other => ObjectClass::Item,
     }
 }
@@ -73,6 +74,25 @@ pub fn container_from_catalogue(container: &ContentContainer) -> Container {
         class: ObjectClass::StorageFolder,
         title: container.title.clone(),
         child_count: container.total.unwrap_or(container.children.len() as u32),
+        creator: None,
+        date: None,
+    }
+}
+
+/// Builds the container of a catalogue item that is a folder.
+///
+/// A folder is listed as a container and not as an item: a client opens a
+/// folder by its identifier, and the schema says that a folder is a
+/// `container` element (`INT-042`).
+pub fn folder_from_catalogue(item: &ContentItem) -> Container {
+    Container {
+        id: item.id.clone(),
+        parent_id: item.parent_id.clone(),
+        restricted: true,
+        searchable: true,
+        class: ObjectClass::StorageFolder,
+        title: item.title.clone(),
+        child_count: item.child_count.unwrap_or(0),
         creator: None,
         date: None,
     }

@@ -12,7 +12,18 @@
 
 use std::time::Duration;
 
+mod builder;
+pub mod identifier;
+pub mod library;
+pub mod media;
 pub mod mime;
+pub mod scanner;
+pub mod sniff;
+mod update_id;
+
+pub use identifier::{is_object_id, object_id, IDENTIFIER_LENGTH};
+pub use library::{Catalogue, RootSummary, CONTENT_DIRECTORY_OBJECT_ID, ROOT_OBJECT_ID};
+pub use scanner::{scan, RootSpec, ScanEntry, ScanOptions, ScanOutcome, DEFAULT_MAX_DEPTH};
 
 /// What kind of thing an item is.
 ///
@@ -29,6 +40,12 @@ pub enum MediaKind {
     VideoBroadcast,
     /// A photo.
     Photo,
+    /// A folder of the library.
+    ///
+    /// A folder is not a file, but the ContentDirectory service lists the
+    /// children of a folder as items, so the catalogue has to be able to say
+    /// "this one is a folder" (`INT-042`).
+    Folder,
     /// A file of a kind the server does not describe further.
     Other,
 }
@@ -93,6 +110,11 @@ pub struct ContentItem {
     pub kind: MediaKind,
     /// The metadata of the file behind the item.
     pub metadata: MediaMetadata,
+    /// The number of children, when the item is a folder.
+    ///
+    /// `None` for a file: a file has no children, and saying so with a number
+    /// would suggest a folder the client cannot open.
+    pub child_count: Option<u32>,
 }
 
 impl ContentItem {
@@ -109,6 +131,24 @@ impl ContentItem {
             title: title.into(),
             kind,
             metadata: MediaMetadata::default(),
+            child_count: None,
+        }
+    }
+
+    /// Builds an item that is a folder.
+    pub fn folder(
+        id: impl Into<String>,
+        parent_id: impl Into<String>,
+        title: impl Into<String>,
+        child_count: u32,
+    ) -> Self {
+        Self {
+            id: id.into(),
+            parent_id: parent_id.into(),
+            title: title.into(),
+            kind: MediaKind::Folder,
+            metadata: MediaMetadata::default(),
+            child_count: Some(child_count),
         }
     }
 }
@@ -141,6 +181,15 @@ pub trait ContentSource {
 
     /// The container with the given identifier, or `None` when there is none.
     fn container(&self, object_id: &str) -> Option<ContentContainer>;
+
+    /// The item with the given identifier, or `None` when there is none.
+    ///
+    /// A client that reads the metadata of an item asks for it by its own
+    /// identifier; the catalogue must therefore be able to answer for an item
+    /// and not only for a container (`INT-033`).
+    fn item_of(&self, _object_id: &str) -> Option<ContentItem> {
+        None
+    }
 
     /// The items of a container whose property contains the given text.
     ///

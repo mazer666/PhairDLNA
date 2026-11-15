@@ -16,6 +16,10 @@ repository = "https://github.com/mazer666/PhairDLNA"
 
 [workspace.dependencies]
 phairdlna-core = { path = "crates/phairdlna-core", version = "0.0.0" }
+# The object identifiers of the catalogue (ADR-0007). The `pure` feature keeps the
+# build free of a C compiler, so the core stays portable and every platform in the
+# build matrix compiles it without a toolchain beyond Rust itself.
+blake3 = { version = "1.8", default-features = false, features = ["std", "pure"] }
 serde = { version = "1.0", features = ["derive"] }
 toml = "1.2"
 thiserror = "2.0"

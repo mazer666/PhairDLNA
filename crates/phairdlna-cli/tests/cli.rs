@@ -118,3 +118,102 @@ fn the_ssdp_report_shows_the_bytes() {
         .stdout
         .contains("urn:schemas-upnp-org:device:MediaServer:1"));
 }
+
+/// The positive case: the scan shows the tree of the library with the
+/// identifiers a client would see.
+#[test]
+fn the_catalogue_scan_shows_the_tree() {
+    let directory = tempfile::tempdir().expect("a temporary directory");
+    let films = directory.path().join("Films");
+    std::fs::create_dir_all(&films).expect("the folder is created");
+    std::fs::write(films.join("King Kong.mkv"), b"a film").expect("the file is written");
+    let config = format!(
+        "schema_version = 1\n\n[library]\n[[library.roots]]\nname = \"Films\"\npath = \"{}\"\n",
+        directory.path().display()
+    );
+    let path = write(&config);
+
+    let outcome = run(&Command::CatalogueScan { path: Some(path) });
+
+    assert_eq!(outcome.exit_code, 0, "{}", outcome.stdout);
+    assert!(outcome.stdout.contains("King Kong.mkv"));
+    assert!(outcome.stdout.contains("video/x-matroska"));
+    assert!(outcome.stdout.contains("present"));
+}
+
+/// The negative case: a container that is not in the catalogue is reported.
+#[test]
+fn the_catalogue_browse_reports_an_unknown_container() {
+    let path = write(VALID);
+    let outcome = run(&Command::CatalogueBrowse {
+        object_id: "does-not-exist".to_owned(),
+        path: Some(path),
+    });
+    assert_eq!(outcome.exit_code, 1);
+    assert!(outcome.stdout.contains("is not in the catalogue"));
+}
+
+/// The positive case: the browse shows the document a client would receive.
+#[test]
+fn the_catalogue_browse_shows_the_document() {
+    let directory = tempfile::tempdir().expect("a temporary directory");
+    std::fs::write(directory.path().join("King Kong.mkv"), b"a film").expect("the file is written");
+    let config = format!(
+        "schema_version = 1\n\n[library]\n[[library.roots]]\nname = \"Films\"\npath = \"{}\"\n",
+        directory.path().display()
+    );
+    let path = write(&config);
+
+    let scan = run(&Command::CatalogueScan {
+        path: Some(path.clone()),
+    });
+    let identifier = scan
+        .stdout
+        .lines()
+        .find(|line| line.trim_start().starts_with("id:"))
+        .and_then(|line| line.split_whitespace().last())
+        .expect("the scan names the root")
+        .to_owned();
+
+    let outcome = run(&Command::CatalogueBrowse {
+        object_id: identifier,
+        path: Some(path),
+    });
+
+    assert_eq!(outcome.exit_code, 0, "{}", outcome.stdout);
+    assert!(outcome.stdout.contains("DIDL-Lite"));
+    assert!(outcome.stdout.contains("King Kong.mkv"));
+}
+
+/// The positive case: the browse of an item shows the document of that item.
+#[test]
+fn the_catalogue_browse_shows_an_item() {
+    let directory = tempfile::tempdir().expect("a temporary directory");
+    std::fs::write(directory.path().join("King Kong.mkv"), b"a film").expect("the file is written");
+    let config = format!(
+        "schema_version = 1\n\n[library]\n[[library.roots]]\nname = \"Films\"\npath = \"{}\"\n",
+        directory.path().display()
+    );
+    let path = write(&config);
+
+    let scan = run(&Command::CatalogueScan {
+        path: Some(path.clone()),
+    });
+    let identifier = scan
+        .stdout
+        .lines()
+        .find(|line| line.contains("King Kong.mkv"))
+        .and_then(|line| line.split('[').next())
+        .and_then(|line| line.split_whitespace().last())
+        .expect("the scan names the file")
+        .to_owned();
+
+    let outcome = run(&Command::CatalogueBrowse {
+        object_id: identifier,
+        path: Some(path),
+    });
+
+    assert_eq!(outcome.exit_code, 0, "{}", outcome.stdout);
+    assert!(outcome.stdout.contains("DIDL-Lite"));
+    assert!(outcome.stdout.contains("King Kong.mkv"));
+}

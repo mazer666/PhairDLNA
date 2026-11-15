@@ -188,13 +188,17 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "Verified",
     ),
     "INT-037": (
-        "`crates/phairdlna-core/tests/content_directory.rs::the_system_update_identifier_grows_with_the_catalogue`"
-        " — the handler returns the identifier of the catalogue; the catalogue owns its growth",
+        "`crates/phairdlna-core/tests/catalogue_index.rs::the_update_id_never_goes_backwards`,"
+        " `::the_update_id_changes_when_a_file_changes`"
+        " — the identifier of the real catalogue never decreases and changes when the"
+        " catalogue changes; it starts again after a restart, because the counter that"
+        " keeps it monotonic is not written to the disk (FUN-009)",
         "Implemented",
     ),
     "INT-038": (
-        "`crates/phairdlna-core/tests/content_directory.rs::the_root_and_the_content_directory_root_are_known`"
-        " — the placeholder catalogue answers; the real one is F-09",
+        "`crates/phairdlna-core/tests/content_directory.rs::the_root_and_the_content_directory_root_are_known`,"
+        " `crates/phairdlna-core/tests/catalogue_index.rs::the_root_container_has_the_parent_id_minus_one`"
+        " — the catalogue of the library answers with the identifiers 0 and 1",
         "Implemented",
     ),
     "INT-039": (
@@ -210,8 +214,9 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "Verified",
     ),
     "INT-042": (
-        "`crates/phairdlna-core/tests/content_directory.rs::the_result_is_a_didl_lite_document_that_parses_on_its_own`"
-        " — the placeholder writer of F-05 answers; the final writer is not written yet",
+        "`crates/phairdlna-core/tests/content_directory.rs::the_result_is_a_didl_lite_document_that_parses_on_its_own`,"
+        " `crates/phairdlna-core/tests/catalogue_index.rs::a_browse_of_a_real_folder_shows_its_files`"
+        " — the writer of F-05 answers with the real catalogue of F-08",
         "Implemented",
     ),
     "INT-043": (

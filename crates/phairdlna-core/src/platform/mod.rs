@@ -17,11 +17,15 @@
 //! }
 //! ```
 
+mod local;
 mod path;
 mod traits;
 mod unsupported;
 
-pub use path::{display_name, identity_of, CaseSensitivity, FileId, MediaPath, VolumeId};
+pub use local::{LocalFileSystem, LOCAL_VOLUME};
+pub use path::{
+    display_name, identity_of, identity_of_with, CaseSensitivity, FileId, MediaPath, VolumeId,
+};
 pub use traits::{
     Consent, ConsentOutcome, FileSystem, LocalNetworkStatus, LogLevel, LogRecord, LogSink, Network,
     NetworkInterface, Notification, PlatformError, PlatformResult, ServiceManager, ServiceSpec,

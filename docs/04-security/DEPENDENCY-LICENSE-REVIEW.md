@@ -61,7 +61,8 @@ adoption, not as a quality judgement.
 | `unicase` | 2.10.0 | MIT OR Apache-2.0 | — | 492 183 614 | 2026-10-05 | **Adopt** — full Unicode case folding for the path identity |
 | `tracing` | 0.1.44 | MIT | 1.65 | 1 050 071 464 | 2025-12-18 | **Adopt** — structured logging |
 | `uuid` | 1.29.2 | Apache-2.0 OR MIT | 1.89 | 992 221 000 | 2026-11-09 | **Adopt** — device UDN (v4) |
-| `blake3` | 1.8.7 | CC0-1.0 OR Apache-2.0 (LLVM exception) | — | 227 947 308 | 2026-08-20 | **Adopt** — object id hash |
+| `blake3` | 1.8.7 | CC0-1.0 OR Apache-2.0 (LLVM exception) | — | 227 947 308 | 2026-08-20 | **Adopt** — the object id hash of the catalogue (M1.9, DEC-027); the `pure` feature keeps the build free of a C compiler |
+| `cpufeatures` | 0.2.17 | MIT OR Apache-2.0 | 1.60 | 302 118 751 | 2026-03-24 | **Adopt** — new with `blake3`; reads the CPU flags for the assembly backend |
 | `muda` | 0.21.2 | Apache-2.0 OR MIT | 1.90 | 51 346 421 | 2026-10-08 | **Evaluate** — macOS menu bar |
 | `tray-icon` | 0.26.1 | MIT OR Apache-2.0 | 1.90 | 44 016 004 | 2026-10-07 | **Evaluate** — tray/status item |
 | `objc2` | 0.6.5 | MIT | 1.71 | 162 826 258 | 2026-10-05 | **Adopt (macOS only)** — modern Objective-C bindings |
@@ -72,7 +73,23 @@ adoption, not as a quality judgement.
 | `infer` | 0.22.0 | MIT | 1.74 | — | 2026-07-15 | **Adopt** — content sniffing |
 | `mime_guess` | 2.0.5 | MIT | — | — | 2024-06-29 | **Adopt** — extension → MIME |
 
-### 2.1 Test and quality tooling (dev-dependencies only)
+### 2.1 The crates `blake3` brings with it
+
+`blake3` is the first dependency the core takes for a cryptographic hash. Three crates
+are **new** in the lock file because of it: `arrayvec` (MIT OR Apache-2.0),
+`constant_time_eq` (Apache-2.0 OR MIT) and `cpufeatures` (MIT OR Apache-2.0) — the last
+one reads the CPU flags of the machine, and it is used by the assembly backend that the
+`pure` feature of the project does not compile. The build dependency `cc` and its
+helpers (`shlex`, `find-msvc-tools`) are new as well; they belong to the same optional
+backend. Every one of them is allowed by `deny.toml` and is covered by
+`cargo deny check licenses` like every other crate.
+
+The licence of `blake3` itself is CC0-1.0 OR Apache-2.0 (with the LLVM exception), and
+`deny.toml` allows all three expressions. CC0-1.0 is a public-domain dedication, which is
+the weakest copyleft obligation of any licence in the set: nothing in the project inherits
+an obligation from it.
+
+### 2.2 Test and quality tooling (dev-dependencies only)
 
 | Crate | Version | Licence | Purpose |
 | --- | --- | --- | --- |
