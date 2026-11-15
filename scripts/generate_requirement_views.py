@@ -103,6 +103,68 @@ VERIFICATION = {
 DEVICE_VERIFICATION = {"INT-001", "INT-004", "INT-006", "INT-010", "INT-100",
                        "INT-102", "INT-103", "FUN-021", "FUN-022"}
 
+# --- recorded evidence -----------------------------------------------------------
+# The evidence that was actually observed, and the status that follows from it.
+#
+# `Verified` means that the requirement is fully observable today and a test
+# proves it. `Implemented` means that the code exists but a part of the
+# requirement still needs a component that does not exist yet — the text of
+# the cell says which part. A cell is never filled with a promise.
+#
+# The status vocabulary is the one of the requirements index:
+# `Baseline`, `Scheduled`, `Implemented`, `Verified`.
+EVIDENCE: dict[str, tuple[str, str]] = {
+    "INT-020": (
+        "`crates/phairdlna-core/tests/device_description.rs::the_root_device_carries_its_identity`"
+        " — the document is generated; it is not served over HTTP yet",
+        "Implemented",
+    ),
+    "INT-021": (
+        "`crates/phairdlna-core/tests/device_description.rs::the_service_list_names_both_mandatory_services`",
+        "Verified",
+    ),
+    "INT-022": (
+        "`crates/phairdlna-core/tests/device_description.rs::every_service_entry_carries_its_addresses`"
+        " — the URLs are absolute; their resolution against the request host needs the HTTP layer",
+        "Implemented",
+    ),
+    "INT-023": (
+        "`crates/phairdlna-core/tests/scpd.rs::every_state_variable_declares_its_data_type`"
+        " — the service descriptions are generated; they are not served over HTTP yet",
+        "Implemented",
+    ),
+    "INT-024": (
+        "`crates/phairdlna-core/tests/device_description.rs::the_document_is_well_formed`",
+        "Verified",
+    ),
+    "INT-027": (
+        "`crates/phairdlna-core/tests/device_description.rs::a_name_with_reserved_characters_is_escaped`",
+        "Verified",
+    ),
+    "INT-028": (
+        "`crates/phairdlna-core/tests/device_description.rs::the_content_directory_is_advertised_in_version_one`"
+        " — the service is advertised; serving it to a client needs the HTTP layer",
+        "Implemented",
+    ),
+    "INT-029": (
+        "`crates/phairdlna-core/tests/device_description.rs::the_connection_manager_is_advertised_without_transcoding`"
+        " — the service is advertised; the reachability of its control URL needs the HTTP layer",
+        "Implemented",
+    ),
+    "INT-040": (
+        "`crates/phairdlna-core/tests/scpd.rs::the_content_directory_lists_no_write_action`",
+        "Verified",
+    ),
+    "INT-044": (
+        "`crates/phairdlna-core/tests/device_description.rs::the_service_list_names_both_mandatory_services`",
+        "Verified",
+    ),
+    "INT-045": (
+        "`crates/phairdlna-core/tests/device_description.rs::the_document_holds_exactly_one_device_element`",
+        "Verified",
+    ),
+}
+
 
 def parse_requirements(path: Path) -> list[dict]:
     """Extract (id, text, priority, section) from a requirement table document."""
@@ -311,9 +373,10 @@ def render_index(rows: list[dict]) -> str:
         out.append("| ID | Requirement | Priority | Feature | Milestone | Verification | Status |")
         out.append("| --- | --- | --- | --- | --- | --- | --- |")
         for r in selected:
+            status = EVIDENCE.get(r["id"], ("", "Baseline"))[1]
             out.append(
                 f"| `{r['id']}` | {r['title']} | {r['priority']} | `{r['feature']}` | "
-                f"{r['milestone']} | {r['verification']} | Baseline |"
+                f"{r['milestone']} | {r['verification']} | {status} |"
             )
     counts: dict[str, int] = {}
     for r in rows:
@@ -344,9 +407,8 @@ def render_trace(rows: list[dict]) -> str:
     out.append(
         "\n**How to read this table.** Every requirement is traced to the feature that owns\n"
         "it, the milestone that delivers it, the module area that will implement it, and the\n"
-        "verification that will prove it. The *evidence* column stays empty on purpose:\n"
-        "there is no implementation yet, and an empty cell means *not implemented*, not\n"
-        "*passed*. Evidence is filled with a test name or a gate output once the code exists.\n"
+        "verification that will prove it. The *evidence* column is filled only with output\n"
+        "that was actually observed; an empty cell means *not implemented*, not *passed*.\n"
     )
     out.append("\n| ID | Feature | Milestone | Module area | Verification | Evidence | Status |")
     out.append("| --- | --- | --- | --- | --- | --- | --- |")
@@ -367,9 +429,10 @@ def render_trace(rows: list[dict]) -> str:
         "PRD": "cross-cutting (see docs/01-product/FEATURE-CATALOG.md)",
     }
     for r in rows:
+        evidence, status = EVIDENCE.get(r["id"], ("—", "Not implemented"))
         out.append(
             f"| `{r['id']}` | `{r['feature']}` | {r['milestone']} | "
-            f"`{module_area[r['domain']]}` | {r['verification']} | — | Not implemented |"
+            f"`{module_area[r['domain']]}` | {r['verification']} | {evidence} | {status} |"
         )
     out.append(
         "\n---\n\n## How evidence is recorded\n\n"

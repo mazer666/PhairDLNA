@@ -8,9 +8,8 @@ Generated from the requirement definitions by
 
 **How to read this table.** Every requirement is traced to the feature that owns
 it, the milestone that delivers it, the module area that will implement it, and the
-verification that will prove it. The *evidence* column stays empty on purpose:
-there is no implementation yet, and an empty cell means *not implemented*, not
-*passed*. Evidence is filled with a test name or a gate output once the code exists.
+verification that will prove it. The *evidence* column is filled only with output
+that was actually observed; an empty cell means *not implemented*, not *passed*.
 
 
 | ID | Feature | Milestone | Module area | Verification | Evidence | Status |
@@ -101,16 +100,16 @@ there is no implementation yet, and an empty cell means *not implemented*, not
 | `INT-017` | `F-01` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-018` | `F-01` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-019` | `F-01` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-020` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-021` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-022` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-023` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-024` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
+| `INT-020` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::the_root_device_carries_its_identity` — the document is generated; it is not served over HTTP yet | Implemented |
+| `INT-021` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::the_service_list_names_both_mandatory_services` | Verified |
+| `INT-022` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::every_service_entry_carries_its_addresses` — the URLs are absolute; their resolution against the request host needs the HTTP layer | Implemented |
+| `INT-023` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/scpd.rs::every_state_variable_declares_its_data_type` — the service descriptions are generated; they are not served over HTTP yet | Implemented |
+| `INT-024` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::the_document_is_well_formed` | Verified |
 | `INT-025` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-026` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-027` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-028` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-029` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
+| `INT-027` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::a_name_with_reserved_characters_is_escaped` | Verified |
+| `INT-028` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::the_content_directory_is_advertised_in_version_one` — the service is advertised; serving it to a client needs the HTTP layer | Implemented |
+| `INT-029` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::the_connection_manager_is_advertised_without_transcoding` — the service is advertised; the reachability of its control URL needs the HTTP layer | Implemented |
 | `INT-030` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-031` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-032` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
@@ -121,12 +120,12 @@ there is no implementation yet, and an empty cell means *not implemented*, not
 | `INT-037` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-038` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-039` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-040` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
+| `INT-040` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/scpd.rs::the_content_directory_lists_no_write_action` | Verified |
 | `INT-041` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-042` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-043` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-044` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-045` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
+| `INT-044` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::the_service_list_names_both_mandatory_services` | Verified |
+| `INT-045` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::the_document_holds_exactly_one_device_element` | Verified |
 | `INT-046` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-047` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-048` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |

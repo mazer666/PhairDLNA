@@ -117,16 +117,16 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-017` | Answer `M-SEARCH` for the device type `urn:schemas-upnp-org:device:MediaServer:1` in addition… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
 | `INT-018` | Not rely on mDNS for discovery; SSDP is the DLNA discovery mechanism and no mDNS advertisement… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
 | `INT-019` | Expose the version of the UPnP architecture it implements in the `SERVER` header | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-020` | Serve an XML device description at a stable URL path that contains a root device with… | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
-| `INT-021` | List the `ContentDirectory:1` and `ConnectionManager:1` services | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
-| `INT-022` | All URLs inside the device description shall be absolute HTTP URLs or root-relative paths that… | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
-| `INT-023` | Serve a valid SCPD document for every advertised service | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
-| `INT-024` | The XML served by the server shall be well-formed | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
+| `INT-020` | Serve an XML device description at a stable URL path that contains a root device with… | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
+| `INT-021` | List the `ContentDirectory:1` and `ConnectionManager:1` services | MUST | `F-02` | M1 | Protocol conformance test | Verified |
+| `INT-022` | All URLs inside the device description shall be absolute HTTP URLs or root-relative paths that… | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
+| `INT-023` | Serve a valid SCPD document for every advertised service | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
+| `INT-024` | The XML served by the server shall be well-formed | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-025` | Answer an unknown SOAP action with an HTTP fault using the UPnP error codes `401 Invalid… | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
 | `INT-026` | Respond to `GET` on the device description and on SCPD documents with `Content-Type: text/xml;… | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
-| `INT-027` | Not include a client-controllable value in the XML output without XML escaping. | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
-| `INT-028` | Advertise `ContentDirectory:1` in addition to any newer ContentDirectory version | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
-| `INT-029` | Reference the `ConnectionManager` service even when no transcoding is available | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
+| `INT-027` | Not include a client-controllable value in the XML output without XML escaping. | MUST | `F-02` | M1 | Protocol conformance test | Verified |
+| `INT-028` | Advertise `ContentDirectory:1` in addition to any newer ContentDirectory version | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
+| `INT-029` | Reference the `ConnectionManager` service even when no transcoding is available | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
 | `INT-030` | Implement the `Browse` action with the arguments `ObjectID` | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
 | `INT-031` | The `Browse` response shall contain `Result`, `NumberReturned`, `TotalMatches` and `UpdateID`… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
 | `INT-032` | Honour `StartingIndex` and `RequestedCount` and shall never return more items than… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
@@ -137,12 +137,12 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-037` | Implement `GetSystemUpdateID` and shall keep the returned value monotonically non-decreasing | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
 | `INT-038` | Return the object ID `0` for the root container and the standard ID `1` for the content… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
 | `INT-039` | Return an UPnP error `701 No Such Object` for an unknown `ObjectID` instead of an empty… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-040` | Not implement write operations (`CreateObject` | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
+| `INT-040` | Not implement write operations (`CreateObject` | MUST | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-041` | Return `NumberReturned` and `TotalMatches` as non-negative integers and shall not exceed… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
 | `INT-042` | Return a `Result` document that is valid DIDL-Lite XML and parses independently of the… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
 | `INT-043` | Return the container's `UpdateID` for a `Browse` of a container and the `SystemUpdateID` for a… | SHOULD | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-044` | Use the service identifiers `urn:upnp-org:serviceId:ContentDirectory` and… | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
-| `INT-045` | Contain exactly one `device` element and shall not contain a `URLBase` element. | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
+| `INT-044` | Use the service identifiers `urn:upnp-org:serviceId:ContentDirectory` and… | MUST | `F-02` | M1 | Protocol conformance test | Verified |
+| `INT-045` | Contain exactly one `device` element and shall not contain a `URLBase` element. | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-046` | When `TotalMatches` cannot be computed, the server shall return `TotalMatches` of `0` with a… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
 | `INT-047` | Accept `SortCriteria` in the empty form and in the `+property` and `-property` forms | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
 | `INT-048` | Not advertise or implement any non-standard ContentDirectory action; a client-specific… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |

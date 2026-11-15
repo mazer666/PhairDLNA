@@ -98,8 +98,8 @@ absolute URLs, no base is needed; the element is omitted entirely.
   listed in the baseline: it is optional and only meaningful when the server exposes per-connection instances (standards §1.1).
 
 - **URLs.** Absolute URLs under the same origin as the description (INT-022): `/ContentDirectory.xml` and `/ConnectionManager.xml` for the SCPDs, `/ctl/CD` and
-  `/ctl/CM` for the control endpoints, `/evt/CD` and `/evt/CM` for the event endpoints. [DESIGN] The two services share one control path with a distinguishing
-  prefix, so one SOAP dispatcher serves both (ARCHITECTURE §4.3).
+  `/ctl/CM` for the control endpoints, `/evt/CD` and `/evt/CM` for the event endpoints. [DESIGN] The two services share the `/ctl` path with a
+  distinguishing suffix, so one SOAP dispatcher serves both (ARCHITECTURE §4.3).
 
 - **SCPD content.** Each SCPD lists the actions of its service with every argument and its direction (`in` / `out`), and the state variables with their data
   type and, where the type has a fixed value set, the allowed values (INT-023). [DESIGN] The ContentDirectory SCPD lists the four required actions plus `Search`
@@ -194,7 +194,8 @@ No failure of this feature may take down the HTTP task: a malformed description 
 
 ## 10. Acceptance criteria and traceability
 
-All criteria below are *planned*; no test file exists yet.
+All criteria below are *planned*. The structural criteria — the ones that can be checked against a generated document rather than against a running
+server — are **covered** by the tests listed in §11; the criteria that need a running server, a socket or a SOAP client are still **planned**.
 
 **AC-01** — *Given* a running server, *when* the client fetches the advertised `LOCATION`, *then* the response is `200 OK` with `Content-Type: text/xml;
 charset="utf-8"` and a `Content-Length` equal to the body length. Requirements: INT-026, INT-020 · Verification: protocol conformance test · Planned location:
@@ -202,35 +203,42 @@ charset="utf-8"` and a `Content-Length` equal to the body length. Requirements: 
 
 **AC-02** — *Given* the fetched description, *when* it is parsed, *then* it is well-formed, declares `encoding="utf-8"`, contains no DOCTYPE declaration and has
 exactly one `device` element. Requirements: INT-024, INT-045 · Verification: protocol conformance test · Planned location:
-`crates/phairdlna-core/tests/device_description.rs`
+`crates/phairdlna-core/tests/device_description.rs` — **covered** by the structural test of the same file.
 
 **AC-03** — *Given* the fetched description, *when* it is parsed, *then* it declares `specVersion` 1.0 and contains no `URLBase` element. Requirements: INT-044,
 INT-045 · Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/device_description.rs`
+— **covered** by the structural test of the same file.
 
 **AC-04** — *Given* the fetched description, *when* the root device is inspected, *then* `deviceType` is `urn:schemas-upnp-org:device:MediaServer:1` and the
 elements `UDN`, `friendlyName`, `manufacturer`, `modelName`, `modelNumber` and `modelURL` are present and non-empty, and `UDN` has the form `uuid:<UUID>`.
 Requirements: INT-020 · Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/device_description.rs`
+— **covered** by the structural test of the same file.
 
 **AC-05** — *Given* the fetched description, *when* the service list is inspected, *then* exactly the `ContentDirectory:1` and `ConnectionManager:1` services
 are listed, each with `serviceType`, `serviceId`, `SCPDURL`, `controlURL` and a non-empty `eventSubURL`, and the `serviceId` values are
 `urn:upnp-org:serviceId:ContentDirectory` and `urn:upnp-org:serviceId:ConnectionManager`. Requirements: INT-021, INT-044 · Verification: protocol conformance
 test · Planned location: `crates/phairdlna-core/tests/device_description.rs`
+— **covered** by the structural test of the same file.
 
 **AC-06** — *Given* the service list, *when* the service types are inspected, *then* `urn:schemas-upnp-org:service:RenderingControl:1` is absent and
 `urn:schemas-upnp-org:service:AVTransport:1` is either absent or listed as an optional service. Requirements: INT-021 · Verification: protocol conformance test
 · Planned location: `crates/phairdlna-core/tests/device_description.rs`
+— **covered** by the structural test of the same file.
 
 **AC-07** — *Given* the description and every `SCPDURL` it contains, *when* each URL is fetched, *then* it resolves to a document with `Content-Type: text/xml;
 charset="utf-8"` and a correct `Content-Length`. Requirements: INT-022, INT-026 · Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/device_description.rs`
+— the advertised URLs are absolute and point at the documented paths; the *fetch* is still **planned**, because it needs a running server.
 
 **AC-08** — *Given* each SCPD, *when* it is parsed, *then* every action of the service is listed with its arguments and their direction, and every state
 variable is listed with its data type and, where the type has a fixed value set, its allowed values. Requirements: INT-023 · Verification: protocol conformance
 test · Planned location: `crates/phairdlna-core/tests/scpd.rs`
+— **covered** by `crates/phairdlna-core/tests/scpd.rs`.
 
 **AC-09** — *Given* the device name is configured to a string containing `<`, `>` and `&`, *when* the description is fetched, *then* those characters appear
 escaped in the XML and no extra element was created. Requirements: INT-027 · Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/device_description.rs`
+— **covered** by the structural test of the same file.
 
 **AC-10** — *Given* a SOAP request to a control path with an action name that the SCPD does not list, *when* it is processed, *then* the response is a SOAP
 fault with the UPnP error code `401 Invalid Action` and the process keeps running. Requirements: INT-025 · Verification: protocol conformance test · Planned
@@ -242,21 +250,23 @@ code `402 Invalid Args`. Requirements: INT-025 · Verification: protocol conform
 **AC-12** — *Given* the description, *when* the `serviceType` of the ContentDirectory entry is inspected, *then* it is
 `urn:schemas-upnp-org:service:ContentDirectory:1`. Requirements: INT-028 · Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/device_description.rs`
+— **covered** by the structural test of the same file.
 
 **AC-13** — *Given* a server with transcoding disabled, *when* the description is fetched, *then* the ConnectionManager service is still listed with a reachable
 `controlURL`. Requirements: INT-029 · Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/device_description.rs`
+— the service is listed with its control URL; the *reachability* of that URL is still **planned**, because it needs a running server.
 
 ## 11. Test strategy and dependencies
 
-**Planned test locations** (none of these files exists yet):
+**Test locations**:
 
-| Purpose | Planned path |
-| --- | --- |
-| Device description structure and header set | `crates/phairdlna-core/tests/device_description.rs` |
-| SCPD structure per service | `crates/phairdlna-core/tests/scpd.rs` |
-| SOAP fault codes and malformed bodies | `crates/phairdlna-core/tests/soap_negative.rs` |
-| XML writer escaping rules | `crates/phairdlna-core/src/upnp/xml_writer.rs` (inline `#[cfg(test)]` module) |
-| Description against a second control point | `qa/device-matrix.toml` |
+| Purpose | Path | State |
+| --- | --- | --- |
+| Device description structure and header set | `crates/phairdlna-core/tests/device_description.rs` | **exists** — the structural part; the response headers still need the HTTP fixture |
+| SCPD structure per service | `crates/phairdlna-core/tests/scpd.rs` | **exists** |
+| SOAP fault codes and malformed bodies | `crates/phairdlna-core/tests/soap_negative.rs` | planned — the dispatcher does not exist yet |
+| XML writer escaping rules | `crates/phairdlna-core/src/upnp/xml_writer.rs` (inline `#[cfg(test)]` module) | **exists** |
+| Description against a second control point | `qa/device-matrix.toml` | planned |
 
 **Method.** The description is generated from a pure function over the configuration, so it can be compared structurally without a socket; an HTTP fixture
 serves it and the SCPDs. The SOAP negatives are driven by a hand-written SOAP client, the same tool F-03 and F-04 use.

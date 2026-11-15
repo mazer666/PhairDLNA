@@ -24,6 +24,7 @@ pub mod error;
 pub mod identity;
 pub mod platform;
 pub mod ssdp;
+pub mod upnp;
 
 pub use config::{Config, ConfigError};
 pub use error::CoreError;

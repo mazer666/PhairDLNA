@@ -41,6 +41,7 @@
 | `crates/phairdlna-core/src/platform/` | The eight capability traits, the path model and the default implementation | F-08, F-13, F-15 |
 | `crates/phairdlna-core/src/ssdp/` | The discovery protocol: parsing a search, matching the targets, building the bytes | F-01 |
 | `crates/phairdlna-core/src/identity.rs` | The persistent device identity | F-01, F-02 |
+| `crates/phairdlna-core/src/upnp/` | The device description, the service list and the service descriptions (SCPD) | F-02 |
 | `crates/phairdlna-core/src/config/` | The typed, validated, versioned configuration | F-12 |
 | `crates/phairdlna-cli/src/lib.rs` | The commands, as pure functions over their arguments | F-13 |
 | `crates/phairdlna-cli/src/main.rs` | The argument parsing and the exit code | F-13 |
@@ -61,7 +62,7 @@ visible and so that a contributor can see where their change will land.
 | Planned path | Responsibility | Feature |
 | --- | --- | --- |
 | `crates/phairdlna-core/src/ssdp/` | SSDP discovery, advertisement, interface selection | F-01 |
-| `crates/phairdlna-core/src/upnp/` | Device model, SCPD, SOAP dispatch | F-02, F-03, F-04 |
+| `crates/phairdlna-core/src/upnp/dispatcher.rs` | The SOAP dispatcher and the control action table | F-03, F-04 |
 | `crates/phairdlna-core/src/didl/` | DIDL-Lite generation and escaping | F-05 |
 | `crates/phairdlna-core/src/http/` | Media delivery, ranges, MIME | F-06 |
 | `crates/phairdlna-core/src/catalogue/` | Library model, index, scanning, identifiers | F-08, F-09 |
