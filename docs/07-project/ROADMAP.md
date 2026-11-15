@@ -37,7 +37,7 @@ M0 Foundation ──▶ M1 Headless DLNA ──▶ M2 Library & UX ──▶ M3 
 | --- | --- |
 | Approved requirements baseline with stable IDs | G0, `DOC-001` |
 | Architecture, ADRs, threat model, dependency review | G1, `PLT-001`, `SUP-002` |
-| Rust workspace with the four crates, boundary check | `PLT-001`, QG-07-style gate |
+| Rust workspace with the four crates, boundary check | `PLT-001`, gate QG-28 |
 | CI that can be triggered manually | `../07-project/CI-POLICY.md` |
 | Full AGPL text, licence and advisory gates green | QG-08, QG-09, `SUP-001` |
 | Documentation structure with no duplicate documents | `DOC-006`, `DOC-011` |

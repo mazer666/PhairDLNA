@@ -1,4 +1,6 @@
 # PhairDLNA — Platform Integration Brief (macOS first; Linux & Windows equivalents)
+Status: **Research input — evidence, not norm** · Owner role: Architect / Platform specialist · Version/date: 1.0 / 2026-11-14
+> Committed so that every citation in the feature specifications resolves. Where this document and a requirement disagree, the requirement wins.
 
 **Status:** Requirements-phase decision brief · **Date:** 2026-11-14 · **Author:** Platform Integration Specialist
 **Scope:** macOS (arm64 + x86_64) as the first shipping platform, with Linux and Windows designed in from the start.

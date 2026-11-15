@@ -77,9 +77,9 @@ Until it is installed, use `cargo test --workspace`; the two run the same tests.
 | QG-09 advisories | `cargo audit` |
 | QG-10 bans and sources | `cargo deny check bans sources` |
 | QG-11 link check | `scripts/check-doc-links.sh` |
-| QG-12 spelling | `typos` |
+| QG-12 spelling | `typos` *(planned — not installed by any documented step)* |
 | QG-13 file size | `scripts/check-file-size.sh` |
-| QG-14 complexity | `cargo clippy --workspace --all-targets -- -D clippy::excessive_nesting -D clippy::too_many_lines` |
+| QG-14 complexity | `cargo clippy --workspace --all-targets -- -D clippy::excessive_nesting -D clippy::too_many_lines` *(planned — the lints are not yet enabled in the workspace)* |
 | QG-16 snapshots | `INSTA_UPDATE=no cargo insta test --check` *(planned — no snapshots exist yet)* |
 | QG-17 DIDL-Lite conformance | *planned* — an `xtask` command against the vendored XSD |
 | QG-18 property tests | `cargo nextest run --workspace --test '*' proptest` *(planned — no property tests exist yet)* |

@@ -1,4 +1,6 @@
 # foobar2000 as a DLNA/UPnP CLIENT — primary-source findings
+Status: **Research input — evidence, not norm** · Owner role: Interoperability Specialist · Version/date: 1.0 / 2026-11-14
+> Committed so that every citation in the feature specifications resolves. Where this document and a requirement disagree, the requirement wins.
 
 Research date: 2026-11-14. Every URL below was actually fetched (HTTP 200 unless noted).
 Label key: **STANDARD** = protocol/spec-level fact · **OBSERVED** = directly seen in a fetched

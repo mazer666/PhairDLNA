@@ -1,4 +1,6 @@
 # PhairDLNA — Security & Privacy Threat Landscape (Requirements Phase)
+Status: **Research input — evidence, not norm** · Owner role: Security & Privacy Engineer · Version/date: 1.0 / 2026-11-14
+> Committed so that every citation in the feature specifications resolves. Where this document and a requirement disagree, the requirement wins.
 
 **Status:** Draft for requirements review · **Owner:** Security & Privacy Engineering
 **Scope:** PhairDLNA — new, from-scratch, pure-Rust DLNA/UPnP AV media server. macOS-first. AGPL-3.0-or-later. Privacy-first. LAN-only by default.

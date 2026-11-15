@@ -1,4 +1,6 @@
 # DLNA Client Behaviour: Samsung, LG, Philips, Panasonic
+Status: **Research input — evidence, not norm** · Owner role: Interoperability Specialist · Version/date: 1.0 / 2026-11-14
+> Committed so that every citation in the feature specifications resolves. Where this document and a requirement disagree, the requirement wins.
 
 Primary-source research notes for the PhairDLNA project. Every claim below is tagged:
 

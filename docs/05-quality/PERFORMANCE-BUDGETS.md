@@ -1,7 +1,7 @@
 # Performance budgets and measurement protocol — PhairDLNA
 
 Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: QA / Performance Engineer
-Requirements: `PERF-001` … `PERF-014`
+Requirements: `PERF-001` … `PERF-015`
 Gate: `../05-quality/QUALITY-GATES.md` (QG-21, QG-15), `TEST-STRATEGY.md`
 
 ---
@@ -26,8 +26,17 @@ the implementation is measured against. The first measurement will be recorded i
 
 ## 2. The reference hardware profile
 
-Because results only mean something relative to a machine, the project defines one
-reference profile. Any measurement on other hardware must state its profile.
+Because results only mean something relative to a machine, the project defines the
+*shape* of a reference profile below. Any measurement on other hardware must state
+its own profile.
+
+**The machine itself is still an open owner decision** (OD-11 in
+`../07-project/OPEN-DECISIONS.md`, and `F-18-Q-03`). Until it is named, no
+measurement may be published as a result against this profile — it is the shape of
+the report, not the report.
+
+The block below is the **shape** every performance report embeds. The filled-in
+version lives in `../09-research/qa-performance.md` §5.3.
 
 | Property | Reference value |
 | --- | --- |
@@ -35,6 +44,7 @@ reference profile. Any measurement on other hardware must state its profile.
 | Memory | 16 GB |
 | Storage | NVMe SSD for the index; the media library on a spinning disk or a NAS is a *separate* profile and must be labelled as such |
 | Library size | 100 000 objects unless stated otherwise |
+| Report shape | The `hardware:` block from `../09-research/qa-performance.md` §5.3, embedded verbatim |
 | Server mode | Headless daemon, release build (`--release`) |
 
 Network conditions (where relevant) are named explicitly: wired 1 GbE, or a defined
@@ -51,6 +61,7 @@ Wi-Fi class. A measurement over an unspecified network is worthless.
 | PERF-001 | Resident memory while idle with 10 000 indexed objects | < 50 MB | — | The catalogue lives on disk; only the hot pages are in memory |
 | PERF-002 | Time from process start to "ready to answer discovery" | < 2 s | — | Measured from process start to the first successful SSDP advertisement |
 | PERF-013 | Average CPU while idle over one minute | < 1 % | — | Excludes the periodic advertisement |
+| PERF-015 | Discovery latency seen by a client | < 10 s at p95 over 30 trials | — | On a documented single-subnet LAN; a television that waits too long assumes no server exists |
 | PERF-012 | Behaviour beyond the tested envelope | Responsive, no memory exhaustion | — | A catalogue larger than 100 000 objects must still browse |
 
 ### 3.2 Scanning and indexing
@@ -61,6 +72,7 @@ Wi-Fi class. A measurement over an unspecified network is worthless.
 | PERF-004 | Indexing throughput with metadata extraction disabled | ≥ 200 files/s | — | Metadata extraction is measured separately |
 | PERF-005 | First page of a `Browse` over a container with 10 000 children | < 100 ms | — | Measured at the SOAP handler, excluding network time |
 | PERF-008 | Directory scans during a browse | 0 | — | A structural property, verified by an audit hook, not a timing |
+| PERF-009 | The catalogue database with 100 000 objects | A page query stays within a documented budget and the plan does not degrade into a full table scan | — | The exact budget is set by the first measurement; the requirement is that the plan is bounded |
 
 ### 3.3 Streaming
 

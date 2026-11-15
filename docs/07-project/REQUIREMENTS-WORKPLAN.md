@@ -75,7 +75,10 @@ an unresolved decision list and a proposed baseline for owner approval.*
 **Done, twice.** The beginner-experience review found 6 blocker, 16 major, 11 minor
 and 4 info findings; all of them are addressed, and the report is kept as evidence at
 `docs/05-quality/reviews/BEGINNER-REVIEW-2026-11-14.md`. A second independent
-consistency review follows up, with its report in the same directory.
+consistency review found 2 blocker, 6 major, 15 minor and 4 info findings — among them
+56 requirements that had lost their owning feature in the generated index. All of them
+are addressed, and its report is kept at
+`../05-quality/reviews/CONSISTENCY-REVIEW-2026-11-15.md`.
 
 ## R6 — Implementation
 

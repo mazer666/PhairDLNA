@@ -22,14 +22,14 @@ the momentum.
 | OD-01 | macOS distribution and signing | Ad-hoc signed universal binary now, Developer ID later | Option A |
 | OD-02 | FFmpeg and transcoding | Never ship FFmpeg; a user-supplied binary only, out of process | No FFmpeg |
 | OD-03 | macOS interface technology | Pure Rust with `objc2` + `objc2-app-kit` | Option A |
-| OD-04 | Administration authentication | A `0600` bearer token plus CSRF, a custom header and a `Host` allowlist | That model |
-| OD-05 | Minimum macOS version | macOS 13 and later | macOS 13 |
-| OD-06 | Prebuilt binary or source only | Source always, plus a signed macOS binary | That |
-| OD-07 | The mandatory device matrix | The ten priority client families, three clients before stable | That |
+| OD-04 | Administration authentication | A `0600` bearer token plus CSRF, a custom header and a `Host` allowlist | The same model |
+| OD-05 | Minimum macOS version | macOS 15 and later | macOS 15 |
+| OD-06 | Prebuilt binary or source only | Source always, plus a signed macOS binary | The same |
+| OD-07 | The mandatory device matrix | The ten priority client families; three clients before stable | The ten families |
 | OD-08 | Local administration surface | Yes, minimal, alongside the native app | Yes, minimal |
-| OD-09 | The v1 format commitment | MP4 (H.264/AAC), MP3, JPEG, Matroska/WebM; SRT and WebVTT sidecars | That |
-| OD-10 | The supported locales | English and German, strings prepared for translation | That |
-| OD-11 | The reference hardware | The profile in the performance budgets, machine named before the first measurement | That |
+| OD-09 | The v1 format commitment | MP4 (H.264/AAC), MP3, JPEG, Matroska/WebM; SRT and WebVTT sidecars | The same list |
+| OD-10 | The supported locales | English and German; strings prepared for translation | English and German |
+| OD-11 | The reference hardware | The profile in the performance budgets; the machine is named before the first measurement | The same profile |
 | OD-12 | Outside contributions | Accepted, with a requirement ID, a test and documentation | Accepted |
 
 **The only decision that blocks work is OD-05** (the minimum macOS version), because
@@ -128,10 +128,13 @@ always-on server must run as a launchd **daemon** rather than an agent
 (`PLT-013`). Supporting older versions means a different permission story and a
 different first-run experience.
 
-**Recommendation:** **macOS 13 and later**, with the local-network permission handled
-explicitly and the daemon model used throughout. This keeps one model instead of two.
+**Recommendation:** **macOS 15 and later**, with the local-network permission handled
+explicitly and the daemon model used throughout. The research is unambiguous here:
+the local-network permission exists only on macOS 15 and later, so on an older system
+the server cannot know whether a permission prompt appeared — which makes the
+diagnostics worse, not better. One model instead of two.
 
-**Default, if no decision is made:** macOS 13 and later, with the launchd daemon model throughout.
+**Default, if no decision is made:** macOS 15 and later, with the launchd daemon model throughout.
 
 **If deferred:** the macOS service design and the first-run flow cannot be finalised.
 
@@ -162,7 +165,7 @@ matrix cover before the first stable release?
 independently implemented clients before the first stable release, and a recorded
 result — including failures — for each.
 
-**Default, if no decision is make:** the ten priority families already listed in the interoperability matrix, with at least three independently implemented clients before the first stable release.
+**Default, if no decision is made:** the ten priority families already listed in the interoperability matrix, with at least three independently implemented clients before the first stable release.
 
 **If deferred:** the "stable" milestone cannot be defined; M4 has no exit criterion.
 

@@ -1,4 +1,5 @@
 # Release blockers
+Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Lead / Release Manager · Version/date: 1.0 / 2026-11-15
 
 - [ ] Full unmodified GNU AGPLv3 license text in LICENSE and license audit.
 - [ ] Functional implementation and repeatable build.

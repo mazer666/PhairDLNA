@@ -1,4 +1,6 @@
 # DLNA Client Family Research — Sony Bravia, Xbox One/Series X|S, PlayStation 4/5
+Status: **Research input — evidence, not norm** · Owner role: Interoperability Specialist · Version/date: 1.0 / 2026-11-14
+> Committed so that every citation in the feature specifications resolves. Where this document and a requirement disagree, the requirement wins.
 
 Scope: real-world behaviour and quirks of DLNA **clients** (control points / renderers) in these three
 families, as observed by real media servers, from primary sources (server source code, server

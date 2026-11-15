@@ -1,4 +1,5 @@
 # ADR-NNNN — <title>
+Status: Template · Owner role: Architect · Version/date: 1.0 / 2026-11-15
 
 Status: **Proposed** | Accepted | Superseded by ADR-NNNN
 Date: YYYY-MM-DD

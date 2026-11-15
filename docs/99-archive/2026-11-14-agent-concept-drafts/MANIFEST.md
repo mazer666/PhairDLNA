@@ -10,8 +10,11 @@ Rule: immutable. Do not edit, move or delete.
 | `03-features/MACOS-EXPERIENCE.md` | `docs/03-features/MACOS-EXPERIENCE.md` | `7e39b7df87a36957f8837ab13393d4fdfeab3a3b0d2c357ada18554808c52126` |
 | `03-features/MEDIA-LIBRARY.md` | `docs/03-features/MEDIA-LIBRARY.md` | `f425caa5c7241e4f8045808e2b440e918845f8c3f6a528758c3e58ae93867432` |
 | `03-features/STREAMING.md` | `docs/03-features/STREAMING.md` | `9e32dfd6f8617f56a916726c1f21312136ef31cefaf4e7811956b00810bcabe5` |
-| `05-quality/ACCEPTANCE-MATRIX.md` | `docs/05-quality/ACCEPTANCE-MATRIX.md` | `ba88f44cae060a2494c3fc262f8e285eccacef6b7a9596d4bcb60a17d1126a8e` |
-| `05-quality/PERFORMANCE-RELIABILITY-SLO.md` | `docs/05-quality/PERFORMANCE-RELIABILITY-SLO.md` | `7d0a356e2f24ac35965a9cd829b60a9e36a04db97ca7e211319c9f68bb7ac2f3` || `03-features/ADAPTIVE-RESOURCE-MANAGEMENT.md` | `docs/03-features/ADAPTIVE-RESOURCE-MANAGEMENT.md` | `20a808901380ffd8e4d27ee78249e45cefb0d6bd6f4fc2770db7f230ce129dd5` |
+| `03-features/ADAPTIVE-RESOURCE-MANAGEMENT.md` | `docs/03-features/ADAPTIVE-RESOURCE-MANAGEMENT.md` | `20a808901380ffd8e4d27ee78249e45cefb0d6bd6f4fc2770db7f230ce129dd5` |
 | `03-features/MACOS-LIFECYCLE-AND-NETWORK-RECOVERY.md` | `docs/03-features/MACOS-LIFECYCLE-AND-NETWORK-RECOVERY.md` | `cc1babca40b21a5658142d4a2ae80ae60a285a4ae87137dca0f13036f5215d39` |
 | `03-features/MACOS-MENU-BAR-UX.md` | `docs/03-features/MACOS-MENU-BAR-UX.md` | `e326e7cca36c139abab0316f7dff6f12e8c9d0ab8df894567d2f7a4fc3cbb209` |
+| `05-quality/ACCEPTANCE-MATRIX.md` | `docs/05-quality/ACCEPTANCE-MATRIX.md` | `ba88f44cae060a2494c3fc262f8e285eccacef6b7a9596d4bcb60a17d1126a8e` |
+| `05-quality/PERFORMANCE-RELIABILITY-SLO.md` | `docs/05-quality/PERFORMANCE-RELIABILITY-SLO.md` | `7d0a356e2f24ac35965a9cd829b60a9e36a04db97ca7e211319c9f68bb7ac2f3` |
 | `07-project/REQUIREMENTS-DECISIONS.md` | `docs/07-project/REQUIREMENTS-DECISIONS.md` | `b2b8ace52d205e11aca56a9129f29498a366b70e71fc942573a99d2695a44b4e` |
+
+The digests were taken from the commits that last touched each file before it was archived.

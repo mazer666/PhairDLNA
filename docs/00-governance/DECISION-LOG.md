@@ -59,7 +59,7 @@ Architectural decisions with options and trade-offs live as ADRs in
 | Review | Date | Result |
 | --- | --- | --- |
 | Independent beginner-experience review | 2026-11-14 | 6 blocker, 16 major, 11 minor, 4 info findings — **all addressed**; the report is kept at `../05-quality/reviews/BEGINNER-REVIEW-2026-11-14.md` |
-| Independent consistency review (round 2) | 2026-11-15 | See `../05-quality/reviews/` |
+| Independent consistency review (round 2) | 2026-11-15 | 2 blocker, 6 major, 15 minor, 4 info findings — **all addressed**; the report is kept at `../05-quality/reviews/CONSISTENCY-REVIEW-2026-11-15.md` |
 
 ## Open decisions requiring owner approval
 

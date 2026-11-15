@@ -1,4 +1,5 @@
 # Documentation map — PhairDLNA
+Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Documentation reviewer · Version/date: 1.0 / 2026-11-15
 
 This is the map of the documentation tree. Every document has exactly one home, and
 the structure follows [00-governance/DOCUMENTATION-POLICY.md](00-governance/DOCUMENTATION-POLICY.md).
@@ -33,7 +34,9 @@ docs/
 ## The three documents that explain the most
 
 1. **[01-product/TECHNICAL-REQUIREMENTS.md](01-product/TECHNICAL-REQUIREMENTS.md)** — the
-   normative catalogue. Every requirement is defined here exactly once.
+   normative catalogue for the technical domains, and
+   **[01-product/PRODUCT-REQUIREMENTS.md](01-product/PRODUCT-REQUIREMENTS.md)** for the
+   product commitments. Every requirement is defined exactly once, in one of the two.
 2. **[02-architecture/ARCHITECTURE.md](02-architecture/ARCHITECTURE.md)** — how the
    system is built and why.
 3. **[05-quality/QUALITY-GATES.md](05-quality/QUALITY-GATES.md)** — what "done" means

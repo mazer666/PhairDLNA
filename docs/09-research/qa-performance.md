@@ -1,4 +1,6 @@
 # PhairDLNA — QA & Performance Test Strategy (Requirements Phase)
+Status: **Research input — evidence, not norm** · Owner role: QA / Performance Engineer · Version/date: 1.0 / 2026-11-14
+> Committed so that every citation in the feature specifications resolves. Where this document and a requirement disagree, the requirement wins.
 
 **Document status:** requirements-phase design; no implementation exists yet, so nothing here is a measured result.
 **Author:** QA & Performance Engineer.

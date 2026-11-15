@@ -23,36 +23,41 @@ INDEX_OUT = REPO / "docs/01-product/REQUIREMENTS-INDEX.md"
 TRACE_OUT = REPO / "docs/07-project/TRACEABILITY-MATRIX.md"
 
 ROW = re.compile(r"^\|\s*((?:PRD|FUN|INT|SEC|PERF|UX|OPS|CFG|PLT|DOC|SUP|REL|RES|LIFE|MB)-\d{3})\s*\|(.*)\|\s*(MUST|SHOULD|COULD)\s*\|")
+# User stories live in the US- namespace and are deliberately NOT requirements:
+# they carry no priority, no feature and no verification method, and they are
+# not part of the requirement index. See docs/00-governance/REQUIREMENTS-METHOD.md.
 HEADING = re.compile(r"^##\s+(.*)$")
 
 # --- feature allocation -------------------------------------------------------
 # (feature_id, feature_slug, [requirement ids or prefixes])
 FEATURES = [
-    ("F-01", "ssdp-discovery", ["INT-001..INT-015"]),
-    ("F-02", "upnp-device-description", ["INT-020..INT-029"]),
-    ("F-03", "content-directory", ["INT-030..INT-043"]),
-    ("F-04", "connection-manager", ["INT-050..INT-056"]),
-    ("F-05", "didl-lite-metadata", ["INT-060..INT-072"]),
-    ("F-06", "http-media-delivery", ["INT-080..INT-091", "FUN-040..FUN-046", "FUN-050"]),
+    ("F-01", "ssdp-discovery", ["INT-001..INT-019"]),
+    ("F-02", "upnp-device-description", ["INT-020..INT-029", "INT-044", "INT-045"]),
+    ("F-03", "content-directory", ["INT-030..INT-043", "INT-046..INT-049"]),
+    ("F-04", "connection-manager", ["INT-050..INT-059"]),
+    ("F-05", "didl-lite-metadata", ["INT-060..INT-079"]),
+    ("F-06", "http-media-delivery", ["INT-080..INT-099", "FUN-040..FUN-046", "FUN-050"]),
     ("F-07", "client-compatibility", ["INT-100..INT-104"]),
     ("F-08", "media-roots-filesystem", ["FUN-001..FUN-007", "FUN-017..FUN-019",
                                         "FUN-023..FUN-024", "SEC-001..SEC-008"]),
-    ("F-09", "catalogue-index", ["FUN-008..FUN-012", "PERF-003..PERF-005",
+    ("F-09", "catalogue-index", ["FUN-008..FUN-012", "FUN-025", "PERF-003..PERF-005",
                                  "PERF-008..PERF-009", "PERF-012"]),
     ("F-10", "metadata-artwork", ["FUN-013..FUN-014", "PERF-004"]),
     ("F-11", "playlists-subtitles", ["FUN-015..FUN-016", "FUN-020..FUN-022"]),
     ("F-12", "configuration", ["CFG-001..CFG-015"]),
-    ("F-13", "cli-service-lifecycle", ["OPS-001..OPS-015", "LIFE-001..LIFE-011"]),
-    ("F-14", "local-administration", ["OPS-020..OPS-027", "UX-011..UX-012"]),
+    ("F-13", "cli-service-lifecycle", ["OPS-001..OPS-015", "LIFE-001..LIFE-009", "LIFE-011"]),
+    ("F-14", "local-administration", ["OPS-016..OPS-017", "OPS-020..OPS-027",
+                                       "UX-011..UX-012"]),
     ("F-15", "macos-native-experience", ["UX-001..UX-010", "UX-013", "UX-014..UX-020",
-                                          "MB-001..MB-009", "PLT-004"]),
-    ("F-16", "security-hardening-privacy", ["SEC-010..SEC-018", "SEC-060..SEC-065",
+                                          "MB-001..MB-009", "LIFE-010", "PLT-004"]),
+    ("F-16", "security-hardening-privacy", ["SEC-010..SEC-019", "SEC-060..SEC-072",
                                           "SEC-090..SEC-096"]),
     ("F-17", "transcoding-optional", ["FUN-047..FUN-049"]),
     ("F-18", "performance-and-reliability", ["PERF-001..PERF-002", "PERF-006..PERF-007",
-                                     "PERF-010..PERF-011", "PERF-013..PERF-015",
-                                     "REL-001..REL-006", "RES-001..RES-009"]),
-    ("F-19", "quality-gates-developer-experience", ["DOC-001..DOC-012", "SUP-001..SUP-008"]),
+                                     "PERF-010..PERF-015", "REL-001..REL-006",
+                                     "RES-001..RES-009"]),
+    ("F-19", "quality-gates-developer-experience", ["DOC-001..DOC-012", "SUP-001..SUP-009"]),
+    ("F-22", "platform-portability", ["PLT-001..PLT-003", "PLT-005..PLT-018"]),
 ]
 
 # --- milestone allocation ------------------------------------------------------
@@ -164,6 +169,72 @@ def allocate(rows: list[dict]) -> dict[str, str]:
     return mapping
 
 
+
+# Milestone overrides: the roadmap schedules individual requirement groups inside
+# a feature across different milestones. The index must agree with the roadmap,
+# so the override table below is the authority for those groups.
+MILESTONE_OVERRIDES = [
+    # (prefix, low, high, milestone, reason)
+    ("FUN", "017", "024", "M2", "external volumes, multiple roots and the organisation rules are M2"),
+    ("FUN", "013", "016", "M2", "metadata, artwork and playlists are M2"),
+    ("FUN", "020", "022", "M2", "playlists and subtitles are M2"),
+    ("CFG", "001", "015", "M2", "the full configuration surface is M2"),
+    ("OPS", "016", "027", "M2", "the administration surface and the source offer are M2"),
+    ("OPS", "001", "015", "M1", "the command line arrives with the first milestone"),
+    ("UX", "011", "020", "M2", "the interface experience is M2"),
+    ("MB", "001", "009", "M2", "the macOS application is M2"),
+    ("RES", "001", "009", "M2", "adaptive resource management is M2"),
+    ("REL", "001", "006", "M4", "the reliability targets are proven in the hardening milestone"),
+    ("PLT", "011", "018", "M3", "the per-platform behaviour is delivered with Linux and Windows"),
+    ("PLT", "013", "013", "M2", "the launchd daemon model belongs to the macOS application"),
+    ("PLT", "001", "009", "M0", "portability and the build matrix are foundation work"),
+    ("INT", "100", "104", "M4", "the client compatibility profiles are hardening work"),
+    ("FUN", "047", "049", "M5", "transcoding is deferred"),
+    ("PERF", "001", "015", "M1", "the budgets are measured in the first milestone"),
+    ("SEC", "066", "072", "M1", "the isolation and the source offer are part of the security baseline"),
+    ("SEC", "010", "065", "M1", "the security baseline is M1"),
+    ("SEC", "090", "096", "M1", "the privacy guarantees are M1"),
+    ("INT", "001", "104", "M1", "the protocol surface is M1"),
+    ("DOC", "001", "012", "M0", "the documentation quality is foundation work"),
+    ("SUP", "001", "009", "M0", "the licence and supply-chain policy is foundation work"),
+    ("LIFE", "001", "011", "M2", "the lifecycle and recovery work is M2"),
+    ("FUN", "001", "012", "M1", "the library core is M1"),
+]
+
+
+def milestone_for(row: dict) -> str:
+    """The milestone of one requirement: the feature default, overridden by the
+    roadmap's finer granularity where the two differ."""
+    prefix = row["id"].split("-")[0]
+    number = row["id"].split("-")[1]
+    for pfx, low, high, milestone, _reason in MILESTONE_OVERRIDES:
+        if pfx == prefix and low <= number <= high:
+            return milestone
+    return row["milestone"]
+
+
+def assert_complete(rows: list[dict]) -> None:
+    """Fail loudly when a requirement has no feature or no milestone.
+
+    A silent default would let the index print a plausible-looking row for a
+    requirement nobody owns - which is how 56 requirements ended up without an
+    owner in an earlier revision of this script.
+    """
+    problems = []
+    for row in rows:
+        if row["feature"] in ("", "—", "-"):
+            problems.append(f"{row['id']}: no owning feature")
+        if not row["milestone"]:
+            problems.append(f"{row['id']}: no milestone")
+    if problems:
+        raise SystemExit(
+            "the requirement catalogue is incomplete:\n  "
+            + "\n  ".join(problems)
+            + "\n\nEvery requirement needs an owning feature and a milestone. "
+            "Add it to FEATURES or MILESTONE_OVERRIDES in this script."
+        )
+
+
 def build_rows() -> list[dict]:
     rows = parse_requirements(PRODUCT) + parse_requirements(TECHNICAL)
     allocation = allocate(rows)
@@ -175,8 +246,11 @@ def build_rows() -> list[dict]:
             if row["id"] in DEVICE_VERIFICATION
             else VERIFICATION[row["id"].split("-")[0]]
         )
-        row["milestone"] = FEATURE_MILESTONES.get(row["feature"], "M0")
         row["domain"] = row["id"].split("-")[0]
+        row["milestone"] = FEATURE_MILESTONES.get(row["feature"], "M0")
+    for row in rows:
+        row["milestone"] = milestone_for(row)
+    assert_complete(rows)
     rows.sort(key=lambda r: (r["domain"], r["id"]))
     return rows
 
@@ -288,6 +362,7 @@ def render_trace(rows: list[dict]) -> str:
         "RES": "crates/phairdlna-core/src/scheduler",
         "LIFE": "crates/phairdlna-core/src/lifecycle, crates/phairdlna-cli",
         "MB": "crates/phairdlna-mac, docs/05-quality",
+        "PRD": "cross-cutting (see docs/01-product/FEATURE-CATALOG.md)",
     }
     for r in rows:
         out.append(

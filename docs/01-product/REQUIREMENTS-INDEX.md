@@ -69,15 +69,15 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-014` | Generate thumbnails for image files and video posters on demand and cache them in a disposable… | SHOULD | `F-10` | M2 | Automated test | Baseline |
 | `FUN-015` | Support playlists in M3U, M3U8 and PLS format, resolving entries relative to the playlist file. | SHOULD | `F-11` | M2 | Automated test | Baseline |
 | `FUN-016` | Expose a subtitle sidecar file (`.srt`, `.vtt`, `.sub`, `.ass`) as an additional `res` element… | SHOULD | `F-11` | M2 | Automated test | Baseline |
-| `FUN-017` | Support media stored on removable volumes and network shares | MUST | `F-08` | M1 | Automated test | Baseline |
-| `FUN-018` | Never write to, rename or delete a file inside a media root, with the single exception of its… | MUST | `F-08` | M1 | Automated test | Baseline |
-| `FUN-019` | Keep the raw path exactly as the operating system reported it for every file operation | MUST | `F-08` | M1 | Automated test | Baseline |
+| `FUN-017` | Support media stored on removable volumes and network shares | MUST | `F-08` | M2 | Automated test | Baseline |
+| `FUN-018` | Never write to, rename or delete a file inside a media root, with the single exception of its… | MUST | `F-08` | M2 | Automated test | Baseline |
+| `FUN-019` | Keep the raw path exactly as the operating system reported it for every file operation | MUST | `F-08` | M2 | Automated test | Baseline |
 | `FUN-020` | Compute a separate identity key for indexing and de-duplication by applying Unicode NFC and a… | MUST | `F-11` | M2 | Automated test | Baseline |
 | `FUN-021` | Provide a way to exclude subdirectories of a root. | SHOULD | `F-11` | M2 | Protocol conformance + device test | Baseline |
 | `FUN-022` | Support multiple roots that point to the same underlying volume without producing duplicate… | SHOULD | `F-11` | M2 | Protocol conformance + device test | Baseline |
-| `FUN-023` | Expose the free space of a root through the ContentDirectory service when the file system… | COULD | `F-08` | M1 | Automated test | Baseline |
-| `FUN-024` | Allow the user to configure a scan schedule (interval | SHOULD | `F-08` | M1 | Automated test | Baseline |
-| `FUN-025` | Make a newly added file visible in the catalogue within 30 seconds on a file system that… | SHOULD | `—` | M0 | Automated test | Baseline |
+| `FUN-023` | Expose the free space of a root through the ContentDirectory service when the file system… | COULD | `F-08` | M2 | Automated test | Baseline |
+| `FUN-024` | Allow the user to configure a scan schedule (interval | SHOULD | `F-08` | M2 | Automated test | Baseline |
+| `FUN-025` | Make a newly added file visible in the catalogue within 30 seconds on a file system that… | SHOULD | `F-09` | M1 | Automated test | Baseline |
 | `FUN-040` | Serve media by byte range from the original file without transcoding whenever the client… | MUST | `F-06` | M1 | Automated test | Baseline |
 | `FUN-041` | Report the container and codec of a file in a way a client can use to decide whether it can… | MUST | `F-06` | M1 | Automated test | Baseline |
 | `FUN-042` | Support multiple simultaneous direct-play streams | MUST | `F-06` | M1 | Automated test | Baseline |
@@ -109,10 +109,10 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-013` | Answer `M-SEARCH` only when the `MAN` header contains the quoted token `ssdp:discover` | SHOULD | `F-01` | M1 | Protocol conformance test | Baseline |
 | `INT-014` | Use a stable `UDN` across restarts for the same installation unless the user resets the… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
 | `INT-015` | Provide a CLI switch to print the exact SSDP headers it would send | SHOULD | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-016` | Set the multicast time-to-live of its advertisements to 2 | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-017` | Answer `M-SEARCH` for the device type `urn:schemas-upnp-org:device:MediaServer:1` in addition… | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-018` | Not rely on mDNS for discovery; SSDP is the DLNA discovery mechanism and no mDNS advertisement… | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-019` | Expose the version of the UPnP architecture it implements in the `SERVER` header | MUST | `—` | M0 | Protocol conformance test | Baseline |
+| `INT-016` | Set the multicast time-to-live of its advertisements to 2 | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
+| `INT-017` | Answer `M-SEARCH` for the device type `urn:schemas-upnp-org:device:MediaServer:1` in addition… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
+| `INT-018` | Not rely on mDNS for discovery; SSDP is the DLNA discovery mechanism and no mDNS advertisement… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
+| `INT-019` | Expose the version of the UPnP architecture it implements in the `SERVER` header | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
 | `INT-020` | Serve an XML device description at a stable URL path that contains a root device with… | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
 | `INT-021` | List the `ContentDirectory:1` and `ConnectionManager:1` services | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
 | `INT-022` | All URLs inside the device description shall be absolute HTTP URLs or root-relative paths that… | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
@@ -137,12 +137,12 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-041` | Return `NumberReturned` and `TotalMatches` as non-negative integers and shall not exceed… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
 | `INT-042` | Return a `Result` document that is valid DIDL-Lite XML and parses independently of the… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
 | `INT-043` | Return the container's `UpdateID` for a `Browse` of a container and the `SystemUpdateID` for a… | SHOULD | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-044` | Use the service identifiers `urn:upnp-org:serviceId:ContentDirectory` and… | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-045` | Contain exactly one `device` element and shall not contain a `URLBase` element. | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-046` | When `TotalMatches` cannot be computed, the server shall return `TotalMatches` of `0` with a… | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-047` | Accept `SortCriteria` in the empty form and in the `+property` and `-property` forms | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-048` | Not advertise or implement any non-standard ContentDirectory action; a client-specific… | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-049` | Expose `SearchCapabilities` and `SortCapabilities` as comma-separated lists of the property… | MUST | `—` | M0 | Protocol conformance test | Baseline |
+| `INT-044` | Use the service identifiers `urn:upnp-org:serviceId:ContentDirectory` and… | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
+| `INT-045` | Contain exactly one `device` element and shall not contain a `URLBase` element. | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
+| `INT-046` | When `TotalMatches` cannot be computed, the server shall return `TotalMatches` of `0` with a… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
+| `INT-047` | Accept `SortCriteria` in the empty form and in the `+property` and `-property` forms | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
+| `INT-048` | Not advertise or implement any non-standard ContentDirectory action; a client-specific… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
+| `INT-049` | Expose `SearchCapabilities` and `SortCapabilities` as comma-separated lists of the property… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
 | `INT-050` | Implement `GetProtocolInfo` and return at least the `http-get` transfer protocol with the MIME… | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
 | `INT-051` | The `GetProtocolInfo` result shall not advertise a container or MIME type that the server… | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
 | `INT-052` | Implement `GetCurrentConnectionIDs` and return an empty list when no transfer is active. | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
@@ -150,9 +150,9 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-054` | Return the same `Source` value in `GetCurrentConnectionInfo` as the `res` URI it serves for the… | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
 | `INT-055` | Advertise the `http-get` protocol with the `*` wildcard for the additional header field only… | SHOULD | `F-04` | M1 | Protocol conformance test | Baseline |
 | `INT-056` | Not implement the `http-subscribe` transfer protocol in the baseline. | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
-| `INT-057` | Reject every GENA `SUBSCRIBE` request unless the user has explicitly enabled eventing | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-058` | Never implement the UPnP Internet Gateway Device actions (`AddPortMapping` | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-059` | Not implement a network self-update mechanism; updates shall be installed by the user through… | MUST | `—` | M0 | Protocol conformance test | Baseline |
+| `INT-057` | Reject every GENA `SUBSCRIBE` request unless the user has explicitly enabled eventing | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
+| `INT-058` | Never implement the UPnP Internet Gateway Device actions (`AddPortMapping` | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
+| `INT-059` | Not implement a network self-update mechanism; updates shall be installed by the user through… | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
 | `INT-060` | Every `<item>` and `<container>` shall carry the attributes `id` | MUST | `F-05` | M1 | Protocol conformance test | Baseline |
 | `INT-061` | Use the UPnP object classes `object.item.audioItem.musicTrack` | MUST | `F-05` | M1 | Protocol conformance test | Baseline |
 | `INT-062` | The `id` attribute shall be a stable, opaque identifier for the object that does not change… | MUST | `F-05` | M1 | Protocol conformance test | Baseline |
@@ -166,13 +166,13 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-070` | Include `upnp:originalTrackNumber` when the audio tags provide it. | COULD | `F-05` | M1 | Protocol conformance test | Baseline |
 | `INT-071` | Produce a `DIDL-Lite` document whose root element is `DIDL-Lite` in the namespace… | MUST | `F-05` | M1 | Protocol conformance test | Baseline |
 | `INT-072` | Truncate a single metadata value to a documented maximum length so that no element or attribute… | MUST | `F-05` | M1 | Protocol conformance test | Baseline |
-| `INT-073` | Escape the complete DIDL-Lite document a second time when embedding it into the `Result`… | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-074` | Report `res@bitrate` in bytes per second, as the metadata schema defines it. | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-075` | Emit `res@sampleFrequency`, `res@nrAudioChannels` and `res@bitsPerSample` when the media… | SHOULD | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-076` | Use `dc:creator` in addition to `upnp:artist` for the artist of an audio item. | SHOULD | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-077` | Not emit the `writeStatus` attribute, because its definition could not be verified against a… | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-078` | The DLNA signalling in the fourth `protocolInfo` field shall be additive: the server shall be… | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-079` | Emit `DLNA.ORG_PN` for a media resource only when the content actually conforms to that DLNA… | MUST | `—` | M0 | Protocol conformance test | Baseline |
+| `INT-073` | Escape the complete DIDL-Lite document a second time when embedding it into the `Result`… | MUST | `F-05` | M1 | Protocol conformance test | Baseline |
+| `INT-074` | Report `res@bitrate` in bytes per second, as the metadata schema defines it. | MUST | `F-05` | M1 | Protocol conformance test | Baseline |
+| `INT-075` | Emit `res@sampleFrequency`, `res@nrAudioChannels` and `res@bitsPerSample` when the media… | SHOULD | `F-05` | M1 | Protocol conformance test | Baseline |
+| `INT-076` | Use `dc:creator` in addition to `upnp:artist` for the artist of an audio item. | SHOULD | `F-05` | M1 | Protocol conformance test | Baseline |
+| `INT-077` | Not emit the `writeStatus` attribute, because its definition could not be verified against a… | MUST | `F-05` | M1 | Protocol conformance test | Baseline |
+| `INT-078` | The DLNA signalling in the fourth `protocolInfo` field shall be additive: the server shall be… | MUST | `F-05` | M1 | Protocol conformance test | Baseline |
+| `INT-079` | Emit `DLNA.ORG_PN` for a media resource only when the content actually conforms to that DLNA… | MUST | `F-05` | M1 | Protocol conformance test | Baseline |
 | `INT-080` | Answer `GET` and `HEAD` requests for media objects with `HTTP/1.1 200 OK` | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
 | `INT-081` | Support a single byte range and answer with `HTTP/1.1 206 Partial Content` | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
 | `INT-082` | Answer a range request whose start is beyond the end of the file with `HTTP/1.1 416 Range Not… | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
@@ -185,14 +185,14 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-089` | Close a connection that a client abandoned mid-transfer without leaking the transfer slot. | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
 | `INT-090` | Serve the media URI that it advertised in the DIDL-Lite `res` element | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
 | `INT-091` | Keep the file open for the duration of the transfer when possible | SHOULD | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-092` | Ignore a `Range` header on a method other than `GET` | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-093` | Honour `If-Range`: when its condition does not hold | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-094` | Answer `404` for an unknown media identifier, `405` for an unsupported method and `400` for a… | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-095` | Support HTTP/1.1 persistent connections, and every response shall carry either a… | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-096` | Emit the DLNA response headers `transferMode.dlna.org` and `contentFeatures.dlna.org` on media… | SHOULD | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-097` | Answer a request carrying `getcontentFeatures.dlna.org: 1` with the `contentFeatures.dlna.org`… | SHOULD | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-098` | Serve the media URL only when it resolves inside one of the configured roots. | MUST | `—` | M0 | Protocol conformance test | Baseline |
-| `INT-099` | Emit `realTimeInfo.dlna.org` with `DLNA.ORG_TLAG=*` on media responses. | COULD | `—` | M0 | Protocol conformance test | Baseline |
+| `INT-092` | Ignore a `Range` header on a method other than `GET` | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
+| `INT-093` | Honour `If-Range`: when its condition does not hold | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
+| `INT-094` | Answer `404` for an unknown media identifier, `405` for an unsupported method and `400` for a… | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
+| `INT-095` | Support HTTP/1.1 persistent connections, and every response shall carry either a… | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
+| `INT-096` | Emit the DLNA response headers `transferMode.dlna.org` and `contentFeatures.dlna.org` on media… | SHOULD | `F-06` | M1 | Protocol conformance test | Baseline |
+| `INT-097` | Answer a request carrying `getcontentFeatures.dlna.org: 1` with the `contentFeatures.dlna.org`… | SHOULD | `F-06` | M1 | Protocol conformance test | Baseline |
+| `INT-098` | Serve the media URL only when it resolves inside one of the configured roots. | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
+| `INT-099` | Emit `realTimeInfo.dlna.org` with `DLNA.ORG_TLAG=*` on media responses. | COULD | `F-06` | M1 | Protocol conformance test | Baseline |
 | `INT-100` | Maintain a declarative profile of known client quirks | MUST | `F-07` | M4 | Protocol conformance + device test | Baseline |
 | `INT-101` | A quirk workaround shall never violate a normative requirement of the UPnP or DLNA… | MUST | `F-07` | M4 | Protocol conformance test | Baseline |
 | `INT-102` | Record every device-test result — device model | MUST | `F-07` | M4 | Protocol conformance + device test | Baseline |
@@ -226,13 +226,13 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SEC-063` | Bound the number of open file descriptors used by transfers and shall release them on… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-064` | Bound the size of its on-disk cache and shall evict entries when the limit is exceeded. | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-065` | Never allocate memory proportional to a client-supplied length field without validating it… | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-066` | Parse media metadata and generate thumbnails in a separate | MUST | `—` | M0 | Negative security test | Baseline |
-| `SEC-067` | Bound the declared dimensions of an image before allocating any buffer for it | MUST | `—` | M0 | Negative security test | Baseline |
-| `SEC-068` | Treat playlist entries as untrusted paths, shall resolve and contain them, and shall refuse… | MUST | `—` | M0 | Negative security test | Baseline |
-| `SEC-069` | Not resolve or follow a macOS Finder alias as if it were a symbolic link; aliases shall be… | MUST | `—` | M0 | Negative security test | Baseline |
-| `SEC-070` | Offer the corresponding source of the running build | MUST | `—` | M0 | Negative security test | Baseline |
-| `SEC-071` | Accept only a `Host` header that matches a configured local host name | MUST | `—` | M0 | Negative security test | Baseline |
-| `SEC-072` | Require a custom, non-standard request header on every state-changing administration request,… | MUST | `—` | M0 | Negative security test | Baseline |
+| `SEC-066` | Parse media metadata and generate thumbnails in a separate | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-067` | Bound the declared dimensions of an image before allocating any buffer for it | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-068` | Treat playlist entries as untrusted paths, shall resolve and contain them, and shall refuse… | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-069` | Not resolve or follow a macOS Finder alias as if it were a symbolic link; aliases shall be… | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-070` | Offer the corresponding source of the running build | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-071` | Accept only a `Host` header that matches a configured local host name | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-072` | Require a custom, non-standard request header on every state-changing administration request,… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-090` | Contain no telemetry, no analytics and no crash reporting to any third party. | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-091` | Make no outbound network connection other than the SSDP multicast announcements and responses | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-092` | Not attempt to configure the user's router, and shall not speak the UPnP Internet Gateway… | MUST | `F-16` | M1 | Negative security test | Baseline |
@@ -290,23 +290,23 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `OPS-001` | Provide a command that runs the daemon in the foreground with structured log output on standard… | MUST | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-002` | Provide a command that reports the current status: version | MUST | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-003` | Provide a command that scans a root on demand and reports progress and errors. | MUST | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-004` | Provide a command that lists the known network interfaces and which ones would be used for… | MUST | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-005` | Provide a command that prints the device description and the SSDP headers it would advertise | SHOULD | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-006` | Write logs with a timestamp, a level, a component and a structured message. | MUST | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-007` | Log output shall be redactable: file system paths | MUST | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-008` | Shut down gracefully on `SIGINT` and `SIGTERM` | MUST | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-009` | Support running as a background service on macOS (launchd) | SHOULD | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-010` | Support a configuration file that sets the service identity | SHOULD | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-011` | Provide `--help` and `--version` output that names the version | MUST | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-012` | Expose its version in the `SERVER` header and in the device description. | MUST | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-013` | Write a structured diagnostic report (anonymised) that a user can attach to a bug report. | SHOULD | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-014` | Return a distinct exit code for configuration errors | SHOULD | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-015` | Never require root privileges to serve media from the user's own directories. | MUST | `F-13` | M0 | Automated CLI test | Baseline |
-| `OPS-016` | Expose an unauthenticated route that serves the corresponding source of the exact running build | MUST | `—` | M0 | Automated CLI test | Baseline |
-| `OPS-017` | Report the exact source revision it was built from in its status output and in the source offer. | MUST | `—` | M0 | Automated CLI test | Baseline |
+| `OPS-001` | Provide a command that runs the daemon in the foreground with structured log output on standard… | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-002` | Provide a command that reports the current status: version | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-003` | Provide a command that scans a root on demand and reports progress and errors. | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-004` | Provide a command that lists the known network interfaces and which ones would be used for… | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-005` | Provide a command that prints the device description and the SSDP headers it would advertise | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-006` | Write logs with a timestamp, a level, a component and a structured message. | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-007` | Log output shall be redactable: file system paths | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-008` | Shut down gracefully on `SIGINT` and `SIGTERM` | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-009` | Support running as a background service on macOS (launchd) | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-010` | Support a configuration file that sets the service identity | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-011` | Provide `--help` and `--version` output that names the version | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-012` | Expose its version in the `SERVER` header and in the device description. | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-013` | Write a structured diagnostic report (anonymised) that a user can attach to a bug report. | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-014` | Return a distinct exit code for configuration errors | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-015` | Never require root privileges to serve media from the user's own directories. | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-016` | Expose an unauthenticated route that serves the corresponding source of the exact running build | MUST | `F-14` | M2 | Automated CLI test | Baseline |
+| `OPS-017` | Report the exact source revision it was built from in its status output and in the source offer. | MUST | `F-14` | M2 | Automated CLI test | Baseline |
 | `OPS-020` | Bind to the loopback interface only by default and shall refuse to start when configured… | MUST | `F-14` | M2 | Automated CLI test | Baseline |
 | `OPS-021` | Require a per-installation random token for every state-changing request. | MUST | `F-14` | M2 | Automated CLI test | Baseline |
 | `OPS-022` | Validate the `Host` header against the loopback names to resist DNS-rebinding attacks. | MUST | `F-14` | M2 | Automated CLI test | Baseline |
@@ -340,24 +340,24 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `PLT-001` | Not depend on any OS-specific crate and shall compile on macOS | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-002` | Provide a build matrix covering macOS (arm64, x86_64), Linux (x86_64) and Windows (x86_64). | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-003` | All OS-specific behaviour shall be reachable through a documented trait with a default… | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-004` | Support macOS Apple Silicon natively without a Rosetta translation requirement. | MUST | `F-15` | M2 | Build matrix | Baseline |
-| `PLT-005` | Detect the case sensitivity, the Unicode normalisation behaviour and the volume identity of… | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-006` | Run correctly when the user's home directory or a media root contains spaces | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-007` | Windows path handling shall support long paths and shall reject path traversal attempts using… | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-008` | Not expose absolute file system paths to clients. | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-009` | Not require a C toolchain beyond what the platform already provides | SHOULD | `—` | M0 | Build matrix | Baseline |
-| `PLT-010` | Behave identically on all platforms with respect to protocol behaviour | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-011` | Treat the mount, unmount and remount of a volume as a first-class event and shall re-key the… | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-012` | Treat a permission error on a subtree as a quarantined subtree that needs consent | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-013` | On macOS the always-on server shall run as a system-context launchd daemon and the user… | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-014` | Be built as a universal binary for Apple Silicon and Intel. | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-015` | Declare long-path support in the executable manifest and shall document that the system-wide… | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-016` | Provide native packages and shall not use a filesystem-sandboxed package format as its primary… | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-017` | Obtain the user's consent for folders that the operating system protects (macOS privacy prompts | MUST | `—` | M0 | Build matrix | Baseline |
-| `PLT-018` | Not require elevated privileges to serve media from the user's own directories. | MUST | `—` | M0 | Build matrix | Baseline |
+| `PLT-001` | Not depend on any OS-specific crate and shall compile on macOS | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-002` | Provide a build matrix covering macOS (arm64, x86_64), Linux (x86_64) and Windows (x86_64). | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-003` | All OS-specific behaviour shall be reachable through a documented trait with a default… | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-004` | Support macOS Apple Silicon natively without a Rosetta translation requirement. | MUST | `F-15` | M0 | Build matrix | Baseline |
+| `PLT-005` | Detect the case sensitivity, the Unicode normalisation behaviour and the volume identity of… | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-006` | Run correctly when the user's home directory or a media root contains spaces | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-007` | Windows path handling shall support long paths and shall reject path traversal attempts using… | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-008` | Not expose absolute file system paths to clients. | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-009` | Not require a C toolchain beyond what the platform already provides | SHOULD | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-010` | Behave identically on all platforms with respect to protocol behaviour | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-011` | Treat the mount, unmount and remount of a volume as a first-class event and shall re-key the… | MUST | `F-22` | M3 | Build matrix | Baseline |
+| `PLT-012` | Treat a permission error on a subtree as a quarantined subtree that needs consent | MUST | `F-22` | M3 | Build matrix | Baseline |
+| `PLT-013` | On macOS the always-on server shall run as a system-context launchd daemon and the user… | MUST | `F-22` | M3 | Build matrix | Baseline |
+| `PLT-014` | Be built as a universal binary for Apple Silicon and Intel. | MUST | `F-22` | M3 | Build matrix | Baseline |
+| `PLT-015` | Declare long-path support in the executable manifest and shall document that the system-wide… | MUST | `F-22` | M3 | Build matrix | Baseline |
+| `PLT-016` | Provide native packages and shall not use a filesystem-sandboxed package format as its primary… | MUST | `F-22` | M3 | Build matrix | Baseline |
+| `PLT-017` | Obtain the user's consent for folders that the operating system protects (macOS privacy prompts | MUST | `F-22` | M3 | Build matrix | Baseline |
+| `PLT-018` | Not require elevated privileges to serve media from the user's own directories. | MUST | `F-22` | M3 | Build matrix | Baseline |
 
 ## DOC — Documentation and developer experience
 
@@ -388,48 +388,48 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SUP-006` | Any dependency that requires a native toolchain or ships a licence with distribution… | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
 | `SUP-007` | Not vendor third-party source code into the repository without a record of its licence and… | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
 | `SUP-008` | Carry no `unsafe` code unless an ADR approves it with a written safety argument. | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
-| `SUP-009` | Carry a defined code-signing and notarisation plan before the first stable release | MUST | `—` | M0 | Licence and advisory gate | Baseline |
+| `SUP-009` | Carry a defined code-signing and notarisation plan before the first stable release | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
 
 ## REL — Reliability
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `REL-001` | An abrupt termination of the server shall never modify a media original; after a restart the… | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
-| `REL-002` | A media root that is offline shall be reported as unavailable and shall not be silently removed… | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
-| `REL-003` | A network interface change, a sleep/wake cycle and a client disconnect shall not leak sockets… | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
-| `REL-004` | Survive a seven-day soak on a defined mixed workload without a crash | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
-| `REL-005` | A configuration change shall be validated, applied atomically and recoverable; an invalid… | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
-| `REL-006` | Active transfers shall survive a change of the presentation mode in the user interface | MUST | `F-18` | M1 | Fault-injection and soak test | Baseline |
+| `REL-001` | An abrupt termination of the server shall never modify a media original; after a restart the… | MUST | `F-18` | M4 | Fault-injection and soak test | Baseline |
+| `REL-002` | A media root that is offline shall be reported as unavailable and shall not be silently removed… | MUST | `F-18` | M4 | Fault-injection and soak test | Baseline |
+| `REL-003` | A network interface change, a sleep/wake cycle and a client disconnect shall not leak sockets… | MUST | `F-18` | M4 | Fault-injection and soak test | Baseline |
+| `REL-004` | Survive a seven-day soak on a defined mixed workload without a crash | MUST | `F-18` | M4 | Fault-injection and soak test | Baseline |
+| `REL-005` | A configuration change shall be validated, applied atomically and recoverable; an invalid… | MUST | `F-18` | M4 | Fault-injection and soak test | Baseline |
+| `REL-006` | Active transfers shall survive a change of the presentation mode in the user interface | MUST | `F-18` | M4 | Fault-injection and soak test | Baseline |
 
 ## RES — Adaptive resource management
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `RES-001` | Arbitrate streaming, discovery, metadata reading, indexing, artwork generation, optional… | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
-| `RES-002` | Every worker pool, queue, cache and connection count shall have a documented bound, a… | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
-| `RES-003` | Indexing shall yield when streaming latency, CPU, disk input/output or memory pressure crosses… | SHOULD | `F-18` | M1 | Resource-pressure test | Baseline |
-| `RES-004` | A slow client shall not be mistaken for server overload | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
-| `RES-005` | Live in the shared core and not in a user interface; platform adapters shall supply… | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
-| `RES-006` | Local resource metrics shall be opt-in to view and export | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
-| `RES-007` | When resources are insufficient the server shall fail gracefully with a meaningful explanation;… | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
-| `RES-008` | On a battery-powered or thermally constrained machine the server may reduce background work | SHOULD | `F-18` | M1 | Resource-pressure test | Baseline |
-| `RES-009` | Start-up, scanning, sleep/wake and shutdown shall release workers and file handles predictably. | MUST | `F-18` | M1 | Resource-pressure test | Baseline |
+| `RES-001` | Arbitrate streaming, discovery, metadata reading, indexing, artwork generation, optional… | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
+| `RES-002` | Every worker pool, queue, cache and connection count shall have a documented bound, a… | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
+| `RES-003` | Indexing shall yield when streaming latency, CPU, disk input/output or memory pressure crosses… | SHOULD | `F-18` | M2 | Resource-pressure test | Baseline |
+| `RES-004` | A slow client shall not be mistaken for server overload | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
+| `RES-005` | Live in the shared core and not in a user interface; platform adapters shall supply… | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
+| `RES-006` | Local resource metrics shall be opt-in to view and export | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
+| `RES-007` | When resources are insufficient the server shall fail gracefully with a meaningful explanation;… | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
+| `RES-008` | On a battery-powered or thermally constrained machine the server may reduce background work | SHOULD | `F-18` | M2 | Resource-pressure test | Baseline |
+| `RES-009` | Start-up, scanning, sleep/wake and shutdown shall release workers and file handles predictably. | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
 
 ## LIFE — Service lifecycle and network recovery
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `LIFE-001` | Expose the distinct states *Starting*, *Ready*, *Degraded*, *Suspended*, *Recovering*,… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
-| `LIFE-002` | Handle a sleep/wake cycle without spinning, leaking resources or reporting a "ready" state it… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
-| `LIFE-003` | Handle a change of interface, address, subnet or route, and shall never widen its network… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
-| `LIFE-004` | When a configured interface disappears the server shall enter the *Degraded* or *Recovering*… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
-| `LIFE-005` | Detect the loss and the return of a network or removable volume | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
-| `LIFE-006` | A transfer interrupted by a real sleep or a real network loss shall end in a way that is… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
-| `LIFE-007` | Retry discovery and rebinding with a bounded backoff and jitter | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
-| `LIFE-008` | Recover from an abnormal termination with an atomic state and either a consistent catalogue or… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
-| `LIFE-009` | The administration surface and the user interface shall reflect the effective interface | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
-| `LIFE-010` | The installation of the login-item service and the permissions it needs shall be explicit and… | MUST | `F-13` | M0 | Lifecycle and recovery test | Baseline |
-| `LIFE-011` | Keep a local, redacted timeline of network changes and recovery events that the user may export… | SHOULD | `F-13` | M0 | Lifecycle and recovery test | Baseline |
+| `LIFE-001` | Expose the distinct states *Starting*, *Ready*, *Degraded*, *Suspended*, *Recovering*,… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-002` | Handle a sleep/wake cycle without spinning, leaking resources or reporting a "ready" state it… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-003` | Handle a change of interface, address, subnet or route, and shall never widen its network… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-004` | When a configured interface disappears the server shall enter the *Degraded* or *Recovering*… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-005` | Detect the loss and the return of a network or removable volume | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-006` | A transfer interrupted by a real sleep or a real network loss shall end in a way that is… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-007` | Retry discovery and rebinding with a bounded backoff and jitter | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-008` | Recover from an abnormal termination with an atomic state and either a consistent catalogue or… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-009` | The administration surface and the user interface shall reflect the effective interface | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-010` | The installation of the login-item service and the permissions it needs shall be explicit and… | MUST | `F-15` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-011` | Keep a local, redacted timeline of network changes and recovery events that the user may export… | SHOULD | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 
 ## MB — macOS menu bar application
 

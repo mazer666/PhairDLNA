@@ -45,6 +45,8 @@ PhairDLNA/
 │   │       ├── http/           media delivery, range handling, MIME
 │   │       ├── security/       path containment, redaction, limits
 │   │       ├── platform/       platform trait + per-OS implementations
+│   │       ├── scheduler/      priority classes, bounded pools, backpressure
+│   │       ├── lifecycle/      server states, sleep/wake and network recovery
 │   │       ├── logging/        structured logging + redaction
 │   │       └── error.rs        the crate error type
 │   ├── phairdlna-cli/         headless daemon and command line

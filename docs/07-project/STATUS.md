@@ -65,16 +65,15 @@ Everything else in this repository is **documented and unmeasured**. In particul
 | Number | Value |
 | --- | --- |
 | Requirements | 341 — 279 MUST, 57 SHOULD, 5 COULD |
-| Feature specifications | 21 (F-01 … F-19 plus two proposals, F-20 / F-21) |
-| Acceptance criteria | 298 across the 21 specifications |
-| Glossary entries | 90 terms across five vocabularies |
-| Independent reviews | 2 (a beginner-experience review and a consistency review) |
-| Acceptance criteria | > 300 across the feature specifications |
+| Feature specifications | 22 (F-01 … F-19, F-22, plus two proposals, F-20 / F-21) |
+| Acceptance criteria | 312 across the 20 baseline specifications (F-20 and F-21 are proposals and define none) |
+| Glossary entries | 77 terms across five vocabularies |
+| Independent reviews | 2 — a beginner-experience review and a consistency review, both in `../05-quality/reviews/` |
 | Protocol conformance checks | 26 (`PC-01` … `PC-26`) |
 | Threats modelled | 28 (`SEC-TH-01` … `SEC-TH-28`) |
 | Quality gates | 28 (`QG-01` … `QG-28`), of which 11 can run today |
 | Milestone gates | 7 (`G0` … `G6`) |
-| Architecture decisions | The ADRs in `../02-architecture/adr/` + 17 decision-log entries |
+| Architecture decisions | The ADRs in `../02-architecture/adr/` + 23 decision-log entries |
 | Open owner decisions | 12 (`OD-01` … `OD-12`) |
 | Risks | 13 (`R-01` … `R-13`) |
 | Archived baselines | 2 snapshots, each with a SHA-256 manifest |

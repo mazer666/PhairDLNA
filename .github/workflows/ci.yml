@@ -43,6 +43,9 @@ jobs:
       - name: QG-02 lints
         run: cargo clippy --workspace --all-targets -- -D warnings
 
+      - name: QG-03 no unsafe code
+        run: ./scripts/check-no-unsafe.sh
+
       - name: QG-04 build
         run: cargo build --workspace --all-targets
 

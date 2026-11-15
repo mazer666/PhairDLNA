@@ -93,7 +93,7 @@ recorded, may be accepted with a reason.
 | QG-16 | Snapshot review | `cargo insta test --check` | blocker | M1+ | planned | `INSTA_UPDATE=no`, `INSTA_FORCE_PASS` unset |
 | QG-17 | DIDL-Lite conformance | *planned* — an `xtask` command validating against the vendored `didl-lite.xsd` via the `xmlschema` crate | blocker | M1+ | planned | Arrives with the DIDL-Lite writer |
 | QG-18 | Property tests | `cargo nextest run --workspace proptest` | blocker | M1+ | planned | Escaping round-trip; path containment |
-| QG-19 | Fuzz smoke | `cargo fuzz run <target> -- -runs=N` | blocker | M4 | planned | Each target has a committed seed corpus |
+| QG-19 | Fuzz smoke | `cargo fuzz run <target> -- -runs=N` | blocker | M4 | planned | The six targets and their seed corpora arrive together; neither exists yet |
 | QG-20 | Miri | `cargo +nightly miri test` | warning | M1+ | planned | Only meaningful where `unsafe` exists; mostly a "no unsafe" proof |
 | QG-21 | Benchmark baseline | `cargo bench --workspace -- --save-baseline` | blocker | M1+ | planned | Compared against the recorded baseline |
 | QG-22 | Soak test | `scripts/soak.sh --duration 7d` | blocker | release | planned | RSS, fd count, thread count, index growth, dropped connections |
@@ -114,9 +114,12 @@ The **State** column says whether the gate can run today. `exists` means the com
 is in the repository and works; `planned` means it arrives with the code it guards.
 A gate in the `planned` state is reported as `NOT RUN — <reason>`, never as a pass.
 
-Four gates have a script of their own and were observed running on 2026-11-14:
-**QG-03** (no `unsafe`), **QG-11** (link check) and **QG-13** (file size), plus the
-formatting, lint, build and test gates that come with the Rust toolchain.
+Three gates have a script of their own and were observed running on 2026-11-14:
+**QG-03** (no `unsafe`), **QG-11** (link check) and **QG-13** (file size). The
+formatting, lint, build and test gates come with the Rust toolchain and are marked
+`exists` for the same reason. The generator script
+`scripts/generate_requirement_views.py` is **not** a quality gate: it is a
+documentation generator that the CI runs as a check step.
 
 ### 3.1 What each gate must prove
 

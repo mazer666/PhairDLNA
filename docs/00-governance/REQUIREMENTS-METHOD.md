@@ -30,6 +30,13 @@ Every requirement has exactly one stable ID. The prefix names the domain:
 | `LIFE` | Service lifecycle and network recovery | `LIFE-001` |
 | `MB` | The macOS menu bar application | `MB-001` |
 
+A second, separate namespace holds **user stories**: `US-001` … `US-017`. A story
+describes a situation ("as a collector, I want several folders to appear as one
+library"); a requirement is a single normative sentence that can be verified. Stories
+carry no priority, no owning feature and no verification method, and they are not part
+of the requirement index. `../01-product/USER-JOURNEYS.md` maps each story to the
+requirements that satisfy it.
+
 **Rules**
 
 1. An ID is never reused for a different requirement, and never recycled after deletion.

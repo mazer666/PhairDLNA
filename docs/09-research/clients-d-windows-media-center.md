@@ -1,4 +1,6 @@
 # Windows Media Center (WMC) and Windows Media Player / "Media Player" as UPnP/DLNA Control Points
+Status: **Research input — evidence, not norm** · Owner role: Interoperability Specialist · Version/date: 1.0 / 2026-11-14
+> Committed so that every citation in the feature specifications resolves. Where this document and a requirement disagree, the requirement wins.
 
 Research subject for **PhairDLNA** — a new pure-Rust DLNA/UPnP AV MediaServer.
 

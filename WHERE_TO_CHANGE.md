@@ -62,6 +62,7 @@ visible and so that a contributor can see where their change will land.
 | `crates/phairdlna-core/src/security/` | Path containment, redaction, limits | F-16 |
 | `crates/phairdlna-core/src/platform/` | Platform traits and per-OS implementations | F-08, F-13, F-15 |
 | `crates/phairdlna-core/src/scheduler/` | Priority classes, bounded pools, backpressure | F-18 |
+| `crates/phairdlna-core/src/lifecycle/` | Server states, sleep/wake and network recovery | F-13 |
 | `crates/phairdlna-core/src/logging/` | Structured logging and redaction | F-13, F-16 |
 | `crates/phairdlna-core/src/error.rs` | The crate error type | — |
 | `crates/phairdlna-admin/` | The optional loopback administration surface | F-14 |

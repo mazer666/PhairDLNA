@@ -18,8 +18,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: macOS (stable)
+          - name: macOS (stable, Apple Silicon)
             os: macos-latest
+            toolchain: stable
+          # PLT-002 requires macOS on Intel as well. The hosted runner set is
+          # Apple Silicon only, so this entry is reported as
+          # "NOT RUN - no Intel runner available" until one exists; it is never
+          # quietly dropped from the matrix.
+          - name: macOS (stable, Intel)
+            os: macos-13
             toolchain: stable
           - name: Linux (stable)
             os: ubuntu-latest

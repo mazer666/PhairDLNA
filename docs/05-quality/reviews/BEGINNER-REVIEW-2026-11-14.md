@@ -1,4 +1,5 @@
 # Beginner experience review — PhairDLNA
+Status: Complete — all findings addressed · Owner role: Independent reviewer · Version/date: 1.0 / 2026-11-15
 
 Reviewer: Documentation & Beginner Experience Reviewer (general-purpose agent)
 Date: 2026-11-14

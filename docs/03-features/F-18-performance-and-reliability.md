@@ -4,6 +4,8 @@ Status: Draft
 Owner role: QA / Performance Engineer
 Version/date: 0.1 / 2026-11-14
 Requirements: PERF-001 … PERF-015, REL-001 … REL-006, RES-001 … RES-009
+(`PERF-003` … `PERF-005`, `PERF-008`, `PERF-009` and `PERF-012` are owned by F-09;
+`PERF-004` is shared with F-09 and F-10, and the index assigns it to F-09.)
 Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
 Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 
@@ -146,6 +148,10 @@ changing the product's behaviour is not.
 **RES-009** — Start-up, scanning, sleep/wake and shutdown shall release workers and
 file handles predictably.
 
+**PERF-014** — The server shall survive a scan of a root that contains a broken or slow
+network share without blocking browse requests. [DESIGN] The scan runs in its own
+bounded workers; a share that stops answering must not hold the request path.
+
 **REL-001** — An abrupt termination shall never modify a media original; after a
 restart the catalogue shall be consistent or safely rebuildable.
 
@@ -287,6 +293,7 @@ explained, not a footnote.
 | AC-14 | Given an invalid configuration, when the server starts, then it refuses to start and names the offending field, and the previous configuration is unchanged | `REL-005` | Negative test | `crates/phairdlna-cli/tests/invalid_configuration.rs` |
 | AC-15 | Given an active transfer, when the user switches the presentation mode, then the transfer continues uninterrupted | `REL-006` | Integration test | `crates/phairdlna-mac/tests/mode_switch.rs` |
 | AC-16 | Given the same workload on two machines with different storage, when both are measured with the same method, then the numbers are comparable because the hardware profile is recorded | `PERF-010`, `PERF-011` | Manual review | `docs/05-quality/PERFORMANCE-BUDGETS.md` |
+| AC-17 | Given a root that contains a network share which stops answering, when a browse request arrives for a folder on another root, then the request is served within the browse budget and the stuck scan is reported | `PERF-014`, `RES-003` | Integration test with a stalling share | `crates/phairdlna-core/tests/slow_share_does_not_block.rs` |
 | AC-17 | Given ten simultaneous direct-play clients, when the streams run and are then closed, then the resident memory does not grow without bound and the memory attributable to one stream stays within the documented bound | `PERF-006`, `PERF-007` | Benchmark | `crates/phairdlna-core/benches/ten_streams.rs` |
 
 ---

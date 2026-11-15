@@ -61,6 +61,13 @@ Additional binding rules:
   what changed.
 - **No silent deletion of approved requirements.** Supersede with traceability and
   preserve the snapshot in `99-archive/`.
+- **A generated view is not a duplicate.** A document that is generated from the
+  single definition of a fact is a *view* of it, not a second statement of it. The
+  requirement index and the traceability matrix are generated from the requirement
+  catalogue by `scripts/generate_requirement_views.py`; the definition lives only in
+  the catalogue, and the generator refuses to drift from it (`--check` fails when it
+  would). Such a document carries the marker "generated — do not edit by hand" and is
+  regenerated, never edited.
 - Git history is *not* a substitute for an explicitly archived baseline.
 - No duplicate or conflicting normative documents. Where a legacy document exists, one of
   the two must state that it is superseded and link to the other.

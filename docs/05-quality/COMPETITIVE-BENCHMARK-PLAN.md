@@ -1,4 +1,5 @@
 # Competitive benchmark protocol
+Status: Draft proposal — no measurements performed · Owner role: QA / Performance Engineer · Version/date: 1.0 / 2026-11-15
 
 > **Non-normative.** This document is research and strategy. It defines **no**
 > requirement IDs and creates no obligation. The binding requirements are in

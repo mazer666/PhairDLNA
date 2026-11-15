@@ -1,4 +1,6 @@
 # PhairDLNA — DLNA / UPnP AV MediaServer Standards Brief
+Status: **Research input — evidence, not norm** · Owner role: Interoperability Specialist · Version/date: 1.0 / 2026-11-14
+> Committed so that every citation in the feature specifications resolves. Where this document and a requirement disagree, the requirement wins.
 
 **Status:** Requirements phase. No implementation implied.
 **Scope:** What a conforming UPnP AV `MediaServer` (a.k.a. DLNA **DMS**) must implement so that DLNA DMRs and plain UPnP AV control points can browse, search, and pull media.

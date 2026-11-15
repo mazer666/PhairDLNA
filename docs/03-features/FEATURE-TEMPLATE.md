@@ -1,4 +1,5 @@
 # FEATURE-XXX — <title>
+Status: Template · Owner role: Product Owner · Version/date: 1.0 / 2026-11-15
 
 Status: Draft
 Owner role: Product/Requirements

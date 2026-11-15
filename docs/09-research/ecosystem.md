@@ -1,4 +1,6 @@
 # DLNA / UPnP AV MediaServer Ecosystem & Client Compatibility Research
+Status: **Research input — evidence, not norm** · Owner role: Product Owner · Version/date: 1.0 / 2026-11-14
+> Committed so that every citation in the feature specifications resolves. Where this document and a requirement disagree, the requirement wins.
 
 **Project:** PhairDLNA — a new, from-scratch, pure-Rust DLNA/UPnP AV Media Server (macOS first, AGPL, privacy-first)
 **Phase:** Requirements — no implementation

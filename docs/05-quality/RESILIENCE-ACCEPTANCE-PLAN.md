@@ -1,10 +1,12 @@
 # Cross-cutting resilience and usability acceptance plan
+Status: Draft proposal — all results NOT RUN · Owner role: QA / Performance Engineer · Version/date: 1.0 / 2026-11-15
 
-> **Non-normative plan.** This is a proposed acceptance plan. The identifiers below
-> (`RES-*`, `LIFE-*`, `MB-*`) are **local to this document** and are not canonical
-> requirement IDs. The binding requirements live in
-> [`../01-product/TECHNICAL-REQUIREMENTS.md`](../01-product/TECHNICAL-REQUIREMENTS.md);
-> the case identifiers of the quality gates are in
+> **Non-normative plan.** This is a proposed acceptance plan. Its case identifiers
+> (`RES-A01`, `LIFE-A01`, `MB-A01`, …) are **local to this document** and are not
+> requirement IDs. The canonical requirement identifiers are `RES-nnn`, `LIFE-nnn` and
+> `MB-nnn`, defined in
+> [`../01-product/TECHNICAL-REQUIREMENTS.md`](../01-product/TECHNICAL-REQUIREMENTS.md)
+> and owned by F-18 and F-15; the quality-gate identifiers are in
 > [`QUALITY-GATES.md`](QUALITY-GATES.md).
 
 

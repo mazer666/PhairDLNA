@@ -26,8 +26,20 @@ checked against its origin.
 ## 2. What these documents are, and are not
 
 - They are **research**: what the sources say, with the URL that was actually
-  fetched, and a label of `VERIFIED`, `OBSERVED`, `ASSUMPTION` or `OPEN` on every
-  claim.
+  fetched. **Each brief declares its own tags in its own "how to read this document"
+  section**, and they are not the same set:
+
+  | Brief | Its tags |
+  | --- | --- |
+  | `standards.md` | `STANDARD`, `OBSERVED`, `ASSUMPTION`, `OPEN` |
+  | `platform-integration.md` | `VERIFIED`, `ASSUMPTION`, `OPEN` |
+  | `security-landscape.md` | `VERIFIED`, `ASSUMPTION`, `OPEN` |
+  | `qa-performance.md` | `VERIFIED`, `ASSUMPTION`, `OPEN` |
+  | `ecosystem.md` | `OBSERVED`, `ASSUMPTION`, `OPEN` |
+
+  The project's own labels — `[SPEC]`, `[OBSERVED]`, `[DESIGN]`, `[OPEN]` — are
+  defined in `../03-features/FEATURE-TEMPLATE.md` and mean something slightly
+  different: they classify a *requirement*, not a piece of research.
 - They are **not normative**. A requirement in
   `../01-product/TECHNICAL-REQUIREMENTS.md` is the normative text. Where a research
   document and a requirement disagree, the requirement wins and the research

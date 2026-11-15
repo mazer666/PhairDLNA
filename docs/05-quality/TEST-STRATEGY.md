@@ -108,7 +108,8 @@ Manual, structured, recorded. The protocol is in
 
 ## 6. Fuzzing
 
-Six targets, each with a committed seed corpus:
+Six targets are planned. Their seed corpora arrive with them — there is no `fuzz/`
+directory in the repository yet:
 
 | Target | Input |
 | --- | --- |

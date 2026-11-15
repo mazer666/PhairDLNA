@@ -1,4 +1,5 @@
 # Usability and accessibility requirements
+Status: Proposed — pending owner approval · Owner role: Product Owner · Version/date: 1.0 / 2026-11-15
 
 > **Non-normative.** This document is research and strategy. It defines **no**
 > requirement IDs and creates no obligation. The binding requirements are in

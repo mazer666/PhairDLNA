@@ -1,4 +1,5 @@
 # Competitive landscape and differentiation — 2026-11-14
+Status: Research — non-normative · Owner role: Product Owner · Version/date: 1.0 / 2026-11-15
 
 > **Non-normative.** This document is research and strategy. It defines **no**
 > requirement IDs and creates no obligation. The binding requirements are in

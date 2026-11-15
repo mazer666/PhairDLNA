@@ -33,7 +33,7 @@ so that I can trust the project without trusting anybody's word.
 
 ## 2. Scope
 
-**In scope** — the gate matrix (QG-01 … QG-27) with its commands, severities and result labels; the negative test that each gate must have; the
+**In scope** — the gate matrix (QG-01 … QG-28) with its commands, severities and result labels; the negative test that each gate must have; the
 code-size, complexity and error-handling standards the gates enforce; the documentation structure, the navigation path, the link check and the archive
 rule; the supply-chain controls (licence, advisory, ban, source, lock file, SBOM, checksum, `unsafe`, vendoring); the macOS signing and notarisation
 plan; the traceability chain from requirement to evidence; and the portability rules that keep the core buildable on the three supported
@@ -132,38 +132,14 @@ maintainer — a governance decision for a volunteer project, not a technical on
 
 ### 4.1 The gate matrix
 
-The canonical list is `../05-quality/QUALITY-GATES.md` §3; it is reproduced here because this feature owns the *developer experience* around it.
+The canonical list is `../05-quality/QUALITY-GATES.md` §3. It is **not** reproduced
+here: a second copy of the gate table is a second thing that can drift. This
+specification describes the developer experience *around* the gates; the gates
+themselves live in one place.
 Severity: **blocker** = the milestone cannot be accepted; **warning** = must be recorded, may be accepted with a reason.
 
 | ID | Gate | Command | Severity | Blocks |
 | --- | --- | --- | --- | --- |
-| QG-01 | Formatting | `cargo fmt --all -- --check` | blocker | every milestone |
-| QG-02 | Lints | `cargo clippy --workspace --all-targets -- -D warnings` | blocker | every milestone |
-| QG-03 | No `unsafe` | `cargo xtask check-unsafe` | blocker | every milestone |
-| QG-04 | Build | `cargo build --workspace --all-targets` | blocker | every milestone |
-| QG-05 | Unit tests | `cargo nextest run --workspace` | blocker | every milestone |
-| QG-06 | Integration tests | `cargo nextest run --workspace --test '*'` | blocker | M1+ |
-| QG-07 | Doctests | `cargo test --workspace --doc` | blocker | every milestone |
-| QG-08 | Licences | `cargo deny check licenses` | blocker | M0+ |
-| QG-09 | Advisories | `cargo audit` | blocker | M0+ |
-| QG-10 | Bans and sources | `cargo deny check bans sources` | blocker | M0+ |
-| QG-11 | Link check | `lychee --offline docs/ README.md` | blocker | every milestone |
-| QG-12 | Spelling | `typos` | warning | every milestone |
-| QG-13 | File size | `cargo xtask size-check` | blocker | M1+ |
-| QG-14 | Complexity | `clippy::excessive_nesting` + `clippy::too_many_lines` | blocker | M1+ |
-| QG-15 | Binary size | `cargo xtask binary-size` | warning | release |
-| QG-16 | Snapshot review | `cargo insta test --check` | blocker | M1+ |
-| QG-17 | DIDL-Lite conformance | `cargo xtask validate-didl` | blocker | M1+ |
-| QG-18 | Property tests | `cargo nextest run --workspace proptest` | blocker | M1+ |
-| QG-19 | Fuzz smoke | `cargo fuzz run <target> -- -runs=N` | blocker | M4 |
-| QG-20 | Miri | `cargo +nightly miri test` | warning | M1+ |
-| QG-21 | Benchmark baseline | `cargo bench --workspace -- --save-baseline` | blocker | M1+ |
-| QG-22 | Soak test | `scripts/soak.sh --duration 7d` | blocker | release |
-| QG-23 | Device matrix | `scripts/device-matrix.sh` | blocker | M1+ |
-| QG-24 | Public API compatibility | `cargo semver-checks` | blocker | release |
-| QG-25 | Outdated dependencies | `cargo outdated` | INFO | — |
-| QG-26 | Coverage | `cargo llvm-cov` | INFO | — |
-| QG-27 | Mutation testing | `cargo mutants` | INFO | — |
 
 ### 4.2 Result labels
 
@@ -484,12 +460,24 @@ layers), `../00-governance/` (the standards, the documentation policy, the requi
 
 ## 12. Open questions and decisions
 
-1. **[OPEN] The `cargo xtask` crate does not exist.** The gate matrix names `cargo xtask check-unsafe`, `cargo xtask size-check`, `cargo xtask
+1. **[CLOSED 2026-11-15] The `cargo xtask` crate does not exist.** *Resolved:* the
+   gates that need a command now name the script that exists — `scripts/check-no-unsafe.sh`
+   (QG-03), `scripts/check-doc-links.sh` (QG-11), `scripts/check-file-size.sh` (QG-13).
+   The remaining `xtask` commands (QG-15 binary size, QG-17 DIDL-Lite conformance) are
+   marked *planned* in the canonical register. **Last verified against the tree:
+   2026-11-15.**
+
+   Original finding: the gate matrix named `cargo xtask check-unsafe`, `cargo xtask size-check`, `cargo xtask
    binary-size` and `cargo xtask validate-didl`, but the workspace contains only `phairdlna-core` and `phairdlna-cli`, and the real gates that exist
    today are shell and Python scripts in `scripts/`. *Proposed reading, used here:* the matrix names the *intent* of each gate; the command is the one
    the repository actually runs, and the matrix is updated when the `xtask` crate is created. *Closes when:* the owner decides whether an `xtask`
    crate is created or the matrix is rewritten to name the scripts.
-2. **[OPEN] Gate-ID drift between the governance documents.** `PROJECT-STANDARDS.md` §2 cites `scripts/check-file-size.sh` as "QG-08" and the
+2. **[CLOSED 2026-11-15] Gate-ID drift between the governance documents.** *Resolved:*
+   `QUALITY-GATES.md` §3 is now the single register of the gate identifiers;
+   `PROJECT-STANDARDS.md` cites QG-13 and QG-14; the crate-boundary check has its own
+   identifier QG-28. **Last verified against the tree: 2026-11-15.**
+
+   Original finding: `PROJECT-STANDARDS.md` §2 cites `scripts/check-file-size.sh` as "QG-08" and the
    complexity check as "QG-09", while `QUALITY-GATES.md` has file size as **QG-13** and complexity as **QG-14**, with QG-08 = licences and QG-09 =
    advisories. The script's own header comment says QG-13. `ARCHITECTURE.md` §2 calls the crate-boundary check "QG-07", while QG-07 is the doctest
    gate and the boundary check has no gate ID at all. *Proposed decision, not in the baseline:* the gate matrix is canonical; the two governance
@@ -497,28 +485,39 @@ layers), `../00-governance/` (the standards, the documentation policy, the requi
 3. **[OPEN] The macOS signing decision.** Option A (ad-hoc-signed universal binary, no cost, some Gatekeeper friction) versus Option B (Developer ID +
    hardened runtime + notarisation, 99 USD/year and a named maintainer) is an owner decision with a governance dimension: the account is a person's
    legal identity in an AGPL volunteer project (platform-integration §3.2, §3.3). *Closes when:* the owner decides before the first stable release.
+   *Last verified against the tree: 2026-11-15.*
 4. **[OPEN] Where the notarisation plan is recorded.** SUP-009 says the plan "shall be recorded here", which this specification reads as §4.8. The
    canonical structure reserves `docs/08-releases/` for distribution and provenance. That directory exists (it holds `RELEASE-POLICY.md`) but contains no notarisation plan yet. *Proposed decision, not in
    the baseline:* the plan lives in this specification and the release documents link to it, rather than being duplicated (DOC-006). *Closes when:*
    the owner confirms.
+   *Last verified against the tree: 2026-11-15.*
 5. **[OPEN] The minimum supported Rust version versus the macOS menu bar crates.** The workspace pins `rust-version = "1.89"`, but `muda` and
    `tray-icon` — the evaluated menu bar crates — declare an MSRV of **1.90**, while `objc2-app-kit` needs 1.71 and the stable `notify` 8.x line needs
    1.88. *Proposed decision, not in the baseline:* either raise the MSRV to 1.90 or call `objc2-app-kit` directly for the status item and avoid
    `muda`. *Closes when:* the owner fixes the MSRV.
-6. **[OPEN] The link gate's command.** The matrix names `lychee --offline docs/ README.md`, but the repository already contains
+   *Last verified against the tree: 2026-11-15.*
+6. **[CLOSED 2026-11-15] The link gate's command.** *Resolved:* the register names
+   `scripts/check-doc-links.sh`, and `lychee` is named as the planned replacement for
+   the external links the script does not check. **Last verified against the tree:
+   2026-11-15.**
+
+   Original finding: the matrix names `lychee --offline docs/ README.md`, but the repository already contains
    `scripts/check-doc-links.sh`, which checks relative links with Python and needs no external tool. The matrix's note that `upnp.org` answers
    soft-404s with HTTP 200 is the reason the check must look at content type, not only at the status code. *Proposed reading, used here:* both exist;
    the script is the offline gate and `lychee` is the optional external cross-check. *Closes when:* the owner picks one.
-7. **[OPEN] Whether the requirement index and the traceability matrix may be generated files.** They are generated today by
+7. **[CLOSED 2026-11-15] Whether the requirement index and the traceability matrix may be generated files.** *Resolved:* `DOCUMENTATION-POLICY.md` §2 now states that a generated view is not a duplicate normative statement, and the generator refuses to drift from the definition it reads. They are generated today by
    `scripts/generate_requirement_views.py`, and the file says "Do not edit by hand". `DOCUMENTATION-POLICY.md` §2 does not mention generated
    documents, and its rule that "no duplicate normative statement" may be read as forbidding a generated copy of the requirement table. *Proposed
    reading, used here:* a generated view is not a duplicate normative statement, because the definition lives only in the requirement catalogue and
    the generator refuses to drift from it. *Closes when:* the policy states the rule for generated documents.
-8. **[OPEN] The build matrix does not yet name the Intel macOS target.** PLT-002 requires macOS on arm64 **and** macOS on x86_64, but
+   *Last verified against the tree: 2026-11-15.*
+8. **[CLOSED 2026-11-15] The build matrix did not name the Intel macOS target.** *Resolved:* `ci-matrix.yml` now names an Intel entry explicitly; while the hosted runner set has no Intel machine, that entry is reported as `NOT RUN — no Intel runner available` rather than being quietly dropped. PLT-002 requires macOS on arm64 **and** macOS on x86_64, but
    `ci-matrix.yml` names three operating systems — `macos-latest`, `ubuntu-latest`, `windows-latest` — and no Intel macOS target, so half of
    the required matrix is not covered by the workflow as it stands. *Proposed reading:* the matrix gains an explicit `x86_64-apple-darwin`
    entry, and an entry the runner set cannot provide is reported as `NOT RUN — <reason>` rather than being quietly left out. *Closes when:* the
    owner decides how the Intel target is run.
-9. **[OPEN] The CI workflow file names.** `CI-POLICY.md` §2 names `ci.yml` and `ci-matrix.yml` as "skeletons with the commands listed but the
+   *Last verified against the tree: 2026-11-15.*
+9. **[CLOSED 2026-11-15] The CI workflow file names.** *Resolved:* `CI-POLICY.md` §2 now describes the real workflows and names the real scripts, and the workflow gained the QG-03 step it promised. `CI-POLICY.md` §2 names `ci.yml` and `ci-matrix.yml` as "skeletons with the commands listed but the
    implementation not yet present", and names `scripts/check-requirement-views.sh` — a file that does not exist; the script in the repository is
    `scripts/generate_requirement_views.py`. *Closes when:* the policy is corrected to match the tree.
+   *Last verified against the tree: 2026-11-15.*
