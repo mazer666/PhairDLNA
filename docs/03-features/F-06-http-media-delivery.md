@@ -206,88 +206,110 @@ All figures below are **targets** with a measurement method; none is a measured 
 
 ## 10. Acceptance criteria and traceability
 
-All criteria below are *planned*; no test file exists yet.
+**Five of the thirteen criteria are implemented, three partly, and five are not.** The criteria
+that need a network runtime — the transfer table, the buffer and the event bus — cannot be
+implemented before F-13 and F-18, because the module under test does not exist yet. Every
+criterion that the *pure* layer can answer has a test; the state of each one is written below.
 
 **AC-01** — *Given* a media file of 1 000 bytes, *when* a client sends `GET` and then `HEAD`, *then* the responses are
 `200 OK` with `Content-Type` equal to the MIME type of the `res` element, `Content-Length: 1000` and `Accept-Ranges:
 bytes`, and the `HEAD` body is empty. Requirements: INT-080, INT-084, INT-086, INT-064 · Verification: protocol
-conformance test · Planned location: `crates/phairdlna-core/tests/http_media.rs`
+conformance test · Location: `crates/phairdlna-core/tests/http_media.rs` — **implemented**
 
 **AC-02** — *Given* the same file, *when* a client sends `GET` with `Range: bytes=100-199`, *then* the response is
 `206 Partial Content` with exactly 100 body bytes, `Content-Range: bytes 100-199/1000` and `Content-Length: 100`.
-Requirements: INT-081 · Verification: protocol conformance test · Planned location:
-`crates/phairdlna-core/tests/http_range.rs`
+Requirements: INT-081 · Verification: protocol conformance test · Location:
+`crates/phairdlna-core/tests/http_range.rs` — **implemented**
 
 **AC-03** — *Given* the same file, *when* a client sends `Range: bytes=1000-`, `Range: bytes=5000-6000` and a
 multi-range `Range: bytes=0-1,5-6`, *then* the first two are answered `416` with `Content-Range: bytes */1000`, and
 the third is a single `206` that is never `multipart/byteranges`. Requirements: INT-082, INT-083, INT-085 ·
-Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/http_range.rs`
+Verification: protocol conformance test · Location: `crates/phairdlna-core/tests/http_range.rs` —
+**implemented**
 
 **AC-04** — *Given* a `Range` header on a method other than `GET`, an unsupported range unit and an `If-Range` whose
 condition does not hold, *when* they are answered, *then* the `Range` header is ignored and the full representation is
-returned. Requirements: INT-092, INT-093 · Verification: protocol conformance test · Planned location:
-`crates/phairdlna-core/tests/http_range.rs`
+returned. Requirements: INT-092, INT-093 · Verification: protocol conformance test · Location:
+`crates/phairdlna-core/tests/http_range.rs` — **implemented**
 
 **AC-05** — *Given* a file whose extension and sniffed content disagree, *when* it is requested, *then* the
 `Content-Type` is the sniffed type, or `application/octet-stream` when neither is known; and *given* any media
 response, *then* it carries a `Content-Length` and no `Transfer-Encoding: chunked`, and a reused connection carries
 `Content-Length` or `Connection: close`. Requirements: INT-087, INT-088, INT-095 · Verification: protocol conformance
-test · Planned location: `crates/phairdlna-core/tests/http_media.rs`
+test · Location: `crates/phairdlna-core/tests/http_media.rs` — **partly implemented**: the type of
+the answer, the `Content-Length`, the absence of a chunked body and the connection handling are
+implemented; the *sniffing* of the content is F-10's, and the catalogue hands the type over
+already refined
 
 **AC-06** — *Given* a client that closes the connection after part of the body, *when* the server notices, *then* the transfer slot, the file descriptor and the buffer are released.
 Requirements: INT-089, FUN-046, FUN-050 · Verification: automated test · Planned location:
-`crates/phairdlna-core/tests/http_cancel.rs`
+`crates/phairdlna-core/tests/http_cancel.rs` — **planned**: the transfer slot, the file
+descriptor and the buffer belong to the runtime (F-13, F-18), which does not exist yet
 
 **AC-07** — *Given* a catalogue entry, *when* the client fetches the URL from the `res` element twice, *then* both requests return the same bytes and the URL keeps its meaning while the entry exists.
-Requirements: INT-090, INT-091 · Verification: automated test · Planned location:
-`crates/phairdlna-core/tests/http_media.rs`
+Requirements: INT-090, INT-091 · Verification: automated test · Location:
+`crates/phairdlna-core/tests/http_media.rs` — **partly implemented**: the URL keeps its meaning
+and the same bytes are answered; the reopening of a file that was removed and restored is the
+file layer's (F-08, F-13)
 
 **AC-08** — *Given* an unknown media identifier, an unsupported method and a malformed request line, *then* the answers are `404`, `405` and `400`, and no answer contains a path. Requirements: INT-094,
-SEC-013 · Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/http_negative.rs`
+SEC-013 · Verification: protocol conformance test · Location: `crates/phairdlna-core/tests/http_negative.rs`
+— **implemented**
 
 **AC-09** — *Given* a media response, *when* it is inspected, *then* it carries `transferMode.dlna.org`,
 `contentFeatures.dlna.org` and `realTimeInfo.dlna.org`; *given* an unsupported transfer mode, *then* the answer is
 `406`; *given* `getcontentFeatures.dlna.org: 1`, *then* the response carries `contentFeatures.dlna.org`, while the
 value `2` is answered `400`. Requirements: INT-096, INT-097, INT-099 · Verification: protocol conformance test ·
-Planned location: `crates/phairdlna-core/tests/http_dlna_headers.rs`
+Location: `crates/phairdlna-core/tests/http_dlna_headers.rs` — **implemented**
 
 **AC-10** — *Given* a media URL whose identifier resolves outside every configured root, *when* it is requested,
 *then* the server refuses to open the file and answers `404` without revealing the path. Requirements: INT-098,
-SEC-001 · Verification: automated test · Planned location: `crates/phairdlna-core/tests/http_path_containment.rs`
+SEC-001 · Verification: automated test · Location: `crates/phairdlna-core/tests/http_path_containment.rs`
+— **implemented** for the identifier and for the lexical check; the repetition of the check with
+the canonical path, after the symbolic links have been resolved, needs the file system and
+belongs to the runtime
 
 **AC-11** — *Given* the transfer limit of the configuration, *when* more clients than the limit request a stream,
 *then* the extra request is refused with `503 Service Unavailable` and a `Retry-After` header, and the running
 transfers are unaffected. Requirements: FUN-042, FUN-043 · Verification: automated test · Planned location:
-`crates/phairdlna-core/tests/http_limits.rs`
+`crates/phairdlna-core/tests/http_limits.rs` — **planned**: the transfer table is the runtime's
+(F-13, F-18)
 
 **AC-12** — *Given* a configured bandwidth limit, *when* a stream runs, *then* its sustained throughput does not
 exceed the limit and the other streams are not starved; *given* a slow client that stops reading, *then* resident
 memory grows by at most one buffer per active transfer. Requirements: FUN-044, FUN-050, PERF-007 · Verification:
-benchmark · Planned location: `qa/perf/scripts/run-bandwidth-limit.sh`, `run-slow-client.sh`
+benchmark · Planned location: `qa/perf/scripts/run-bandwidth-limit.sh`, `run-slow-client.sh` —
+**planned**: a benchmark needs a runtime to measure
 
 **AC-13** — *Given* an active transfer, *when* the position and duration are read through the event bus, *then* they match the bytes sent and the length of the file, and the MIME type is the one in the `res` element.
 Requirements: FUN-045, FUN-041 · Verification: automated test · Planned location:
-`crates/phairdlna-core/tests/http_transfer_state.rs`
+`crates/phairdlna-core/tests/http_transfer_state.rs` — **planned**: the event bus is the runtime's
+(ARCHITECTURE §3)
 
 ## 11. Test strategy and dependencies
 
-**Planned test locations** (none of these files exists yet):
+**Test locations.** The five rows below exist today; the three rows after them are still planned.
 
-| Purpose | Planned path |
-| --- | --- |
-| Media responses and headers | `crates/phairdlna-core/tests/http_media.rs` |
-| Range semantics (the table of qa-performance §5.4) | `crates/phairdlna-core/tests/http_range.rs` |
-| Negative requests and error codes | `crates/phairdlna-core/tests/http_negative.rs` |
-| DLNA headers | `crates/phairdlna-core/tests/http_dlna_headers.rs` |
-| Path containment | `crates/phairdlna-core/tests/http_path_containment.rs` |
-| Cancellation and transfer limits | `crates/phairdlna-core/tests/http_cancel.rs`, `http_limits.rs` |
-| Range-header and header-block fuzzing | `fuzz/fuzz_targets/fuzz_range_header.rs`, `fuzz_http_headers.rs` (qa-performance §4.2) |
-| Throughput, memory and device behaviour | `qa/perf/scripts/run-*.sh`; `qa/device-matrix.toml` |
+| Purpose | Path | State |
+| --- | --- | --- |
+| Media answers and headers | `crates/phairdlna-core/tests/http_media.rs` | **exists** |
+| Range semantics (the table of qa-performance §5.4) | `crates/phairdlna-core/tests/http_range.rs` | **exists** |
+| Negative requests and error codes | `crates/phairdlna-core/tests/http_negative.rs` | **exists** |
+| DLNA headers | `crates/phairdlna-core/tests/http_dlna_headers.rs` | **exists** |
+| Path containment | `crates/phairdlna-core/tests/http_path_containment.rs` | **exists** |
+| Cancellation and transfer limits | `crates/phairdlna-core/tests/http_cancel.rs`, `http_limits.rs` | planned |
+| Range-header and header-block fuzzing | `fuzz/fuzz_targets/fuzz_range_header.rs`, `fuzz_http_headers.rs` (qa-performance §4.2) | planned |
+| Throughput, memory and device behaviour | `qa/perf/scripts/run-*.sh`; `qa/device-matrix.toml` | planned |
 
 **Method.** The HTTP layer reads its bytes through a `MediaSource` trait, so the range, header and
 cancellation behaviour is testable against an in-memory source without a disk (ARCHITECTURE §4.7).
 The `Range` table of qa-performance §5.4 is the row-by-row test plan; the fuzz target checks that no
 `Range` header ever produces a range outside the resource.
+
+**What the tests prove.** The evaluator is pure: it reads no socket and no file, it decides the
+status, the headers and the slice of the file to read. A test therefore compares what the server
+promised with what the client receives — the fixture holds the bytes of the file, and the test reads
+exactly the slice the answer names (`crates/phairdlna-core/tests/support/media.rs`).
 
 **Dependencies.** F-05 (the `res` URI and the MIME type), F-08 and F-09 (the roots and the
 catalogue entry behind an identifier), F-12 (the limits in the configuration), F-16 (path
@@ -295,12 +317,59 @@ containment and the request bounds).
 
 ## 12. Open questions and decisions
 
+### 12.1 Decisions taken by the implementation (WP4)
+
+These decisions are implemented and covered by a test. The ones marked **[owner decision]** change a
+documented behaviour and are reported to the owner with this work package.
+
+**D-01 — A range that cannot be read is answered with `416` (INT-083).** A `Range` header whose unit is
+`bytes` and whose value cannot be read — `bytes=abc-def`, `bytes=200-100`, `bytes=-0` — is answered
+with `416` and `Content-Range: bytes */<size>`, never with a partial body. This follows INT-083, which
+is a MUST; question 1 below proposes the opposite and is still open. A header that names another
+*unit* (`items=0-10`) is ignored and the whole representation is returned, as INT-092 asks. *Implemented.*
+
+**D-02 — A set of ranges is served as one range (INT-085).** `bytes=0-1,5-6` is answered with `206` and
+the first range that the file can satisfy — never with a `multipart/byteranges` body. *Implemented.*
+
+**D-03 — The transfer mode of a content.** An image is delivered interactively and in no other way; a
+renderer that asks to stream an image gets `406`, as the reference implementation does (standards
+§5.2). Sound and pictures are streamed, and a background request is served like a streaming one. The
+answer always names the mode the server uses. *Implemented; the proposed decision of question 3 below
+still needs the owner's confirmation.*
+
+**D-04 — The identifier of a media object is an opaque token.** The identifier in the URL may not carry
+a separator, a dot or a control character, so a request that tries to walk out of the catalogue is
+answered like an unknown object and never reveals the layout of the disk (SEC-013). A target whose
+percent-encoding is broken is answered with `400`, because the request line itself is broken
+(INT-094). *Implemented.*
+
+**D-05 — The containment of a resolved path is a lexical check.** `is_inside_roots` normalises the path
+and compares it with the roots, so a path that walks out of a root with `..` does not pass. The check
+cannot see a symbolic link: the caller resolves the links first and repeats the check with the
+canonical path (INT-098, SEC-003). *Implemented.*
+
+**D-06 — The answer carries no `ETag` today.** `If-Range` is honoured when the object has a validator
+and the condition is an entity tag that matches it; the server does not emit an `ETag` of its own yet,
+because the validator of a file is the catalogue's business (F-08). A date cannot be compared, so a
+date condition does not hold and the range is ignored (INT-093). *Implemented.*
+
+**D-07 — The body of an error answer is a fixed text.** The answers `400`, `404`, `405`, `406` and `416`
+carry a short text that names no path (SEC-013). A `HEAD` answer carries the headers of the `GET`
+answer and no body (INT-086). *Implemented.*
+
+**D-08 — The connection is kept alive unless the client asks to close it.** HTTP/1.1 makes the
+persistent connection the default, so the answer carries no `Connection` header unless the request
+asked for `close` (INT-095). Every answer carries a `Content-Length` in any case (INT-088). *Implemented.*
+
+### 12.2 Open questions
+
 1. **[OPEN] `416` or `400` for an invalid `Range`?** INT-083 answers `416` for a syntactically invalid or
 unsatisfiable range; INT-094 reserves `400` for a malformed request line or header block. [OBSERVED] MiniDLNA answers
 `400` when the start is greater than the end and `416` when the range is outside the file; qa-performance §5.4
 proposes ignoring the header and answering `200` for `Range: bytes=abc`. *Proposed decision:* one table — unknown unit
 or unparsable value → ignore and answer `200`; a well-formed but unsatisfiable range → `416`; and amend INT-083.
-*Closes when:* the owner confirms the table.
+*Closes when:* the owner confirms the table. **The implementation follows INT-083 and answers `416`
+for an unparsable value (D-01); the proposal is not implemented.**
 
 2. **[OPEN] Chunked bodies and certified renderers.** Whether a DLNA-certified renderer refuses a chunked body or a body without `Content-Length` is not publicly documented (standards §5.3, §9 Q1). *Closes when:* a device test answers it; until then INT-088 keeps media bodies unchunked, the low-risk choice.
 

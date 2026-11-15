@@ -23,6 +23,7 @@ pub mod catalogue;
 pub mod config;
 pub mod didl;
 pub mod error;
+pub mod http;
 pub mod identity;
 pub mod platform;
 pub mod ssdp;

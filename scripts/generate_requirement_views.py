@@ -362,6 +362,100 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " exist yet, so the catalogue claims no profile",
         "Implemented",
     ),
+    "INT-080": (
+        "`crates/phairdlna-core/tests/http_media.rs::a_get_answers_the_whole_file`",
+        "Verified",
+    ),
+    "INT-081": (
+        "`crates/phairdlna-core/tests/http_range.rs::a_closed_range_is_answered_with_206`",
+        "Verified",
+    ),
+    "INT-082": (
+        "`crates/phairdlna-core/tests/http_range.rs::a_range_behind_the_file_is_answered_with_416`",
+        "Verified",
+    ),
+    "INT-083": (
+        "`crates/phairdlna-core/tests/http_range.rs::a_broken_range_is_answered_with_416`",
+        "Verified",
+    ),
+    "INT-084": (
+        "`crates/phairdlna-core/tests/http_media.rs::a_get_answers_the_whole_file`",
+        "Verified",
+    ),
+    "INT-085": (
+        "`crates/phairdlna-core/tests/http_range.rs::a_set_of_ranges_is_answered_as_one_range`",
+        "Verified",
+    ),
+    "INT-086": (
+        "`crates/phairdlna-core/tests/http_media.rs::a_head_answers_the_headers_without_a_body`",
+        "Verified",
+    ),
+    "INT-087": (
+        "`crates/phairdlna-core/tests/http_media.rs::a_file_without_a_type_is_sent_as_octet_stream`"
+        " — the type comes from the catalogue, which hands it over already refined; the sniffing is F-10",
+        "Implemented",
+    ),
+    "INT-088": (
+        "`crates/phairdlna-core/tests/http_media.rs::the_answer_carries_a_length_and_no_chunked_encoding`",
+        "Verified",
+    ),
+    "INT-089": (
+        "`crates/phairdlna-core/tests/http_media.rs::the_answer_names_the_file_to_read`"
+        " — the transfer slot and the file descriptor belong to the runtime (F-13, F-18)",
+        "Implemented",
+    ),
+    "INT-090": (
+        "`crates/phairdlna-core/tests/http_media.rs::the_url_keeps_its_meaning`",
+        "Verified",
+    ),
+    "INT-091": (
+        "`crates/phairdlna-core/tests/http_media.rs::the_url_keeps_its_meaning`"
+        " — reopening a file that was removed and restored is the file layer's (F-08, F-13)",
+        "Implemented",
+    ),
+    "INT-092": (
+        "`crates/phairdlna-core/tests/http_range.rs::a_range_on_a_head_is_ignored`",
+        "Verified",
+    ),
+    "INT-093": (
+        "`crates/phairdlna-core/tests/http_range.rs::an_if_range_that_does_not_hold_ignores_the_range`",
+        "Verified",
+    ),
+    "INT-094": (
+        "`crates/phairdlna-core/tests/http_negative.rs::an_unknown_object_is_answered_with_404`",
+        "Verified",
+    ),
+    "INT-095": (
+        "`crates/phairdlna-core/tests/http_media.rs::a_connection_is_kept_alive_unless_it_asks_to_close`",
+        "Verified",
+    ),
+    "INT-096": (
+        "`crates/phairdlna-core/tests/http_dlna_headers.rs::a_transfer_mode_the_server_does_not_offer_is_answered_with_406`",
+        "Verified",
+    ),
+    "INT-097": (
+        "`crates/phairdlna-core/tests/http_dlna_headers.rs::another_value_for_the_content_features_is_answered_with_400`",
+        "Verified",
+    ),
+    "INT-098": (
+        "`crates/phairdlna-core/tests/http_path_containment.rs::a_traversal_attempt_is_answered_with_404`"
+        " — the repetition of the check with the canonical path belongs to the runtime",
+        "Implemented",
+    ),
+    "INT-099": (
+        "`crates/phairdlna-core/tests/http_dlna_headers.rs::a_media_answer_carries_the_dlna_headers`",
+        "Verified",
+    ),
+    "FUN-040": (
+        "`crates/phairdlna-core/tests/http_media.rs::the_client_receives_the_bytes_of_the_file`"
+        " — the bytes come from the file, never from a conversion",
+        "Verified",
+    ),
+    "FUN-041": (
+        "`crates/phairdlna-core/tests/http_media.rs::the_type_of_the_answer_is_the_type_of_the_file`"
+        " — the codec is part of the type and of the DLNA profile token",
+        "Implemented",
+    ),
 }
 
 

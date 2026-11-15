@@ -82,8 +82,8 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-027` | Deliver a subtitle file in a character set the client can read | MUST | `F-11` | M2 | Automated test | Baseline |
 | `FUN-028` | Serve a file larger than 4 GiB with correct byte offsets across the 4 GiB boundary and at the… | MUST | `F-06` | M1 | Automated test | Baseline |
 | `FUN-029` | Expose each additional audio or subtitle track of a media item as its own resource | MUST | `F-11` | M2 | Automated test | Baseline |
-| `FUN-040` | Serve media by byte range from the original file without transcoding whenever the client… | MUST | `F-06` | M1 | Automated test | Baseline |
-| `FUN-041` | Report the container and codec of a file in a way a client can use to decide whether it can… | MUST | `F-06` | M1 | Automated test | Baseline |
+| `FUN-040` | Serve media by byte range from the original file without transcoding whenever the client… | MUST | `F-06` | M1 | Automated test | Verified |
+| `FUN-041` | Report the container and codec of a file in a way a client can use to decide whether it can… | MUST | `F-06` | M1 | Automated test | Implemented |
 | `FUN-042` | Support multiple simultaneous direct-play streams | MUST | `F-06` | M1 | Automated test | Baseline |
 | `FUN-043` | Bound the number of concurrent transfers and shall refuse further transfers with a clear error… | MUST | `F-06` | M1 | Automated test | Baseline |
 | `FUN-044` | Apply a per-stream bandwidth limit when configured | SHOULD | `F-06` | M1 | Automated test | Baseline |
@@ -177,26 +177,26 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-077` | Not emit the `writeStatus` attribute, because its definition could not be verified against a… | MUST | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-078` | The DLNA signalling in the fourth `protocolInfo` field shall be additive: the server shall be… | MUST | `F-05` | M1 | Protocol conformance test | Implemented |
 | `INT-079` | Emit `DLNA.ORG_PN` for a media resource only when the content actually conforms to that DLNA… | MUST | `F-05` | M1 | Protocol conformance test | Implemented |
-| `INT-080` | Answer `GET` and `HEAD` requests for media objects with `HTTP/1.1 200 OK` | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-081` | Support a single byte range and answer with `HTTP/1.1 206 Partial Content` | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-082` | Answer a range request whose start is beyond the end of the file with `HTTP/1.1 416 Range Not… | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-083` | Answer a syntactically invalid or unsatisfiable `Range` header with `HTTP/1.1 416` rather than… | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-084` | Advertise `Accept-Ranges: bytes` on media responses. | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-085` | Not implement `multipart/byteranges`; for a multi-range request it shall serve the first… | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-086` | Answer a `HEAD` request with the same headers as the corresponding `GET` | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-087` | Use the extension of the file, refined by the sniffed content, to determine the `Content-Type`;… | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-088` | Not use chunked transfer encoding for media objects and shall always send a `Content-Length`. | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-089` | Close a connection that a client abandoned mid-transfer without leaking the transfer slot. | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-090` | Serve the media URI that it advertised in the DIDL-Lite `res` element | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-091` | Keep the file open for the duration of the transfer when possible | SHOULD | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-092` | Ignore a `Range` header on a method other than `GET` | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-093` | Honour `If-Range`: when its condition does not hold | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-094` | Answer `404` for an unknown media identifier, `405` for an unsupported method and `400` for a… | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-095` | Support HTTP/1.1 persistent connections, and every response shall carry either a… | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-096` | Emit the DLNA response headers `transferMode.dlna.org` and `contentFeatures.dlna.org` on media… | SHOULD | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-097` | Answer a request carrying `getcontentFeatures.dlna.org: 1` with the `contentFeatures.dlna.org`… | SHOULD | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-098` | Serve the media URL only when it resolves inside one of the configured roots. | MUST | `F-06` | M1 | Protocol conformance test | Baseline |
-| `INT-099` | Emit `realTimeInfo.dlna.org` with `DLNA.ORG_TLAG=*` on media responses. | COULD | `F-06` | M1 | Protocol conformance test | Baseline |
+| `INT-080` | Answer `GET` and `HEAD` requests for media objects with `HTTP/1.1 200 OK` | MUST | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-081` | Support a single byte range and answer with `HTTP/1.1 206 Partial Content` | MUST | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-082` | Answer a range request whose start is beyond the end of the file with `HTTP/1.1 416 Range Not… | MUST | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-083` | Answer a syntactically invalid or unsatisfiable `Range` header with `HTTP/1.1 416` rather than… | MUST | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-084` | Advertise `Accept-Ranges: bytes` on media responses. | MUST | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-085` | Not implement `multipart/byteranges`; for a multi-range request it shall serve the first… | MUST | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-086` | Answer a `HEAD` request with the same headers as the corresponding `GET` | MUST | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-087` | Use the extension of the file, refined by the sniffed content, to determine the `Content-Type`;… | MUST | `F-06` | M1 | Protocol conformance test | Implemented |
+| `INT-088` | Not use chunked transfer encoding for media objects and shall always send a `Content-Length`. | MUST | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-089` | Close a connection that a client abandoned mid-transfer without leaking the transfer slot. | MUST | `F-06` | M1 | Protocol conformance test | Implemented |
+| `INT-090` | Serve the media URI that it advertised in the DIDL-Lite `res` element | MUST | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-091` | Keep the file open for the duration of the transfer when possible | SHOULD | `F-06` | M1 | Protocol conformance test | Implemented |
+| `INT-092` | Ignore a `Range` header on a method other than `GET` | MUST | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-093` | Honour `If-Range`: when its condition does not hold | MUST | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-094` | Answer `404` for an unknown media identifier, `405` for an unsupported method and `400` for a… | MUST | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-095` | Support HTTP/1.1 persistent connections, and every response shall carry either a… | MUST | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-096` | Emit the DLNA response headers `transferMode.dlna.org` and `contentFeatures.dlna.org` on media… | SHOULD | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-097` | Answer a request carrying `getcontentFeatures.dlna.org: 1` with the `contentFeatures.dlna.org`… | SHOULD | `F-06` | M1 | Protocol conformance test | Verified |
+| `INT-098` | Serve the media URL only when it resolves inside one of the configured roots. | MUST | `F-06` | M1 | Protocol conformance test | Implemented |
+| `INT-099` | Emit `realTimeInfo.dlna.org` with `DLNA.ORG_TLAG=*` on media responses. | COULD | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-100` | Maintain a declarative profile of known client quirks | MUST | `F-07` | M4 | Protocol conformance + device test | Baseline |
 | `INT-101` | A quirk workaround shall never violate a normative requirement of the UPnP or DLNA… | MUST | `F-07` | M4 | Protocol conformance test | Baseline |
 | `INT-102` | Record every device-test result — device model | MUST | `F-07` | M4 | Protocol conformance + device test | Baseline |

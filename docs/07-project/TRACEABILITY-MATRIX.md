@@ -70,8 +70,8 @@ that was actually observed; an empty cell means *not implemented*, not *passed*.
 | `FUN-027` | `F-11` | M2 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
 | `FUN-028` | `F-06` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
 | `FUN-029` | `F-11` | M2 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
-| `FUN-040` | `F-06` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
-| `FUN-041` | `F-06` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
+| `FUN-040` | `F-06` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | `crates/phairdlna-core/tests/http_media.rs::the_client_receives_the_bytes_of_the_file` — the bytes come from the file, never from a conversion | Verified |
+| `FUN-041` | `F-06` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | `crates/phairdlna-core/tests/http_media.rs::the_type_of_the_answer_is_the_type_of_the_file` — the codec is part of the type and of the DLNA profile token | Implemented |
 | `FUN-042` | `F-06` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
 | `FUN-043` | `F-06` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
 | `FUN-044` | `F-06` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
@@ -160,26 +160,26 @@ that was actually observed; an empty cell means *not implemented*, not *passed*.
 | `INT-077` | `F-05` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/didl_resource.rs::the_document_never_carries_a_write_status` | Verified |
 | `INT-078` | `F-05` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/didl_resource.rs::the_two_modes_describe_the_same_file` — the mode is chosen by the dispatcher; the client profile that selects it is F-07 | Implemented |
 | `INT-079` | `F-05` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/didl_resource.rs::nothing_is_claimed_that_the_server_cannot_prove` — the tokens are written as the requirement asks; the conformance check of a profile does not exist yet, so the catalogue claims no profile | Implemented |
-| `INT-080` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-081` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-082` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-083` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-084` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-085` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-086` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-087` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-088` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-089` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-090` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-091` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-092` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-093` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-094` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-095` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-096` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-097` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-098` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-099` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
+| `INT-080` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_media.rs::a_get_answers_the_whole_file` | Verified |
+| `INT-081` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_range.rs::a_closed_range_is_answered_with_206` | Verified |
+| `INT-082` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_range.rs::a_range_behind_the_file_is_answered_with_416` | Verified |
+| `INT-083` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_range.rs::a_broken_range_is_answered_with_416` | Verified |
+| `INT-084` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_media.rs::a_get_answers_the_whole_file` | Verified |
+| `INT-085` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_range.rs::a_set_of_ranges_is_answered_as_one_range` | Verified |
+| `INT-086` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_media.rs::a_head_answers_the_headers_without_a_body` | Verified |
+| `INT-087` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_media.rs::a_file_without_a_type_is_sent_as_octet_stream` — the type comes from the catalogue, which hands it over already refined; the sniffing is F-10 | Implemented |
+| `INT-088` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_media.rs::the_answer_carries_a_length_and_no_chunked_encoding` | Verified |
+| `INT-089` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_media.rs::the_answer_names_the_file_to_read` — the transfer slot and the file descriptor belong to the runtime (F-13, F-18) | Implemented |
+| `INT-090` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_media.rs::the_url_keeps_its_meaning` | Verified |
+| `INT-091` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_media.rs::the_url_keeps_its_meaning` — reopening a file that was removed and restored is the file layer's (F-08, F-13) | Implemented |
+| `INT-092` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_range.rs::a_range_on_a_head_is_ignored` | Verified |
+| `INT-093` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_range.rs::an_if_range_that_does_not_hold_ignores_the_range` | Verified |
+| `INT-094` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_negative.rs::an_unknown_object_is_answered_with_404` | Verified |
+| `INT-095` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_media.rs::a_connection_is_kept_alive_unless_it_asks_to_close` | Verified |
+| `INT-096` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_dlna_headers.rs::a_transfer_mode_the_server_does_not_offer_is_answered_with_406` | Verified |
+| `INT-097` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_dlna_headers.rs::another_value_for_the_content_features_is_answered_with_400` | Verified |
+| `INT-098` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_path_containment.rs::a_traversal_attempt_is_answered_with_404` — the repetition of the check with the canonical path belongs to the runtime | Implemented |
+| `INT-099` | `F-06` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/http_dlna_headers.rs::a_media_answer_carries_the_dlna_headers` | Verified |
 | `INT-100` | `F-07` | M4 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance + device test | — | Not implemented |
 | `INT-101` | `F-07` | M4 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-102` | `F-07` | M4 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance + device test | — | Not implemented |

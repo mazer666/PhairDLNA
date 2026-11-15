@@ -16,6 +16,7 @@
 
 pub mod catalogue;
 pub mod didl;
+pub mod media;
 
 /// The service type of the ContentDirectory service.
 pub const CONTENT_DIRECTORY: &str = "urn:schemas-upnp-org:service:ContentDirectory:1";
