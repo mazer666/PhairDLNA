@@ -39,6 +39,8 @@
 | `crates/phairdlna-core/src/lib.rs` | The portable domain core — the crate root and the error type | — |
 | `crates/phairdlna-core/src/error.rs` | The core error type | F-12 |
 | `crates/phairdlna-core/src/platform/` | The eight capability traits, the path model and the default implementation | F-08, F-13, F-15 |
+| `crates/phairdlna-core/src/ssdp/` | The discovery protocol: parsing a search, matching the targets, building the bytes | F-01 |
+| `crates/phairdlna-core/src/identity.rs` | The persistent device identity | F-01, F-02 |
 | `crates/phairdlna-core/src/config/` | The typed, validated, versioned configuration | F-12 |
 | `crates/phairdlna-cli/src/lib.rs` | The commands, as pure functions over their arguments | F-13 |
 | `crates/phairdlna-cli/src/main.rs` | The argument parsing and the exit code | F-13 |

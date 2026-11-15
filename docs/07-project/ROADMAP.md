@@ -57,10 +57,16 @@ the command line offers `version`, `config path`, `config validate` and
 The manual CI run on Linux is green — all 13 gate steps, recorded as
 [run 43698100636](https://github.com/mazer666/PhairDLNA/actions/runs/43698100636).
 
-M1.1 (the configuration) and M1.2 (the platform traits) are implemented: the typed,
-validated, versioned configuration with 14 tests, and the eight capability traits with
-the path model, the default "not supported" implementation and the Unicode-correct
-identity computation.
+M1.1 (the configuration), M1.2 (the platform traits) and M1.3 (the discovery
+protocol) are implemented: the typed, validated, versioned configuration; the eight
+capability traits with the path model and the Unicode-correct identity computation;
+and the portable half of SSDP — parsing a search, deciding which of the five
+advertised targets answers it, and writing the exact bytes of a reply or an
+advertisement. 58 tests, 0 failed.
+
+The socket itself is not yet written; the pure half was done first, because it is the
+half that decides whether the server answers at all, and it is the half that can be
+tested.
 
 **Still open in M0:** the manual CI run on macOS and Windows, and the Intel macOS
 target of the build matrix.

@@ -94,3 +94,18 @@ fn unique() -> u128 {
         .map(|since| since.as_nanos())
         .unwrap_or_default()
 }
+
+/// The positive case: the SSDP report names the device and shows the bytes.
+#[test]
+fn the_ssdp_report_shows_the_bytes() {
+    let path = write(VALID);
+    let outcome = run(&Command::SsdpHeaders { path: Some(path) });
+    assert_eq!(outcome.exit_code, 0, "{}", outcome.stdout);
+    assert!(outcome.stdout.contains("Device identity: uuid:"));
+    assert!(outcome.stdout.contains("NOTIFY * HTTP/1.1"));
+    assert!(outcome.stdout.contains("NTS: ssdp:alive"));
+    assert!(outcome.stdout.contains("upnp:rootdevice"));
+    assert!(outcome
+        .stdout
+        .contains("urn:schemas-upnp-org:device:MediaServer:1"));
+}

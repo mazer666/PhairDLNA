@@ -19,6 +19,7 @@ Commands:
   config path              Print the path the configuration would be read from
   config validate          Check a configuration file and report the first problem
   config show              Print the effective configuration
+  ssdp headers             Print the SSDP headers the server would send
   serve                    Start the server (not implemented yet)
 
 Options:
@@ -73,8 +74,18 @@ fn command_from(rest: &[&str], config_path: Option<PathBuf>) -> Result<Command, 
         None => Ok(Command::Version),
         Some("version") => Ok(Command::Version),
         Some("config") => config_command(&rest[1..], config_path),
+        Some("ssdp") => ssdp_command(&rest[1..], config_path),
         Some("serve") => Ok(Command::Serve { path: config_path }),
         Some(other) => Err(format!("unknown command \"{other}\"")),
+    }
+}
+
+/// Builds an `ssdp` subcommand.
+fn ssdp_command(rest: &[&str], config_path: Option<PathBuf>) -> Result<Command, String> {
+    match rest.first().copied() {
+        Some("headers") => Ok(Command::SsdpHeaders { path: config_path }),
+        Some(other) => Err(format!("unknown ssdp command \"{other}\"")),
+        None => Err("ssdp needs a subcommand: headers".to_owned()),
     }
 }
 
