@@ -81,16 +81,73 @@ Everything else in this repository is **documented and unmeasured**. In particul
 
 ---
 
-## 4. What happens next
+## 4. What we should do next — the proposal
 
-1. The owner reviews the baseline and answers the open decisions in
-   `OPEN-DECISIONS.md`.
-2. The owner approves the baseline (or returns it with changes).
-3. M0 is completed: the four crates, the boundary gate, the manual CI workflow, the
-   file-size and link gates.
-4. M1 begins with the configuration and platform traits, then discovery, then the
-   device description, then browsing, then metadata, then streaming — with the
-   conformance checklist green before any device is touched.
+### 4.1 The first thing: M0, and it is small
+
+M0 has four pieces of work left, and all four are mechanical:
+
+| Step | What | Done when |
+| --- | --- | --- |
+| M0.1 | The four crates exist: `phairdlna-core`, `phairdlna-cli`, `phairdlna-admin`, `phairdlna-mac` | `cargo build --workspace` succeeds on macOS, Linux and Windows |
+| M0.2 | `scripts/check-crate-boundaries.sh` (gate QG-28) | an intentionally inverted dependency turns it red |
+| M0.3 | `deny.toml` proven on the real dependency set | `cargo deny check licenses bans sources` is green, and `cargo audit` is green |
+| M0.4 | The manual CI workflow has been run once on every platform | three run URLs exist in the run list, and every step passed |
+
+**Why this order:** the boundary check is the gate that protects everything the
+project builds afterwards. It is cheap to write now and expensive to retrofit.
+
+### 4.2 Then M1, in nine small steps
+
+Each step ends in something observable, and each is small enough to review in one
+sitting. The order is not negotiable: each step needs the one before it.
+
+| # | Step | The observable that says it is done |
+| --- | --- | --- |
+| 1 | Configuration and the platform traits | `phairdlna-cli config validate` accepts a generated configuration and rejects a broken one with a named field |
+| 2 | SSDP discovery | `phairdlna-cli ssdp headers` prints the exact bytes that will be sent, and a recorded `M-SEARCH` from a real client is answered |
+| 3 | The device description and the SCPD | `curl http://localhost:PORT/description.xml` returns a document that a real client accepts |
+| 4 | The SOAP dispatcher and ContentDirectory | A recorded `Browse` returns a DIDL-Lite document that validates against the vendored XSD (gate QG-17) |
+| 5 | ConnectionManager | `GetProtocolInfo` names only MIME types the server can actually serve |
+| 6 | DIDL-Lite generation | The escaping property test passes, and the XSD validation passes |
+| 7 | HTTP media delivery | A byte range returns 206 with a correct `Content-Range`; an unsatisfiable range returns 416 |
+| 8 | The catalogue over one root | A browse shows one folder of real files with stable ids |
+| 9 | The security baseline | Every threat row in F-16 has its negative test, and they pass |
+
+**Step 9 is not optional and not last.** The threat rows are cheap to test while the
+code is small, and expensive to retrofit.
+
+### 4.3 The first real device, and when
+
+**No device test happens before steps 1 to 8 are green.** The conformance checklist
+(`PC-01` … `PC-26`) is automated and runs first; a device is the *second* test, not
+the first. The first device round is scheduled inside M1, and its result — including
+failures — goes into the interoperability matrix the same day.
+
+**Which device first:** a Samsung or LG television, because they are the most
+frequently reported source of DLNA incompatibilities. If only one is available, use
+VLC on a laptop, because it logs what it receives.
+
+### 4.4 What we deliberately do not do first
+
+- No transcoding (M5), no artwork (M2), no menu bar app (M2), no second root (M2),
+  no administration surface (M2), no Linux and Windows packaging (M3).
+- No plugin system, ever, without an ADR.
+- No automatic CI. Manual only, until the gates have been run three times green and
+  their negative tests demonstrated.
+
+### 4.5 What the owner has to answer, and what happens if they do not
+
+Twelve open decisions are listed in `OPEN-DECISIONS.md`, each with a recommendation
+**and** the default that applies if there is no answer. Only **OD-05** (the minimum
+macOS version) blocks work, because the service model and the first-run flow depend
+on it. Everything else can be answered while M1 is already running.
+
+### 4.6 The honest risk of this plan
+
+The plan is a plan, not a forecast. The largest uncertainty is still the device
+matrix: the first device round may reveal that a requirement is wrong. That is the
+point of the matrix, and it is cheaper to learn now than after M2.
 
 ---
 

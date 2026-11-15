@@ -10,6 +10,32 @@ recorded as an ADR.
 Each entry states the question, the options, a **recommendation with its reason**, and
 what happens if the decision is deferred.
 
+## The recommendations at a glance
+
+If you read nothing else, this is the short version. Every decision has a
+recommendation, and every recommendation is also the **default** — so the project
+can continue without an answer, and your answer only ever changes the default, never
+the momentum.
+
+| ID | Question | Recommendation | If you do not decide |
+| --- | --- | --- | --- |
+| OD-01 | macOS distribution and signing | Ad-hoc signed universal binary now, Developer ID later | Option A |
+| OD-02 | FFmpeg and transcoding | Never ship FFmpeg; a user-supplied binary only, out of process | No FFmpeg |
+| OD-03 | macOS interface technology | Pure Rust with `objc2` + `objc2-app-kit` | Option A |
+| OD-04 | Administration authentication | A `0600` bearer token plus CSRF, a custom header and a `Host` allowlist | That model |
+| OD-05 | Minimum macOS version | macOS 13 and later | macOS 13 |
+| OD-06 | Prebuilt binary or source only | Source always, plus a signed macOS binary | That |
+| OD-07 | The mandatory device matrix | The ten priority client families, three clients before stable | That |
+| OD-08 | Local administration surface | Yes, minimal, alongside the native app | Yes, minimal |
+| OD-09 | The v1 format commitment | MP4 (H.264/AAC), MP3, JPEG, Matroska/WebM; SRT and WebVTT sidecars | That |
+| OD-10 | The supported locales | English and German, strings prepared for translation | That |
+| OD-11 | The reference hardware | The profile in the performance budgets, machine named before the first measurement | That |
+| OD-12 | Outside contributions | Accepted, with a requirement ID, a test and documentation | Accepted |
+
+**The only decision that blocks work is OD-05** (the minimum macOS version), because
+the service model and the first-run flow depend on it. Everything else can be
+answered while M1 is already running.
+
 ---
 
 ## OD-01 — macOS distribution and signing model
@@ -28,6 +54,8 @@ an early audience. The architecture must not prevent B later: the `ServiceSpec` 
 carry the bundle identifier and the readiness notification from the start
 (`LIFE-010`, `PLT-013`).
 
+**Default, if no decision is made:** option A (ad-hoc signed universal binary). M1 is unaffected; only the macOS release experience stays undefined and `SUP-009` stays open.
+
 **If deferred:** M1 can proceed on macOS; the macOS release experience stays undefined
 and `SUP-009` cannot be closed.
 
@@ -42,6 +70,8 @@ AGPL product makes the combined work GPLv3-governed and detaches the AGPL networ
 source obligation from it. The only acceptable shape is an **optional, user-supplied
 external binary**, invoked out of process with an argument array, never a shell,
 resource-capped and off by default (`FUN-047` … `FUN-049`).
+
+**Default, if no decision is made:** no FFmpeg, no bundled transcoder. M5 stays deferred. Nothing in the baseline is blocked.
 
 **If deferred:** M5 stays deferred and the baseline is unaffected. This decision does
 not block anything.
@@ -62,6 +92,8 @@ not block anything.
 in M2.4 shows that `objc2-app-kit` cannot deliver the required VoiceOver behaviour
 (`MB-003`, `UX-017`, `UX-018`).
 
+**Default, if no decision is made:** option A (pure Rust with `objc2` + `objc2-app-kit`). The accessibility audit in M2.4 is the gate that can send us back to option B.
+
 **If deferred:** M2.6 cannot start, but nothing else is blocked.
 
 ---
@@ -78,6 +110,8 @@ model the security research supports against DNS rebinding and cross-site reques
 **Alternative considered:** no authentication at all, because the surface is loopback
 only. Rejected: loopback is not a boundary (CVE-2022-26505 is the proof), and a
 browser on the same machine is enough to attack it.
+
+**Default, if no decision is made:** the bearer-token model described above. The administration surface does not ship without it; the server itself is unaffected either way.
 
 **If deferred:** the administration surface must not ship. The server itself is
 unaffected.
@@ -97,6 +131,8 @@ different first-run experience.
 **Recommendation:** **macOS 13 and later**, with the local-network permission handled
 explicitly and the daemon model used throughout. This keeps one model instead of two.
 
+**Default, if no decision is made:** macOS 13 and later, with the launchd daemon model throughout.
+
 **If deferred:** the macOS service design and the first-run flow cannot be finalised.
 
 ---
@@ -109,6 +145,8 @@ explicitly and the daemon model used throughout. This keeps one model instead of
 addition** once OD-01 is settled. Linux packages (deb, rpm) follow in M3; Windows an
 MSI in M3. Every artefact carries a checksum and a software bill of materials
 (`SUP-005`).
+
+**Default, if no decision is made:** source always, plus a signed macOS binary once OD-01 is settled. The release checklist already assumes this.
 
 **If deferred:** no impact on development; it changes the release process only.
 
@@ -124,6 +162,8 @@ matrix cover before the first stable release?
 independently implemented clients before the first stable release, and a recorded
 result — including failures — for each.
 
+**Default, if no decision is make:** the ten priority families already listed in the interoperability matrix, with at least three independently implemented clients before the first stable release.
+
 **If deferred:** the "stable" milestone cannot be defined; M4 has no exit criterion.
 
 ---
@@ -136,6 +176,8 @@ application?
 **Recommendation:** **yes, but minimal** — the surface exists for diagnostics and
 automation (`OPS-020` … `OPS-027`), while the native application is the primary
 interface. Both talk to the same core.
+
+**Default, if no decision is made:** a minimal local administration surface exists from M2.2, alongside the native application. Both talk to the same core.
 
 **If deferred:** F-14 shrinks; the CLI must carry the whole administrative load.
 
@@ -150,6 +192,8 @@ rather than best effort?
 Matroska/WebM**, and to **external subtitle sidecars in SRT and WebVTT** where the
 client accepts them. Everything else is best effort and documented as such.
 
+**Default, if no decision is made:** direct play for MP4 (H.264/AAC), MP3, JPEG and Matroska/WebM, plus SRT and WebVTT sidecars where the client accepts them. Everything else is best effort and documented as such.
+
 **If deferred:** the acceptance criteria in F-05, F-06 and F-11 cannot be written
 concretely.
 
@@ -162,6 +206,8 @@ concretely.
 **Recommendation:** **English and German**, with all strings prepared for translation
 (`UX-020`) and no translation workflow beyond a plain string catalogue.
 
+**Default, if no decision is made:** English and German, with all strings prepared for translation (`UX-020`).
+
 **If deferred:** the string architecture in F-15 may need rework later.
 
 ---
@@ -173,6 +219,8 @@ concretely.
 **Recommendation:** the profile in `../05-quality/PERFORMANCE-BUDGETS.md` § 2, with
 the **reference machine recorded by name** before the first measurement, and a
 secondary profile for a NAS-backed library.
+
+**Default, if no decision is made:** the profile in `../05-quality/PERFORMANCE-BUDGETS.md` § 2, with the reference machine named by the owner before the first measurement.
 
 **If deferred:** no measurement can be compared against anything.
 
