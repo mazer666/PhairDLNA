@@ -41,9 +41,15 @@ jobs:
           set -euo pipefail
           install_tool() {
             name="$1"; url="$2"
-            curl --proto '=https' --tlsv1.2 -sSfL "$url" -o "$HOME/$name.tgz"
-            tar xzf "$HOME/$name.tgz" -C "$HOME"
-            install -m 0755 "$HOME/$name" "/usr/local/bin/$name"
+            tmp="$(mktemp -d)"
+            curl --proto '=https' --tlsv1.2 -sSfL "$url" -o "$tmp/tool.tgz"
+            tar xzf "$tmp/tool.tgz" -C "$tmp"
+            binary="$(find "$tmp" -type f -name "$name" | head -n 1)"
+            if [ -z "$binary" ]; then
+              echo "the archive for $name contains no binary named $name" >&2
+              exit 1
+            fi
+            install -m 0755 "$binary" "/usr/local/bin/$name"
           }
           install_tool cargo-deny \
             "https://github.com/EmbarkStudios/cargo-deny/releases/download/0.20.2/cargo-deny-0.20.2-x86_64-unknown-linux-musl.tar.gz"
