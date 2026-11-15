@@ -17,7 +17,7 @@ use super::device_model::BaseUrl;
 use super::device_model::DeviceInfo;
 use super::error::UpnpError;
 use super::services::{advertised_services, ServiceDefinition};
-use super::xml_writer::XmlWriter;
+use crate::xml::XmlWriter;
 
 /// The namespace of a device description document.
 pub const DEVICE_NAMESPACE: &str = "urn:schemas-upnp-org:device-1-0";

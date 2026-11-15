@@ -160,7 +160,8 @@ means "not transcoded".
   mode is a property of the client profile (F-07), never of the file.
 - **Second escaping and validation.** The document is serialised to a string, then escaped once more
   when written into the `Result` element of the SOAP body (INT-073). The official DIDL-Lite XSD is
-  public and is vendored for offline validation (qa-performance §1.3, item 4); a planned gate validates
+  public and is vendored for offline validation (qa-performance §1.3, item 4) — the vendoring is
+  still to be done; a planned gate validates
   every generated document against it, and snapshot tests pin the element order.
 
 ## 5. Performance requirements
@@ -189,8 +190,10 @@ All figures below are **targets** with a measurement method; none is a measured 
   layout (INT-062, PLT-008, SEC-093).
 - `upnp:albumArtURI` points at the server's own HTTP endpoint; it is never a URL taken from a tag
   file, so a malicious tag cannot make the client fetch a third-party address. The document contains
-  no DOCTYPE and no external entity (INT-024, SEC-010), and document size and every single value are
-  bounded (INT-072, SEC-061), so a huge tag cannot exhaust memory.
+  no DOCTYPE and no external entity (INT-024, SEC-010), and every metadata value of the document is
+  bounded (INT-072, SEC-061), so a huge tag cannot exhaust memory. The identifier of an object and
+  the address of the server are not cut: they are produced by the catalogue and by the server, they
+  carry no data of the file, and cutting them would break the address (F-05 §9).
 
 ## 8. Interoperability
 
@@ -215,6 +218,7 @@ All figures below are **targets** with a measurement method; none is a measured 
 | The media inspection found no duration | `res@duration` is omitted rather than guessed | INT-063 |
 | The artwork file disappeared after indexing | `upnp:albumArtURI` is omitted | INT-067 |
 | A value exceeds the maximum length | the value is truncated on a character boundary, marked `…` | INT-072 |
+| A value of the catalogue that is not a metadata value (the identifier, the address) | not truncated: the identifier is produced by the catalogue and the address by the server, and cutting them would break the address | INT-062, INT-090 |
 | The DLNA profile of a file cannot be determined | the plain `*` fourth field is written | INT-078, INT-079 |
 
 A metadata problem never fails the whole browse: one broken file must not cost the user the other 99 files in
@@ -222,99 +226,182 @@ the folder (F-03).
 
 ## 10. Acceptance criteria and traceability
 
-All criteria below are *planned*; no test file exists yet.
+All criteria below are **implemented**; every one of them has a test. The *location* of a
+criterion names the file that proves it, and the file exists today.
 
 **AC-01** — *Given* a generated document, *when* it is parsed, *then* the root element is `DIDL-Lite`
 in the namespace `urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/`, every prefix the document uses is
 declared on it, and each item and container carries `id`, `parentID` and `restricted` while each
 container also carries `childCount`. Requirements: INT-071, INT-060 · Verification: protocol
-conformance test · Planned location: `crates/phairdlna-core/tests/didl_lite.rs`
+conformance test · Location: `crates/phairdlna-core/tests/didl_lite.rs`
 
 **AC-02** — *Given* a music file, a film, an image and a folder, *when* their items are rendered, *then* their
 `upnp:class` values are `object.item.audioItem.musicTrack`, `object.item.videoItem.movie`,
 `object.item.imageItem.photo` and `object.container.storageFolder`, and the `id` attribute of one object is
 identical before and after a restart and contains no path separator. Requirements: INT-061, INT-062 ·
-Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/didl_lite.rs`
+Verification: protocol conformance test · Location: `crates/phairdlna-core/tests/didl_lite.rs`
+*Partly implemented:* the class values and the path-freeness of the identifier are proven; the
+identifier is produced by the catalogue, and its stability across a restart is F-08's job (the hash of
+ARCHITECTURE §8).
 
 **AC-03** — *Given* an item with a known duration, an image with known dimensions and an audio file with a known
 bitrate, *when* the `res` element is rendered, *then* it carries a `protocolInfo` with four colon-separated
 fields whose third is a MIME type the HTTP layer serves for the same object, a `size`, a `duration` matching
 `H*:MM:SS.F*`, a `resolution` matching `<width>x<height>` for the image and a `bitrate` in bytes per second.
-Requirements: INT-063, INT-064, INT-074, INT-051 · Verification: protocol conformance test · Planned location:
-`crates/phairdlna-core/tests/didl_lite.rs`
+Requirements: INT-063, INT-064, INT-074, INT-051 · Verification: protocol conformance test · Location:
+`crates/phairdlna-core/tests/didl_resource.rs`
 
 **AC-04** — *Given* a title containing `&`, `<`, `>`, `"` and `'`, *when* it is rendered as element
 text and as an attribute value, *then* `&`, `<` and `>` are escaped in the text, all five characters
 are escaped in the attribute, and the document still parses; and *when* a generated document is
 embedded into the `Result` element of a SOAP response and the response is parsed and unescaped twice,
 *then* the recovered document equals the original document. Requirements: INT-065, INT-073, INT-042 ·
-Verification: protocol conformance test · Planned location:
-`crates/phairdlna-core/tests/didl_escaping.rs`
+Verification: protocol conformance test · Location: `crates/phairdlna-core/tests/didl_escaping.rs`
 
 **AC-05** — *Given* a title of 20 000 characters containing characters that expand when escaped,
 *when* the document is rendered, *then* the escaped value is at most 8192 bytes long and ends with
-the truncation marker. Requirements: INT-072 · Verification: automated test · Planned location:
+the truncation marker. Requirements: INT-072 · Verification: automated test · Location:
 `crates/phairdlna-core/tests/didl_lite.rs`
 
 **AC-06** — *Given* an audio item with artwork, *when* the item is rendered, *then*
 `upnp:albumArtURI` holds an absolute HTTP URL of this server and carries no `dlna:profileID`
 attribute and no `xmlns:dlna` declaration. Requirements: INT-067 · Verification: protocol
-conformance test · Planned location: `crates/phairdlna-core/tests/didl_lite.rs`
+conformance test · Location: `crates/phairdlna-core/tests/didl_lite.rs`
 
 **AC-07** — *Given* a file whose modification time is known and an audio item whose tags provide an artist and a
 track number, *when* the item is rendered, *then* `dc:date` matches `YYYY-MM-DD` or `YYYY-MM-DDThh:mm:ss`, and
 `upnp:artist`, `dc:creator` and `upnp:originalTrackNumber` carry the tagged values. Requirements: INT-068,
-INT-069, INT-070, INT-076 · Verification: protocol conformance test · Planned location:
+INT-069, INT-070, INT-076 · Verification: protocol conformance test · Location:
 `crates/phairdlna-core/tests/didl_lite.rs`
 
 **AC-08** — *Given* the plain mode and the DLNA mode, *when* the same item is rendered twice,
 *then* the plain document contains `http-get:*:<mime>:*` and the DLNA document contains the
 `DLNA.ORG_PN`, `DLNA.ORG_OP`, `DLNA.ORG_CI` and `DLNA.ORG_FLAGS` tokens, and both parse.
-Requirements: INT-078, INT-055, INT-079 · Verification: protocol conformance test · Planned
-location: `crates/phairdlna-core/tests/didl_lite.rs`
+Requirements: INT-078, INT-055, INT-079 · Verification: protocol conformance test · Location:
+`crates/phairdlna-core/tests/didl_resource.rs`
 
 **AC-09** — *Given* a file whose content does not conform to any known DLNA Media Format Profile, *when* the
 item is rendered, *then* no `DLNA.ORG_PN` token is emitted, `DLNA.ORG_OP=01` is emitted only when byte-range
 seeking is available, and no attribute named `writeStatus` appears anywhere. Requirements: INT-079, INT-077 ·
-Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/didl_lite.rs`
+Verification: protocol conformance test · Location: `crates/phairdlna-core/tests/didl_resource.rs`
 
 ## 11. Test strategy and dependencies
 
-**Planned test locations** (none of these files exists yet):
+**Test locations.** The three rows below exist today; the three rows after them are still planned.
 
-| Purpose | Planned path |
-| --- | --- |
-| Document shape and class mapping | `crates/phairdlna-core/tests/didl_lite.rs` |
-| Escaping round-trip (property test) | `crates/phairdlna-core/tests/didl_escaping.rs` (qa-performance §2.6, P1) |
-| Writer, truncation and namespace unit tests | `crates/phairdlna-core/src/didl/` (inline `#[cfg(test)]` modules) |
-| Shape snapshots and schema validation | `crates/phairdlna-core/tests/snapshots/` (`insta`); vendored `qa/xsd/didl-lite.xsd` |
-| Fuzzing of the parser | `fuzz/fuzz_targets/fuzz_didl_xml.rs`, corpus `qa/corpus/didl/*.xml` (qa-performance §4.2) |
-| Device behaviour | `qa/device-matrix.toml` (qa-performance §3.2) |
+| Purpose | Path | State |
+| --- | --- | --- |
+| Document shape, class mapping, the length policy, the artwork and the metadata | `crates/phairdlna-core/tests/didl_lite.rs` | **exists** |
+| The attributes of the resource and the two modes of the `protocolInfo` | `crates/phairdlna-core/tests/didl_resource.rs` | **exists** |
+| Escaping round-trip and the property tests | `crates/phairdlna-core/tests/didl_escaping.rs` | **exists** |
+| Writer, truncation, namespace, protocol and mapping unit tests | `crates/phairdlna-core/src/didl/` (inline `#[cfg(test)]` modules) | **exists** |
+| Shape snapshots and schema validation | `crates/phairdlna-core/tests/snapshots/` (`insta`); vendored `qa/xsd/didl-lite.xsd` | planned |
+| Fuzzing of the parser | `fuzz/fuzz_targets/fuzz_didl_xml.rs`, corpus `qa/corpus/didl/*.xml` (qa-performance §4.2) | planned |
+| Device behaviour | `qa/device-matrix.toml` (qa-performance §3.2) | planned |
 
 **Method.** The document is produced from an in-memory object model, so the module is testable without a
-catalogue, a filesystem or a socket. The escaping tests are property-based: generate arbitrary strings, render
-them, parse them back and compare (qa-performance §2.6); the XSD gate proves schema-legality.
+catalogue, a filesystem or a socket. The tests read the document with the XML reader of the project
+(`crates/phairdlna-core/src/upnp/xml_reader.rs`), not with a string match: the reader resolves the
+namespaces and decodes the entities, so a test that uses it proves that a client can read the document.
+The escaping tests are property-based: generate arbitrary strings, render them, parse them back and
+compare (qa-performance §2.6).
+
+**The property test without a dependency.** The project has no property-testing dependency, and adding one
+(`proptest`) would cost a licence assessment and a change of the supply-chain policy (qa-performance §2.6).
+The property test therefore uses a small deterministic generator inside the test file: the same run produces
+the same values, and a failure can be reproduced exactly. *This is a deviation from qa-performance §2.6 and
+needs the owner's confirmation.* The XSD gate proves schema-legality and is still planned.
 
 **Dependencies.** F-03 (the `Browse` action that consumes the document), F-06 (the media URI and its MIME type),
 F-07 (the client profile that selects the mode), F-09 (the metadata), F-16 (the parsing and size limits).
 
 ## 12. Open questions and decisions
 
+### 12.1 Decisions taken by the implementation (WP3)
+
+These decisions are implemented and covered by a test. The ones marked **[owner decision]** change a
+documented behaviour and are reported to the owner with this work package.
+
+**D-01 — The truncation policy (INT-072).** A value is cut so that its XML-escaped UTF-8 form is at most
+8192 bytes. The cut happens on the raw value and on a character boundary, so an entity is never cut in half,
+and the value ends with `…` (U+2026). The escaped form of the cut value therefore never exceeds the budget.
+*Implemented in `crates/phairdlna-core/src/didl/value.rs`. **[owner decision]** the number and the marker
+are still open in question 1 below.*
+
+**D-02 — `writeStatus` is never written (INT-077).** The attribute is not part of the model at all, so it
+cannot be written by accident. *Implemented.*
+
+**D-03 — The plain mode is the default (INT-078, INT-079).** The server starts in the plain mode and writes
+`http-get:*:<mime>:*`. `DLNA.ORG_PN` is written only when the catalogue knows that the content conforms to a
+media format profile; `DLNA.ORG_OP=01` only when the server really serves byte ranges; `DLNA.ORG_CI=0`
+always in the DLNA mode. The mode is chosen by the dispatcher, not by the file, because the mode belongs to
+the client profile (F-07). *Implemented.*
+
+**D-04 — The `dlna` namespace is never declared.** The DLNA signalling lives in the fourth field of
+`res@protocolInfo`, which is an attribute value and not a namespaced element, and `dlna:profileID` is
+forbidden on `upnp:albumArtURI` (`INT-067`). A prefix that is used is declared, and nothing else is
+(`INT-071`). *Implemented.*
+
+**D-05 — The artwork address is built by the server (`INT-067).** The catalogue carries the opaque
+identifier of the artwork, not an address; the address is built from the base URL of the server, so that a
+tag file cannot make the client fetch a third-party address. The path is `/art/<id>`; the HTTP layer has
+to serve exactly that address, as it has to serve `/media/<id>` (`INT-090`). **[owner decision]** the path
+is a proposal, because no requirement names it.
+
+**D-06 — `restricted` is an attribute, not an element (`INT-060).** The placeholder writer of WP2 wrote a
+`<restricted>` child element; the schema has no such element, and the attribute is what `INT-060` asks for.
+The document now carries `restricted="1"` and nothing else.
+
+**D-07 — The two mandatory properties survive every filter (`INT-066`, `INT-034`).** `dc:title` and
+`upnp:class` are written on every item and container, whatever the client asked for: the schema makes them
+mandatory, and a document without them is not a DIDL-Lite document. The filter narrows the other
+properties. `INT-034` asks for "the elements the client asked for"; that is satisfied, because the asked-for
+elements are returned. **[owner decision]** this changes the behaviour of the WP2 placeholder, which dropped
+`upnp:class` when the filter did not name it.
+
+**D-08 — The class of a file the catalogue cannot describe.** The five classes of `INT-061` are used for the
+five kinds the catalogue knows. A file of an unknown kind gets the generic class `object.item`, which the
+schema allows. **[owner decision]** the requirement names five classes and does not say what an unknown
+kind maps to.
+
+**D-09 — The document carries no XML declaration.** The document is carried as the text of another document,
+and a declaration is only allowed at the start of a document. The client receives the root element.
+
+**D-10 — The dispatcher takes the base address and the policy.** `Dispatcher::new` takes the catalogue
+*and* the base address of the server, because the document builds its links from it, and it starts in
+the plain mode. The new constructor `Dispatcher::with_policy` takes the mode as its third argument,
+and `browse` takes the base address and the policy. The signature of `Dispatcher::new` and of `browse`
+therefore changed with WP3. Nothing outside the crate uses them yet, and the server (F-13) is the first
+consumer.
+
+### 12.2 Open questions
+
 1. **[OPEN] The truncation policy and `writeStatus` (INT-072, INT-077).** INT-072 asks for "a
    documented maximum length"; this document proposes 8192 bytes of escaped UTF-8, truncation on the
    raw value and a trailing `…`. INT-077 forbids `writeStatus` because the research could not verify
-   its definition (standards §9, Q5). *Closes when:* the owner approves the number and the marker, and
-   when the CD:4 Appendix-B row is available.
+   its definition (standards §9, Q5). *Implemented as D-01 and D-02; closes when:* the owner approves the
+   number and the marker, and when the CD:4 Appendix-B row is available.
 2. **[OPEN] The DLNA Media Format Profile list.** Only the reference implementation's list is available
    and the per-profile conformance rules are not (standards §9, Q2). Until a conformance check exists,
-   the server cannot claim `DLNA.ORG_PN` for anything. *Proposed decision:* ship the plain mode first.
+   the server cannot claim `DLNA.ORG_PN` for anything, so the catalogue leaves the profile empty and the
+   server stays in the plain mode (D-03). *Closes when:* the conformance rules exist.
 3. **[OPEN] Which `DLNA.ORG_FLAGS` bits to set.** The bit layout is documented by the reference
    implementation (standards §6.4), but no baseline requirement fixes our value. *Proposed decision:*
    byte-based seek (bit 29) plus streaming transfer mode (bit 24) for audio and video, interactive
-   (bit 23) for images. *Closes when:* the owner confirms.
+   (bit 23) for images. *Closes when:* the owner confirms. The bits and the format of the token are
+   implemented (`DlnaFlags`), but no policy sets them yet.
 4. **[OPEN] `searchable` on containers, the order of several `res` elements and `dc:date` precision.**
    The `searchable` attribute appears in the wild (standards §4.2) but the baseline does not mention
    it; a subtitle sidecar adds a second `res` (FUN-016, F-11); and the schema constraint on `dc:date`
    was not opened (standards §9, Q6), so this document emits a date only. [PROPOSED — not in the baseline] extend INT-060 with "containers shall carry `searchable`" once the client's
    `Search` capability is defined (F-03, INT-035). *Proposed decision:* the primary media resource
-   comes first in the element order.
+   comes first in the element order. *Partly implemented:* the containers carry `searchable="1"`, because
+   `Search` exists (F-03, INT-035) and the property of the catalogue is a search of the title; the
+   baseline still does not name the attribute, so the owner has to confirm it.
+5. **[OPEN] The `ORG_FLAGS` token layout.** The research says only "<32 hex>" (standards §6.4). The
+   reference implementation writes the significant digits first and pads the rest with zeros
+   (`01700000000000000000000000000000`); this implementation writes the same way. A client that parses the
+   token as a plain hexadecimal number would read a different value. *Closes when:* the owner confirms the
+   layout or a capture of a real client settles it.
+6. **[OPEN] The filter and the mandatory properties.** `INT-034` and `INT-066` pull in two directions, and
+   D-07 resolves them in favour of the schema. *Closes when:* the owner confirms D-07.

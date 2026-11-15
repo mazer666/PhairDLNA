@@ -10,12 +10,19 @@
 mod support;
 
 use phairdlna_core::upnp::{Dispatcher, SEARCHABLE_PROPERTIES, SORTABLE_PROPERTIES};
-use support::catalogue::TestCatalogue;
+use support::catalogue::{MediaCatalogue, TestCatalogue, BASE_URL};
 use support::{element_text, element_text_unescaped, envelope, CONTENT_DIRECTORY};
 
 /// The answer of a request against the test catalogue.
 fn answer(request: &str) -> String {
-    Dispatcher::new(&TestCatalogue).dispatch(request, None).body
+    Dispatcher::new(&TestCatalogue, BASE_URL)
+        .dispatch(request, None)
+        .body
+}
+
+/// The dispatcher of the catalogue whose files carry metadata.
+fn media_dispatcher() -> Dispatcher<'static> {
+    Dispatcher::new(&MediaCatalogue, BASE_URL)
 }
 
 /// A browse request with the given order.
@@ -181,37 +188,46 @@ fn a_sort_criterion_without_a_sign_is_refused() {
 }
 
 /// A filter that names only unknown properties does not become the wildcard:
-/// the item carries only its mandatory properties.
+/// the item carries only the properties the schema makes mandatory.
 #[test]
 fn an_unknown_filter_does_not_widen_the_answer() {
-    let body = answer(&envelope(
-        support::CONTENT_DIRECTORY,
-        "Browse",
-        &[
-            ("ObjectID", "1"),
-            ("BrowseFlag", "BrowseDirectChildren"),
-            ("Filter", "dc:creator"),
-            ("StartingIndex", "0"),
-            ("RequestedCount", "1"),
-            ("SortCriteria", ""),
-        ],
-    ));
+    let body = media_dispatcher()
+        .dispatch(
+            &envelope(
+                support::CONTENT_DIRECTORY,
+                "Browse",
+                &[
+                    ("ObjectID", "1"),
+                    ("BrowseFlag", "BrowseDirectChildren"),
+                    ("Filter", "upnp:unknownProperty"),
+                    ("StartingIndex", "0"),
+                    ("RequestedCount", "1"),
+                    ("SortCriteria", ""),
+                ],
+            ),
+            None,
+        )
+        .body;
     assert!(
         !body.contains("<errorCode>"),
         "the answer must not be a fault"
     );
     let result = element_text_unescaped(&body, "Result").expect("the result is present");
     assert!(
-        !result.contains("<dc:title>"),
-        "the title was not asked for"
+        result.contains("<dc:title>"),
+        "the title is mandatory in the schema"
     );
     assert!(
-        !result.contains("<upnp:class>"),
-        "the class was not asked for"
+        result.contains("<upnp:class>"),
+        "the class is mandatory in the schema"
     );
     assert!(
-        result.contains("<restricted>1</restricted>"),
-        "the mandatory property is there"
+        !result.contains("<upnp:artist>"),
+        "the artist was not asked for"
+    );
+    assert!(
+        result.contains("restricted=\"1\""),
+        "the mandatory attribute is there"
     );
 }
 

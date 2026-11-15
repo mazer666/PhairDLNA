@@ -338,6 +338,15 @@ schema (interoperability matrix PC-14), which makes AC-12 and AC-13 depend on F-
 > servers do (the `rclone` capture in standards §3.3 shows `&lt;DIDL-Lite` on the wire) and it is what
 > AC-12 demands. *Closes when:* the owner confirms the wording of AC-13, or corrects AC-12.
 
+> **The filter and the two mandatory properties, changed by F-05 (D-07).**
+> The placeholder writer of WP2 applied the filter to the mandatory properties as well, so a browse with
+> `Filter=dc:title` returned an item without `upnp:class`. F-05 owns the document and `INT-066` asks for
+> `dc:title` and `upnp:class` on every item and container; the schema makes them mandatory, and a document
+> without them is not a DIDL-Lite document. **The filter now narrows the other properties only**, and the
+> two mandatory ones are always written. `INT-034` is read as "the elements the client asked for are
+> returned", which stays true. The list of properties a filter may name grew from `dc:title,upnp:class` to
+> the ten properties the document can carry, because the document can carry them now.
+
 1. **[OPEN] The `UpdateID` semantics: CD:1 or CD:4?** CD:1 returns the *container's* update identifier for a container browse and the `SystemUpdateID` only for
    `ObjectID = 0`; CD:4 always returns the `SystemUpdateID` (standards §1.2, §7.1, §9 Q11). INT-043 states the CD:1 rule and we advertise `ContentDirectory:1`.
    *Closes when:* a device round shows that a client is confused by a container-specific update identifier, or the owner moves to `ContentDirectory:4`. 2.

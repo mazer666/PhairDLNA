@@ -1,78 +1,27 @@
 //! The MIME types the server can deliver.
 //!
-//! What: the registry of the MIME types the server serves, and the protocol
-//!       list that is derived from it.
-//! Why: the `Source` list of the ConnectionManager must name only the formats
-//!       the server can really deliver (`INT-051`), and the same registry
-//!       decides the `Content-Type` of a media answer in F-06 and the third
-//!       field of a `res` element in F-05. One registry, so that the three
-//!       cannot drift apart.
+//! What: the protocol list of the ConnectionManager: the `Source` list the
+//!       server advertises and the `Sink` list it offers.
+//! Why: the `Source` list must name only the formats the server can really
+//!       deliver (`INT-051`), and the same registry decides the `Content-Type`
+//!       of a media answer in F-06 and the third field of a `res` element in
+//!       F-05. One registry, so that the three cannot drift apart.
 //! Example: `source_protocol_info()` returns the `http-get` entries of the
 //!       `Source` list.
 
-/// The transport protocol the server uses.
-pub const HTTP_GET: &str = "http-get";
-
-/// The MIME types the server can deliver.
-pub const SUPPORTED_MIME_TYPES: [&str; 6] = [
-    "video/mp4",
-    "video/x-matroska",
-    "video/mpeg",
-    "audio/mpeg",
-    "audio/mp4",
-    "image/jpeg",
-];
-
-/// One protocolInfo entry: the four fields of the format.
-///
-/// The format is `<transportProtocol>:<network>:<contentFormat>:<additionalInfo>`
-/// (standards §1.3, §4.4). No field may contain a colon.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ProtocolInfo {
-    /// The transport protocol, for example `http-get`.
-    pub transport_protocol: String,
-    /// The network the transfer runs over, `*` for any.
-    pub network: String,
-    /// The content format, a MIME type.
-    pub content_format: String,
-    /// The additional information, `*` when no header is needed.
-    pub additional_info: String,
-}
-
-impl ProtocolInfo {
-    /// Builds an entry.
-    pub fn new(
-        transport_protocol: impl Into<String>,
-        network: impl Into<String>,
-        content_format: impl Into<String>,
-        additional_info: impl Into<String>,
-    ) -> Self {
-        Self {
-            transport_protocol: transport_protocol.into(),
-            network: network.into(),
-            content_format: content_format.into(),
-            additional_info: additional_info.into(),
-        }
-    }
-
-    /// The entry as it appears in the `Source` list.
-    pub fn as_string(&self) -> String {
-        format!(
-            "{}:{}:{}:{}",
-            self.transport_protocol, self.network, self.content_format, self.additional_info
-        )
-    }
-}
+use crate::catalogue::mime::SUPPORTED_MIME_TYPES;
+use crate::didl::ProtocolInfo;
 
 /// The `Source` list: the formats the server can send.
 ///
 /// The fourth field is `*`, because the delivery of a file over `http-get`
 /// depends on no request-specific header (`INT-055`). The list names no file
-/// and no path (`PLT-008`).
+/// and no path (`PLT-008`). Every format of the registry yields an entry — the
+/// registry holds MIME types, and a MIME type can always be written.
 pub fn source_protocol_info() -> Vec<ProtocolInfo> {
     SUPPORTED_MIME_TYPES
         .iter()
-        .map(|mime_type| ProtocolInfo::new(HTTP_GET, "*", *mime_type, "*"))
+        .filter_map(|mime_type| ProtocolInfo::http_get(mime_type))
         .collect()
 }
 
@@ -138,7 +87,7 @@ mod tests {
     /// An entry is written with the four fields in the order of the format.
     #[test]
     fn an_entry_is_written_in_the_specified_order() {
-        let entry = ProtocolInfo::new("http-get", "*", "video/mp4", "*");
+        let entry = ProtocolInfo::new("http-get", "*", "video/mp4", "*").expect("a valid entry");
         assert_eq!(entry.as_string(), "http-get:*:video/mp4:*");
     }
 }

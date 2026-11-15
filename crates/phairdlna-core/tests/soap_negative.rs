@@ -12,11 +12,14 @@
 mod support;
 
 use phairdlna_core::upnp::Dispatcher;
-use support::{catalogue::TestCatalogue, envelope, CONNECTION_MANAGER, CONTENT_DIRECTORY};
+use support::{
+    catalogue::{TestCatalogue, BASE_URL},
+    envelope, CONNECTION_MANAGER, CONTENT_DIRECTORY,
+};
 
 /// The dispatcher of the test catalogue.
 fn dispatcher() -> Dispatcher<'static> {
-    Dispatcher::new(&TestCatalogue)
+    Dispatcher::new(&TestCatalogue, BASE_URL)
 }
 
 /// The answer of a request, with its status.

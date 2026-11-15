@@ -14,7 +14,7 @@
 use super::scpd_connection_manager;
 use super::scpd_content_directory;
 use super::services::{ServiceDefinition, CONNECTION_MANAGER, CONTENT_DIRECTORY};
-use super::xml_writer::XmlWriter;
+use crate::xml::XmlWriter;
 
 /// The namespace of a service description document.
 pub const SCPD_NAMESPACE: &str = "urn:schemas-upnp-org:service-1-0";

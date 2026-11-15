@@ -31,7 +31,6 @@
 mod browse;
 mod connection_manager;
 mod content_directory;
-mod content_model;
 mod device;
 mod device_model;
 mod dispatcher;
@@ -45,24 +44,26 @@ mod scpd_content_directory;
 mod services;
 mod soap;
 mod xml_syntax;
-mod xml_writer;
 
 pub mod xml_reader;
 
+pub use crate::catalogue::mime::SUPPORTED_MIME_TYPES;
+pub use crate::catalogue::{ContentContainer, ContentItem, ContentSource};
+pub use crate::didl::ProtocolInfo;
+pub use crate::xml::{escape_attribute, escape_text, XmlWriter, XML_DECLARATION};
 pub use browse::{BrowseArguments, BrowseFlag, SortCriteria};
 pub use content_directory::{
     browse, get_search_capabilities, get_sort_capabilities, get_system_update_id, search,
-    CONTENT_DIRECTORY_OBJECT_ID, ROOT_OBJECT_ID, SEARCHABLE_PROPERTIES, SEARCH_CAPABILITIES,
-    SORTABLE_PROPERTIES, SORT_CAPABILITIES,
+    CONTENT_DIRECTORY_OBJECT_ID, KNOWN_PROPERTIES, ROOT_OBJECT_ID, SEARCHABLE_PROPERTIES,
+    SEARCH_CAPABILITIES, SORTABLE_PROPERTIES, SORT_CAPABILITIES,
 };
-pub use content_model::{Container, ContentItem, ContentSource};
 pub use device::{DeviceDescription, DEVICE_NAMESPACE};
 pub use device_model::{
     BaseUrl, DeviceInfo, DEFAULT_MODEL_DESCRIPTION, DEFAULT_MODEL_NAME, PROJECT_URL,
 };
 pub use dispatcher::Dispatcher;
 pub use error::{fault_description, UpnpError};
-pub use mime::{sink_list, source_list, source_protocol_info, ProtocolInfo, SUPPORTED_MIME_TYPES};
+pub use mime::{sink_list, source_list, source_protocol_info};
 pub use page::PAGE_LIMIT;
 pub use placeholder::PlaceholderCatalogue;
 pub use scpd::{
@@ -76,4 +77,3 @@ pub use soap::{
     check_soap_action, fault_body, parse_request, response_body, SoapRequest, SoapResponse,
     SOAP_ENCODING_STYLE, SOAP_ENVELOPE_NAMESPACE, UPNP_CONTROL_NAMESPACE, XML_CONTENT_TYPE,
 };
-pub use xml_writer::{escape_attribute, escape_text, XmlWriter, XML_DECLARATION};

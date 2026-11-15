@@ -265,7 +265,7 @@ code `402 Invalid Args`. Requirements: INT-025 · Verification: protocol conform
 | Device description structure and header set | `crates/phairdlna-core/tests/device_description.rs` | **exists** — the structural part; the response headers still need the HTTP fixture |
 | SCPD structure per service | `crates/phairdlna-core/tests/scpd.rs` | **exists** |
 | SOAP fault codes and malformed bodies | `crates/phairdlna-core/tests/soap_negative.rs` | planned — the dispatcher does not exist yet |
-| XML writer escaping rules | `crates/phairdlna-core/src/upnp/xml_writer.rs` (inline `#[cfg(test)]` module) | **exists** |
+| XML writer escaping rules | `crates/phairdlna-core/src/xml/mod.rs` (inline `#[cfg(test)]` module) | **exists** |
 | Description against a second control point | `qa/device-matrix.toml` | planned |
 
 **Method.** The description is generated from a pure function over the configuration, so it can be compared structurally without a socket; an HTTP fixture

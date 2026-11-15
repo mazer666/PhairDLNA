@@ -7,20 +7,25 @@
 //!       exercised without a socket, and they never touch the filesystem — a
 //!       browse reads the catalogue and nothing else (`PERF-008`,
 //!       ARCHITECTURE §5). Every argument comes from the network and is
-//!       therefore treated as untrusted (`SEC-018`).
+//!       therefore treated as untrusted (`SEC-018`). The document the answer
+//!       carries is built by the `didl` module, which owns the escaping and
+//!       the length policy (`INT-065`, `INT-072`).
 //! Example: `browse` answers a browse request with the four arguments the
 //!       specification names: `Result`, `NumberReturned`, `TotalMatches` and
 //!       `UpdateID`.
 
+use crate::catalogue::{ContentContainer, ContentItem, ContentSource};
+use crate::didl::{
+    container_from_catalogue, item_from_catalogue, render_for_soap_result, DidlDocument,
+    ProtocolPolicy, SUPPORTED_PROPERTIES,
+};
 use crate::upnp::browse::{
     read_browse_arguments, read_filter, read_search_criteria, read_sort, read_ui4, BrowseArguments,
     BrowseFlag,
 };
-use crate::upnp::content_model::{Container, ContentItem, ContentSource};
 use crate::upnp::error::UpnpError;
 use crate::upnp::page::{page, sort_items};
-use crate::upnp::placeholder::{container_document, items_document};
-use crate::upnp::soap::{response_body, SoapRequest, SoapResponse};
+use crate::upnp::soap::{response_body, response_body_with_result, SoapRequest, SoapResponse};
 
 /// The properties the server can search in.
 ///
@@ -39,9 +44,9 @@ pub const SORT_CAPABILITIES: &str = "dc:title,upnp:class";
 ///
 /// A filter that names another property is ignored rather than refused, so
 /// that a client of a newer ContentDirectory version still gets an answer
-/// (`INT-034`). The property `restricted` is required in every item and is
-/// therefore never selected by a filter.
-pub const KNOWN_PROPERTIES: [&str; 2] = ["dc:title", "upnp:class"];
+/// (`INT-034`). The list is the one of the document, so that the two cannot
+/// drift apart.
+pub const KNOWN_PROPERTIES: &[&str] = &SUPPORTED_PROPERTIES;
 
 /// The properties the server can search in.
 ///
@@ -86,9 +91,15 @@ pub fn get_system_update_id(source: &dyn ContentSource) -> SoapResponse {
 /// The four arguments are the ones the specification names, in that order
 /// (`INT-031`). An object the server does not know is the fault `701 No Such
 /// Object`, never an empty answer that looks like data loss (`INT-039`).
+///
+/// The base address is the address the document builds its links from, and
+/// the policy decides how the `protocolInfo` of a resource is written
+/// (`INT-078`).
 pub fn browse(
     request: &SoapRequest,
     source: &dyn ContentSource,
+    base_url: &str,
+    policy: &ProtocolPolicy,
 ) -> Result<SoapResponse, UpnpError> {
     let arguments = read_browse_arguments(request)?;
     let container =
@@ -98,18 +109,32 @@ pub fn browse(
                 object_id: arguments.object_id.clone(),
             })?;
     match arguments.flag {
-        BrowseFlag::Metadata => Ok(metadata_answer(&container, source)),
-        BrowseFlag::DirectChildren => children_answer(&container, &arguments, source),
+        BrowseFlag::Metadata => Ok(metadata_answer(
+            &container,
+            source,
+            arguments.filter.as_deref(),
+        )),
+        BrowseFlag::DirectChildren => {
+            children_answer(&container, &arguments, source, base_url, policy)
+        }
     }
 }
 
 /// The answer of a metadata browse: the container itself (`INT-033`).
-fn metadata_answer(container: &Container, source: &dyn ContentSource) -> SoapResponse {
-    let result = container_document(container);
-    answer(
+///
+/// A container carries no file, so the answer needs neither the address of
+/// the server nor the protocol policy.
+fn metadata_answer(
+    container: &ContentContainer,
+    source: &dyn ContentSource,
+    filter: Option<&[String]>,
+) -> SoapResponse {
+    let document = DidlDocument::with_containers(vec![container_from_catalogue(container)]);
+    let result = render_for_soap_result(&document, filter);
+    answer_with_result(
         "Browse",
+        &result,
         &[
-            ("Result", &result),
             ("NumberReturned", "1"),
             ("TotalMatches", "1"),
             ("UpdateID", &update_id_of(container, source).to_string()),
@@ -122,7 +147,7 @@ fn metadata_answer(container: &Container, source: &dyn ContentSource) -> SoapRes
 /// A browse of the root container reports the identifier of the whole
 /// catalogue; a browse of another container reports the identifier of that
 /// container (`INT-043`).
-fn update_id_of(container: &Container, source: &dyn ContentSource) -> u32 {
+fn update_id_of(container: &ContentContainer, source: &dyn ContentSource) -> u32 {
     if container.id == ROOT_OBJECT_ID {
         source.system_update_id()
     } else {
@@ -132,9 +157,11 @@ fn update_id_of(container: &Container, source: &dyn ContentSource) -> u32 {
 
 /// The answer of a browse of the children of a container.
 fn children_answer(
-    container: &Container,
+    container: &ContentContainer,
     arguments: &BrowseArguments,
     source: &dyn ContentSource,
+    base_url: &str,
+    policy: &ProtocolPolicy,
 ) -> Result<SoapResponse, UpnpError> {
     let children = sorted_children(container, arguments);
     let page = page(&children, arguments);
@@ -148,11 +175,12 @@ fn children_answer(
         }
     };
     let update_id = update_id_of(container, source);
-    let result = items_document(&page, arguments.filter.as_deref());
-    Ok(answer(
+    let document = document_of(&page, base_url, policy);
+    let result = render_for_soap_result(&document, arguments.filter.as_deref());
+    Ok(answer_with_result(
         "Browse",
+        &result,
         &[
-            ("Result", &result),
             ("NumberReturned", &page.len().to_string()),
             ("TotalMatches", &total.to_string()),
             ("UpdateID", &update_id.to_string()),
@@ -160,8 +188,17 @@ fn children_answer(
     ))
 }
 
+/// The document of a page of items.
+fn document_of(page: &[ContentItem], base_url: &str, policy: &ProtocolPolicy) -> DidlDocument {
+    DidlDocument::with_items(
+        page.iter()
+            .map(|item| item_from_catalogue(item, base_url, policy))
+            .collect(),
+    )
+}
+
 /// The children in the order the client asked for.
-fn sorted_children(container: &Container, arguments: &BrowseArguments) -> Vec<ContentItem> {
+fn sorted_children(container: &ContentContainer, arguments: &BrowseArguments) -> Vec<ContentItem> {
     let mut children = container.children.clone();
     sort_items(&mut children, &arguments.sort);
     children
@@ -175,6 +212,8 @@ fn sorted_children(container: &Container, arguments: &BrowseArguments) -> Vec<Co
 pub fn search(
     request: &SoapRequest,
     source: &dyn ContentSource,
+    base_url: &str,
+    policy: &ProtocolPolicy,
 ) -> Result<SoapResponse, UpnpError> {
     let criteria = read_search_criteria(request.required_argument("SearchCriteria")?)?;
     let container_id = request.required_argument("ContainerID")?.trim().to_owned();
@@ -194,11 +233,11 @@ pub fn search(
     let total = matches.len() as u32;
     sort_items(&mut matches, &arguments.sort);
     let page = page(&matches, &arguments);
-    let result = items_document(&page, filter.as_deref());
-    Ok(answer(
+    let result = render_for_soap_result(&document_of(&page, base_url, policy), filter.as_deref());
+    Ok(answer_with_result(
         "Search",
+        &result,
         &[
-            ("Result", &result),
             ("NumberReturned", &page.len().to_string()),
             ("TotalMatches", &total.to_string()),
             ("UpdateID", &source.system_update_id().to_string()),
@@ -211,6 +250,19 @@ fn answer(action: &str, arguments: &[(&str, &str)]) -> SoapResponse {
     SoapResponse::ok(response_body(
         crate::upnp::services::CONTENT_DIRECTORY.service_type,
         action,
+        arguments,
+    ))
+}
+
+/// The answer of an action that carries a document.
+///
+/// The document is already escaped for the text of an element, because the
+/// `didl` module owns that escaping (`INT-073`).
+fn answer_with_result(action: &str, result: &str, arguments: &[(&str, &str)]) -> SoapResponse {
+    SoapResponse::ok(response_body_with_result(
+        crate::upnp::services::CONTENT_DIRECTORY.service_type,
+        action,
+        result,
         arguments,
     ))
 }

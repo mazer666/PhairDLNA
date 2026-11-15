@@ -19,12 +19,15 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
+pub mod catalogue;
 pub mod config;
+pub mod didl;
 pub mod error;
 pub mod identity;
 pub mod platform;
 pub mod ssdp;
 pub mod upnp;
+pub mod xml;
 
 pub use config::{Config, ConfigError};
 pub use error::CoreError;

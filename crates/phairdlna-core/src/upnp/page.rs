@@ -10,8 +10,9 @@
 //! Example: `page` returns the items from the index the client asked for,
 //!       never more than the page limit.
 
+use crate::catalogue::ContentItem;
+use crate::didl::class_of;
 use crate::upnp::browse::{BrowseArguments, SortCriteria};
-use crate::upnp::content_model::ContentItem;
 
 /// The largest number of items one answer carries (`SEC-061`).
 pub const PAGE_LIMIT: usize = 500;
@@ -52,7 +53,7 @@ pub(super) fn sort_items(items: &mut [ContentItem], sort: &SortCriteria) {
 fn property_of(item: &ContentItem, property: &str) -> String {
     match property {
         "dc:title" => item.title.clone(),
-        "upnp:class" => item.class.clone(),
+        "upnp:class" => class_of(item.kind).as_str().to_owned(),
         _ => String::new(),
     }
 }
@@ -60,8 +61,8 @@ fn property_of(item: &ContentItem, property: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::{page, PAGE_LIMIT};
+    use crate::catalogue::{ContentItem, MediaKind};
     use crate::upnp::browse::{BrowseArguments, BrowseFlag, SortCriteria};
-    use crate::upnp::content_model::ContentItem;
 
     /// A container with the given number of children.
     fn children(count: usize) -> Vec<ContentItem> {
@@ -71,7 +72,7 @@ mod tests {
                     index.to_string(),
                     "1",
                     format!("Item {index}"),
-                    "object.item.videoItem",
+                    MediaKind::Movie,
                 )
             })
             .collect()

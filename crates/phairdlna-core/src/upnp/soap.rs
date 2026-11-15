@@ -25,7 +25,7 @@
 
 use crate::upnp::error::{fault_description, UpnpError};
 use crate::upnp::xml_reader::{parse_with_limits, Element, XmlLimits};
-use crate::upnp::xml_writer::XmlWriter;
+use crate::xml::XmlWriter;
 
 /// The namespace of the SOAP envelope.
 pub const SOAP_ENVELOPE_NAMESPACE: &str = "http://schemas.xmlsoap.org/soap/envelope/";
@@ -183,6 +183,40 @@ pub fn response_body(service_type: &str, action: &str, arguments: &[(&str, &str)
     );
     writer.open("s:Body", &[]);
     writer.open(&format!("u:{action}Response"), &[("xmlns:u", service_type)]);
+    for (name, value) in arguments {
+        writer.text(name, value);
+    }
+    writer.close(&format!("u:{action}Response"));
+    writer.close("s:Body");
+    writer.close("s:Envelope");
+    writer.finish()
+}
+
+/// The answer of an action whose `Result` argument carries a document.
+///
+/// The document is written verbatim, because the caller has already escaped
+/// it for the text of an element: the `didl` module owns that second
+/// escaping (`INT-073`), and escaping it again here would corrupt it
+/// (`INT-065`). The document comes first, because the specification names
+/// `Result` before the other arguments of a browse (`INT-031`).
+pub fn response_body_with_result(
+    service_type: &str,
+    action: &str,
+    result: &str,
+    arguments: &[(&str, &str)],
+) -> String {
+    let mut writer = XmlWriter::new();
+    writer.declaration();
+    writer.open(
+        "s:Envelope",
+        &[
+            ("xmlns:s", SOAP_ENVELOPE_NAMESPACE),
+            ("s:encodingStyle", SOAP_ENCODING_STYLE),
+        ],
+    );
+    writer.open("s:Body", &[]);
+    writer.open(&format!("u:{action}Response"), &[("xmlns:u", service_type)]);
+    writer.escaped_text("Result", result);
     for (name, value) in arguments {
         writer.text(name, value);
     }

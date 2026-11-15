@@ -214,8 +214,17 @@ mod tests {
     /// wildcard: the client did not ask for every property.
     #[test]
     fn an_unknown_filter_is_not_the_wildcard() {
-        assert_eq!(read_filter("dc:creator"), Some(Vec::new()));
-        assert_eq!(read_filter("dc:creator,upnp:unknown"), Some(Vec::new()));
+        assert_eq!(read_filter("upnp:unknown"), Some(Vec::new()));
+        assert_eq!(read_filter("upnp:unknown,dc:alsoUnknown"), Some(Vec::new()));
+    }
+
+    /// A property the document can carry is understood, and is kept.
+    #[test]
+    fn a_known_filter_is_kept() {
+        assert_eq!(
+            read_filter("dc:title,upnp:artist"),
+            Some(vec!["dc:title".to_owned(), "upnp:artist".to_owned()])
+        );
     }
 
     /// The three forms of the sort criteria are the empty form, the plus form

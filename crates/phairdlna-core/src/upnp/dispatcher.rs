@@ -10,6 +10,8 @@
 //! Example: `dispatch` answers a browse request with the browse answer, and a
 //!       request for an action that does not exist with the fault `401`.
 
+use crate::catalogue::ContentSource;
+use crate::didl::ProtocolPolicy;
 use crate::upnp::connection_manager::{
     connection_complete, get_current_connection_ids, get_current_connection_info,
     get_protocol_info, prepare_for_connection,
@@ -17,7 +19,6 @@ use crate::upnp::connection_manager::{
 use crate::upnp::content_directory::{
     browse, get_search_capabilities, get_sort_capabilities, get_system_update_id, search,
 };
-use crate::upnp::content_model::ContentSource;
 use crate::upnp::error::UpnpError;
 use crate::upnp::services::{CONNECTION_MANAGER, CONTENT_DIRECTORY};
 use crate::upnp::soap::{check_soap_action, parse_request, SoapRequest, SoapResponse};
@@ -25,12 +26,36 @@ use crate::upnp::soap::{check_soap_action, parse_request, SoapRequest, SoapRespo
 /// The dispatcher of the control path.
 pub struct Dispatcher<'a> {
     content: &'a dyn ContentSource,
+    base_url: &'a str,
+    policy: ProtocolPolicy,
 }
 
 impl<'a> Dispatcher<'a> {
     /// Builds a dispatcher that reads the catalogue through the given source.
-    pub fn new(content: &'a dyn ContentSource) -> Self {
-        Self { content }
+    ///
+    /// The base address is the address the document builds its links from; the
+    /// server knows it, because it served the description from it (`INT-022`).
+    /// The dispatcher starts in the plain mode, because the server claims
+    /// nothing it cannot prove (`INT-078`).
+    pub fn new(content: &'a dyn ContentSource, base_url: &'a str) -> Self {
+        Self {
+            content,
+            base_url,
+            policy: ProtocolPolicy::plain(),
+        }
+    }
+
+    /// Builds a dispatcher that writes the protocolInfo in the given mode.
+    pub fn with_policy(
+        content: &'a dyn ContentSource,
+        base_url: &'a str,
+        policy: ProtocolPolicy,
+    ) -> Self {
+        Self {
+            content,
+            base_url,
+            policy,
+        }
     }
 
     /// Reads a control request and answers it.
@@ -77,8 +102,8 @@ impl<'a> Dispatcher<'a> {
             "GetSearchCapabilities" => Ok(get_search_capabilities()),
             "GetSortCapabilities" => Ok(get_sort_capabilities()),
             "GetSystemUpdateID" => Ok(get_system_update_id(self.content)),
-            "Browse" => browse(request, self.content),
-            "Search" => search(request, self.content),
+            "Browse" => browse(request, self.content, self.base_url, &self.policy),
+            "Search" => search(request, self.content, self.base_url, &self.policy),
             _ => Err(UpnpError::UnknownAction {
                 action: request.action.clone(),
             }),

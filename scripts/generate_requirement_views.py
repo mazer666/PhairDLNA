@@ -239,7 +239,7 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "Verified",
     ),
     "INT-051": (
-        "`crates/phairdlna-core/tests/connection_manager.rs::every_advertised_mime_type_is_in_the_registry`",
+        "`crates/phairdlna-core/tests/connection_manager.rs::the_source_list_holds_every_format_of_the_registry`",
         "Verified",
     ),
     "INT-052": (
@@ -274,6 +274,93 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     "INT-045": (
         "`crates/phairdlna-core/tests/device_description.rs::the_document_holds_exactly_one_device_element`",
         "Verified",
+    ),
+    "INT-060": (
+        "`crates/phairdlna-core/tests/didl_lite.rs::the_document_has_the_shape_the_schema_asks_for`"
+        " — the attributes are written; the client that reads them is not tested yet",
+        "Implemented",
+    ),
+    "INT-061": (
+        "`crates/phairdlna-core/tests/didl_lite.rs::the_classes_are_the_ones_of_the_schema`",
+        "Verified",
+    ),
+    "INT-062": (
+        "`crates/phairdlna-core/tests/didl_lite.rs::the_identifier_is_stable_and_carries_no_path`"
+        " — the identifier of the fixture is opaque; the hash of ARCHITECTURE §8 is F-08",
+        "Implemented",
+    ),
+    "INT-063": (
+        "`crates/phairdlna-core/tests/didl_resource.rs::the_resource_carries_the_attributes_of_the_schema`",
+        "Verified",
+    ),
+    "INT-064": (
+        "`crates/phairdlna-core/tests/didl_resource.rs::the_protocol_names_a_format_the_server_serves`",
+        "Verified",
+    ),
+    "INT-065": (
+        "`crates/phairdlna-core/tests/didl_escaping.rs::the_reserved_characters_are_escaped_in_the_text`",
+        "Verified",
+    ),
+    "INT-066": (
+        "`crates/phairdlna-core/tests/didl_lite.rs::the_document_has_the_shape_the_schema_asks_for`",
+        "Verified",
+    ),
+    "INT-067": (
+        "`crates/phairdlna-core/tests/didl_lite.rs::the_artwork_address_carries_no_dlna_attribute`"
+        " — the address is built; the endpoint that serves it is F-10",
+        "Implemented",
+    ),
+    "INT-068": (
+        "`crates/phairdlna-core/tests/didl_lite.rs::the_metadata_elements_carry_the_values_of_the_tags`",
+        "Verified",
+    ),
+    "INT-069": (
+        "`crates/phairdlna-core/tests/didl_lite.rs::the_metadata_elements_carry_the_values_of_the_tags`",
+        "Verified",
+    ),
+    "INT-070": (
+        "`crates/phairdlna-core/tests/didl_lite.rs::the_metadata_elements_carry_the_values_of_the_tags`",
+        "Verified",
+    ),
+    "INT-071": (
+        "`crates/phairdlna-core/tests/didl_lite.rs::the_document_has_the_shape_the_schema_asks_for`",
+        "Verified",
+    ),
+    "INT-072": (
+        "`crates/phairdlna-core/tests/didl_lite.rs::a_very_long_title_is_cut_and_marked`",
+        "Verified",
+    ),
+    "INT-073": (
+        "`crates/phairdlna-core/tests/didl_escaping.rs::the_document_survives_the_second_escaping`",
+        "Verified",
+    ),
+    "INT-074": (
+        "`crates/phairdlna-core/tests/didl_resource.rs::the_resource_carries_the_attributes_of_the_schema`"
+        " — the attribute carries the number the catalogue read; the unit is the catalogue's contract",
+        "Implemented",
+    ),
+    "INT-075": (
+        "`crates/phairdlna-core/tests/didl_resource.rs::the_resource_carries_the_attributes_of_the_schema`",
+        "Verified",
+    ),
+    "INT-076": (
+        "`crates/phairdlna-core/tests/didl_lite.rs::the_metadata_elements_carry_the_values_of_the_tags`",
+        "Verified",
+    ),
+    "INT-077": (
+        "`crates/phairdlna-core/tests/didl_resource.rs::the_document_never_carries_a_write_status`",
+        "Verified",
+    ),
+    "INT-078": (
+        "`crates/phairdlna-core/tests/didl_resource.rs::the_two_modes_describe_the_same_file`"
+        " — the mode is chosen by the dispatcher; the client profile that selects it is F-07",
+        "Implemented",
+    ),
+    "INT-079": (
+        "`crates/phairdlna-core/tests/didl_resource.rs::nothing_is_claimed_that_the_server_cannot_prove`"
+        " — the tokens are written as the requirement asks; the conformance check of a profile does not"
+        " exist yet, so the catalogue claims no profile",
+        "Implemented",
     ),
 }
 

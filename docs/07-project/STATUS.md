@@ -7,9 +7,11 @@ Owner role: Lead / Project Manager
 
 ## 1. Where the project stands
 
-The **requirements phase is complete** and presented for approval. No DLNA feature is
-implemented. The repository contains a Rust workspace scaffold, a complete
-documentation baseline and the gates that will hold the implementation honest.
+The **requirements phase is complete** and presented for approval. The implementation has
+begun: the milestones M1.1 to M1.7 are coded and reviewed, but nothing is served over the
+network yet and **no device test has been performed**. The repository contains a Rust
+workspace, a complete documentation baseline and the gates that will hold the
+implementation honest.
 
 | Area | State | Evidence |
 | --- | --- | --- |
@@ -29,7 +31,7 @@ documentation baseline and the gates that will hold the implementation honest.
 | Open decisions | **13 awaiting the owner** | `OPEN-DECISIONS.md` |
 | Glossary | **Complete** | The protocol, product, platform, security and project vocabulary — `../01-product/GLOSSARY.md` |
 | Research inputs | **Complete** | The briefs the specifications cite — `../09-research/` |
-| Implementation | **M0 done, M1.1–M1.3 done** | The four crates exist with the boundary enforced; the configuration, the eight platform traits and the discovery protocol are implemented with 58 tests; the command line offers `version`, `config path`, `config validate`, `config show` and `ssdp headers` |
+| Implementation | **M0 done, M1.1–M1.7 implemented** | The four crates exist with the boundary enforced; the configuration, the eight platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, and the DIDL-Lite generation are implemented and reviewed; 297 tests; **no device test has been performed**, so no milestone exit criterion is met yet |
 | Device evidence | **None** | Every device row reads `NOT TESTED` |
 | Release | **Not releasable** | `RELEASE-BLOCKERS.md` |
 

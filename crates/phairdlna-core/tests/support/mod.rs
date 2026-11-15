@@ -7,13 +7,15 @@
 //!       SOAP control requests.
 //! Why: the acceptance criteria of F-02 say "*when it is parsed*". A string
 //!       match on the document cannot tell a well-formed document from a
-//!       broken one, and the project has no XML parser as a dependency yet.
-//!       The checker reads the documents the project itself produces, which
-//!       escape every reserved character, so a small checker is enough.
+//!       broken one, so the tests read the document with the XML reader of the
+//!       project (`support::didl::parse`), which resolves the namespaces and
+//!       decodes the entities. The checker below is a second opinion: it
+//!       catches a document that carries an unescaped reserved character.
 //! Example: `assert_well_formed(&description.to_xml())` panics with the
 //!       offending fragment if the document is malformed.
 
 pub mod catalogue;
+pub mod didl;
 
 /// The service type of the ContentDirectory service.
 pub const CONTENT_DIRECTORY: &str = "urn:schemas-upnp-org:service:ContentDirectory:1";

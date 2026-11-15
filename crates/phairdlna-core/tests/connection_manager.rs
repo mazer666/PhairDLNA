@@ -14,9 +14,12 @@ use support::{element_text, envelope, CONNECTION_MANAGER};
 
 /// The answer of a request of the ConnectionManager service.
 fn answer(action: &str, arguments: &[(&str, &str)]) -> String {
-    Dispatcher::new(&support::catalogue::TestCatalogue)
-        .dispatch(&envelope(CONNECTION_MANAGER, action, arguments), None)
-        .body
+    Dispatcher::new(
+        &support::catalogue::TestCatalogue,
+        support::catalogue::BASE_URL,
+    )
+    .dispatch(&envelope(CONNECTION_MANAGER, action, arguments), None)
+    .body
 }
 
 /// The source list of the protocol information.

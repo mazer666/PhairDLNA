@@ -9,7 +9,7 @@
 //! Example:
 //!
 //! ```
-//! use phairdlna_core::upnp::XmlWriter;
+//! use phairdlna_core::xml::XmlWriter;
 //!
 //! let mut writer = XmlWriter::new();
 //! writer.declaration();
@@ -21,6 +21,12 @@
 //! assert!(xml.contains("<friendlyName>Living &amp; room</friendlyName>"));
 //! assert!(!xml.contains("<!DOCTYPE"));
 //! ```
+
+mod chars;
+
+pub use chars::{escaped_character_len, escaped_text_len};
+
+use chars::{is_allowed, replacement};
 
 /// The XML declaration every document starts with.
 pub const XML_DECLARATION: &str = r#"<?xml version="1.0" encoding="utf-8"?>"#;
@@ -44,32 +50,13 @@ pub fn escape_attribute(value: &str) -> String {
 fn escape(value: &str, in_attribute: bool) -> String {
     let mut escaped = String::with_capacity(value.len());
     for character in value.chars() {
-        match character {
-            '&' => escaped.push_str("&amp;"),
-            '<' => escaped.push_str("&lt;"),
-            '>' => escaped.push_str("&gt;"),
-            '"' if in_attribute => escaped.push_str("&quot;"),
-            '\'' if in_attribute => escaped.push_str("&apos;"),
-            character if is_allowed(character) => escaped.push(character),
-            _ => {}
+        match replacement(character, in_attribute) {
+            Some(replacement) => escaped.push_str(replacement),
+            None if is_allowed(character) => escaped.push(character),
+            None => {}
         }
     }
     escaped
-}
-
-/// Whether a character may appear in an XML 1.0 document.
-///
-/// The ranges are the ones XML 1.0 names: tab, line feed and carriage return,
-/// then the printable ranges. The control characters between them are
-/// forbidden, and the two noncharacters `U+FFFE` and `U+FFFF` are forbidden
-/// as well. A user-chosen device name may contain such a character, and a
-/// document that carries one is not well-formed, so the writer drops it
-/// instead of emitting broken XML.
-fn is_allowed(character: char) -> bool {
-    matches!(character, '\t' | '\n' | '\r')
-        || ('\u{20}'..='\u{D7FF}').contains(&character)
-        || ('\u{E000}'..='\u{FFFD}').contains(&character)
-        || ('\u{10000}'..='\u{10FFFF}').contains(&character)
 }
 
 /// A writer that builds a document element by element.
@@ -96,6 +83,12 @@ impl XmlWriter {
     /// Opens an element with optional attributes.
     pub fn open(&mut self, name: &str, attributes: &[(&str, &str)]) {
         self.indent();
+        self.write_tag(name, attributes);
+        self.open_elements.push(name.to_owned());
+    }
+
+    /// Writes the opening tag of an element.
+    fn write_tag(&mut self, name: &str, attributes: &[(&str, &str)]) {
         self.output.push('<');
         self.output.push_str(name);
         for (attribute, value) in attributes {
@@ -106,7 +99,6 @@ impl XmlWriter {
             self.output.push('"');
         }
         self.output.push('>');
-        self.open_elements.push(name.to_owned());
     }
 
     /// Closes the element that was opened last.
@@ -133,6 +125,39 @@ impl XmlWriter {
         self.output.push_str(name);
         self.output.push('>');
         self.output.push_str(&escape_text(value));
+        self.output.push_str("</");
+        self.output.push_str(name);
+        self.output.push('>');
+    }
+
+    /// Writes an element that carries attributes and text.
+    ///
+    /// The element is written on one line, because its text is a value the
+    /// client reads — the URI of a `res` element, for example — and a line
+    /// break inside the element would become part of that value.
+    pub fn element_with_text(&mut self, name: &str, attributes: &[(&str, &str)], value: &str) {
+        self.indent();
+        self.write_tag(name, attributes);
+        self.output.push_str(&escape_text(value));
+        self.output.push_str("</");
+        self.output.push_str(name);
+        self.output.push('>');
+    }
+
+    /// Writes an element that carries text that is already escaped.
+    ///
+    /// The value is written verbatim: the caller owns the escaping. The method
+    /// exists for the one place where a document is carried as the text of
+    /// another document (`INT-073`), where escaping it twice would corrupt it.
+    ///
+    /// The method is not public: a value that is written verbatim and was not
+    /// escaped is an injection, and only the crate can hold that responsibility.
+    pub(crate) fn escaped_text(&mut self, name: &str, value: &str) {
+        self.indent();
+        self.output.push('<');
+        self.output.push_str(name);
+        self.output.push('>');
+        self.output.push_str(value);
         self.output.push_str("</");
         self.output.push_str(name);
         self.output.push('>');
@@ -170,12 +195,21 @@ impl XmlWriter {
 
 #[cfg(test)]
 mod tests {
-    use super::{escape_attribute, escape_text, XmlWriter, XML_DECLARATION};
+    use super::{escape_attribute, escape_text, escaped_text_len, XmlWriter, XML_DECLARATION};
 
     /// The five characters XML 1.0 reserves are escaped in element text.
     #[test]
     fn element_text_is_escaped() {
         assert_eq!(escape_text("a & b < c > d"), "a &amp; b &lt; c &gt; d");
+    }
+
+    /// The length of a value is the length of its escaped form.
+    #[test]
+    fn the_escaped_length_counts_the_escapes() {
+        assert_eq!(escaped_text_len("abc"), 3);
+        assert_eq!(escaped_text_len("a & b"), 9);
+        assert_eq!(escaped_text_len("<"), 4);
+        assert_eq!(escaped_text_len("ä"), 2);
     }
 
     /// The quotes are escaped in an attribute value as well.
@@ -201,14 +235,6 @@ mod tests {
         assert_eq!(escape_text("keep\tthe\ntabs"), "keep\tthe\ntabs");
     }
 
-    /// The characters XML 1.0 allows but a control character test would
-    /// reject are kept, and the two noncharacters are dropped.
-    #[test]
-    fn the_allowed_characters_are_kept_and_the_noncharacters_are_dropped() {
-        assert_eq!(escape_text("a\u{0080}b"), "a\u{0080}b");
-        assert_eq!(escape_text("a\u{FFFE}b\u{FFFF}c"), "abc");
-    }
-
     /// The writer never emits a DOCTYPE, because the writer has no way to.
     #[test]
     fn the_writer_never_emits_a_doctype() {
@@ -232,5 +258,38 @@ mod tests {
         let xml = writer.finish();
         assert!(!xml.contains("<injected/>"));
         assert!(xml.contains("&quot;&gt;&lt;injected/&gt;"));
+    }
+
+    /// An element with attributes and text is written on one line, so that
+    /// the text is the value and not the value and a line break.
+    #[test]
+    fn an_element_with_text_is_written_on_one_line() {
+        let mut writer = XmlWriter::new();
+        writer.element_with_text(
+            "res",
+            &[("protocolInfo", "http-get:*:audio/mpeg:*")],
+            "http://host/a",
+        );
+        let xml = writer.finish();
+        assert!(xml.contains("<res protocolInfo=\"http-get:*:audio/mpeg:*\">http://host/a</res>"));
+    }
+
+    /// The text of an element with text is escaped.
+    #[test]
+    fn the_text_of_an_element_with_text_is_escaped() {
+        let mut writer = XmlWriter::new();
+        writer.element_with_text("res", &[], "a & b");
+        let xml = writer.finish();
+        assert!(xml.contains("<res>a &amp; b</res>"));
+    }
+
+    /// Already escaped text is written as it is, and only once.
+    #[test]
+    fn already_escaped_text_is_written_verbatim() {
+        let mut writer = XmlWriter::new();
+        writer.escaped_text("Result", "&lt;DIDL-Lite&gt;");
+        let xml = writer.finish();
+        assert!(xml.contains("<Result>&lt;DIDL-Lite&gt;</Result>"));
+        assert!(!xml.contains("&amp;lt;"));
     }
 }

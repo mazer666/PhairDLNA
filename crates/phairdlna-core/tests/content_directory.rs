@@ -11,13 +11,19 @@ mod support;
 
 use phairdlna_core::upnp::{Dispatcher, ServiceSpec};
 use support::catalogue::{
-    ChangingCatalogue, EmptyUncountableCatalogue, TestCatalogue, UncountableCatalogue, CHILD_COUNT,
+    ChangingCatalogue, EmptyUncountableCatalogue, MediaCatalogue, TestCatalogue,
+    UncountableCatalogue, BASE_URL, CHILD_COUNT,
 };
 use support::{assert_well_formed, browse_request, element_text, element_text_unescaped, envelope};
 
 /// The dispatcher of the test catalogue.
 fn dispatcher() -> Dispatcher<'static> {
-    Dispatcher::new(&TestCatalogue)
+    Dispatcher::new(&TestCatalogue, BASE_URL)
+}
+
+/// The dispatcher of the catalogue whose files carry metadata.
+fn media_dispatcher() -> Dispatcher<'static> {
+    Dispatcher::new(&MediaCatalogue, BASE_URL)
 }
 
 /// The answer of a request against the test catalogue.
@@ -91,6 +97,10 @@ fn a_browse_without_a_limit_returns_every_child() {
 
 /// The wildcard filter returns the full property set, a known filter only that
 /// property, and an unknown filter a complete answer.
+///
+/// The two mandatory properties — `dc:title` and `upnp:class` — survive every
+/// filter, because the schema makes them mandatory (`INT-066`); the filter
+/// narrows the other properties.
 #[test]
 fn the_filter_narrows_the_answer_without_failing() {
     let full = element_text_unescaped(&browse("BrowseDirectChildren", 0, 1), "Result")
@@ -98,21 +108,34 @@ fn the_filter_narrows_the_answer_without_failing() {
     assert!(full.contains("<dc:title>"));
     assert!(full.contains("<upnp:class>"));
 
-    let narrow = answer(&envelope(
-        support::CONTENT_DIRECTORY,
-        "Browse",
-        &[
-            ("ObjectID", "1"),
-            ("BrowseFlag", "BrowseDirectChildren"),
-            ("Filter", "dc:title"),
-            ("StartingIndex", "0"),
-            ("RequestedCount", "1"),
-            ("SortCriteria", ""),
-        ],
-    ));
+    let narrow = media_dispatcher()
+        .dispatch(
+            &envelope(
+                support::CONTENT_DIRECTORY,
+                "Browse",
+                &[
+                    ("ObjectID", "1"),
+                    ("BrowseFlag", "BrowseDirectChildren"),
+                    ("Filter", "dc:title"),
+                    ("StartingIndex", "0"),
+                    ("RequestedCount", "1"),
+                    ("SortCriteria", ""),
+                ],
+            ),
+            None,
+        )
+        .body;
     let narrow = element_text_unescaped(&narrow, "Result").expect("the result is present");
-    assert!(narrow.contains("<dc:title>"));
-    assert!(!narrow.contains("<upnp:class>"));
+    assert!(narrow.contains("<dc:title>Nightfall</dc:title>"));
+    assert!(
+        narrow.contains("<upnp:class>object.item.audioItem.musicTrack</upnp:class>"),
+        "the class is mandatory and survives the filter"
+    );
+    assert!(
+        !narrow.contains("<upnp:artist>"),
+        "the artist was not asked for"
+    );
+    assert!(!narrow.contains("<res "), "the resource was not asked for");
 
     let unknown = answer(&envelope(
         support::CONTENT_DIRECTORY,
@@ -140,11 +163,11 @@ fn the_filter_narrows_the_answer_without_failing() {
 /// when the catalogue changes.
 #[test]
 fn the_system_update_identifier_grows_with_the_catalogue() {
-    let before = Dispatcher::new(&ChangingCatalogue::new(5)).dispatch(
+    let before = Dispatcher::new(&ChangingCatalogue::new(5), BASE_URL).dispatch(
         &envelope(support::CONTENT_DIRECTORY, "GetSystemUpdateID", &[]),
         None,
     );
-    let after = Dispatcher::new(&ChangingCatalogue::new(6)).dispatch(
+    let after = Dispatcher::new(&ChangingCatalogue::new(6), BASE_URL).dispatch(
         &envelope(support::CONTENT_DIRECTORY, "GetSystemUpdateID", &[]),
         None,
     );
@@ -230,13 +253,13 @@ fn the_raw_result_element_carries_the_document_escaped() {
 /// a count that is not, and with the error `720` when it returns nothing.
 #[test]
 fn an_uncountable_container_answers_with_zero_or_720() {
-    let body = Dispatcher::new(&UncountableCatalogue)
+    let body = Dispatcher::new(&UncountableCatalogue, BASE_URL)
         .dispatch(&browse_request("1", "BrowseDirectChildren", 0, 0), None);
     let body = body.body;
     assert_eq!(element_text(&body, "TotalMatches").as_deref(), Some("0"));
     assert_eq!(element_text(&body, "NumberReturned").as_deref(), Some("1"));
 
-    let body = Dispatcher::new(&EmptyUncountableCatalogue)
+    let body = Dispatcher::new(&EmptyUncountableCatalogue, BASE_URL)
         .dispatch(&browse_request("1", "BrowseDirectChildren", 0, 0), None);
     let body = body.body;
     assert!(body.contains("<errorCode>720</errorCode>"));
