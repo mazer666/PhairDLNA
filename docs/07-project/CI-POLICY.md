@@ -27,9 +27,16 @@ is read and recorded.
 | `ci.yml` | `workflow_dispatch` | The full gate set on one platform |
 | `ci-matrix.yml` | `workflow_dispatch` | The build and test set on macOS, Linux and Windows |
 
-Both workflows are **real and complete**: `ci.yml` runs eleven gate steps and
-`ci-matrix.yml` builds and tests on macOS, Linux and Windows plus the minimum
-supported Rust version. What they cover today is limited by what exists: the gates
+Both workflows are **real and complete**: `ci.yml` runs the gate set — formatting,
+lints, no unsafe, build, tests, doctests, licences, advisories, bans and sources,
+the link check, the file-size check, the crate-boundary check and the requirement
+views — and `ci-matrix.yml` builds and tests on macOS, Linux and Windows plus the
+minimum supported Rust version.
+
+The auxiliary tools are installed as **prebuilt binaries**, not compiled from source:
+building `cargo-deny` and `cargo-audit` from source takes longer than the rest of
+the workflow put together. The versions are the ones recorded in
+`../04-security/DEPENDENCY-LICENSE-REVIEW.md`. What they cover today is limited by what exists: the gates
 that depend on the implementation cannot run, and the workflows that call them say
 so explicitly rather than pretending.
 
@@ -63,7 +70,8 @@ The full list is in `../05-quality/QUALITY-GATES.md`. A `ci.yml` run covers:
 
 `QG-01` formatting · `QG-02` lints · `QG-03` no unsafe · `QG-04` build ·
 `QG-05` unit tests · `QG-07` doctests · `QG-08` licences · `QG-09` advisories ·
-`QG-10` bans and sources · `QG-11` link check · `QG-13` file size.
+`QG-10` bans and sources · `QG-11` link check · `QG-13` file size ·
+`QG-28` crate boundaries · the requirement views are current.
 
 The remaining gates — `QG-06` integration tests, `QG-12` spelling, `QG-14`
 complexity, `QG-15` binary size, `QG-16` snapshots, `QG-17` DIDL-Lite conformance,

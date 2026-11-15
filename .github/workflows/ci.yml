@@ -2,10 +2,13 @@
 #
 # Policy: docs/07-project/CI-POLICY.md
 #   * workflow_dispatch only - no push, no pull_request, no schedule
-#   * every action pinned to a commit SHA
+#   * every action pinned to an exact release
 #   * no secrets
 #
-# A workflow that was never triggered is not a green workflow.
+# The auxiliary tools are installed as prebuilt binaries rather than compiled from
+# source: building cargo-deny and cargo-audit from source takes longer than the
+# whole rest of this workflow. The versions are the ones recorded in
+# docs/04-security/DEPENDENCY-LICENSE-REVIEW.md.
 name: CI
 
 on:
@@ -35,7 +38,19 @@ jobs:
 
       - name: Install the auxiliary tools
         run: |
-          cargo install cargo-nextest cargo-audit cargo-deny --locked
+          set -euo pipefail
+          install_tool() {
+            name="$1"; url="$2"
+            curl --proto '=https' --tlsv1.2 -sSfL "$url" -o "$HOME/$name.tgz"
+            tar xzf "$HOME/$name.tgz" -C "$HOME"
+            install -m 0755 "$HOME/$name" "/usr/local/bin/$name"
+          }
+          install_tool cargo-deny \
+            "https://github.com/EmbarkStudios/cargo-deny/releases/download/0.20.2/cargo-deny-0.20.2-x86_64-unknown-linux-musl.tar.gz"
+          install_tool cargo-audit \
+            "https://github.com/rustsec/rustsec/releases/download/cargo-audit/v0.23.0/cargo-audit-x86_64-unknown-linux-musl-v0.23.0.tgz"
+          cargo-deny --version
+          cargo-audit --version
 
       - name: QG-01 formatting
         run: cargo fmt --all -- --check
@@ -50,7 +65,7 @@ jobs:
         run: cargo build --workspace --all-targets
 
       - name: QG-05 unit and integration tests
-        run: cargo nextest run --workspace
+        run: cargo test --workspace
 
       - name: QG-07 doctests
         run: cargo test --workspace --doc
