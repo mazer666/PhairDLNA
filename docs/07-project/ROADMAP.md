@@ -54,7 +54,10 @@ the real dependency set, the configuration module is implemented with its tests,
 the command line offers `version`, `config path`, `config validate` and
 `config show`.
 
-**Still open in M0:** the manual CI run on all three platforms, and the Intel macOS
+The manual CI run on Linux is green — all 13 gate steps, recorded as
+[run 43698100636](https://github.com/mazer666/PhairDLNA/actions/runs/43698100636).
+
+**Still open in M0:** the manual CI run on macOS and Windows, and the Intel macOS
 target of the build matrix.
 
 ---
