@@ -1,6 +1,10 @@
 # Competitor feature evaluation and adoption policy
 
-Status: Binding process proposal; individual product scope remains subject to owner-approved baseline.
+Status: **Approved (v1.0 baseline, 2026-11-15)** · Owner role: Lead / Product Owner
+Applies to: every feature that a competitor has, and every feature idea in general.
+Records: `../01-product/COMPETITOR-FEATURE-ATLAS.md` (the research),
+`../05-quality/FEATURE-EVALUATION-TEMPLATE.md` (the record template),
+`../01-product/COMPETITIVE-PARITY-ELMEDIA.md` (the worked example).
 
 ## Objective
 Not a feature-count contest: deliver measurable user value beyond competing products while retaining best-in-class performance, reliability, security, accessibility and privacy.

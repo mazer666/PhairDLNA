@@ -1,6 +1,11 @@
 # Competitor feature atlas — November 2026
 
-Status: Research baseline, not approved implementation scope. Sources are vendor/project descriptions unless stated otherwise. Feature availability varies by version, edition, OS and device. No hands-on tests performed. This atlas covers **server, player, caster and mirroring** products separately: a capability in a player does not imply the same capability belongs in a server.
+Status: **Research input — evidence, not scope** · Owner role: Product Owner · Version/date: 1.0 / 2026-11-15
+Governed by: `../00-governance/FEATURE-EVALUATION-AND-ADOPTION-POLICY.md`
+Record template: `../05-quality/FEATURE-EVALUATION-TEMPLATE.md`
+Worked example: `COMPETITIVE-PARITY-ELMEDIA.md`
+
+Status of the content: research baseline, not approved implementation scope. Sources are vendor/project descriptions unless stated otherwise. Feature availability varies by version, edition, OS and device. No hands-on tests performed. This atlas covers **server, player, caster and mirroring** products separately: a capability in a player does not imply the same capability belongs in a server.
 
 ## Elmedia Player (Electronic Team) — macOS local player and caster
 Source: https://www.elmedia-video-player.com/features/ ; https://www.elmedia-video-player.com/ ; https://help.electronic.us/support/solutions/articles/44002278728

@@ -26,7 +26,7 @@ documentation baseline and the gates that will hold the implementation honest.
 | Performance | **Budgets defined, not measured** | Budgets and the measurement protocol — `../05-quality/PERFORMANCE-BUDGETS.md` |
 | Roadmap | **Complete** | Six milestones with exit criteria — `ROADMAP.md` |
 | Risk register | **Complete** | 13 risks with mitigations and owners — `RISK-REGISTER.md` |
-| Open decisions | **12 awaiting the owner** | `OPEN-DECISIONS.md` |
+| Open decisions | **13 awaiting the owner** | `OPEN-DECISIONS.md` |
 | Glossary | **Complete** | The protocol, product, platform, security and project vocabulary — `../01-product/GLOSSARY.md` |
 | Research inputs | **Complete** | The briefs the specifications cite — `../09-research/` |
 | Implementation | **M0 started** | The four crates exist, the configuration module is implemented with 14 tests, the command line has `version`, `config path`, `config validate` and `config show` |
@@ -79,10 +79,12 @@ Everything else in this repository is **documented and unmeasured**. In particul
 | Quality gates | 28 (`QG-01` … `QG-28`), of which 11 can run today |
 | Milestone gates | 7 (`G0` … `G6`) |
 | Architecture decisions | The ADRs in `../02-architecture/adr/` + 23 decision-log entries |
-| Open owner decisions | 12 (`OD-01` … `OD-12`) |
+| Open owner decisions | 13 (`OD-01` … `OD-13`) |
 | Risks | 13 (`R-01` … `R-13`) |
 | Archived baselines | 2 snapshots, each with a SHA-256 manifest |
 | Research briefs committed | 9 documents under `../09-research/` |
+| Competitors mapped | 11 products with per-feature proposals — `../01-product/COMPETITOR-FEATURE-ATLAS.md` |
+| Competitive criteria | 11 testable criteria against the macOS field — `../01-product/COMPETITIVE-PARITY-ELMEDIA.md` |
 
 ---
 

@@ -31,6 +31,7 @@ the momentum.
 | OD-10 | The supported locales | English and German; strings prepared for translation | English and German |
 | OD-11 | The reference hardware | The profile in the performance budgets; the machine is named before the first measurement | The same profile |
 | OD-12 | Outside contributions | Accepted, with a requirement ID, a test and documentation | Accepted |
+| OD-13 | The Apple media libraries | Own folders only; the libraries stay opt-in and unbuilt | Option A |
 
 **The only decision that blocks work is OD-05** (the minimum macOS version), because
 the service model and the first-run flow depend on it. Everything else can be
@@ -237,6 +238,31 @@ implemented?
 **Recommendation:** **yes**, with the rule that a contribution must come with a
 requirement ID, a test and documentation. The feature template and the requirement
 method exist for exactly this.
+
+---
+
+## OD-13 — The Apple media libraries
+
+**Question:** shall the server be able to publish the user's macOS media libraries
+(Music, TV, Podcasts, Books, Photos) alongside their own folders?
+
+**The competitor:** FireStream does exactly this. It is the one place where the field is
+ahead of our baseline, which is why it is written down instead of ignored.
+
+| Option | Effect |
+| --- | --- |
+| **A. Own folders only** | Smallest surface, no access to personal libraries, no media-API permission. The gap to FireStream stays |
+| **B. Apple libraries, opt-in per library** | Every library the user names, with the system's own consent prompt and the same metadata and artwork rules as a folder |
+| **C. Apple libraries, always** | Rejected: it reaches into personal data the user never named, and it contradicts `PRD-003` |
+
+**Recommendation:** **A now, B only if the owner asks for it.** The libraries are
+personal data; opening them is a deliberate act by the user, not a default. If B is
+chosen, the implementation rules are already written down: off by default, one
+consent per library, the library appears as an ordinary root, and the same metadata
+and artwork rules apply.
+
+**If deferred:** nothing in the baseline is blocked. This is the one competitor gap
+that we are choosing knowingly.
 
 ---
 

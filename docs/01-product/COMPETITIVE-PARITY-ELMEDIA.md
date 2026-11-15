@@ -30,6 +30,33 @@ this document as to every other claim in the project.
 | Hardware decoding | VideoToolbox, smooth 4K | vendor page |
 | Price | Free tier plus a PRO tier (a one-off purchase) | app-store listing |
 
+## 1b. The wider macOS field
+
+The owner named Elmedia. The research found that Elmedia belongs to a family: the same
+vendor also ships **JustStream** (casting and screen mirroring) and **FireStream** (a
+native macOS UPnP/DLNA *server*). FireStream is the closest competitor of all — a
+Mac-first DLNA server, aimed at exactly the job PhairDLNA takes.
+
+The per-competitor detail is in
+[COMPETITOR-FEATURE-ATLAS.md](COMPETITOR-FEATURE-ATLAS.md); the method that decides
+whether a competitor feature becomes ours is in
+[../00-governance/FEATURE-EVALUATION-AND-ADOPTION-POLICY.md](../00-governance/FEATURE-EVALUATION-AND-ADOPTION-POLICY.md).
+The criteria in §3 below are a **worked example** of that method.
+
+Three observations from the atlas that change this document:
+
+- **FireStream integrates with the Apple media libraries** (Music, TV, Podcasts, Books,
+  Photos) alongside user folders. That is a real capability and a real privacy
+  question, and it is now an open decision (**OD-13**).
+- **JustStream** documents a specific device workaround — sending `STOP` before `PLAY` —
+  and warns that transcoding can cost substantial processor time. Both are exactly the
+  kind of thing our compatibility profiles are for, and exactly the kind of thing that
+  must never happen silently.
+- **Universal Media Server, Serviio and Gerbera** all ship mature device-specific
+  compatibility workarounds. Their depth is the bar: a decade of device quirks is what
+  "works everywhere" actually costs, and our matrix must be able to accumulate that
+  knowledge without a rewrite.
+
 ## 2. Why the comparison is not one-to-one
 
 Elmedia is a **player and a sender**: the user picks a file in the app, and the app
@@ -144,6 +171,30 @@ cannot write that sentence — and must not.
 **Criterion:** no compatibility claim without a device row behind it; an unknown
 capability stays unknown (`COMP-002`).
 
+### C-10 — The Mac media libraries, if we do them at all
+
+FireStream offers the Apple libraries; Elmedia does not. This is the one place where
+the field is genuinely ahead of our baseline, so it is written down rather than
+ignored.
+
+**Test:** with the integration disabled, the server sees only the user's folders; with
+it enabled and consented, the chosen library appears as an ordinary root with the same
+metadata and artwork rules.
+**Criterion:** the integration is **off by default**, asks for the specific library it
+needs, never reaches for a library the user did not name, and never runs without the
+user's consent (`PRD-003`, `PLT-017`). It is recorded as an open decision (OD-13)
+rather than as a promise.
+
+### C-11 — A device quirk is data, not a patch
+
+JustStream's "send `STOP` before `PLAY`" is the kind of knowledge that is worth money
+and that every competitor has to rediscover.
+
+**Test:** a quirk is recorded in a profile, carries its evidence, and can be switched
+off by the user without recompiling.
+**Criterion:** `INT-100` … `INT-104` — a quirk is declarative, versioned and
+reversible, and the matrix records where it came from.
+
 ## 4. Where we are *not* competing, and why
 
 | Elmedia capability | Our answer |
@@ -151,6 +202,7 @@ capability stays unknown (`COMP-002`).
 | Web playback of YouTube | Out of scope. We serve the user's own files; we do not become a browser or an advertising surface |
 | Built-in equaliser, audio effects, playback speed | A player feature. We are a server |
 | Video editing, frame stepping, screenshots | A player feature |
+| Screen mirroring | JustStream does it. A separate protocol with a separate capture-permission and CPU budget — **LATER**, never a default server dependency |
 | DVD/Blu-ray playback | A player feature. We serve what is already on the disk |
 | A PRO tier | There is no tier. The project is AGPL and free, permanently (`DEC-001`) |
 
@@ -169,6 +221,8 @@ Nothing in the baseline is abandoned. The criteria map onto existing work:
 | C-07 | F-21 (proposed Playback Doctor) | after the baseline |
 | C-08 | F-15 | M2 |
 | C-09 | F-07, F-19 | M1, M4 |
+| C-10 | F-08, F-12 (behind OD-13) | after the baseline |
+| C-11 | F-07 | M4 |
 
 **What the comparison adds to the baseline:** four new requirements — `FUN-026`
 (subtitle formats and MIME types), `FUN-027` (subtitle charset handling),
