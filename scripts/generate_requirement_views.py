@@ -155,6 +155,118 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "`crates/phairdlna-core/tests/scpd.rs::the_content_directory_lists_no_write_action`",
         "Verified",
     ),
+    "INT-025": (
+        "`crates/phairdlna-core/tests/soap_negative.rs::an_unknown_action_is_the_fault_401`",
+        "Verified",
+    ),
+    "INT-030": (
+        "`crates/phairdlna-core/tests/content_directory.rs::the_browse_answer_carries_the_four_arguments_in_order`",
+        "Verified",
+    ),
+    "INT-031": (
+        "`crates/phairdlna-core/tests/content_directory.rs::the_browse_answer_carries_the_four_arguments_in_order`",
+        "Verified",
+    ),
+    "INT-032": (
+        "`crates/phairdlna-core/tests/content_directory.rs::a_browse_with_a_limit_returns_at_most_that_many`",
+        "Verified",
+    ),
+    "INT-033": (
+        "`crates/phairdlna-core/tests/content_directory.rs::a_metadata_browse_describes_the_container`",
+        "Verified",
+    ),
+    "INT-034": (
+        "`crates/phairdlna-core/tests/content_directory.rs::the_filter_narrows_the_answer_without_failing`",
+        "Verified",
+    ),
+    "INT-035": (
+        "`crates/phairdlna-core/tests/content_directory_search.rs::the_capabilities_name_the_properties_the_server_uses`",
+        "Verified",
+    ),
+    "INT-036": (
+        "`crates/phairdlna-core/tests/content_directory_search.rs::a_search_finds_the_matching_item`",
+        "Verified",
+    ),
+    "INT-037": (
+        "`crates/phairdlna-core/tests/content_directory.rs::the_system_update_identifier_grows_with_the_catalogue`"
+        " — the handler returns the identifier of the catalogue; the catalogue owns its growth",
+        "Implemented",
+    ),
+    "INT-038": (
+        "`crates/phairdlna-core/tests/content_directory.rs::the_root_and_the_content_directory_root_are_known`"
+        " — the placeholder catalogue answers; the real one is F-09",
+        "Implemented",
+    ),
+    "INT-039": (
+        "`crates/phairdlna-core/tests/content_directory.rs::an_unknown_object_is_the_fault_701`",
+        "Verified",
+    ),
+    "INT-040": (
+        "`crates/phairdlna-core/tests/content_directory.rs::the_write_actions_are_absent_and_not_answered`",
+        "Verified",
+    ),
+    "INT-041": (
+        "`crates/phairdlna-core/tests/content_directory.rs::a_browse_with_an_offset_returns_the_rest`",
+        "Verified",
+    ),
+    "INT-042": (
+        "`crates/phairdlna-core/tests/content_directory.rs::the_result_is_a_didl_lite_document_that_parses_on_its_own`"
+        " — the placeholder writer of F-05 answers; the final writer is not written yet",
+        "Implemented",
+    ),
+    "INT-043": (
+        "`crates/phairdlna-core/tests/content_directory.rs::a_browse_of_the_root_reports_the_system_update_identifier`",
+        "Verified",
+    ),
+    "INT-046": (
+        "`crates/phairdlna-core/tests/content_directory.rs::an_uncountable_container_answers_with_zero_or_720`",
+        "Verified",
+    ),
+    "INT-047": (
+        "`crates/phairdlna-core/tests/content_directory_search.rs::the_sort_criteria_order_the_answer`",
+        "Verified",
+    ),
+    "INT-048": (
+        "`crates/phairdlna-core/tests/content_directory.rs::no_non_standard_action_is_answered`",
+        "Verified",
+    ),
+    "INT-049": (
+        "`crates/phairdlna-core/tests/content_directory_search.rs::the_capabilities_name_the_properties_the_server_uses`",
+        "Verified",
+    ),
+    "INT-050": (
+        "`crates/phairdlna-core/tests/connection_manager.rs::the_source_list_has_four_fields_per_entry`",
+        "Verified",
+    ),
+    "INT-051": (
+        "`crates/phairdlna-core/tests/connection_manager.rs::every_advertised_mime_type_is_in_the_registry`",
+        "Verified",
+    ),
+    "INT-052": (
+        "`crates/phairdlna-core/tests/connection_manager.rs::the_list_of_the_running_transfers_is_empty`",
+        "Verified",
+    ),
+    "INT-053": (
+        "`crates/phairdlna-core/tests/connection_manager.rs::a_preparation_creates_no_transfer`"
+        " — no connection is ever opened; the transfer that binds a connection to a media object needs the HTTP layer",
+        "Implemented",
+    ),
+    "INT-055": (
+        "`crates/phairdlna-core/tests/connection_manager.rs::every_entry_carries_the_wildcard_and_names_no_profile`",
+        "Verified",
+    ),
+    "INT-056": (
+        "`crates/phairdlna-core/tests/connection_manager.rs::no_entry_uses_the_push_protocol`",
+        "Verified",
+    ),
+    "SEC-010": (
+        "`crates/phairdlna-core/tests/xml_reader.rs::a_document_type_declaration_is_refused`",
+        "Verified",
+    ),
+    "SEC-060": (
+        "`crates/phairdlna-core/tests/xml_reader.rs::a_document_that_is_too_large_is_refused`",
+        "Verified",
+    ),
     "INT-044": (
         "`crates/phairdlna-core/tests/device_description.rs::the_service_list_names_both_mandatory_services`",
         "Verified",
@@ -415,7 +527,8 @@ def render_trace(rows: list[dict]) -> str:
     module_area = {
         "PRD": "—", "FUN": "crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media",
         "INT": "crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl",
-        "SEC": "crates/phairdlna-core/src/security, crates/phairdlna-core/src/http",
+        "SEC": ("crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, "
+                "crates/phairdlna-core/src/upnp"),
         "PERF": "crates/phairdlna-core/src/** (benchmarked)",
         "UX": "crates/phairdlna-cli, crates/phairdlna-mac",
         "OPS": "crates/phairdlna-cli, crates/phairdlna-admin",

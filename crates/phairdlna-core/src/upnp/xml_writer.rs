@@ -138,6 +138,16 @@ impl XmlWriter {
         self.output.push('>');
     }
 
+    /// Writes a comment.
+    ///
+    /// XML forbids the sequence `--` inside a comment, so it is replaced.
+    pub fn comment(&mut self, text: &str) {
+        self.indent();
+        self.output.push_str("<!-- ");
+        self.output.push_str(&text.replace("--", "- -"));
+        self.output.push_str(" -->");
+    }
+
     /// Finishes the document and returns it.
     pub fn finish(mut self) -> String {
         debug_assert!(

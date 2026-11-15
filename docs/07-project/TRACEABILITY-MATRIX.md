@@ -105,38 +105,38 @@ that was actually observed; an empty cell means *not implemented*, not *passed*.
 | `INT-022` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::every_service_entry_carries_its_addresses` — the URLs are absolute; their resolution against the request host needs the HTTP layer | Implemented |
 | `INT-023` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/scpd.rs::every_state_variable_declares_its_data_type` — the service descriptions are generated; they are not served over HTTP yet | Implemented |
 | `INT-024` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::the_document_is_well_formed` | Verified |
-| `INT-025` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
+| `INT-025` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/soap_negative.rs::an_unknown_action_is_the_fault_401` | Verified |
 | `INT-026` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-027` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::a_name_with_reserved_characters_is_escaped` | Verified |
 | `INT-028` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::the_content_directory_is_advertised_in_version_one` — the service is advertised; serving it to a client needs the HTTP layer | Implemented |
 | `INT-029` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::the_connection_manager_is_advertised_without_transcoding` — the service is advertised; the reachability of its control URL needs the HTTP layer | Implemented |
-| `INT-030` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-031` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-032` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-033` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-034` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-035` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-036` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-037` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-038` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-039` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-040` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/scpd.rs::the_content_directory_lists_no_write_action` | Verified |
-| `INT-041` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-042` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-043` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
+| `INT-030` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::the_browse_answer_carries_the_four_arguments_in_order` | Verified |
+| `INT-031` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::the_browse_answer_carries_the_four_arguments_in_order` | Verified |
+| `INT-032` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::a_browse_with_a_limit_returns_at_most_that_many` | Verified |
+| `INT-033` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::a_metadata_browse_describes_the_container` | Verified |
+| `INT-034` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::the_filter_narrows_the_answer_without_failing` | Verified |
+| `INT-035` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory_search.rs::the_capabilities_name_the_properties_the_server_uses` | Verified |
+| `INT-036` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory_search.rs::a_search_finds_the_matching_item` | Verified |
+| `INT-037` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::the_system_update_identifier_grows_with_the_catalogue` — the handler returns the identifier of the catalogue; the catalogue owns its growth | Implemented |
+| `INT-038` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::the_root_and_the_content_directory_root_are_known` — the placeholder catalogue answers; the real one is F-09 | Implemented |
+| `INT-039` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::an_unknown_object_is_the_fault_701` | Verified |
+| `INT-040` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::the_write_actions_are_absent_and_not_answered` | Verified |
+| `INT-041` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::a_browse_with_an_offset_returns_the_rest` | Verified |
+| `INT-042` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::the_result_is_a_didl_lite_document_that_parses_on_its_own` — the placeholder writer of F-05 answers; the final writer is not written yet | Implemented |
+| `INT-043` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::a_browse_of_the_root_reports_the_system_update_identifier` | Verified |
 | `INT-044` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::the_service_list_names_both_mandatory_services` | Verified |
 | `INT-045` | `F-02` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/device_description.rs::the_document_holds_exactly_one_device_element` | Verified |
-| `INT-046` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-047` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-048` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-049` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-050` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-051` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-052` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-053` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
+| `INT-046` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::an_uncountable_container_answers_with_zero_or_720` | Verified |
+| `INT-047` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory_search.rs::the_sort_criteria_order_the_answer` | Verified |
+| `INT-048` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory.rs::no_non_standard_action_is_answered` | Verified |
+| `INT-049` | `F-03` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/content_directory_search.rs::the_capabilities_name_the_properties_the_server_uses` | Verified |
+| `INT-050` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/connection_manager.rs::the_source_list_has_four_fields_per_entry` | Verified |
+| `INT-051` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/connection_manager.rs::every_advertised_mime_type_is_in_the_registry` | Verified |
+| `INT-052` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/connection_manager.rs::the_list_of_the_running_transfers_is_empty` | Verified |
+| `INT-053` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/connection_manager.rs::a_preparation_creates_no_transfer` — no connection is ever opened; the transfer that binds a connection to a media object needs the HTTP layer | Implemented |
 | `INT-054` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-055` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
-| `INT-056` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
+| `INT-055` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/connection_manager.rs::every_entry_carries_the_wildcard_and_names_no_profile` | Verified |
+| `INT-056` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | `crates/phairdlna-core/tests/connection_manager.rs::no_entry_uses_the_push_protocol` | Verified |
 | `INT-057` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-058` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
 | `INT-059` | `F-04` | M1 | `crates/phairdlna-core/src/upnp, crates/phairdlna-core/src/didl` | Protocol conformance test | — | Not implemented |
@@ -294,43 +294,43 @@ that was actually observed; an empty cell means *not implemented*, not *passed*.
 | `RES-007` | `F-18` | M2 | `crates/phairdlna-core/src/scheduler` | Resource-pressure test | — | Not implemented |
 | `RES-008` | `F-18` | M2 | `crates/phairdlna-core/src/scheduler` | Resource-pressure test | — | Not implemented |
 | `RES-009` | `F-18` | M2 | `crates/phairdlna-core/src/scheduler` | Resource-pressure test | — | Not implemented |
-| `SEC-001` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-002` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-003` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-004` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-005` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-006` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-007` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-008` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-010` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-011` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-012` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-013` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-014` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-015` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-016` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-017` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-018` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-060` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-061` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-062` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-063` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-064` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-065` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-066` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-067` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-068` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-069` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-070` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-071` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-072` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-090` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-091` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-092` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-093` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-094` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-095` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
-| `SEC-096` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http` | Negative security test | — | Not implemented |
+| `SEC-001` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-002` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-003` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-004` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-005` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-006` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-007` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-008` | `F-08` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-010` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | `crates/phairdlna-core/tests/xml_reader.rs::a_document_type_declaration_is_refused` | Verified |
+| `SEC-011` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-012` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-013` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-014` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-015` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-016` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-017` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-018` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-060` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | `crates/phairdlna-core/tests/xml_reader.rs::a_document_that_is_too_large_is_refused` | Verified |
+| `SEC-061` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-062` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-063` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-064` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-065` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-066` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-067` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-068` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-069` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-070` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-071` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-072` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-090` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-091` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-092` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-093` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-094` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-095` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
+| `SEC-096` | `F-16` | M1 | `crates/phairdlna-core/src/security, crates/phairdlna-core/src/http, crates/phairdlna-core/src/upnp` | Negative security test | — | Not implemented |
 | `SUP-001` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |
 | `SUP-002` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |
 | `SUP-003` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |

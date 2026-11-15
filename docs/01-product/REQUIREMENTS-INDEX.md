@@ -122,38 +122,38 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-022` | All URLs inside the device description shall be absolute HTTP URLs or root-relative paths that… | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
 | `INT-023` | Serve a valid SCPD document for every advertised service | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
 | `INT-024` | The XML served by the server shall be well-formed | MUST | `F-02` | M1 | Protocol conformance test | Verified |
-| `INT-025` | Answer an unknown SOAP action with an HTTP fault using the UPnP error codes `401 Invalid… | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
+| `INT-025` | Answer an unknown SOAP action with an HTTP fault using the UPnP error codes `401 Invalid… | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-026` | Respond to `GET` on the device description and on SCPD documents with `Content-Type: text/xml;… | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
 | `INT-027` | Not include a client-controllable value in the XML output without XML escaping. | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-028` | Advertise `ContentDirectory:1` in addition to any newer ContentDirectory version | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
 | `INT-029` | Reference the `ConnectionManager` service even when no transcoding is available | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
-| `INT-030` | Implement the `Browse` action with the arguments `ObjectID` | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-031` | The `Browse` response shall contain `Result`, `NumberReturned`, `TotalMatches` and `UpdateID`… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-032` | Honour `StartingIndex` and `RequestedCount` and shall never return more items than… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-033` | Honour `BrowseFlag` such that `BrowseMetadata` returns only the container metadata with… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-034` | Apply the `Filter` argument, shall support the wildcard `*` that clients send constantly, and… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-035` | Implement `GetSearchCapabilities` and `GetSortCapabilities` and shall return only capabilities… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-036` | Implement `Search` for the capability strings it advertises in `GetSearchCapabilities`. | SHOULD | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-037` | Implement `GetSystemUpdateID` and shall keep the returned value monotonically non-decreasing | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-038` | Return the object ID `0` for the root container and the standard ID `1` for the content… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-039` | Return an UPnP error `701 No Such Object` for an unknown `ObjectID` instead of an empty… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
+| `INT-030` | Implement the `Browse` action with the arguments `ObjectID` | MUST | `F-03` | M1 | Protocol conformance test | Verified |
+| `INT-031` | The `Browse` response shall contain `Result`, `NumberReturned`, `TotalMatches` and `UpdateID`… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
+| `INT-032` | Honour `StartingIndex` and `RequestedCount` and shall never return more items than… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
+| `INT-033` | Honour `BrowseFlag` such that `BrowseMetadata` returns only the container metadata with… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
+| `INT-034` | Apply the `Filter` argument, shall support the wildcard `*` that clients send constantly, and… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
+| `INT-035` | Implement `GetSearchCapabilities` and `GetSortCapabilities` and shall return only capabilities… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
+| `INT-036` | Implement `Search` for the capability strings it advertises in `GetSearchCapabilities`. | SHOULD | `F-03` | M1 | Protocol conformance test | Verified |
+| `INT-037` | Implement `GetSystemUpdateID` and shall keep the returned value monotonically non-decreasing | MUST | `F-03` | M1 | Protocol conformance test | Implemented |
+| `INT-038` | Return the object ID `0` for the root container and the standard ID `1` for the content… | MUST | `F-03` | M1 | Protocol conformance test | Implemented |
+| `INT-039` | Return an UPnP error `701 No Such Object` for an unknown `ObjectID` instead of an empty… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-040` | Not implement write operations (`CreateObject` | MUST | `F-03` | M1 | Protocol conformance test | Verified |
-| `INT-041` | Return `NumberReturned` and `TotalMatches` as non-negative integers and shall not exceed… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-042` | Return a `Result` document that is valid DIDL-Lite XML and parses independently of the… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-043` | Return the container's `UpdateID` for a `Browse` of a container and the `SystemUpdateID` for a… | SHOULD | `F-03` | M1 | Protocol conformance test | Baseline |
+| `INT-041` | Return `NumberReturned` and `TotalMatches` as non-negative integers and shall not exceed… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
+| `INT-042` | Return a `Result` document that is valid DIDL-Lite XML and parses independently of the… | MUST | `F-03` | M1 | Protocol conformance test | Implemented |
+| `INT-043` | Return the container's `UpdateID` for a `Browse` of a container and the `SystemUpdateID` for a… | SHOULD | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-044` | Use the service identifiers `urn:upnp-org:serviceId:ContentDirectory` and… | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-045` | Contain exactly one `device` element and shall not contain a `URLBase` element. | MUST | `F-02` | M1 | Protocol conformance test | Verified |
-| `INT-046` | When `TotalMatches` cannot be computed, the server shall return `TotalMatches` of `0` with a… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-047` | Accept `SortCriteria` in the empty form and in the `+property` and `-property` forms | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-048` | Not advertise or implement any non-standard ContentDirectory action; a client-specific… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-049` | Expose `SearchCapabilities` and `SortCapabilities` as comma-separated lists of the property… | MUST | `F-03` | M1 | Protocol conformance test | Baseline |
-| `INT-050` | Implement `GetProtocolInfo` and return at least the `http-get` transfer protocol with the MIME… | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
-| `INT-051` | The `GetProtocolInfo` result shall not advertise a container or MIME type that the server… | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
-| `INT-052` | Implement `GetCurrentConnectionIDs` and return an empty list when no transfer is active. | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
-| `INT-053` | Implement `PrepareForConnection`, `ConnectionComplete` and `GetCurrentConnectionInfo` in a way… | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
+| `INT-046` | When `TotalMatches` cannot be computed, the server shall return `TotalMatches` of `0` with a… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
+| `INT-047` | Accept `SortCriteria` in the empty form and in the `+property` and `-property` forms | MUST | `F-03` | M1 | Protocol conformance test | Verified |
+| `INT-048` | Not advertise or implement any non-standard ContentDirectory action; a client-specific… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
+| `INT-049` | Expose `SearchCapabilities` and `SortCapabilities` as comma-separated lists of the property… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
+| `INT-050` | Implement `GetProtocolInfo` and return at least the `http-get` transfer protocol with the MIME… | MUST | `F-04` | M1 | Protocol conformance test | Verified |
+| `INT-051` | The `GetProtocolInfo` result shall not advertise a container or MIME type that the server… | MUST | `F-04` | M1 | Protocol conformance test | Verified |
+| `INT-052` | Implement `GetCurrentConnectionIDs` and return an empty list when no transfer is active. | MUST | `F-04` | M1 | Protocol conformance test | Verified |
+| `INT-053` | Implement `PrepareForConnection`, `ConnectionComplete` and `GetCurrentConnectionInfo` in a way… | MUST | `F-04` | M1 | Protocol conformance test | Implemented |
 | `INT-054` | Return the same `Source` value in `GetCurrentConnectionInfo` as the `res` URI it serves for the… | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
-| `INT-055` | Advertise the `http-get` protocol with the `*` wildcard for the additional header field only… | SHOULD | `F-04` | M1 | Protocol conformance test | Baseline |
-| `INT-056` | Not implement the `http-subscribe` transfer protocol in the baseline. | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
+| `INT-055` | Advertise the `http-get` protocol with the `*` wildcard for the additional header field only… | SHOULD | `F-04` | M1 | Protocol conformance test | Verified |
+| `INT-056` | Not implement the `http-subscribe` transfer protocol in the baseline. | MUST | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-057` | Reject every GENA `SUBSCRIBE` request unless the user has explicitly enabled eventing | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
 | `INT-058` | Never implement the UPnP Internet Gateway Device actions (`AddPortMapping` | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
 | `INT-059` | Not implement a network self-update mechanism; updates shall be installed by the user through… | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
@@ -216,7 +216,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SEC-006` | Not follow a symbolic link that points outside a root | MUST | `F-08` | M1 | Negative security test | Baseline |
 | `SEC-007` | Treat all file names and metadata as untrusted input | MUST | `F-08` | M1 | Negative security test | Baseline |
 | `SEC-008` | Open media files read-only, without requesting write permission on the containing directory. | MUST | `F-08` | M1 | Negative security test | Baseline |
-| `SEC-010` | Not process a DTD, shall not resolve external entities and shall bound the nesting depth and… | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-010` | Not process a DTD, shall not resolve external entities and shall bound the nesting depth and… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-011` | Bound the size of every accepted HTTP request line | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-012` | Bound the number of concurrent connections and the number of concurrent transfers. | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-013` | Answer an unauthenticated or malformed request with a generic error that reveals no internal… | MUST | `F-16` | M1 | Negative security test | Baseline |
@@ -225,7 +225,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SEC-016` | Enforce a read and write timeout on every connection. | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-017` | Never bind a non-loopback port other than the media port without an explicit configuration… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-018` | Treat an SSDP or SOAP peer as untrusted and shall perform no action on its behalf other than… | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-060` | Every parser in the server shall have an explicit input size bound and a documented failure… | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-060` | Every parser in the server shall have an explicit input size bound and a documented failure… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-061` | Bound the number of entries in a single DIDL-Lite response and the size of the generated XML… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-062` | Run metadata extraction with a time limit per file and shall abandon a file that exceeds it. | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-063` | Bound the number of open file descriptors used by transfers and shall release them on… | MUST | `F-16` | M1 | Negative security test | Baseline |

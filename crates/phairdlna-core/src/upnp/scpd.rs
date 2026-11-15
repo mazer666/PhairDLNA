@@ -11,8 +11,8 @@
 //! Example: `ServiceSpec::content_directory().to_xml()` produces the document
 //!       a client fetches at `/ContentDirectory.xml`.
 
-use super::connection_manager;
-use super::content_directory;
+use super::scpd_connection_manager;
+use super::scpd_content_directory;
 use super::services::{ServiceDefinition, CONNECTION_MANAGER, CONTENT_DIRECTORY};
 use super::xml_writer::XmlWriter;
 
@@ -56,6 +56,16 @@ pub struct ActionSpec {
     pub name: &'static str,
     /// The arguments of the action.
     pub arguments: &'static [ArgumentSpec],
+    /// Whether the action is optional.
+    ///
+    /// An optional action is written into the service description with a
+    /// comment that marks it. The comment is *not* a mechanism of the UPnP
+    /// specification — the service description schema has no attribute for it
+    /// — but it is how the shipped servers mark such an action (standards §8.4
+    /// M5), and a reader of the document sees it. The contract that matters is
+    /// the fault `600 Optional Action Not Implemented` that the server answers
+    /// with.
+    pub optional: bool,
 }
 
 /// One state variable of a service.
@@ -84,8 +94,8 @@ impl ServiceSpec {
     pub fn content_directory() -> Self {
         Self {
             definition: CONTENT_DIRECTORY,
-            actions: &content_directory::ACTIONS,
-            state_variables: &content_directory::STATE_VARIABLES,
+            actions: &scpd_content_directory::ACTIONS,
+            state_variables: &scpd_content_directory::STATE_VARIABLES,
         }
     }
 
@@ -93,8 +103,8 @@ impl ServiceSpec {
     pub fn connection_manager() -> Self {
         Self {
             definition: CONNECTION_MANAGER,
-            actions: &connection_manager::ACTIONS,
-            state_variables: &connection_manager::STATE_VARIABLES,
+            actions: &scpd_connection_manager::ACTIONS,
+            state_variables: &scpd_connection_manager::STATE_VARIABLES,
         }
     }
 
@@ -140,6 +150,9 @@ impl ServiceSpec {
     fn write_actions(&self, writer: &mut XmlWriter) {
         writer.open("actionList", &[]);
         for action in self.actions {
+            if action.optional {
+                writer.comment(&format!("OPTIONAL: {}", action.name));
+            }
             writer.open("action", &[]);
             writer.text("name", action.name);
             writer.open("argumentList", &[]);

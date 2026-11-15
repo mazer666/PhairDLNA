@@ -213,77 +213,91 @@ a fault, never a panic (INT-025, UX-005).
 
 ## 10. Acceptance criteria and traceability
 
-All criteria below are *planned*; no test file exists yet.
+All criteria below are *planned*. The criteria that the dispatcher can answer without a socket are
+**covered** by the tests listed in §11; the criteria that need the HTTP layer or a real transfer are
+still **planned**.
 
 **AC-01** — *Given* a catalogue with MP3, MP4 and JPEG files, *when* a client calls `GetProtocolInfo`,
 *then* the `Source` list is non-empty, contains an `http-get` entry and every entry has exactly four
 colon-separated fields. Requirements: INT-050 · Verification: protocol conformance test · Planned
 location: `crates/phairdlna-core/tests/connection_manager.rs`
+— **covered** by `crates/phairdlna-core/tests/connection_manager.rs::the_source_list_has_four_fields_per_entry`.
 
 **AC-02** — *Given* the same catalogue, *when* the `Source` list is compared with the MIME types the
 catalogue can produce, *then* no advertised MIME type is missing from the catalogue's MIME registry.
 Requirements: INT-051, INT-050 · Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/connection_manager.rs`
+— **covered** by `crates/phairdlna-core/tests/connection_manager.rs::every_advertised_mime_type_is_in_the_registry`.
 
 **AC-03** — *Given* no active transfer, *when* a client calls `GetCurrentConnectionIDs`, *then* the
 response contains an empty `ConnectionIDs` list. Requirements: INT-052 · Verification: protocol
 conformance test · Planned location: `crates/phairdlna-core/tests/connection_manager.rs`
+— **covered** by `crates/phairdlna-core/tests/connection_manager.rs::the_list_of_the_running_transfers_is_empty`.
 
 **AC-04** — *Given* no active transfer, *when* a client calls `GetCurrentConnectionInfo` with a
 `ConnectionID` that was never issued, *then* the response is the UPnP error `701 No Such Object`.
 Requirements: INT-053 · Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/connection_manager.rs`
+— **covered** by `crates/phairdlna-core/tests/connection_manager.rs::an_unknown_transfer_is_the_fault_701`.
 
 **AC-05** — *Given* a client that called `PrepareForConnection` and never called `ConnectionComplete`,
 *when* the transfer has ended and the reaper has run, *then* the `ConnectionID` is no longer listed
 and the connection table has not grown beyond bound. Requirements: INT-053 · Verification: automated
 test · Planned location: `crates/phairdlna-core/tests/connection_manager.rs`
+— **covered** by `crates/phairdlna-core/tests/connection_manager.rs::a_preparation_creates_no_transfer`: the server never opens a connection, so there is none that could stay pending.
 
 **AC-06** — *Given* a connection bound to a media object, *when* `GetCurrentConnectionInfo` returns,
 *then* the URI it reports equals the `res` URI of that object and the HTTP layer serves that same URI.
 Requirements: INT-054, INT-090 · Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/connection_manager.rs`
+— **planned**: a connection bound to a media object needs the `res` URI of F-05 and the HTTP layer of F-06; neither exists yet.
 
 **AC-07** — *Given* the plain UPnP mode, *when* `GetProtocolInfo` is answered, *then* every `Source`
 entry has `*` in the fourth field and no entry mentions `DLNA.ORG_`. Requirements: INT-055, INT-078 ·
 Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/connection_manager.rs`
+— **covered** by `crates/phairdlna-core/tests/connection_manager.rs::every_entry_carries_the_wildcard_and_names_no_profile`.
 
 **AC-08** — *Given* any mode, *when* `GetProtocolInfo` is answered, *then* no entry uses the transport
 protocol `http-subscribe`. Requirements: INT-056 · Verification: protocol conformance test · Planned
 location: `crates/phairdlna-core/tests/connection_manager.rs`
+— **covered** by `crates/phairdlna-core/tests/connection_manager.rs::no_entry_uses_the_push_protocol`.
 
 **AC-09** — *Given* the served SCPD document, *when* it is parsed, *then* the action list contains the
 three required actions and marks `PrepareForConnection` and `ConnectionComplete` optional.
 Requirements: INT-053, INT-023 · Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/connection_manager.rs`
+— **covered** by `crates/phairdlna-core/tests/connection_manager.rs::the_service_description_marks_the_optional_actions`.
 
 **AC-10** — *Given* a `GetProtocolInfo` call, *when* the response is produced, *then* the `Sink`
 element is present and empty, and no file name or path appears in the response. Requirements: INT-051,
 PLT-008 · Verification: automated test · Planned location:
 `crates/phairdlna-core/tests/connection_manager.rs`
+— **covered** by `crates/phairdlna-core/tests/connection_manager.rs::the_sink_is_present_and_empty`.
 
 **AC-11** — *Given* a `PrepareForConnection` call with a `Direction` outside {`Input`,`Output`},
 *when* the request is processed, *then* the response is the UPnP error `402 Invalid Args` and no
 connection is created. Requirements: INT-053 · Verification: protocol conformance test · Planned
 location: `crates/phairdlna-core/tests/connection_manager.rs`
+— **covered** by `crates/phairdlna-core/tests/connection_manager.rs::a_wrong_direction_is_the_fault_402`.
 
 **AC-12** — *Given* a client that sends a `PeerConnectionManager` value of several kilobytes, *when*
 the request is processed, *then* it is rejected without an unbounded allocation and without writing
 the value to a log in raw form. Requirements: INT-053, SEC-011, SEC-007 · Verification: automated test
 · Planned location: `crates/phairdlna-core/tests/connection_manager.rs`
+— **covered** by `crates/phairdlna-core/tests/connection_manager.rs::a_huge_peer_value_is_refused_without_an_unbounded_allocation`.
 
 ## 11. Test strategy and dependencies
 
-**Planned test locations** (none of these files exists yet):
+**Test locations**:
 
-| Purpose | Planned path |
-| --- | --- |
-| Action-level conformance of this feature | `crates/phairdlna-core/tests/connection_manager.rs` |
-| ProtocolInfo grammar and connection table unit tests | `crates/phairdlna-core/src/upnp/connection_manager.rs` (inline `#[cfg(test)]` module) |
-| Cross-check of the advertised MIME types against the HTTP layer | `crates/phairdlna-core/tests/protocol_info_consistency.rs` |
-| SOAP-level negative cases | `crates/phairdlna-core/tests/soap_negative.rs` (qa-performance §2.5) |
-| Device behaviour | `qa/device-matrix.toml` (qa-performance §3.2) |
+| Purpose | Path | State |
+| --- | --- | --- |
+| Action-level conformance of this feature | `crates/phairdlna-core/tests/connection_manager.rs` | **exists** |
+| ProtocolInfo grammar and the faults of the actions without a transfer | `crates/phairdlna-core/src/upnp/connection_manager.rs` (inline `#[cfg(test)]` module) | **exists** — there is no connection table, because the server opens no connection |
+| Cross-check of the advertised MIME types against the HTTP layer | `crates/phairdlna-core/tests/protocol_info_consistency.rs` | planned — the HTTP layer of F-06 does not exist yet |
+| SOAP-level negative cases | `crates/phairdlna-core/tests/soap_negative.rs` (qa-performance §2.5) | **exists** |
+| Device behaviour | `qa/device-matrix.toml` (qa-performance §3.2) | planned |
 
 **Method.** The action handlers are plain functions with typed inputs and outputs, so the SOAP layer
 can be exercised without a socket; a hand-written SOAP client (qa-performance §2.5) drives the
@@ -295,6 +309,11 @@ field and the `res` URI), F-06 (the served media URL), F-07 (the client profile 
 DLNA-flavoured protocolInfo).
 
 ## 12. Open questions and decisions
+
+> **The HTTP status of a request that is too large.**
+> The control path answers a request that is too large with the SOAP fault `402 Invalid Args`, because that is what the UPnP specification offers. At the
+> HTTP layer the status `413 Request Entity Too Large` says the same thing more directly. The HTTP layer does not exist yet, so the choice belongs to
+> F-06. *Closes when:* the HTTP layer maps the failure to a status.
 
 1. **[OPEN] Five actions, not six.** standards.md §1.3 enumerates exactly five actions for
    ConnectionManager:1, and the baseline owns only INT-050…INT-056; the research identifies no

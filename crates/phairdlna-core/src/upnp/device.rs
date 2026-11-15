@@ -13,8 +13,8 @@
 
 use crate::ssdp::DEVICE_TYPE_MEDIA_SERVER;
 
-use super::base_url::BaseUrl;
-use super::device_info::DeviceInfo;
+use super::device_model::BaseUrl;
+use super::device_model::DeviceInfo;
 use super::error::UpnpError;
 use super::services::{advertised_services, ServiceDefinition};
 use super::xml_writer::XmlWriter;

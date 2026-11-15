@@ -56,8 +56,9 @@ CD:1 wording is normative: "If BrowseMetadata is specified in the BrowseFlags, t
 client asked for when the filter is understood. [SPEC] The filter is `*` or a comma-separated list of property names (standards §8.3 C6).
 
 **INT-035** — The server shall implement `GetSearchCapabilities` and `GetSortCapabilities` and shall return only capabilities it actually implements. [SPEC]
-Both actions are required in ContentDirectory:1 (standards §1.2, §8.3 C1, C10). [DESIGN] `SearchCapabilities` =
-`dc:title,dc:creator,dc:date,upnp:class,res@size`; `SortCapabilities` = `dc:title,dc:date,dc:creator,upnp:class`.
+Both actions are required in ContentDirectory:1 (standards §1.2, §8.3 C1, C10). [DESIGN] The lists name only the properties the server can really use,
+and they grow with the catalogue: `SearchCapabilities` = `dc:title`; `SortCapabilities` = `dc:title,upnp:class`. The catalogue module (F-08, F-09) adds
+`dc:creator`, `dc:date` and `res@size` when it can search and sort by them — see the open question in §12.
 
 **INT-036** — The server shall implement `Search` for the capability strings it advertises in `GetSearchCapabilities`. [SPEC] `Search` is optional in CD:1 and
 required from CD:2; the research recommends it because it is cheap and widely called (standards §1.2, §8.3 C8). [DESIGN] The expression grammar is `dc:title
@@ -189,7 +190,8 @@ All figures below are **targets** with a measurement method; none is a measured 
 - [OBSERVED] Every shipped media server implements exactly the four required actions, and none implements `GetFreeSpace`, `GetUpdateCounter`,
   `GetObjectIDfromPath`, `GetParentID`, `GetTransferTotal` or `GetShareIndexInBrowse` (standards §0.3, §8.3 C12).
 
-- [OBSERVED] `GetSearchCapabilities` in the field returns `dc:title,dc:creator,dc:date,upnp:class,res@size` — the same list we advertise (standards §1.2).
+- [OBSERVED] `GetSearchCapabilities` in the field returns `dc:title,dc:creator,dc:date,upnp:class,res@size` (standards §1.2). We advertise a subset of it
+  until the catalogue can search in more; the subset is a subset on purpose, because the list must name only what the server really does (INT-035).
 
 - [OBSERVED] Control points send `Filter` as `*` almost always, and `SortCriteria` as an empty string or as `+property` (standards §8.3 C6–C7).
 
@@ -213,84 +215,104 @@ No failure of this feature may take down the HTTP task: a bad browse request pro
 
 ## 10. Acceptance criteria and traceability
 
-All criteria below are *planned*; no test file exists yet.
+All criteria below are *planned*. The criteria that the dispatcher can answer without a socket are
+**covered** by the tests listed in §11; the criteria that need a running server or the real catalogue
+are still **planned**.
 
 **AC-01** — *Given* a client that calls `Browse` with the six CD:1 arguments, *when* the answer is inspected, *then* it contains `Result`, `NumberReturned`,
 `TotalMatches` and `UpdateID`, each exactly once, in that order. Requirements: INT-030, INT-031 · Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory.rs::the_browse_answer_carries_the_four_arguments_in_order`.
 
 **AC-02** — *Given* a container with 12 children, *when* a client calls `Browse` with `BrowseFlag = BrowseMetadata`, *then* the `Result` describes the container
 itself and `NumberReturned` and `TotalMatches` are both `1`. Requirements: INT-033 · Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory.rs::a_metadata_browse_describes_the_container`.
 
 **AC-03** — *Given* a container with 12 children, *when* a client calls `Browse` with `BrowseFlag = BrowseDirectChildren` and `StartingIndex = 5`, *then*
 `TotalMatches` is `12`, `NumberReturned` is the number of items actually returned, both are non-negative integers and `NumberReturned` does not exceed
 `TotalMatches`. Requirements: INT-033, INT-041 · Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory.rs::a_browse_with_an_offset_returns_the_rest`.
 
 **AC-04** — *Given* a container with 12 children, *when* a client calls `Browse` with `RequestedCount = 5`, *then* at most 5 items are in the `Result`; and
 *when* it calls with `RequestedCount = 0`, *then* the page contains every child the server's page limit allows and `TotalMatches` still reports the true total.
 Requirements: INT-032, INT-041 · Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory.rs::a_browse_with_a_limit_returns_at_most_that_many`.
 
 **AC-05** — *Given* a client that sends `Filter = *`, *when* the answer is inspected, *then* each item carries the full property set the server produces for it;
 *given* a known property, *then* only that property is present; *given* an unknown property, *then* the answer is complete and no fault is returned.
 Requirements: INT-034 · Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory.rs::the_filter_narrows_the_answer_without_failing`.
 
 **AC-06** — *Given* the service is queried for its capabilities, *when* `GetSearchCapabilities` and `GetSortCapabilities` are called, *then* each answer is a
 comma-separated list of property names and every property named is one the server really searches or sorts by. Requirements: INT-035, INT-049 · Verification:
 protocol conformance test · Planned location: `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory_search.rs::the_capabilities_name_the_properties_the_server_uses`.
 
 **AC-07** — *Given* a catalogue with a known title, *when* a client calls `Search` with `dc:title contains "<fragment>"` for a property that
 `GetSearchCapabilities` advertises, *then* the matching item is in the `Result` with a correct `NumberReturned` and `TotalMatches`. Requirements: INT-036 ·
 Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory_search.rs::a_search_finds_the_matching_item`.
 
 **AC-08** — *Given* the catalogue changes, *when* `GetSystemUpdateID` is called before and after, *then* the value is not smaller afterwards and it differs
 across the change; *given* no change, *then* the value is unchanged; and *given* a browse of a container, *when* the `UpdateID` is read, *then* it equals that
 container's update identifier, while a browse of `ObjectID = 0` returns the `SystemUpdateID`. Requirements: INT-037, INT-043 · Verification: protocol
 conformance test · Planned location: `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory_search.rs::the_system_update_identifier_grows_with_the_catalogue`.
 
 **AC-09** — *Given* a client that browses `ObjectID = 0` and `ObjectID = 1`, *when* the answers are inspected, *then* `0` is the root container and `1` is the
 content directory root, and both are consistent with the hierarchy the server returns. Requirements: INT-038 · Verification: protocol conformance test · Planned
 location: `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory.rs::the_root_and_the_content_directory_root_are_known`.
 
 **AC-10** — *Given* an `ObjectID` that the server does not know, *when* a client calls `Browse`, *then* the response is the UPnP error `701 No Such Object` and
 not an empty successful result. Requirements: INT-039 · Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory.rs::an_unknown_object_is_the_fault_701`.
 
 **AC-11** — *Given* the served SCPD of the ContentDirectory service, *when* it is parsed, *then* it lists `Browse`, `GetSearchCapabilities`,
 `GetSortCapabilities`, `GetSystemUpdateID` and `Search`, and none of the write actions; *given* a request for one of them, *then* the answer is the UPnP error
 `401 Invalid Action`. Requirements: INT-040, INT-023 · Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory.rs::the_write_actions_are_absent_and_not_answered`.
 
 **AC-12** — *Given* a browse answer, *when* the `Result` text is extracted and unescaped once, *then* it is a well-formed DIDL-Lite document that parses on its
 own, with a `DIDL-Lite` root element in the namespace `urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/`; *given* the items, *then* no `writeStatus` attribute is
 present. Requirements: INT-042, INT-071, INT-077 (owned by F-05) · Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory.rs::the_result_is_a_didl_lite_document_that_parses_on_its_own`; the DIDL-Lite writer itself is still the placeholder of F-05.
 
 **AC-13** — *Given* a browse answer on the wire, *when* the raw `Result` element is inspected, *then* it carries the DIDL-Lite document **escaped a second
 time** — the text contains `&lt;DIDL-Lite` and not a literal `<DIDL-Lite` — and unescaping it twice yields the DIDL-Lite document. Requirements: INT-042 (the
 escaping rule itself is INT-073, owned by F-05) · Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory.rs::the_raw_result_element_carries_the_document_escaped`. The document is escaped once, so the text carries `&lt;DIDL-Lite` and *one* unescaping yields the DIDL-Lite document — see the open question in §12.
 
 **AC-14** — *Given* a container whose child count cannot be computed, *when* the browse returns items, *then* `TotalMatches` is `0` and `NumberReturned` is not;
 and *given* that container returns no items, *then* the answer is the SOAP error `720`. Requirements: INT-046 · Verification: protocol conformance test ·
 Planned location: `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory.rs::an_uncountable_container_answers_with_zero_or_720`.
 
 **AC-15** — *Given* a browse with an empty `SortCriteria`, *then* the server's own order is returned; *given* `SortCriteria = "+dc:title"`, *then* the items are
 ordered ascending by title; *given* `"-dc:title"`, *then* descending. Requirements: INT-047 · Verification: protocol conformance test · Planned location:
 `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory_search.rs::the_sort_criteria_order_the_answer`.
 
 **AC-16** — *Given* the served SCPD of the ContentDirectory service and the SOAP dispatcher, *when* both are inspected, *then* none of `GetFreeSpace`,
 `GetUpdateCounter`, `GetObjectIDfromPath`, `GetParentID`, `GetTransferTotal` or `GetShareIndexInBrowse` appears in the action list and none of them is answered
 by the dispatcher. Requirements: INT-048 · Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/content_directory.rs`
+— **covered** by `crates/phairdlna-core/tests/content_directory.rs::no_non_standard_action_is_answered`.
 
 ## 11. Test strategy and dependencies
 
-**Planned test locations** (none of these files exists yet):
+**Test locations**:
 
-| Purpose | Planned path |
-| --- | --- |
-| Action-level conformance of the ContentDirectory service | `crates/phairdlna-core/tests/content_directory.rs` |
-| Page arithmetic, filter and sort unit tests | `crates/phairdlna-core/src/upnp/content_directory.rs` (inline `#[cfg(test)]` module) |
-| DIDL-Lite validation of the produced `Result` | `crates/phairdlna-core/tests/didl_validation.rs` (F-05) |
+| Purpose | Path | State |
+| --- | --- | --- |
+| Action-level conformance of the ContentDirectory service | `crates/phairdlna-core/tests/content_directory.rs` | **exists** |
+| The search, the capabilities and the order of an answer | `crates/phairdlna-core/tests/content_directory_search.rs` | **exists** |
+| Page arithmetic unit tests | `crates/phairdlna-core/src/upnp/page.rs` (inline `#[cfg(test)]` module) | **exists** |
+| Filter and sort unit tests | `crates/phairdlna-core/src/upnp/browse.rs` (inline `#[cfg(test)]` module) | **exists** |
+| DIDL-Lite validation of the produced `Result` | `crates/phairdlna-core/tests/didl_validation.rs` (F-05) | planned — the DIDL-Lite parser of F-05 does not exist yet |
 
 **Method.** The action handlers are plain functions with typed inputs and outputs, so they are exercised without a socket; a hand-written SOAP client (the one
 F-02 and F-04 use) drives the dispatcher over loopback. The `Result` document is parsed by the DIDL-Lite parser of F-05 and validated against the vendored
@@ -300,6 +322,21 @@ schema (interoperability matrix PC-14), which makes AC-12 and AC-13 depend on F-
 `res` URLs), and the catalogue module for the identifier scheme and the child counts.
 
 ## 12. Open questions and decisions
+
+> **The capability lists are smaller than the design of §3, until the catalogue exists.**
+> The design of INT-035 names `dc:creator`, `dc:date` and `res@size` as searchable and `dc:creator`, `dc:date` as sortable. The placeholder catalogue
+> cannot search in them or sort by them, and INT-035 asks for *only the capabilities the server actually implements*, so the lists are `dc:title` and
+> `dc:title,upnp:class`. The lists grow with the catalogue module (F-08, F-09). *Closes when:* the catalogue can search and sort by the other properties,
+> or the owner decides that the lists shall name the design of §3 regardless.
+
+> **A contradiction between AC-12 and AC-13, found while the work package was implemented.**
+> AC-12 says that the `Result` text, *unescaped once*, is a well-formed DIDL-Lite document; AC-13 says
+> that the text carries the document *escaped a second time* and that *unescaping it twice* yields the
+> DIDL-Lite document. Both cannot hold at once: a text that is escaped twice carries `&amp;lt;DIDL-Lite`
+> and is not a document after one unescaping. **The implementation escapes it once** — the text on the wire
+> carries `&lt;DIDL-Lite`, and one unescaping yields the DIDL-Lite document. That is what the shipped
+> servers do (the `rclone` capture in standards §3.3 shows `&lt;DIDL-Lite` on the wire) and it is what
+> AC-12 demands. *Closes when:* the owner confirms the wording of AC-13, or corrects AC-12.
 
 1. **[OPEN] The `UpdateID` semantics: CD:1 or CD:4?** CD:1 returns the *container's* update identifier for a container browse and the `SystemUpdateID` only for
    `ObjectID = 0`; CD:4 always returns the `SystemUpdateID` (standards §1.2, §7.1, §9 Q11). INT-043 states the CD:1 rule and we advertise `ContentDirectory:1`.
