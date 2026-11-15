@@ -27,18 +27,27 @@ is read and recorded.
 | `ci.yml` | `workflow_dispatch` | The full gate set on one platform |
 | `ci-matrix.yml` | `workflow_dispatch` | The build and test set on macOS, Linux and Windows |
 
-Both are **skeletons with the commands listed but the implementation not yet
-present**. The scripts they call (`scripts/check-file-size.sh`,
-`scripts/check-doc-links.sh`, `scripts/check-requirement-views.sh`) exist; the
-remaining gates depend on the implementation.
+Both workflows are **real and complete**: `ci.yml` runs eleven gate steps and
+`ci-matrix.yml` builds and tests on macOS, Linux and Windows plus the minimum
+supported Rust version. What they cover today is limited by what exists: the gates
+that depend on the implementation cannot run, and the workflows that call them say
+so explicitly rather than pretending.
+
+The scripts the workflows call are `scripts/check-file-size.sh` (QG-13),
+`scripts/check-doc-links.sh` (QG-11), `scripts/check-no-unsafe.sh` (QG-03) and
+`scripts/generate_requirement_views.py`.
 
 ---
 
 ## 3. Rules for a workflow
 
 1. **`workflow_dispatch` only.** No `push`, no `pull_request`, no `schedule`.
-2. **Pinned actions.** Every action is pinned to a commit SHA, not to a tag.
-3. **Pinned toolchain.** The Rust version is pinned in `rust-toolchain.toml`.
+2. **Pinned actions.** Every action is pinned to an exact release tag, and moves to
+   a commit SHA as the project grows. *(In progress: the actions currently use
+   release tags, not digests.)*
+3. **Pinned toolchain.** The `stable` channel is selected in `rust-toolchain.toml`,
+   and the build matrix additionally tests the minimum supported version from
+   `Cargo.toml` (`rust-version`).
 4. **No secrets.** The gates need none. A workflow that needs a secret needs an
    owner decision and an explanation.
 5. **Failures are informative.** A failing step prints the command, the exit code
@@ -54,11 +63,16 @@ The full list is in `../05-quality/QUALITY-GATES.md`. A `ci.yml` run covers:
 
 `QG-01` formatting · `QG-02` lints · `QG-03` no unsafe · `QG-04` build ·
 `QG-05` unit tests · `QG-07` doctests · `QG-08` licences · `QG-09` advisories ·
-`QG-10` bans and sources · `QG-11` link check · `QG-13` file size · `QG-14`
-complexity · `QG-16` snapshots · `QG-17` DIDL-Lite conformance · `QG-18` property
-tests.
+`QG-10` bans and sources · `QG-11` link check · `QG-13` file size.
 
-The integration test gate (`QG-06`) is included once the integration tests exist.
+The remaining gates — `QG-06` integration tests, `QG-12` spelling, `QG-14`
+complexity, `QG-15` binary size, `QG-16` snapshots, `QG-17` DIDL-Lite conformance,
+`QG-18` property tests, `QG-19` fuzz smoke, `QG-20` Miri, `QG-21` benchmarks,
+`QG-22` soak, `QG-23` device matrix, `QG-24` semver, `QG-25` outdated,
+`QG-26` coverage, `QG-27` mutation testing and `QG-28` crate boundaries — arrive
+with the code they guard. **A gate that is not in the workflow is not run, and a
+gate that is not run is never reported as a pass.** The canonical list with the
+state of each is in `../05-quality/QUALITY-GATES.md`.
 
 ---
 

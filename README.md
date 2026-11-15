@@ -34,6 +34,7 @@ cloud, no internet access in normal operation.
 | --- | --- |
 | understand the product | [Vision](docs/01-product/PRODUCT-VISION.md) · [Product requirements](docs/01-product/PRODUCT-REQUIREMENTS.md) · [Technical requirements](docs/01-product/TECHNICAL-REQUIREMENTS.md) |
 | see every requirement | [Requirements index](docs/01-product/REQUIREMENTS-INDEX.md) (341 requirements) |
+| look up a term | [Glossary](docs/01-product/GLOSSARY.md) |
 | understand the architecture | [Architecture](docs/02-architecture/ARCHITECTURE.md) · [Decisions](docs/00-governance/DECISION-LOG.md) · [ADRs](docs/02-architecture/adr/) |
 | work on a feature | [Feature catalog](docs/01-product/FEATURE-CATALOG.md) · [Feature specifications](docs/03-features/) |
 | check the security posture | [Security model](docs/04-security/SECURITY-MODEL.md) · [Privacy model](docs/04-security/PRIVACY.md) |
@@ -51,8 +52,12 @@ cd PhairDLNA
 cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
+cargo test --workspace --doc   # doctests are a separate step
 cargo run -p phairdlna-cli     # prints a status banner; it does not start a server
 ```
+
+The complete gate set is in
+[docs/06-development/BUILD-AND-TEST.md](docs/06-development/BUILD-AND-TEST.md).
 
 ## Status
 

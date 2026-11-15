@@ -7,7 +7,7 @@ Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Lead / Documenta
 ```
 docs/
   00-governance/   standards, ADR policy, exceptions, agent roles, decision log, requirements method
-  01-product/      vision, product requirements, technical requirements, user journeys, requirement index
+  01-product/      vision, product requirements, technical requirements, user journeys, glossary, requirement index
   02-architecture/ component boundaries, data flows, protocols, persistence, adr/
   03-features/     one specification per feature (+ the feature template)
   04-security/     threat model, privacy model, dependency and licence review

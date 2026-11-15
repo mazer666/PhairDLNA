@@ -62,6 +62,8 @@ visible and so that a contributor can see where their change will land.
 | `crates/phairdlna-core/src/security/` | Path containment, redaction, limits | F-16 |
 | `crates/phairdlna-core/src/platform/` | Platform traits and per-OS implementations | F-08, F-13, F-15 |
 | `crates/phairdlna-core/src/scheduler/` | Priority classes, bounded pools, backpressure | F-18 |
+| `crates/phairdlna-core/src/logging/` | Structured logging and redaction | F-13, F-16 |
+| `crates/phairdlna-core/src/error.rs` | The crate error type | — |
 | `crates/phairdlna-admin/` | The optional loopback administration surface | F-14 |
 | `crates/phairdlna-mac/` | The optional native macOS application | F-15 |
 
@@ -72,7 +74,7 @@ visible and so that a contributor can see where their change will land.
 | `scripts/check-file-size.sh` | QG-13 | **exists and runs** | Enforces the file-length budget |
 | `scripts/check-doc-links.sh` | QG-11 | **exists and runs** | Resolves every relative documentation link |
 | `scripts/check-no-unsafe.sh` | QG-03 | **exists and runs** | Finds `unsafe` outside of comments |
-| `scripts/generate_requirement_views.py` | — | **exists and runs** | Generates the requirement index and the traceability matrix |
+| `scripts/generate_requirement_views.py` | CI step "Requirement views are current" | **exists and runs** | Generates the requirement index and the traceability matrix |
 | `scripts/check-crate-boundaries.sh` | QG-28 | planned | Fails when a crate depends "downwards" |
 | `scripts/soak.sh` | QG-22 | planned | Runs the seven-day soak and samples the signals |
 | `scripts/device-matrix.sh` | QG-23 | planned | Records a device test in the interoperability matrix |

@@ -8,8 +8,17 @@ Requirements: <the requirement IDs this feature owns>
 > **Template rule:** every section below must contain real content. "Not applicable"
 > is acceptable only with a one-line reason. An empty section is a defect.
 >
-> **Label every normative claim:** `[SPEC]` (from a standard), `[OBSERVED]` (documented
-> real-world behaviour), `[DESIGN]` (our own decision), `[OPEN]` (unresolved).
+> ### How to read this specification
+>
+> | Tag | Meaning |
+> | --- | --- |
+> | `[SPEC]` | The claim comes from a published specification. The research brief and the source document are cited |
+> | `[OBSERVED]` | The claim describes documented real-world behaviour, with a source |
+> | `[DESIGN]` | The claim is our own decision, not someone else's rule |
+> | `[OPEN]` | The question is unresolved; the section says what would close it |
+>
+> A citation such as `standards §8.3 C12` points into `docs/09-research/`; the
+> convention is explained in `docs/09-research/README.md`.
 
 ## 1. Purpose and user story
 

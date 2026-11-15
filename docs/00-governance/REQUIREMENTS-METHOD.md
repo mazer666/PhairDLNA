@@ -25,6 +25,10 @@ Every requirement has exactly one stable ID. The prefix names the domain:
 | `PLT` | Platform and portability | `PLT-009` |
 | `DOC` | Documentation and developer experience | `DOC-005` |
 | `SUP` | Supply chain, licensing, provenance | `SUP-004` |
+| `REL` | Reliability under failure | `REL-001` |
+| `RES` | Adaptive resource management | `RES-001` |
+| `LIFE` | Service lifecycle and network recovery | `LIFE-001` |
+| `MB` | The macOS menu bar application | `MB-001` |
 
 **Rules**
 
@@ -70,6 +74,11 @@ A milestone cannot be accepted while a `MUST` requirement of that milestone is o
 `Draft` → `In Review` → `Approved` → `Scheduled` → `Implemented` → `Verified` →
 `Superseded` / `Withdrawn`
 
+The generated index uses the value **`Baseline`** for every requirement of the current
+baseline. `Baseline` means *Approved, minus the owner's sign-off on the baseline as a
+whole*: the requirement is defined, internally consistent and traceable, but the
+owner has not yet approved the set.
+
 "Verified" requires recorded evidence: a named test with observed output, a recorded
 benchmark, or a device-test record. A requirement that is implemented but not yet
 verified is `Implemented`, never `Verified`.
@@ -86,6 +95,10 @@ Requirement (PRD/FUN/INT/SEC/PERF/UX/OPS/CFG/PLT/DOC/SUP-nnn)
    → Verification method (automated test / gate / manual protocol / device test)
    → Evidence record (test name, gate output, device matrix row)
 ```
+
+The chain is **populated as each milestone lands**: today the *evidence* column is
+empty by design, because nothing is implemented. An empty evidence cell means *not
+implemented*, never *passed*.
 
 The chain is materialised in `../07-project/TRACEABILITY-MATRIX.md`. A requirement without
 a feature, a milestone and a verification method is **not a requirement yet** — it is a

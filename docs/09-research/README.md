@@ -44,7 +44,33 @@ checked against its origin.
 | `[DESIGN]` | The claim is our own decision |
 | `[OPEN]` | The question is unresolved; the research document says what would close it |
 
-## 4. Paths that are still planned
+## 4. The identifier key
+
+The research briefs use their own short identifiers, and one of them collides with
+the project's own vocabulary. Here is the key.
+
+| Identifier | Means | Lives in |
+| --- | --- | --- |
+| `M-01` … `M-08` | The eight **security mitigations** (SSDP hardening, XML and SOAP hardening, no shell, strict HTTP framing, path containment, isolation of untrusted work, bounded resources, supply chain) | `security-landscape.md` §4 and `../04-security/SECURITY-MODEL.md` §4 |
+| `SEC-TH-nn` | A row of the threat table | `../04-security/SECURITY-MODEL.md` §5 |
+| `D-n`, `P-n`, `C-n`, `M-n` (single letter), `L-n`, `H-n`, `E-n`, `N-n` | Obligation lists inside the standards brief (discovery, device description, ContentDirectory, ConnectionManager, DIDL-Lite, HTTP, GENA, DLNA layer) | `standards.md` §8 |
+| `Q1` … `Q12` | The open questions of the standards brief | `standards.md` §9 |
+| `PC-nn` | A protocol conformance check | `../05-quality/INTEROPERABILITY-MATRIX.md` §2 |
+| `AC-nn` | An acceptance criterion | the feature specifications |
+| `QG-nn` | A quality gate | `../05-quality/QUALITY-GATES.md` §3 |
+| `G0` … `G6` | A milestone gate | `../05-quality/QUALITY-GATES.md` §4 |
+| `M0` … `M5` | A **milestone** | `../07-project/ROADMAP.md` |
+| `R-nn` | A risk | `../07-project/RISK-REGISTER.md` |
+| `OD-nn` | An open owner decision | `../07-project/OPEN-DECISIONS.md` |
+| `DEC-nnn` | A decision-log entry | `../00-governance/DECISION-LOG.md` |
+| `ADR-nnnn` | An architecture decision record | `../02-architecture/adr/` |
+
+**The collision.** `M-01` … `M-08` (mitigations, hyphenated) and `M0` … `M5`
+(milestones, unhyphenated) look alike. Read them with their prefixes and their
+spelling: a hyphen means a mitigation, no hyphen means a milestone. When a
+mitigation is meant in prose, it is written as "mitigation `M-04`".
+
+## 5. Paths that are still planned
 
 The specifications also cite paths that do not exist yet, because they describe where
 evidence *will* live. They are listed here so that a reader is not left hunting:

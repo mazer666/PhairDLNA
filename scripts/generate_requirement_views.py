@@ -194,9 +194,17 @@ def render_index(rows: list[dict]) -> str:
         "Do not edit it by hand; edit the definition and re-run the script.\n"
     )
     out.append(
-        "**Status vocabulary:** `Baseline` = defined and internally consistent, awaiting the\n"
-        "owner's approval of the baseline as a whole. `Scheduled` = assigned to a\n"
-        "milestone. `Implemented` = code exists. `Verified` = evidence recorded.\n"
+        "**Priority vocabulary.** `MUST` = required for correctness, safety or the promise of\n"
+        "the product; a milestone with an open `MUST` cannot be accepted. `SHOULD` = strongly\n"
+        "desirable, tracked, may delay a milestone. `COULD` = optional enhancement, outside\n"
+        "the current baseline. Defined in\n"
+        "[../00-governance/REQUIREMENTS-METHOD.md](../00-governance/REQUIREMENTS-METHOD.md) section 3.\n"
+    )
+    out.append(
+        "\n**Status vocabulary.** `Baseline` = defined, internally consistent and traceable,\n"
+        "awaiting the owner's approval of the baseline as a whole (it is `Approved` minus the\n"
+        "sign-off). `Scheduled` = assigned to a milestone. `Implemented` = code exists.\n"
+        "`Verified` = evidence recorded.\n"
     )
     out.append(
         "\nRequirement method, ID rules and the traceability chain are defined in\n"

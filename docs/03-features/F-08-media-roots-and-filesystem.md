@@ -4,6 +4,7 @@ Status: Draft
 Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 Requirements: FUN-001, FUN-002, FUN-003, FUN-004, FUN-005, FUN-006, FUN-007, FUN-017, FUN-018, FUN-019, FUN-023, FUN-024, SEC-001, SEC-002, SEC-003, SEC-004, SEC-005, SEC-006, SEC-007, SEC-008, PLT-003, PLT-005, PLT-006, PLT-007, PLT-011, PLT-012, PLT-015, PLT-017
+Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
 Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 
 ## 1. Purpose and user story

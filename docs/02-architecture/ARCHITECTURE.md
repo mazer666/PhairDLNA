@@ -252,16 +252,24 @@ never leak file system paths to a client (`SEC-013`).
 
 ## 12. Platform integration
 
-The core needs exactly five things from the operating system:
+The core needs a small number of things from the operating system. They are grouped
+into **eight orthogonal traits** — not one large trait — plus a `Platform` facade that
+bundles them (ADR-0003 §"Decision"):
 
-1. enumerate network interfaces and their multicast capability,
-2. resolve and validate a media path on a given volume,
-3. detect that a volume changed (mounted, unmounted, replaced),
-4. locate per-user configuration and data directories,
-5. emit a log record and (optionally) a user notification.
+| Trait | What the core gets from it |
+| --- | --- |
+| `Network` | The network interfaces, their addresses and their multicast capability |
+| `FileSystem` | A `MediaPath` with its raw path, its normalised identity and its volume; the case sensitivity and normalisation behaviour of a volume; a stable file identity |
+| `VolumeWatcher` | Mount, unmount and remount events |
+| `Consent` | A request for permission where the operating system protects a folder, and an explanation when it is refused |
+| `UserEnvironment` | The per-user configuration and data directories |
+| `ServiceManager` | The service description, including the macOS bundle identifier and the readiness notification |
+| `LogSink` | The platform's log facility |
+| `UserNotifier` | A user-facing notification; unsupported when the server runs headless |
 
-These are the five methods of the `Platform` trait (ADR-0003). Everything else is
-portable code.
+Every trait has a default implementation that reports "not supported", so a new
+platform compiles without writing a platform module and the core degrades explicitly
+instead of failing silently.
 
 ## 13. What the architecture deliberately does not do
 

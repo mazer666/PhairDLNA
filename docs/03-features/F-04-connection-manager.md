@@ -4,6 +4,7 @@ Status: Draft
 Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 Requirements: INT-050, INT-051, INT-052, INT-053, INT-054, INT-055, INT-056
+Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
 Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 
 ## 1. Purpose and user story

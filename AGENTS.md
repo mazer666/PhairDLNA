@@ -1,4 +1,13 @@
-# PhairDLNA — mandatory agent instructions
+# PhairDLNA — mandatory working rules
+
+> **For human contributors:** you can satisfy every rule in this file yourself. The
+> rules about delegation and agent roles apply to teams that work with agents; the
+> rules about code, tests, evidence and documentation apply to everyone. If you are
+> contributing by hand, start with
+> [docs/00-governance/PROJECT-STANDARDS.md](docs/00-governance/PROJECT-STANDARDS.md)
+> and
+> [docs/00-governance/REQUIREMENTS-METHOD.md](docs/00-governance/REQUIREMENTS-METHOD.md),
+> then come back here for the full ruleset.
 
 Read first, in this order:
 

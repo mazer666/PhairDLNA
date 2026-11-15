@@ -27,6 +27,7 @@ docs/
 | a contributor | [../WHERE_TO_CHANGE.md](../WHERE_TO_CHANGE.md) |
 | a reviewer | [01-product/REQUIREMENTS-INDEX.md](01-product/REQUIREMENTS-INDEX.md) and [07-project/TRACEABILITY-MATRIX.md](07-project/TRACEABILITY-MATRIX.md) |
 | the owner | [07-project/STATUS.md](07-project/STATUS.md) and [07-project/OPEN-DECISIONS.md](07-project/OPEN-DECISIONS.md) |
+| looking up a term | [01-product/GLOSSARY.md](01-product/GLOSSARY.md) |
 | checking a claim against its source | [09-research/](09-research/) — the briefs the specifications cite |
 
 ## The three documents that explain the most
@@ -37,6 +38,8 @@ docs/
    system is built and why.
 3. **[05-quality/QUALITY-GATES.md](05-quality/QUALITY-GATES.md)** — what "done" means
    and how it is checked.
+
+And whenever a word is unfamiliar: **[01-product/GLOSSARY.md](01-product/GLOSSARY.md)**.
 
 ## Generated documents
 

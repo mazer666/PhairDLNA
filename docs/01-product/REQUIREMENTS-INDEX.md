@@ -9,9 +9,17 @@ short title, priority, owning feature, milestone, verification method and status
 and it is **generated** from those definitions by `scripts/generate_requirement_views.py`.
 Do not edit it by hand; edit the definition and re-run the script.
 
-**Status vocabulary:** `Baseline` = defined and internally consistent, awaiting the
-owner's approval of the baseline as a whole. `Scheduled` = assigned to a
-milestone. `Implemented` = code exists. `Verified` = evidence recorded.
+**Priority vocabulary.** `MUST` = required for correctness, safety or the promise of
+the product; a milestone with an open `MUST` cannot be accepted. `SHOULD` = strongly
+desirable, tracked, may delay a milestone. `COULD` = optional enhancement, outside
+the current baseline. Defined in
+[../00-governance/REQUIREMENTS-METHOD.md](../00-governance/REQUIREMENTS-METHOD.md) section 3.
+
+
+**Status vocabulary.** `Baseline` = defined, internally consistent and traceable,
+awaiting the owner's approval of the baseline as a whole (it is `Approved` minus the
+sign-off). `Scheduled` = assigned to a milestone. `Implemented` = code exists.
+`Verified` = evidence recorded.
 
 
 Requirement method, ID rules and the traceability chain are defined in

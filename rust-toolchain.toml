@@ -2,8 +2,8 @@
 #
 # The channel is "stable" rather than a pinned release so that a new contributor
 # does not have to download a second toolchain. The *minimum* supported version is
-# pinned separately as `rust-version` in the workspace Cargo.toml, and that value is
-# the one the CI matrix tests against.
+# `rust-version` in the workspace Cargo.toml (currently 1.89); the build matrix
+# tests that version explicitly in addition to stable.
 [toolchain]
 channel = "stable"
 components = ["clippy", "rustfmt"]

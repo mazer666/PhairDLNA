@@ -4,6 +4,7 @@ Status: Draft
 Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 Requirements: CFG-001, CFG-002, CFG-003, CFG-004, CFG-005, CFG-006, CFG-007, CFG-008,
+Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
 Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 CFG-009, CFG-010, CFG-011, CFG-012, CFG-013, CFG-014, CFG-015
 

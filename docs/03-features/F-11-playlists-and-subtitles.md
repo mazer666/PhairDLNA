@@ -5,6 +5,7 @@ Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 Requirements:
 FUN-015, FUN-016, FUN-020, FUN-021, FUN-022
+Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
 Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 
 ## 1. Purpose and user story

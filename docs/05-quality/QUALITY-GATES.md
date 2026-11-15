@@ -73,36 +73,36 @@ Two things that **do not exist** and must not be assumed:
 Severity: **blocker** = the milestone cannot be accepted; **warning** = must be
 recorded, may be accepted with a reason.
 
-| ID | Gate | Tool / command | Severity | Blocks | Notes |
-| --- | --- | --- | --- | --- | --- |
-| QG-01 | Formatting | `cargo fmt --all -- --check` | blocker | every milestone | |
-| QG-02 | Lints | `cargo clippy --workspace --all-targets -- -D warnings` | blocker | every milestone | No `#[allow]` without a justifying comment |
-| QG-03 | No `unsafe` | `scripts/check-no-unsafe.sh` | blocker | every milestone | `SUP-008`; any `unsafe` needs an ADR. **Implemented and running** |
-| QG-04 | Build | `cargo build --workspace --all-targets` | blocker | every milestone | Plus the release profile and the macOS universal binary |
-| QG-05 | Unit tests | `cargo nextest run --workspace` | blocker | every milestone | |
-| QG-06 | Integration tests | `cargo nextest run --workspace --test '*'` | blocker | M1+ | |
-| QG-07 | Doctests | `cargo test --workspace --doc` | blocker | every milestone | nextest does not cover these |
-| QG-08 | Licences | `cargo deny check licenses` | blocker | M0+ | `AGPL-3.0-only` + `MPL-2.0`; `unused-allowed-license = warn` |
-| QG-09 | Advisories | `cargo audit` | blocker | M0+ | Fail on any un-waived advisory |
-| QG-10 | Bans and sources | `cargo deny check bans sources` | blocker | M0+ | Banned crates list in `deny.toml` |
-| QG-11 | Link check | `scripts/check-doc-links.sh` | blocker | every milestone | Resolves every relative link in the tracked markdown. **Implemented and running**; `lychee` is the planned replacement for external links |
-| QG-12 | Spelling | `typos` | warning | every milestone | |
-| QG-13 | File size | `scripts/check-file-size.sh` | blocker | M1+ | ≤ 300 lines target, > 500 hard limit; no maintained Rust tool exists, so the project writes its own. **Implemented and running** |
-| QG-14 | Complexity | `clippy::excessive_nesting` + `clippy::too_many_lines` (blocking) | blocker | M1+ | `rust-code-analysis-cli` is stale (2023) and MPL-2.0 → advisory only, never gating |
-| QG-15 | Binary size | *planned* — an `xtask` command | warning | release | Budget per binary, documented |
-| QG-16 | Snapshot review | `cargo insta test --check` | blocker | M1+ | `INSTA_UPDATE=no`, `INSTA_FORCE_PASS` unset |
-| QG-17 | DIDL-Lite conformance | *planned* — an `xtask` command validating against the vendored `didl-lite.xsd` via the `xmlschema` crate | blocker | M1+ | Arrives with the DIDL-Lite writer |
-| QG-18 | Property tests | `cargo nextest run --workspace proptest` | blocker | M1+ | Escaping round-trip; path containment |
-| QG-19 | Fuzz smoke | `cargo fuzz run <target> -- -runs=N` | blocker | M4 | Each target has a committed seed corpus |
-| QG-20 | Miri | `cargo +nightly miri test` | warning | M1+ | Only meaningful where `unsafe` exists; mostly a "no unsafe" proof |
-| QG-21 | Benchmark baseline | `cargo bench --workspace -- --save-baseline` | blocker | M1+ | Compared against the recorded baseline |
-| QG-22 | Soak test | `scripts/soak.sh --duration 7d` | blocker | release | RSS, fd count, thread count, index growth, dropped connections |
-| QG-23 | Device matrix | `scripts/device-matrix.sh` | blocker | M1+ | Rows in `INTEROPERABILITY-MATRIX.md` with device, firmware, format, outcome |
-| QG-24 | Public API compatibility | `cargo semver-checks` | blocker | release | |
-| QG-25 | Outdated dependencies | `cargo outdated` | INFO | — | Informational only |
-| QG-26 | Coverage | `cargo llvm-cov` | INFO | — | Informational; never a quality claim on its own |
-| QG-27 | Mutation testing | `cargo mutants` | INFO | — | Informational, optional |
-| QG-28 | Crate boundaries | *planned* — `scripts/check-crate-boundaries.sh` | blocker | M0+ | Fails when a crate depends "downwards". Arrives with the crates it guards (ADR-0001) |
+| ID | Gate | Tool / command | Severity | Blocks | State | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| QG-01 | Formatting | `cargo fmt --all -- --check` | blocker | every milestone | **exists** |  |
+| QG-02 | Lints | `cargo clippy --workspace --all-targets -- -D warnings` | blocker | every milestone | **exists** | No `#[allow]` without a justifying comment |
+| QG-03 | No `unsafe` | `scripts/check-no-unsafe.sh` | blocker | every milestone | **exists** | `SUP-008`; any `unsafe` needs an ADR. **Implemented and running** |
+| QG-04 | Build | `cargo build --workspace --all-targets` | blocker | every milestone | **exists** | Plus the release profile and the macOS universal binary |
+| QG-05 | Unit tests | `cargo nextest run --workspace` | blocker | every milestone | **exists** | Requires `cargo-nextest`. |
+| QG-06 | Integration tests | `cargo nextest run --workspace --test '*'` | blocker | M1+ | planned |  |
+| QG-07 | Doctests | `cargo test --workspace --doc` | blocker | every milestone | **exists** | nextest does not cover these |
+| QG-08 | Licences | `cargo deny check licenses` | blocker | M0+ | **exists** | `AGPL-3.0-only` + `MPL-2.0`; `unused-allowed-license = warn` Requires `cargo-deny`. |
+| QG-09 | Advisories | `cargo audit` | blocker | M0+ | **exists** | Fail on any un-waived advisory Requires `cargo-audit`. |
+| QG-10 | Bans and sources | `cargo deny check bans sources` | blocker | M0+ | **exists** | Banned crates list in `deny.toml` Requires `cargo-deny`. |
+| QG-11 | Link check | `scripts/check-doc-links.sh` | blocker | every milestone | **exists** | Resolves every relative link in the tracked markdown. **Implemented and running**; `lychee` is the planned replacement for external links |
+| QG-12 | Spelling | `typos` | warning | every milestone | planned |  |
+| QG-13 | File size | `scripts/check-file-size.sh` | blocker | M1+ | **exists** | ≤ 300 lines target, > 500 hard limit; no maintained Rust tool exists, so the project writes its own. **Implemented and running** |
+| QG-14 | Complexity | `clippy::excessive_nesting` + `clippy::too_many_lines` (blocking) | blocker | M1+ | planned | `rust-code-analysis-cli` is stale (2023) and MPL-2.0 → advisory only, never gating |
+| QG-15 | Binary size | *planned* — an `xtask` command | warning | release | planned | Budget per binary, documented |
+| QG-16 | Snapshot review | `cargo insta test --check` | blocker | M1+ | planned | `INSTA_UPDATE=no`, `INSTA_FORCE_PASS` unset |
+| QG-17 | DIDL-Lite conformance | *planned* — an `xtask` command validating against the vendored `didl-lite.xsd` via the `xmlschema` crate | blocker | M1+ | planned | Arrives with the DIDL-Lite writer |
+| QG-18 | Property tests | `cargo nextest run --workspace proptest` | blocker | M1+ | planned | Escaping round-trip; path containment |
+| QG-19 | Fuzz smoke | `cargo fuzz run <target> -- -runs=N` | blocker | M4 | planned | Each target has a committed seed corpus |
+| QG-20 | Miri | `cargo +nightly miri test` | warning | M1+ | planned | Only meaningful where `unsafe` exists; mostly a "no unsafe" proof |
+| QG-21 | Benchmark baseline | `cargo bench --workspace -- --save-baseline` | blocker | M1+ | planned | Compared against the recorded baseline |
+| QG-22 | Soak test | `scripts/soak.sh --duration 7d` | blocker | release | planned | RSS, fd count, thread count, index growth, dropped connections |
+| QG-23 | Device matrix | `scripts/device-matrix.sh` | blocker | M1+ | planned | Rows in `INTEROPERABILITY-MATRIX.md` with device, firmware, format, outcome |
+| QG-24 | Public API compatibility | `cargo semver-checks` | blocker | release | planned |  |
+| QG-25 | Outdated dependencies | `cargo outdated` | INFO | — | planned | Informational only |
+| QG-26 | Coverage | `cargo llvm-cov` | INFO | — | planned | Informational; never a quality claim on its own |
+| QG-27 | Mutation testing | `cargo mutants` | INFO | — | planned | Informational, optional |
+| QG-28 | Crate boundaries | *planned* — `scripts/check-crate-boundaries.sh` | blocker | M0+ | planned | Fails when a crate depends "downwards". Arrives with the crates it guards (ADR-0001) |
 
 ### 3.0 The canonical register
 
@@ -110,10 +110,13 @@ recorded, may be accepted with a reason.
 to a gate as `QG-nn` and mean the row here. A document that names a gate for a
 different check is a defect — fix the document, not this table.
 
-Four gates exist and run today: **QG-01** (formatting), **QG-03** (no `unsafe`),
-**QG-11** (link check) and **QG-13** (file size). The rest arrive with the code they
-guard, and a gate that does not exist is reported as `NOT RUN — <reason>`, never as a
-pass.
+The **State** column says whether the gate can run today. `exists` means the command
+is in the repository and works; `planned` means it arrives with the code it guards.
+A gate in the `planned` state is reported as `NOT RUN — <reason>`, never as a pass.
+
+Four gates have a script of their own and were observed running on 2026-11-14:
+**QG-03** (no `unsafe`), **QG-11** (link check) and **QG-13** (file size), plus the
+formatting, lint, build and test gates that come with the Rust toolchain.
 
 ### 3.1 What each gate must prove
 
@@ -137,7 +140,7 @@ a **negative test**:
 
 ---
 
-## 4. Milestone gates (G0–G6)
+## 4. Milestone gates (G0 … G6)
 
 The gate matrix above is *horizontal* (one per property). The milestone gates below are
 *vertical* (one per phase). A milestone needs both.
@@ -145,7 +148,7 @@ The gate matrix above is *horizontal* (one per property). The milestone gates be
 | Gate | Name | Exit criteria |
 | --- | --- | --- |
 | **G0** | Requirements | Every requirement has an ID, a definition, a priority, a feature, a milestone and a verification method. No open contradiction. Baseline approved by the owner. |
-| **G1** | Architecture | Module boundaries defined and enforced (QG-07-style boundary check), ADRs written for every significant decision, threat model current, dependency and licence review complete. |
+| **G1** | Architecture | Module boundaries defined and enforced (gate QG-28), ADRs written for every significant decision, threat model current, dependency and licence review complete. |
 | **G2** | Implementation | QG-01 … QG-18 green. No `unsafe` without an ADR. Public API documented. |
 | **G3** | Interoperability | Protocol fixtures green, range and seek verified, the device matrix has at least one observed result per supported client family, regressions captured as fixtures. |
 | **G4** | Robustness | Fuzz targets clean, traversal and resource-bound tests green, crash recovery proven, soak test completed. |

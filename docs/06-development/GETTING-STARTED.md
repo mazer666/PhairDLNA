@@ -19,8 +19,13 @@ You need a stable Rust toolchain. The easiest way is [rustup](https://rustup.rs/
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-The project pins its toolchain in `rust-toolchain.toml`, so `cargo` will download the
-right version on the first build.
+The project **requires Rust 1.89 or newer**. That minimum is recorded as
+`rust-version` in `Cargo.toml`, and it is what the build matrix tests.
+
+`rust-toolchain.toml` selects the **stable channel** and its components
+(`clippy`, `rustfmt`). It deliberately does not pin an exact release, so that a new
+contributor does not have to download a second toolchain. If your installed stable
+channel is older than 1.89, `rustup update stable` fixes it.
 
 Check it:
 
@@ -55,7 +60,9 @@ cargo test --workspace                              # tests
 cargo test --workspace --doc                       # documentation tests
 ```
 
-The last two are separate: `cargo nextest` does not run doctests, so both are needed.
+Doctests are a separate step: `cargo nextest` does not run them. `cargo test --workspace`
+runs both, so it is the simpler command; the CI workflow uses `cargo nextest` for
+speed and runs the doctests separately.
 
 More commands, including the licence, advisory, link and size gates, are in
 [BUILD-AND-TEST.md](BUILD-AND-TEST.md).
@@ -84,7 +91,9 @@ README.md  →  docs/06-development/GETTING-STARTED.md  →  WHERE_TO_CHANGE.md
 
 - **[WHERE_TO_CHANGE.md](../../WHERE_TO_CHANGE.md)** — the index of the code: which
   file owns which responsibility.
-- **[../03-features/](../03-features/)** — one specification per feature.
+- **[../01-product/FEATURE-CATALOG.md](../01-product/FEATURE-CATALOG.md)** — the index
+  of features: which file owns what, in which milestone.
+- **[../03-features/](../03-features/)** — the specifications themselves.
 - **[../01-product/REQUIREMENTS-INDEX.md](../01-product/REQUIREMENTS-INDEX.md)** — every
   requirement with its ID, priority, feature and verification method.
 - **[../02-architecture/ARCHITECTURE.md](../02-architecture/ARCHITECTURE.md)** — how the
@@ -132,9 +141,10 @@ python3 scripts/generate_requirement_views.py --check   # fails if out of date
 | Symptom | Likely cause | What to do |
 | --- | --- | --- |
 | `cargo` is not found | rustup is installed but not on `PATH` | Open a new terminal, or `source "$HOME/.cargo/env"` |
-| The toolchain downloads on the first build | `rust-toolchain.toml` pins a version | Expected; wait for it |
+| `cargo` refuses to build because of `rust-version` | Your Rust is older than 1.89 | `rustup update stable` |
+| `cargo nextest` is not found | The test runner is not installed by default | `cargo install cargo-nextest --locked`, or use `cargo test --workspace` |
 | `cargo fmt` reports a diff | The file is not formatted | `cargo fmt --all` |
-| A link-check failure on `upnp.org` | The server answers soft-404s with HTTP 200 | The link checker checks the content type; this is a known behaviour of the upstream server |
+| The optional `lychee` cross-check reports `upnp.org` | That server answers soft-404s with HTTP 200 and an HTML body | `lychee` is not part of the repository gates today; when it is enabled, it must check the content type, not only the status code |
 | `scripts/check-file-size.sh` fails | A file exceeds the size gate | Split the file, or record an exception in `docs/00-governance/EXCEPTIONS.md` |
 
 ---

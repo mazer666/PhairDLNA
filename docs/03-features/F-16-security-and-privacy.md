@@ -7,6 +7,7 @@ Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 
 Requirements: INT-057, INT-058, INT-059, SEC-010, SEC-011, SEC-012, SEC-013, SEC-014, SEC-015, SEC-016, SEC-017, SEC-018, SEC-060, SEC-061, SEC-062, SEC-063, SEC-064, SEC-065, SEC-066, SEC-067, SEC-068, SEC-069, SEC-070, SEC-071, SEC-072, SEC-090, SEC-091, SEC-092, SEC-093, SEC-094, SEC-095, SEC-096
+Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
 Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 
 ## 1. Purpose and user story

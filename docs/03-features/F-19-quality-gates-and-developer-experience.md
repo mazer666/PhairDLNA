@@ -7,6 +7,7 @@ Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 
 Requirements: DOC-001, DOC-002, DOC-003, DOC-004, DOC-005, DOC-006, DOC-007, DOC-008, DOC-009, DOC-010, DOC-011, DOC-012,
+Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
 Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 SUP-001, SUP-002, SUP-003, SUP-004, SUP-005, SUP-006, SUP-007, SUP-008, SUP-009, PLT-001, PLT-002, PLT-009, PLT-016
 
@@ -43,7 +44,7 @@ platforms — the crate boundary (PLT-001), the build matrix (PLT-002), the nati
 ten mandatory sections); the performance budgets themselves (F-18, `../05-quality/PERFORMANCE-BUDGETS.md`); the interoperability matrix rows and the
 device protocol (F-07, `../05-quality/`); the protocol conformance checklist (PC-01 … PC-26); the security mitigations and the threat table (F-16);
 the CI *trigger* policy, which is manual-only by owner decision (`../07-project/CI-POLICY.md`); and the release policy and the publishing of artefacts
-(`../08-releases/`, which does not exist yet).
+(`../08-releases/`, which exists and holds the release policy, but has no notarisation plan yet).
 
 ## 3. Functional requirements
 
@@ -497,7 +498,7 @@ layers), `../00-governance/` (the standards, the documentation policy, the requi
    hardened runtime + notarisation, 99 USD/year and a named maintainer) is an owner decision with a governance dimension: the account is a person's
    legal identity in an AGPL volunteer project (platform-integration §3.2, §3.3). *Closes when:* the owner decides before the first stable release.
 4. **[OPEN] Where the notarisation plan is recorded.** SUP-009 says the plan "shall be recorded here", which this specification reads as §4.8. The
-   canonical structure reserves `docs/08-releases/` for distribution and provenance, but that directory does not exist yet. *Proposed decision, not in
+   canonical structure reserves `docs/08-releases/` for distribution and provenance. That directory exists (it holds `RELEASE-POLICY.md`) but contains no notarisation plan yet. *Proposed decision, not in
    the baseline:* the plan lives in this specification and the release documents link to it, rather than being duplicated (DOC-006). *Closes when:*
    the owner confirms.
 5. **[OPEN] The minimum supported Rust version versus the macOS menu bar crates.** The workspace pins `rust-version = "1.89"`, but `muda` and

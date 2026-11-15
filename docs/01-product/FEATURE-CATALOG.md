@@ -30,8 +30,8 @@ the code.
 | User experience | F-15 Native macOS experience | `F-15-macos-native-experience.md` | M2 | MUST |
 | Security | F-16 Security hardening and privacy guarantees | `F-16-security-and-privacy.md` | M1 | MUST |
 | Optional | F-17 Optional transcoding | `F-17-optional-transcoding.md` | M5 | COULD |
-| Quality | F-18 Performance and reliability budgets | — (see `../05-quality/`) | M1 | MUST |
-| Quality | F-19 Quality gates and developer experience | — (see `../05-quality/`) | M0 | MUST |
+| Quality | F-18 Performance and reliability budgets | `F-18-performance-and-reliability.md` | M1 | MUST |
+| Quality | F-19 Quality gates and developer experience | `F-19-quality-gates-and-developer-experience.md` | M0 | MUST |
 | Proposed | F-20 Compatibility Inspector (proposed, deferred) | `F-20-compatibility-inspector.md` | — | COULD |
 | Proposed | F-21 Playback Doctor (proposed, deferred) | `F-21-playback-doctor.md` | — | COULD |
 

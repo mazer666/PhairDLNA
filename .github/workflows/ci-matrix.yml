@@ -11,20 +11,34 @@ permissions:
 
 jobs:
   build:
-    name: ${{ matrix.os }}
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        include:
+          - name: macOS (stable)
+            os: macos-latest
+            toolchain: stable
+          - name: Linux (stable)
+            os: ubuntu-latest
+            toolchain: stable
+          - name: Windows (stable)
+            os: windows-latest
+            toolchain: stable
+          # The minimum supported Rust version, as recorded in Cargo.toml.
+          - name: Linux (MSRV 1.89)
+            os: ubuntu-latest
+            toolchain: "1.89.0"
     steps:
       - name: Check out
         uses: actions/checkout@v4.2.2
 
       - name: Install the Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: ${{ matrix.toolchain }}
           components: clippy, rustfmt
 
       - name: Build

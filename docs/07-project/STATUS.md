@@ -16,11 +16,11 @@ documentation baseline and the gates that will hold the implementation honest.
 | Requirements | **Complete** | 341 requirements with IDs, priorities, features, milestones and verification methods — `../01-product/REQUIREMENTS-INDEX.md` |
 | Traceability | **Complete** | Generated matrix requirement → feature → milestone → module → verification → evidence — `TRACEABILITY-MATRIX.md` |
 | Architecture | **Complete** | Module boundaries, data flows, runtime model — `../02-architecture/ARCHITECTURE.md` |
-| Decisions | **Complete** | Six ADRs plus 17 entries in the decision log — `../00-governance/DECISION-LOG.md` |
+| Decisions | **Complete** | The ADRs in `../02-architecture/adr/` plus 17 entries in the decision log — `../00-governance/DECISION-LOG.md` |
 | Security model | **Complete** | Eight mitigations, 28 threats, each with its verification — `../04-security/SECURITY-MODEL.md` |
 | Privacy model | **Complete** | Data inventory, network posture, source offer — `../04-security/PRIVACY.md` |
 | Dependency review | **Complete** | Licence data for every candidate crate, retrieved 2026-11-14 — `../04-security/DEPENDENCY-LICENSE-REVIEW.md` |
-| Quality gates | **Complete** | 27 gates with their commands, labels and negative tests — `../05-quality/QUALITY-GATES.md` |
+| Quality gates | **Defined** | 28 gates with their commands, the label vocabulary and 12 recorded negative tests; 11 gates can run today — `../05-quality/QUALITY-GATES.md` |
 | Test strategy | **Complete** | Test layers, property tests, negative catalogue, fuzz targets — `../05-quality/TEST-STRATEGY.md` |
 | Interoperability | **Framework complete, evidence empty** | 26 conformance checks defined; **no device test has been performed** — `../05-quality/INTEROPERABILITY-MATRIX.md` |
 | Performance | **Budgets defined, not measured** | Budgets and the measurement protocol — `../05-quality/PERFORMANCE-BUDGETS.md` |
@@ -63,9 +63,9 @@ Everything else in this repository is **documented and unmeasured**. In particul
 | Acceptance criteria | > 300 across the feature specifications |
 | Protocol conformance checks | 26 (`PC-01` … `PC-26`) |
 | Threats modelled | 28 (`SEC-TH-01` … `SEC-TH-28`) |
-| Quality gates | 27 (`QG-01` … `QG-27`) |
+| Quality gates | 28 (`QG-01` … `QG-28`), of which 11 can run today |
 | Milestone gates | 7 (`G0` … `G6`) |
-| Architecture decisions | 6 ADRs + 17 decision-log entries |
+| Architecture decisions | The ADRs in `../02-architecture/adr/` + 17 decision-log entries |
 | Open owner decisions | 12 (`OD-01` … `OD-12`) |
 | Risks | 13 (`R-01` … `R-13`) |
 | Archived baselines | 2 snapshots, each with a SHA-256 manifest |

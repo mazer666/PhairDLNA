@@ -419,7 +419,7 @@ guidelines require of a media server.
 | RES-008 | On a battery-powered or thermally constrained machine the server may reduce background work, but it shall never silently change which media is exposed and never disable an active playback. | SHOULD |
 | RES-009 | Start-up, scanning, sleep/wake and shutdown shall release workers and file handles predictably. | MUST |
 
-## 17. Reliability
+## 18. Reliability
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
@@ -430,7 +430,7 @@ guidelines require of a media server.
 | REL-005 | A configuration change shall be validated, applied atomically and recoverable; an invalid configuration shall never silently change the network exposure. | MUST |
 | REL-006 | Active transfers shall survive a change of the presentation mode in the user interface, and the headless service shall remain independent of the life cycle of any user interface. | MUST |
 
-## 18. Service lifecycle and network recovery
+## 19. Service lifecycle and network recovery
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
@@ -446,7 +446,7 @@ guidelines require of a media server.
 | LIFE-010 | The installation of the login-item service and the permissions it needs shall be explicit and reversible, and the server shall not install a hidden privileged helper or bypass the firewall. | MUST |
 | LIFE-011 | The server shall keep a local, redacted timeline of network changes and recovery events that the user may export after reviewing it. | SHOULD |
 
-## 19. Documentation and developer experience
+## 20. Documentation and developer experience
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
@@ -463,7 +463,7 @@ guidelines require of a media server.
 | DOC-011 | Broken internal links shall be detected by an automated gate. | MUST |
 | DOC-012 | Contribution guidance shall state the standards, the gates and the expectations for evidence. | MUST |
 
-## 20. Supply chain, licensing and provenance
+## 21. Supply chain, licensing and provenance
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
@@ -479,7 +479,7 @@ guidelines require of a media server.
 
 ---
 
-## 21. Requirement-level priorities
+## 22. Requirement-level priorities
 
 - **MUST** — required for correctness, safety or the promise of the product. A milestone
   with an open `MUST` cannot be accepted.
