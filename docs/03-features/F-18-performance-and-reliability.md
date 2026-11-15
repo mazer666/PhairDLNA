@@ -294,7 +294,7 @@ explained, not a footnote.
 | **AC-15** | Given an active transfer, when the user switches the presentation mode, then the transfer continues uninterrupted | `REL-006` | Integration test | `crates/phairdlna-mac/tests/mode_switch.rs` |
 | **AC-16** | Given the same workload on two machines with different storage, when both are measured with the same method, then the numbers are comparable because the hardware profile is recorded | `PERF-010`, `PERF-011` | Manual review | `docs/05-quality/PERFORMANCE-BUDGETS.md` |
 | **AC-17** | Given a root that contains a network share which stops answering, when a browse request arrives for a folder on another root, then the request is served within the browse budget and the stuck scan is reported | `PERF-014`, `RES-003` | Integration test with a stalling share | `crates/phairdlna-core/tests/slow_share_does_not_block.rs` |
-| **AC-17** | Given ten simultaneous direct-play clients, when the streams run and are then closed, then the resident memory does not grow without bound and the memory attributable to one stream stays within the documented bound | `PERF-006`, `PERF-007` | Benchmark | `crates/phairdlna-core/benches/ten_streams.rs` |
+| **AC-18** | Given ten simultaneous direct-play clients, when the streams run and are then closed, then the resident memory does not grow without bound and the memory attributable to one stream stays within the documented bound | `PERF-006`, `PERF-007` | Benchmark | `crates/phairdlna-core/benches/ten_streams.rs` |
 
 ---
 
