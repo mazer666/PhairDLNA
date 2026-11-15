@@ -66,7 +66,7 @@ Everything else in this repository is **documented and unmeasured**. In particul
 | --- | --- |
 | Requirements | 341 — 279 MUST, 57 SHOULD, 5 COULD |
 | Feature specifications | 22 (F-01 … F-19, F-22, plus two proposals, F-20 / F-21) |
-| Acceptance criteria | 312 across the 20 baseline specifications (F-20 and F-21 are proposals and define none) |
+| Acceptance criteria | 330 across the 20 baseline specifications (F-20 and F-21 are proposals and define none) |
 | Glossary entries | 77 terms across five vocabularies |
 | Independent reviews | 2 — a beginner-experience review and a consistency review, both in `../05-quality/reviews/` |
 | Protocol conformance checks | 26 (`PC-01` … `PC-26`) |
