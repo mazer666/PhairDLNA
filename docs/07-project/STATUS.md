@@ -64,8 +64,9 @@ Everything else in this repository is **documented and unmeasured**. In particul
 
 | Number | Value |
 | --- | --- |
-| Requirements | 341 (MUST / SHOULD / COULD per the index totals) |
+| Requirements | 341 — 279 MUST, 57 SHOULD, 5 COULD |
 | Feature specifications | 21 (F-01 … F-19 plus two proposals, F-20 / F-21) |
+| Acceptance criteria | 298 across the 21 specifications |
 | Glossary entries | 90 terms across five vocabularies |
 | Independent reviews | 2 (a beginner-experience review and a consistency review) |
 | Acceptance criteria | > 300 across the feature specifications |
