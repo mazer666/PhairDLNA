@@ -22,20 +22,36 @@
 | Quality gates and tests | [docs/05-quality/QUALITY-GATES.md](docs/05-quality/QUALITY-GATES.md) · [docs/05-quality/TEST-STRATEGY.md](docs/05-quality/TEST-STRATEGY.md) |
 | Interoperability and device evidence | [docs/05-quality/INTEROPERABILITY-MATRIX.md](docs/05-quality/INTEROPERABILITY-MATRIX.md) |
 | Performance budgets | [docs/05-quality/PERFORMANCE-BUDGETS.md](docs/05-quality/PERFORMANCE-BUDGETS.md) |
+| The research the requirements cite | [docs/09-research/](docs/09-research/) |
 | Build and test commands | [docs/06-development/BUILD-AND-TEST.md](docs/06-development/BUILD-AND-TEST.md) |
 | Roadmap, traceability, risks, decisions | [docs/07-project/](docs/07-project/) |
 | Release policy | [docs/08-releases/RELEASE-POLICY.md](docs/08-releases/RELEASE-POLICY.md) |
 
 ## The source tree
 
-> **Do not add a path to this table until it exists.** Update this file whenever a
-> module changes ownership.
+### Exists today
 
 | Path | Responsibility | Feature |
 | --- | --- | --- |
 | `Cargo.toml` | Workspace definition, shared package metadata | — |
-| `rust-toolchain.toml` | Pinned toolchain versions | — |
-| `crates/phairdlna-core/` | The portable domain core — no OS-specific dependencies | F-01 … F-12 |
+| `rust-toolchain.toml` | Pinned toolchain and components | — |
+| `deny.toml` | Licence, advisory, ban and source policy | F-19 |
+| `crates/phairdlna-core/src/lib.rs` | The portable domain core — currently only the project constants | — |
+| `crates/phairdlna-cli/src/main.rs` | The command line entry point | F-13 |
+| `scripts/` | Repository gates and the requirement-view generator | F-19 |
+| `.github/workflows/` | Manual-only continuous integration | F-19 |
+| `docs/` | The documentation tree | F-19 |
+
+> **A path moves into this table the day it exists.** Until then it belongs in the
+> planned table below.
+
+### Planned layout
+
+**None of these paths exists yet.** They are listed so that the target structure is
+visible and so that a contributor can see where their change will land.
+
+| Planned path | Responsibility | Feature |
+| --- | --- | --- |
 | `crates/phairdlna-core/src/config/` | Typed, validated, versioned configuration | F-12 |
 | `crates/phairdlna-core/src/ssdp/` | SSDP discovery, advertisement, interface selection | F-01 |
 | `crates/phairdlna-core/src/upnp/` | Device model, SCPD, SOAP dispatch | F-02, F-03, F-04 |
@@ -46,16 +62,17 @@
 | `crates/phairdlna-core/src/security/` | Path containment, redaction, limits | F-16 |
 | `crates/phairdlna-core/src/platform/` | Platform traits and per-OS implementations | F-08, F-13, F-15 |
 | `crates/phairdlna-core/src/scheduler/` | Priority classes, bounded pools, backpressure | F-18 |
-| `crates/phairdlna-cli/` | The daemon and the command line | F-13 |
 | `crates/phairdlna-admin/` | The optional loopback administration surface | F-14 |
 | `crates/phairdlna-mac/` | The optional native macOS application | F-15 |
-| `scripts/` | Repository gates and the requirement-view generator | F-19 |
-| `.github/workflows/` | Manual-only continuous integration | F-19 |
 
-## The scripts
+### The scripts
 
-| Script | Gate | What it does |
-| --- | --- | --- |
-| `scripts/check-file-size.sh` | QG-13 | Enforces the file-length budget |
-| `scripts/check-doc-links.sh` | QG-11 | Resolves every relative documentation link |
-| `scripts/generate_requirement_views.py` | — | Regenerates the requirement index and the traceability matrix |
+| Script | Gate | State | What it does |
+| --- | --- | --- | --- |
+| `scripts/check-file-size.sh` | QG-13 | **exists and runs** | Enforces the file-length budget |
+| `scripts/check-doc-links.sh` | QG-11 | **exists and runs** | Resolves every relative documentation link |
+| `scripts/check-no-unsafe.sh` | QG-03 | **exists and runs** | Finds `unsafe` outside of comments |
+| `scripts/generate_requirement_views.py` | — | **exists and runs** | Generates the requirement index and the traceability matrix |
+| `scripts/check-crate-boundaries.sh` | QG-28 | planned | Fails when a crate depends "downwards" |
+| `scripts/soak.sh` | QG-22 | planned | Runs the seven-day soak and samples the signals |
+| `scripts/device-matrix.sh` | QG-23 | planned | Records a device test in the interoperability matrix |

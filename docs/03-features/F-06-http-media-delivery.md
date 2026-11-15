@@ -4,6 +4,7 @@ Status: Draft
 Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 Requirements: FUN-040, FUN-041, FUN-042, FUN-043, FUN-044, FUN-045, FUN-046, FUN-050, INT-080,
+Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 INT-081, INT-082, INT-083, INT-084, INT-085, INT-086, INT-087, INT-088, INT-089, INT-090, INT-091, INT-092, INT-093,
 INT-094, INT-095, INT-096, INT-097, INT-098, INT-099
 

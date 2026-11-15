@@ -7,6 +7,7 @@ Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 
 Requirements: UX-001, UX-002, UX-003, UX-004, UX-005, UX-006, UX-007, UX-008, UX-009, UX-010, UX-013, UX-014, UX-015, UX-016, UX-017, UX-018, UX-019, UX-020, MB-001, MB-002, MB-003, MB-004, MB-005, MB-006, MB-007, MB-008, MB-009, PLT-004
+Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 
 ## 1. Purpose and user story
 

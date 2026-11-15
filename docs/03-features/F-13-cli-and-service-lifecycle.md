@@ -4,6 +4,7 @@ Status: Draft
 Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 Requirements: OPS-001, OPS-002, OPS-003, OPS-004, OPS-005, OPS-006, OPS-007, OPS-008,
+Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 OPS-009, OPS-010, OPS-011, OPS-012, OPS-013, OPS-014, OPS-015, LIFE-001, LIFE-002,
 LIFE-003, LIFE-004, LIFE-005, LIFE-006, LIFE-007, LIFE-008, LIFE-009, LIFE-011
 

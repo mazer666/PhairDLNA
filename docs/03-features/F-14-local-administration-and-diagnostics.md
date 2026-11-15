@@ -1,8 +1,12 @@
 # F-14 — Local administration and diagnostics
 
-Status: Draft Owner role: Product/Requirements Version/date: 0.1 / 2026-11-14 Requirements:
+Status: Draft
+Owner role: Product/Requirements
+Version/date: 0.1 / 2026-11-14
+Requirements:
 OPS-016, OPS-017, OPS-020, OPS-021, OPS-022, OPS-023, OPS-024, OPS-025, OPS-026, OPS-027, UX-011,
 UX-012, SEC-070, SEC-071, SEC-072
+Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 
 ## 1. Purpose and user story
 

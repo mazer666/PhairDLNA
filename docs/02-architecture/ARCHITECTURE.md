@@ -66,8 +66,9 @@ phairdlna-cli  ─┘
 lifecycle; `phairdlna-admin` and `phairdlna-mac` are optional front ends that talk to
 the core through its public API.
 
-The boundary check (`scripts/check-crate-boundaries.sh`, gate QG-07) is mechanical: it
+The boundary check is **planned** (`scripts/check-crate-boundaries.sh`, gate QG-28): it
 parses the `Cargo.toml` dependency graph and fails when a crate depends "downwards".
+It arrives with the crates it guards — today the workspace has two of the four.
 
 ---
 

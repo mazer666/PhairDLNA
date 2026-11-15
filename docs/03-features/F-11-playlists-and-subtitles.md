@@ -1,7 +1,11 @@
 # F-11 — Playlists, subtitles and organisation
 
-Status: Draft Owner role: Product/Requirements Version/date: 0.1 / 2026-11-14 Requirements:
+Status: Draft
+Owner role: Product/Requirements
+Version/date: 0.1 / 2026-11-14
+Requirements:
 FUN-015, FUN-016, FUN-020, FUN-021, FUN-022
+Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 
 ## 1. Purpose and user story
 

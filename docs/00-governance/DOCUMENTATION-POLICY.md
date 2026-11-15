@@ -15,6 +15,7 @@ docs/
   06-development/  setup, build and test, troubleshooting, WHERE_TO_CHANGE
   07-project/      requirements work plan, roadmap, traceability, risks, status, CI policy, blockers
   08-releases/     release policy, distribution, provenance, changelog
+  09-research/     the research briefs the requirements cite (evidence, not normative)
   99-archive/      immutable snapshots of superseded baselines
 ```
 
@@ -33,6 +34,7 @@ mapping table and updated links (see § 4).
 | How do I build and run it? | `06-development/` |
 | When will it be done, and what is left? | `07-project/` |
 | How is it shipped and trusted? | `08-releases/` |
+| What is the evidence behind a requirement? | `09-research/` |
 | What did we decide earlier, and why? | `99-archive/` |
 
 **A single source of truth.** If two documents state the same normative fact, one of them
@@ -93,6 +95,12 @@ Migrating an existing document requires:
 
 The consolidated baseline of 2026-11-14 was migrated this way; see
 `../99-archive/2026-11-14-preconsolidation-baseline/MANIFEST.md`.
+
+**The `09-research` section** holds the research briefs that the feature
+specifications cite (`standards §8.3`, `security-landscape §5.1`, …). They are
+committed so that every `[SPEC]`, `[OBSERVED]` and `[DESIGN]` label can be checked
+against its origin. They are **evidence, not norm**: where a research document and a
+requirement disagree, the requirement wins.
 
 ---
 

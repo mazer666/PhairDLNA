@@ -4,6 +4,7 @@ Status: Draft
 Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 Requirements: INT-030, INT-031, INT-032, INT-033, INT-034, INT-035, INT-036,
+Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 INT-037, INT-038, INT-039, INT-040, INT-041, INT-042, INT-043, INT-046, INT-047, INT-048, INT-049
 
 ## 1. Purpose and user story

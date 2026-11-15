@@ -7,6 +7,7 @@ Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 
 Requirements: DOC-001, DOC-002, DOC-003, DOC-004, DOC-005, DOC-006, DOC-007, DOC-008, DOC-009, DOC-010, DOC-011, DOC-012,
+Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 SUP-001, SUP-002, SUP-003, SUP-004, SUP-005, SUP-006, SUP-007, SUP-008, SUP-009, PLT-001, PLT-002, PLT-009, PLT-016
 
 ## 1. Purpose and user story

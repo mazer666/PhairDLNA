@@ -4,6 +4,7 @@ Status: Draft
 Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 Requirements: FUN-008, FUN-009, FUN-010, FUN-011, FUN-012, FUN-025, PERF-003, PERF-004,
+Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 PERF-005, PERF-008, PERF-009, PERF-012
 
 ## 1. Purpose and user story

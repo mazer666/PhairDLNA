@@ -14,6 +14,7 @@ docs/
 ├── 06-development/  setup, build, test, troubleshooting
 ├── 07-project/      plan, traceability, risks, status, decisions, CI, release blockers
 ├── 08-releases/     release policy, distribution, provenance
+├── 09-research/     the research briefs the requirements cite (evidence, not normative)
 └── 99-archive/      immutable snapshots of superseded baselines
 ```
 
@@ -26,6 +27,7 @@ docs/
 | a contributor | [../WHERE_TO_CHANGE.md](../WHERE_TO_CHANGE.md) |
 | a reviewer | [01-product/REQUIREMENTS-INDEX.md](01-product/REQUIREMENTS-INDEX.md) and [07-project/TRACEABILITY-MATRIX.md](07-project/TRACEABILITY-MATRIX.md) |
 | the owner | [07-project/STATUS.md](07-project/STATUS.md) and [07-project/OPEN-DECISIONS.md](07-project/OPEN-DECISIONS.md) |
+| checking a claim against its source | [09-research/](09-research/) — the briefs the specifications cite |
 
 ## The three documents that explain the most
 

@@ -7,6 +7,7 @@ Owner role: Product/Requirements
 Version/date: 0.1 / 2026-11-14
 
 Requirements: FUN-047, FUN-048, FUN-049
+Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 
 ## 1. Purpose and user story
 

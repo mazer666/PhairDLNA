@@ -39,6 +39,7 @@ cloud, no internet access in normal operation.
 | check the security posture | [Security model](docs/04-security/SECURITY-MODEL.md) · [Privacy model](docs/04-security/PRIVACY.md) |
 | check the quality gates | [Quality gates](docs/05-quality/QUALITY-GATES.md) · [Test strategy](docs/05-quality/TEST-STRATEGY.md) · [Interoperability matrix](docs/05-quality/INTEROPERABILITY-MATRIX.md) |
 | know the plan | [Roadmap](docs/07-project/ROADMAP.md) · [Status](docs/07-project/STATUS.md) · [Open decisions](docs/07-project/OPEN-DECISIONS.md) |
+| check a claim against its source | [Research inputs](docs/09-research/) — the briefs every specification cites |
 | build and test | [Getting started](docs/06-development/GETTING-STARTED.md) · [Build and test](docs/06-development/BUILD-AND-TEST.md) |
 | contribute | [AGENTS.md](AGENTS.md) · [WHERE_TO_CHANGE.md](WHERE_TO_CHANGE.md) · [CONTRIBUTING.md](CONTRIBUTING.md) |
 

@@ -37,9 +37,11 @@ phairdlna-cli  ─┘
 - `phairdlna-mac` is an optional native macOS front end, compiled only on macOS.
 
 The direction is checked mechanically by `scripts/check-crate-boundaries.sh`
-(gate QG-07), which parses the `Cargo.toml` dependency graph and fails when a crate
-depends downwards. The gate must have a negative test: an intentionally inverted
-dependency has to turn the gate red.
+(gate **QG-28**), which parses the `Cargo.toml` dependency graph and fails when a
+crate depends downwards. **The script is planned** — it arrives together with the
+crates it guards, because a boundary check over two crates would prove nothing. The
+gate must have a negative test: an intentionally inverted dependency has to turn the
+gate red.
 
 ## Consequences
 

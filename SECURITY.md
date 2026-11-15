@@ -53,20 +53,25 @@ security model applies to it.
   binds the local interfaces; exposing it to the internet is a network configuration
   matter.
 
-## Hardening guarantees
+## Hardening requirements — the target state, not present behaviour
 
-The project treats these as guarantees, each with a negative test:
+**No server exists yet.** The repository contains a requirements baseline and a Rust
+workspace scaffold, not a running server. The properties below are **requirements
+that the implementation must satisfy**, each with a negative test that will prove it
+once the code exists. None of them is a claim about software you can download today.
 
-- The administration surface binds to the loopback interface only and validates the
-  `Host` header against an allowlist.
-- Media paths are canonicalised and verified to be inside a configured root, including
-  after symbolic links and aliases are resolved.
-- XML is parsed without DTD processing or external entity resolution, with bounded
-  size and depth.
-- No SOAP action ever reaches a shell, and no Internet Gateway Device action exists.
-- Media metadata is parsed out of process, with a bounded memory and time budget.
-- The product sends no telemetry and makes no outbound connection other than the
-  local network.
+| Property | Requirement | Delivered by | State |
+| --- | --- | --- | --- |
+| The administration surface binds to the loopback interface only and validates the `Host` header against an allowlist | `OPS-020`, `SEC-071` | F-14 | specified, not implemented |
+| Media paths are canonicalised and verified to be inside a configured root, including after symbolic links and aliases are resolved | `SEC-001` … `SEC-004`, `SEC-069` | F-08, F-16 | specified, not implemented |
+| XML is parsed without DTD processing or external entity resolution, with bounded size and depth | `SEC-010`, `SEC-060` | F-16 | specified, not implemented |
+| No SOAP action ever reaches a shell, and no Internet Gateway Device action exists | `SEC-005`, `INT-058` | F-03, F-16 | specified, not implemented |
+| Media metadata is parsed out of process, with a bounded memory and time budget | `SEC-066`, `SEC-067` | F-10, F-16 | specified, not implemented |
+| The product sends no telemetry and makes no outbound connection other than the local network | `SEC-090` … `SEC-093` | F-16 | specified, not implemented |
+
+The threat model, the eight mitigations and the verification that will prove each one
+are in [docs/04-security/SECURITY-MODEL.md](docs/04-security/SECURITY-MODEL.md). A
+security claim will only be published once its negative test has been observed.
 
 ## Licence
 

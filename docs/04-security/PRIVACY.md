@@ -42,14 +42,19 @@ Everything else is opt-in and documented.
 
 ## 3. What is stored, and where
 
-| Data | Where | Lifetime | Notes |
+**Target state.** No server exists yet; the table below is the inventory the
+implementation must satisfy, not a description of running software. The last column
+names the feature that delivers it.
+
+| Data | Where | Lifetime | Delivered by |
 | --- | --- | --- | --- |
-| Catalogue index | SQLite file in the user's data directory | Until deleted | Contains file paths and media metadata. Not encrypted — it is a local file with user-only permissions |
-| Configuration | Configuration file chosen by the user | Until deleted | May contain folder paths and access-control lists |
-| Device identity (UDN) | In the configuration and the index | Until the identity is reset | A random UUID, not derived from hardware |
-| Logs | Standard error by default, or a file the user names | Until deleted by the user | Redactable |
-| Administration token | A file with owner-only permissions (`0600`) in a `0700` directory | Regenerated on request | Never in the configuration file, never in a log line, never in a command-line argument |
-| Thumbnails and generated artwork | Disposable cache directory | Evicted automatically when the size limit is reached | Regenerable at any time |
+| Catalogue index | SQLite file in the user's data directory | Until deleted | F-09 | Contains file paths and media metadata. Not encrypted — it is a local file with user-only permissions |
+| Configuration | Configuration file chosen by the user | Until deleted | F-12 | May contain folder paths and access-control lists |
+| Device identity (UDN) | In the configuration and the index | Until the identity is reset | F-02 | A random UUID, not derived from hardware |
+| Logs | Standard error by default, or a file the user names | Until deleted by the user | F-13 | Redactable |
+| Administration token | A file with owner-only permissions (`0600`) in a `0700` directory | Regenerated on request | F-14 | Never in the configuration file, never in a log line, never in a command-line argument |
+| Thumbnails and generated artwork | Disposable cache directory | Evicted automatically when the size limit is reached | F-10 | Regenerable at any time |
+| The corresponding source of the running build | Served over HTTP, not stored | — | F-14, F-16 | Required by the AGPL network-use clause |
 
 Nothing else is written. There is no analytics database, no usage profile, no crash
 dump uploaded anywhere, no "first run" identifier sent to a vendor.
@@ -75,10 +80,12 @@ Specifically, the server does **not**:
   user explicitly enables a feature that does so,
 - attempt to configure the router or speak the UPnP Internet Gateway Device protocol.
 
-**How this is verified:** the release checklist includes an outbound-connection audit —
-the server is started with all network egress blocked except the local network, and the
-test suite asserts that a normal browse-and-play session produces **zero** outbound
-connections. This is a gate, not a promise in a README.
+**How this will be verified:** the release checklist includes an outbound-connection
+audit — the server is started with all network egress blocked except the local
+network, and the test suite asserts that a normal browse-and-play session produces
+**zero** outbound connections. That audit has not been performed, because there is no
+server to audit. Until it has been, this section states a requirement and a planned
+verification, not an observation.
 
 ---
 
@@ -123,7 +130,8 @@ LAN is a network, so the obligation applies.
 PhairDLNA therefore ships the offer **as a product feature**: the running server
 serves the corresponding source of the exact build — including the dependency tree
 and the build recipe — over HTTP, without authentication, at no charge
-(`OPS-016`, `OPS-017`, `SEC-070`).
+(`OPS-016`, `OPS-017`, `SEC-070`). This is a requirement of the baseline, not a
+description of existing behaviour; the route arrives with F-14.
 
 This is not an obligation to be minimised; it is the licence's central promise, and
 implementing it as a first-class route is the honest way to comply.

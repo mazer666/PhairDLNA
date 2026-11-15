@@ -27,11 +27,15 @@ Two rules outrank every convenience in this document:
 
 ## 2. Code size and readability gates
 
+The **canonical register of the gates is `../05-quality/QUALITY-GATES.md`**. The IDs
+used here (`QG-nn`) are defined there; this table states what each rule means for the
+code, not how it is measured.
+
 | Gate | Target | Hard limit | How it is measured |
 | --- | --- | --- | --- |
-| Rust source file length | ≤ 300 physical lines | > 500 lines requires a reviewed exception | `scripts/check-file-size.sh` (planned, QG-08) |
+| Rust source file length | ≤ 300 physical lines | > 500 lines requires a reviewed exception | `scripts/check-file-size.sh` (QG-13) |
 | Function / method length | ≤ 40 lines | > 60 lines requires refactoring or a reviewed exception | `scripts/check-file-size.sh` + reviewer |
-| Cyclomatic complexity | ≤ 10 | > 15 requires refactoring | `clippy::cognitive_complexity` (pedantic) + `rust-code-analysis` (planned, QG-09) |
+| Cyclomatic complexity | ≤ 10 | > 15 requires refactoring | `clippy::excessive_nesting` + `clippy::too_many_lines` (QG-14) |
 | Nesting depth | ≤ 3 | > 4 requires refactoring | reviewer + `rust-code-analysis` (planned) |
 | Rust file count per module | ≤ 20 | — | reviewer |
 

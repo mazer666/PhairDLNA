@@ -29,12 +29,23 @@ crates.io stub) and an official XSD for a UPnP device description (every
 
 ## 2. The everyday commands
 
+These need nothing but the Rust toolchain:
+
 ```bash
 cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
-cargo nextest run --workspace          # unit + integration
-cargo test --workspace --doc           # doctests (nextest does not cover these)
+cargo test --workspace                 # unit + integration
+cargo test --workspace --doc           # doctests
 ```
+
+`cargo nextest` is faster and is what the CI workflow uses, but it is **not installed
+by default** — install it once with:
+
+```bash
+cargo install cargo-nextest --locked
+```
+
+Until it is installed, use `cargo test --workspace`; the two run the same tests.
 
 ---
 
@@ -44,10 +55,10 @@ cargo test --workspace --doc           # doctests (nextest does not cover these)
 | --- | --- |
 | QG-01 formatting | `cargo fmt --all -- --check` |
 | QG-02 lints | `cargo clippy --workspace --all-targets -- -D warnings` |
-| QG-03 no `unsafe` | `cargo xtask check-unsafe` |
+| QG-03 no `unsafe` | `scripts/check-no-unsafe.sh` |
 | QG-04 build | `cargo build --workspace --all-targets` |
-| QG-05 unit tests | `cargo nextest run --workspace` |
-| QG-06 integration tests | `cargo nextest run --workspace --test '*'` |
+| QG-05 unit tests | `cargo nextest run --workspace` (or `cargo test --workspace`) |
+| QG-06 integration tests | `cargo nextest run --workspace --test '*'` (planned — no integration tests exist yet) |
 | QG-07 doctests | `cargo test --workspace --doc` |
 | QG-08 licences | `cargo deny check licenses` |
 | QG-09 advisories | `cargo audit` |
@@ -56,23 +67,35 @@ cargo test --workspace --doc           # doctests (nextest does not cover these)
 | QG-12 spelling | `typos` |
 | QG-13 file size | `scripts/check-file-size.sh` |
 | QG-14 complexity | `cargo clippy --workspace --all-targets -- -D clippy::excessive_nesting -D clippy::too_many_lines` |
-| QG-16 snapshots | `INSTA_UPDATE=no cargo insta test --check` |
-| QG-17 DIDL-Lite conformance | `cargo xtask validate-didl` |
-| QG-18 property tests | `cargo nextest run --workspace --test '*' proptest` |
-| QG-21 benchmark baseline | `cargo bench --workspace -- --save-baseline` |
+| QG-16 snapshots | `INSTA_UPDATE=no cargo insta test --check` *(planned — no snapshots exist yet)* |
+| QG-17 DIDL-Lite conformance | *planned* — an `xtask` command against the vendored XSD |
+| QG-18 property tests | `cargo nextest run --workspace --test '*' proptest` *(planned — no property tests exist yet)* |
+| QG-21 benchmark baseline | `cargo bench --workspace -- --save-baseline` *(planned — no benchmarks exist yet)* |
 
-The scripts marked *planned* in the gate matrix do not exist yet; they arrive with
-the implementation. A gate that does not exist is reported as `NOT RUN — <reason>`,
-never as a pass.
+**State of each gate.** The canonical register is
+[`../05-quality/QUALITY-GATES.md`](../05-quality/QUALITY-GATES.md). Four gates exist
+and run today:
+
+```bash
+scripts/check-file-size.sh      # QG-13
+scripts/check-doc-links.sh      # QG-11
+scripts/check-no-unsafe.sh      # QG-03
+python3 scripts/generate_requirement_views.py --check
+```
+
+Everything else arrives with the code it guards and is marked *planned* in the table
+above. **A gate that does not exist is reported as `NOT RUN — <reason>`, never as a
+pass.**
 
 ---
 
 ## 4. Documentation gates
 
 ```bash
-scripts/check-doc-links.sh          # every relative link resolves
-scripts/check-file-size.sh          # file and function size gates
-python3 scripts/generate_requirement_views.py --check   # the index is current
+scripts/check-doc-links.sh          # QG-11: every relative link resolves
+scripts/check-file-size.sh          # QG-13: the file-length budget
+scripts/check-no-unsafe.sh          # QG-03: no unsafe code
+python3 scripts/generate_requirement_views.py --check   # the generated views are current
 ```
 
 The requirement index and the traceability matrix are **generated**. If you change a

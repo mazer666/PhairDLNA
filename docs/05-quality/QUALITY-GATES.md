@@ -77,7 +77,7 @@ recorded, may be accepted with a reason.
 | --- | --- | --- | --- | --- | --- |
 | QG-01 | Formatting | `cargo fmt --all -- --check` | blocker | every milestone | |
 | QG-02 | Lints | `cargo clippy --workspace --all-targets -- -D warnings` | blocker | every milestone | No `#[allow]` without a justifying comment |
-| QG-03 | No `unsafe` | `cargo xtask check-unsafe` | blocker | every milestone | `SUP-008`; any `unsafe` needs an ADR |
+| QG-03 | No `unsafe` | `scripts/check-no-unsafe.sh` | blocker | every milestone | `SUP-008`; any `unsafe` needs an ADR. **Implemented and running** |
 | QG-04 | Build | `cargo build --workspace --all-targets` | blocker | every milestone | Plus the release profile and the macOS universal binary |
 | QG-05 | Unit tests | `cargo nextest run --workspace` | blocker | every milestone | |
 | QG-06 | Integration tests | `cargo nextest run --workspace --test '*'` | blocker | M1+ | |
@@ -85,13 +85,13 @@ recorded, may be accepted with a reason.
 | QG-08 | Licences | `cargo deny check licenses` | blocker | M0+ | `AGPL-3.0-only` + `MPL-2.0`; `unused-allowed-license = warn` |
 | QG-09 | Advisories | `cargo audit` | blocker | M0+ | Fail on any un-waived advisory |
 | QG-10 | Bans and sources | `cargo deny check bans sources` | blocker | M0+ | Banned crates list in `deny.toml` |
-| QG-11 | Link check | `lychee --offline docs/ README.md` | blocker | every milestone | Offline mode; content-type check on |
+| QG-11 | Link check | `scripts/check-doc-links.sh` | blocker | every milestone | Resolves every relative link in the tracked markdown. **Implemented and running**; `lychee` is the planned replacement for external links |
 | QG-12 | Spelling | `typos` | warning | every milestone | |
-| QG-13 | File size | `cargo xtask size-check` | blocker | M1+ | ≤ 300 lines target, > 500 hard limit; no maintained Rust tool exists, so the project writes its own |
+| QG-13 | File size | `scripts/check-file-size.sh` | blocker | M1+ | ≤ 300 lines target, > 500 hard limit; no maintained Rust tool exists, so the project writes its own. **Implemented and running** |
 | QG-14 | Complexity | `clippy::excessive_nesting` + `clippy::too_many_lines` (blocking) | blocker | M1+ | `rust-code-analysis-cli` is stale (2023) and MPL-2.0 → advisory only, never gating |
-| QG-15 | Binary size | `cargo xtask binary-size` | warning | release | Budget per binary, documented |
+| QG-15 | Binary size | *planned* — an `xtask` command | warning | release | Budget per binary, documented |
 | QG-16 | Snapshot review | `cargo insta test --check` | blocker | M1+ | `INSTA_UPDATE=no`, `INSTA_FORCE_PASS` unset |
-| QG-17 | DIDL-Lite conformance | `cargo xtask validate-didl` (XSD via `xmlschema`) | blocker | M1+ | Against the vendored `didl-lite.xsd` |
+| QG-17 | DIDL-Lite conformance | *planned* — an `xtask` command validating against the vendored `didl-lite.xsd` via the `xmlschema` crate | blocker | M1+ | Arrives with the DIDL-Lite writer |
 | QG-18 | Property tests | `cargo nextest run --workspace proptest` | blocker | M1+ | Escaping round-trip; path containment |
 | QG-19 | Fuzz smoke | `cargo fuzz run <target> -- -runs=N` | blocker | M4 | Each target has a committed seed corpus |
 | QG-20 | Miri | `cargo +nightly miri test` | warning | M1+ | Only meaningful where `unsafe` exists; mostly a "no unsafe" proof |
@@ -102,6 +102,18 @@ recorded, may be accepted with a reason.
 | QG-25 | Outdated dependencies | `cargo outdated` | INFO | — | Informational only |
 | QG-26 | Coverage | `cargo llvm-cov` | INFO | — | Informational; never a quality claim on its own |
 | QG-27 | Mutation testing | `cargo mutants` | INFO | — | Informational, optional |
+| QG-28 | Crate boundaries | *planned* — `scripts/check-crate-boundaries.sh` | blocker | M0+ | Fails when a crate depends "downwards". Arrives with the crates it guards (ADR-0001) |
+
+### 3.0 The canonical register
+
+**This table is the single register of the gate identifiers.** Other documents refer
+to a gate as `QG-nn` and mean the row here. A document that names a gate for a
+different check is a defect — fix the document, not this table.
+
+Four gates exist and run today: **QG-01** (formatting), **QG-03** (no `unsafe`),
+**QG-11** (link check) and **QG-13** (file size). The rest arrive with the code they
+guard, and a gate that does not exist is reported as `NOT RUN — <reason>`, never as a
+pass.
 
 ### 3.1 What each gate must prove
 
@@ -112,16 +124,16 @@ a **negative test**:
 | --- | --- |
 | QG-01 | Introduce a mis-indented line → the check reports a diff |
 | QG-02 | Introduce a lint violation → clippy fails with `-D warnings` |
-| QG-03 | Add one `unsafe` block → the check fails and names the file |
+| QG-03 | Add one `unsafe` block → the check fails and names the file — **demonstrated on 2026-11-14** |
 | QG-08 | Add a dependency with an incompatible licence → the check fails |
 | QG-09 | Add a dependency with a known advisory → the check fails |
-| QG-13 | Add a 600-line file → the check fails and names the file |
+| QG-13 | Add a 600-line file → the check fails and names the file — **demonstrated on 2026-11-14** |
 | QG-14 | Add a function with six nesting levels → clippy fails |
 | QG-16 | Change a DIDL-Lite output → the snapshot check fails |
 | QG-17 | Emit DIDL-Lite with a missing required attribute → the XSD check fails |
 | QG-18 | Break the escaping function → the property test finds a counterexample |
 | QG-19 | Feed a malformed input → the fuzz target aborts (this one *must* crash) |
-| QG-11 | Add a broken relative link → the link checker fails |
+| QG-11 | Add a broken relative link → the link checker fails — **demonstrated on 2026-11-14** (it found six broken links in the README on its first run) |
 
 ---
 

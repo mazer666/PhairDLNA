@@ -380,7 +380,7 @@ Two more contradictions in the same document: §3 rule 2 says "Every action is p
 ### m-02 — Minor — the feature index is missing from the navigation path
 **Location**: `docs/06-development/GETTING-STARTED.md:85-91`
 **The passage**:
-> - **[../03-features/](../03-features/)** — one specification per feature.
+> - **[../../03-features/](../../03-features/)** — one specification per feature.
 **What a beginner would believe**: that the directory listing is the index. It links the *directory*, not `FEATURE-CATALOG.md`, which is the table of "feature → file → milestone → priority" — exactly what a newcomer needs. **Suggested fix**: link `../01-product/FEATURE-CATALOG.md` and describe the directory as "the specifications themselves".
 
 ### m-03 — Minor — `WHERE_TO_CHANGE.md`'s scripts table gives no gate for the generator
@@ -448,7 +448,7 @@ Two more contradictions in the same document: §3 rule 2 says "Every action is p
 > …
 > Delegate by outcome, not by line. Bound every work package by file ownership — two agents never write the same file.
 
-**What a beginner would believe**: that the repository is operated by a team of AI agents and that "delegate by outcome" is an instruction they can follow. `CONTRIBUTING.md` §1 tells a human contributor to "Read [AGENTS.md](AGENTS.md) — the binding working rules" as step one of contributing. `docs/00-governance/AGENT-ROLES.md` defines the roles, so the vocabulary is at least documented, but a human's first required document is written in the imperative voice of an agent roster. **Suggested fix**: keep AGENTS.md as the binding ruleset, but open it with a short note for human contributors ("you can satisfy these rules yourself; the delegation rules apply to agent teams"), and point humans at `PROJECT-STANDARDS.md` and `REQUIREMENTS-METHOD.md` first.
+**What a beginner would believe**: that the repository is operated by a team of AI agents and that "delegate by outcome" is an instruction they can follow. `CONTRIBUTING.md` §1 tells a human contributor to "Read [AGENTS.md](../../../AGENTS.md) — the binding working rules" as step one of contributing. `docs/00-governance/AGENT-ROLES.md` defines the roles, so the vocabulary is at least documented, but a human's first required document is written in the imperative voice of an agent roster. **Suggested fix**: keep AGENTS.md as the binding ruleset, but open it with a short note for human contributors ("you can satisfy these rules yourself; the delegation rules apply to agent teams"), and point humans at `PROJECT-STANDARDS.md` and `REQUIREMENTS-METHOD.md` first.
 
 ### i-01 — Info — the project documents its own documentation defects
 **Location**: `docs/03-features/F-19-quality-gates-and-developer-experience.md:424-449`

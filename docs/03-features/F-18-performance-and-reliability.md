@@ -4,6 +4,7 @@ Status: Draft
 Owner role: QA / Performance Engineer
 Version/date: 0.1 / 2026-11-14
 Requirements: PERF-001 … PERF-015, REL-001 … REL-006, RES-001 … RES-009
+Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 
 ## 1. Purpose and user story
 
