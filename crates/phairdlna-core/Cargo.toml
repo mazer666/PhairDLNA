@@ -1,8 +1,20 @@
 [package]
 name = "phairdlna-core"
 version = "0.0.0"
+description = "The portable domain core of PhairDLNA: configuration, protocols, catalogue and streaming."
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 publish = false
+
+# The core is portable: it must not depend on an OS-specific crate.
+# The boundary is checked mechanically by scripts/check-crate-boundaries.sh (QG-28).
+
+[dependencies]
+serde = { workspace = true }
+toml = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

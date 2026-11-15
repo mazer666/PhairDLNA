@@ -53,6 +53,7 @@ Architectural decisions with options and trade-offs live as ADRs in
 | DEC-021 | `docs/05-quality/QUALITY-GATES.md` is the single register of the gate identifiers; every other document refers to a gate by the ID defined there | Accepted | 2026-11-15 | Lead |
 | DEC-022 | The research briefs the specifications cite are committed under `docs/09-research/` as evidence, not as norm; a citation such as `standards §8.3 C12` resolves there | Accepted | 2026-11-15 | Lead |
 | DEC-023 | The documentation carries one identifier scheme only. A draft that introduced its own IDs is archived or explicitly marked as non-normative | Accepted | 2026-11-15 | Lead |
+| DEC-024 | The competitive bar is the macOS media player **Elmedia**: PhairDLNA must be the better macOS media *server* and must not be the worse macOS media *tool*. The bar is expressed as nine testable criteria, not as a slogan | Owner direction | 2026-11-15 | Owner |
 
 ## Reviews and evidence
 

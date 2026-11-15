@@ -87,6 +87,27 @@ file that I shared through two overlapping folders to appear once, not twice.
 
 ## 4. Technical requirements
 
+**FUN-026** — The server shall offer a subtitle sidecar as an additional resource with
+the MIME type that matches its format, for the formats SRT, WebVTT, SSA/ASS, SMIL and
+SUB/IDX. [DESIGN] The MIME type is what tells the client what it is downloading; a
+subtitle served as `application/octet-stream` is a subtitle the client may refuse.
+
+**FUN-027** — The server shall deliver a subtitle file in a character set the client
+can read, and shall state the character set in the response. [DESIGN] UTF-8 with or
+without a byte-order mark is the default; a Latin-1 file that is not valid UTF-8 is
+transcoded to UTF-8 on the way out, because the client would otherwise show mojibake.
+
+**FUN-029** — The server shall expose each additional audio or subtitle track of a
+media item as its own resource, so that a client may choose it. [DESIGN] The first
+track stays the primary resource, so a client that only understands one resource keeps
+working.
+
+**INT-105** — The server shall give each additional resource of an item a
+`protocolInfo` that names its own MIME type, so that a client can tell the tracks
+apart. [SPEC] The `protocolInfo` string is four fields, the third of which is the
+content format.
+
+
 - **Modules.** Playlist parsing, subtitle pairing, the identity key and the de-duplication live in
   `catalogue`; the `res` element that carries a subtitle is written by `didl` (F-05); the containment rule that
   every playlist entry must pass lives in `security` (F-08); the platform facts — the stable file identity, the

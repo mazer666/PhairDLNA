@@ -1,0 +1,15 @@
+[package]
+name = "phairdlna-mac"
+version = "0.0.0"
+description = "The optional native macOS menu bar application of PhairDLNA."
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+# The application is a front end for the headless server. It never embeds server
+# logic, and it is built only on macOS.
+
+[dependencies]
+phairdlna-core = { workspace = true }

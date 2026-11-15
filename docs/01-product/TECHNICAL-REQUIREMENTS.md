@@ -165,6 +165,7 @@ guidelines require of a media server.
 | INT-102 | The server shall record every device-test result — device model, firmware version, client application, media format and observed outcome — in the interoperability matrix. | MUST |
 | INT-103 | The server shall provide a diagnostics command that replays a stored `M-SEARCH` request and prints the response it would produce. | SHOULD |
 | INT-104 | The server shall allow the user to disable a quirk workaround globally without editing source code. | SHOULD |
+| INT-105 | The server shall give each additional resource of an item a `protocolInfo` that names its own MIME type, so that a client can tell the tracks apart. | MUST |
 
 ---
 
@@ -197,6 +198,10 @@ guidelines require of a media server.
 | FUN-023 | The server shall expose the free space of a root through the ContentDirectory service when the file system provides it. | COULD |
 | FUN-024 | The server shall allow the user to configure a scan schedule (interval, or manual only). | SHOULD |
 | FUN-025 | The server shall make a newly added file visible in the catalogue within 30 seconds on a file system that delivers reliable change events, and shall document the fallback behaviour when it does not. | SHOULD |
+| FUN-026 | The server shall offer a subtitle sidecar as an additional resource with the MIME type that matches its format, for the formats SRT, WebVTT, SSA/ASS, SMIL and SUB/IDX. | MUST |
+| FUN-027 | The server shall deliver a subtitle file in a character set the client can read, and shall state the character set in the response. | MUST |
+| FUN-028 | The server shall serve a file larger than 4 GiB with correct byte offsets across the 4 GiB boundary and at the end of the file. | MUST |
+| FUN-029 | The server shall expose each additional audio or subtitle track of a media item as its own resource, so that a client may choose it. | MUST |
 
 ## 9. Playback and streaming
 

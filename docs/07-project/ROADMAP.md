@@ -47,9 +47,15 @@ a verification method; no open contradiction in the baseline; the owner has appr
 the baseline; `cargo fmt`, `clippy` and `test` are green on all three platforms; the
 licence and advisory gates have been observed at least once.
 
-**Current state:** the requirements, architecture, security, quality and traceability
-parts of this milestone are complete (2026-11-14). The implementation scaffolding is
-not.
+**Current state (2026-11-15):** the requirements, architecture, security, quality and
+traceability parts are complete. The four crates now exist with the dependency
+direction enforced by gate QG-28, the licence, advisory and ban gates are green on
+the real dependency set, the configuration module is implemented with its tests, and
+the command line offers `version`, `config path`, `config validate` and
+`config show`.
+
+**Still open in M0:** the manual CI run on all three platforms, and the Intel macOS
+target of the build matrix.
 
 ---
 

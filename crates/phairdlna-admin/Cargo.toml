@@ -1,0 +1,14 @@
+[package]
+name = "phairdlna-admin"
+version = "0.0.0"
+description = "The optional loopback-only administration surface of PhairDLNA."
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+# The administration surface is optional: the server runs completely without it.
+
+[dependencies]
+phairdlna-core = { workspace = true }

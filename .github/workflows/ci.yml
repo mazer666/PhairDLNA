@@ -70,5 +70,8 @@ jobs:
       - name: QG-13 file size
         run: ./scripts/check-file-size.sh
 
+      - name: QG-28 crate boundaries
+        run: ./scripts/check-crate-boundaries.sh
+
       - name: Requirement views are current
         run: python3 scripts/generate_requirement_views.py --check

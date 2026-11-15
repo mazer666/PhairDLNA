@@ -13,7 +13,7 @@ documentation baseline and the gates that will hold the implementation honest.
 
 | Area | State | Evidence |
 | --- | --- | --- |
-| Requirements | **Complete** | 341 requirements with IDs, priorities, features, milestones and verification methods — `../01-product/REQUIREMENTS-INDEX.md` |
+| Requirements | **Complete** | 346 requirements with IDs, priorities, features, milestones and verification methods — `../01-product/REQUIREMENTS-INDEX.md` |
 | Traceability | **Complete** | Generated matrix requirement → feature → milestone → module → verification → evidence — `TRACEABILITY-MATRIX.md` |
 | Architecture | **Complete** | Module boundaries, data flows, runtime model — `../02-architecture/ARCHITECTURE.md` |
 | Decisions | **Complete** | The ADRs in `../02-architecture/adr/` plus 17 entries in the decision log — `../00-governance/DECISION-LOG.md` |
@@ -29,7 +29,7 @@ documentation baseline and the gates that will hold the implementation honest.
 | Open decisions | **12 awaiting the owner** | `OPEN-DECISIONS.md` |
 | Glossary | **Complete** | The protocol, product, platform, security and project vocabulary — `../01-product/GLOSSARY.md` |
 | Research inputs | **Complete** | The briefs the specifications cite — `../09-research/` |
-| Implementation | **Not started** | The workspace is a scaffold by design |
+| Implementation | **M0 started** | The four crates exist, the configuration module is implemented with 14 tests, the command line has `version`, `config path`, `config validate` and `config show` |
 | Device evidence | **None** | Every device row reads `NOT TESTED` |
 | Release | **Not releasable** | `RELEASE-BLOCKERS.md` |
 
@@ -41,12 +41,16 @@ documentation baseline and the gates that will hold the implementation honest.
 | --- | --- |
 | `cargo fmt --all -- --check` | clean (it failed before this phase — the CLI entry point was reformatted) |
 | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
-| `cargo test --workspace` | 1 passed, 0 failed, 0 ignored |
+| `cargo test --workspace` | 26 passed, 0 failed, 0 ignored (2 doctests included) |
 | `scripts/check-file-size.sh` | `RESULT: PASS` |
+| `scripts/check-crate-boundaries.sh` | `RESULT: PASS` (3 sibling dependencies across 4 crate manifests) |
+| `cargo deny check licenses` | `licenses ok` (exit 0) |
+| `cargo deny check bans sources` | `bans ok, sources ok` (exit 0) |
+| `cargo audit` | exit 0 — 1509 advisories loaded, 35 dependencies scanned, no finding |
 | `scripts/check-doc-links.sh` | `RESULT: PASS` (118 relative links checked) |
 | `scripts/check-no-unsafe.sh` | `RESULT: PASS` (no unsafe code in 2 tracked Rust files) |
-| `python3 scripts/generate_requirement_views.py --check` | up to date; 341 requirements indexed |
-| `python3 scripts/generate_requirement_views.py` | 341 requirements indexed; index and traceability matrix regenerated |
+| `python3 scripts/generate_requirement_views.py --check` | up to date; 346 requirements indexed |
+| `python3 scripts/generate_requirement_views.py` | 346 requirements indexed; index and traceability matrix regenerated |
 
 Toolchain used: rustc 1.100.0, cargo 1.100.0, clippy 0.1.100, rustfmt 1.11.0-stable.
 
@@ -64,7 +68,7 @@ Everything else in this repository is **documented and unmeasured**. In particul
 
 | Number | Value |
 | --- | --- |
-| Requirements | 341 — 279 MUST, 57 SHOULD, 5 COULD |
+| Requirements | 346 — 284 MUST, 57 SHOULD, 5 COULD |
 | Feature specifications | 22 (F-01 … F-19, F-22, plus two proposals, F-20 / F-21) |
 | Acceptance criteria | 330 across the 20 baseline specifications (F-20 and F-21 are proposals and define none) |
 | Glossary entries | 77 terms across five vocabularies |

@@ -1,10 +1,22 @@
 [workspace]
 resolver = "2"
-members = ["crates/phairdlna-core", "crates/phairdlna-cli"]
+members = [
+    "crates/phairdlna-core",
+    "crates/phairdlna-cli",
+    "crates/phairdlna-admin",
+    "crates/phairdlna-mac",
+]
 
 [workspace.package]
 edition = "2021"
-# Minimum supported Rust version. The CI matrix tests this version as well as stable.
+# Minimum supported Rust version. The build matrix tests this version as well as stable.
 rust-version = "1.89"
 license = "AGPL-3.0-or-later"
 repository = "https://github.com/mazer666/PhairDLNA"
+
+[workspace.dependencies]
+phairdlna-core = { path = "crates/phairdlna-core", version = "0.0.0" }
+serde = { version = "1.0", features = ["derive"] }
+toml = "1.2"
+thiserror = "2.0"
+tempfile = "3.27"

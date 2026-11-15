@@ -73,6 +73,12 @@ memory. [DESIGN] One fixed-size buffer per transfer; the value is a configuratio
 
 ## 4. Technical requirements
 
+**FUN-028** — The media server shall serve a file larger than 4 GiB with correct byte
+offsets across the 4 GiB boundary and at the end of the file. [DESIGN] A 32-bit offset
+silently truncates at 4 GiB, which is the classic DLNA failure: the device plays the
+first four gigabytes and then stops. Every offset in the path — the file length, the
+range, the `Content-Range` header — is 64-bit.
+
 **INT-080** — The media server shall answer `GET` and `HEAD` requests for media objects with `HTTP/1.1 200 OK`, the
 correct `Content-Type`, and a `Content-Length` equal to the file size. [SPEC] RFC 9110 §8.3, §8.6 (standards §5.1).
 
