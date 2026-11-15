@@ -693,7 +693,7 @@ check is a CI step outside the `QG-nn` series — deliberately, and say why.
 
 **What is wrong**:
 
-> 1. **[01-product/TECHNICAL-REQUIREMENTS.md](01-product/TECHNICAL-REQUIREMENTS.md)** — the
+> 1. **[01-product/TECHNICAL-REQUIREMENTS.md](../../01-product/TECHNICAL-REQUIREMENTS.md)** — the
 >    normative catalogue. Every requirement is defined here exactly once.
 > — `docs/README.md:35-36`
 
@@ -948,7 +948,7 @@ document" section, and list the tags per brief.
 
 At `fc07b2c` the glossary's last row linked to a non-existent directory:
 
-> | Where did a rule come from? | [../09-research/](09-research/) |
+> | Where did a rule come from? | [../09-research/](../../09-research/) |
 
 The link target was relative to `docs/01-product/`, so it resolved to
 `docs/01-product/09-research/`. The link gate was therefore **red** on the tree I was
