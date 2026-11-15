@@ -77,12 +77,21 @@ fn the_server_says_it_is_not_implemented() {
 
 /// Writes a configuration file into a temporary directory and returns its path.
 fn write(text: &str) -> PathBuf {
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static COUNTER: AtomicU64 = AtomicU64::new(0);
+
     let directory = tempfile::tempdir().expect("a temporary directory");
     let path = directory.path().join("config.toml");
     std::fs::write(&path, text).expect("the file should be written");
     // The directory is removed when it is dropped, so the file is copied out of
     // a directory that outlives this function.
-    let target = std::env::temp_dir().join(format!("phairdlna-test-{}.toml", unique()));
+    let count = COUNTER.fetch_add(1, Ordering::Relaxed);
+    let target = std::env::temp_dir().join(format!(
+        "phairdlna-test-{}-{}-{}.toml",
+        std::process::id(),
+        unique(),
+        count
+    ));
     std::fs::copy(&path, &target).expect("the file should be copied");
     target
 }

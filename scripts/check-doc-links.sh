@@ -15,6 +15,19 @@ if ! command -v python3 >/dev/null 2>&1; then
     exit 77
 fi
 
+if ! type mapfile >/dev/null 2>&1; then
+    mapfile() {
+        local target="MAPFILE"
+        if [ "$1" = "-t" ]; then shift; fi
+        if [ $# -gt 0 ]; then target="$1"; fi
+        eval "$target=()"
+        local line
+        while IFS= read -r line || [ -n "$line" ]; do
+            eval "$target+=(\"\$line\")"
+        done
+    }
+fi
+
 # Archived snapshots are immutable historical documents: their links were valid
 # when they were written and are not expected to resolve against the current tree.
 mapfile -t DOCS < <(git ls-files '*.md' 2>/dev/null | grep -v '^docs/99-archive/')

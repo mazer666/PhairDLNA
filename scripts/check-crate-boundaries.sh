@@ -25,6 +25,19 @@ if ! command -v python3 >/dev/null 2>&1; then
     exit 77
 fi
 
+if ! type mapfile >/dev/null 2>&1; then
+    mapfile() {
+        local target="MAPFILE"
+        if [ "$1" = "-t" ]; then shift; fi
+        if [ $# -gt 0 ]; then target="$1"; fi
+        eval "$target=()"
+        local line
+        while IFS= read -r line || [ -n "$line" ]; do
+            eval "$target+=(\"\$line\")"
+        done
+    }
+fi
+
 mapfile -t MANIFESTS < <(git ls-files 'crates/*/Cargo.toml' 2>/dev/null)
 
 if [ "${#MANIFESTS[@]}" -eq 0 ]; then
