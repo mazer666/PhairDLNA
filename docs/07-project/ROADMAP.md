@@ -57,6 +57,11 @@ the command line offers `version`, `config path`, `config validate` and
 The manual CI run on Linux is green — all 13 gate steps, recorded as
 [run 43698100636](https://github.com/mazer666/PhairDLNA/actions/runs/43698100636).
 
+M1.1 (the configuration) and M1.2 (the platform traits) are implemented: the typed,
+validated, versioned configuration with 14 tests, and the eight capability traits with
+the path model, the default "not supported" implementation and the Unicode-correct
+identity computation.
+
 **Still open in M0:** the manual CI run on macOS and Windows, and the Intel macOS
 target of the build matrix.
 

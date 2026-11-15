@@ -51,10 +51,14 @@ adoption, not as a quality judgement.
 | `lofty` | 0.25.5 | MIT OR Apache-2.0 | 1.89 | 1 568 758 | 2026-10-25 | **Adopt** — audio tags, artwork |
 | `notify` | 9.0.0-rc.8 | CC0-1.0 | 1.91 | 198 269 121 | 2026-11-09 | **Adopt the stable 8.x line** — do not depend on a release candidate |
 | `ignore` | 0.4.34 | Unlicense OR MIT | 1.88 | 213 708 619 | 2026-10-27 | **Adopt** — gitignore-style filtering during scans |
+| `thiserror` | 2.0.21 | MIT OR Apache-2.0 | 1.77 | — | 2026 | **Adopt** — the error types |
+| `tempfile` | 3.27.0 | MIT OR Apache-2.0 | 1.63 | 997 650 245 | 2026-03-11 | **Adopt** — temporary directories in tests (dev-dependency) |
 | `walkdir` | 2.5.0 | MIT | — | 774 949 224 | 2024-03-01 | **Adopt** — traversal primitive |
 | `clap` | 4.6.7 | MIT OR Apache-2.0 | 1.85 | 1 340 276 208 | 2026-09-14 | **Adopt** — CLI parsing |
 | `serde` | 1.0.229 | MIT OR Apache-2.0 | 1.56 | 1 709 177 081 | 2026-07-18 | **Adopt** — serialisation |
 | `toml` | 1.2.1 | MIT OR Apache-2.0 | 1.85 | 1 141 698 378 | 2026-11-06 | **Adopt** — configuration format |
+| `unicode-normalization` | 0.1.26 | (MIT OR Apache-2.0) AND Unicode-3.0 | 1.36 | 683 092 567 | 2026-10-16 | **Adopt** — NFC normalisation of path components |
+| `unicase` | 2.10.0 | MIT OR Apache-2.0 | — | 492 183 614 | 2026-10-05 | **Adopt** — full Unicode case folding for the path identity |
 | `tracing` | 0.1.44 | MIT | 1.65 | 1 050 071 464 | 2025-12-18 | **Adopt** — structured logging |
 | `uuid` | 1.29.2 | Apache-2.0 OR MIT | 1.89 | 992 221 000 | 2026-11-09 | **Adopt** — device UDN (v4) |
 | `blake3` | 1.8.7 | CC0-1.0 OR Apache-2.0 (LLVM exception) | — | 227 947 308 | 2026-08-20 | **Adopt** — object id hash |
@@ -85,6 +89,23 @@ adoption, not as a quality judgement.
 | `cargo-audit` | 0.23.0 | MIT OR Apache-2.0 | RustSec advisories |
 
 ---
+
+## 2a. Why the path identity needs two Unicode crates
+
+The catalogue identity of a path is the normalised and case-folded form of its
+components (ADR-0007). Two crates are needed for that, and the reason for each is
+different:
+
+- **`unicode-normalization`** provides NFC. macOS preserves whichever normalisation
+  form a file was written in, so two spellings of "café" can reach the server as
+  different byte sequences for the same file.
+- **`unicase`** provides the *full* Unicode case folding. A simple lowercase
+  mapping would treat `Straße` and `STRASSE` as two different names, although a
+  case-insensitive volume treats them as one file — and then the catalogue would
+  show the film twice.
+
+Both are permissively licensed; `unicode-normalization` additionally carries the
+`Unicode-3.0` licence, which the allow-list in `deny.toml` permits.
 
 ## 3. The MPL-2.0 assessment (`symphonia`)
 

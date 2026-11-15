@@ -29,7 +29,7 @@ documentation baseline and the gates that will hold the implementation honest.
 | Open decisions | **13 awaiting the owner** | `OPEN-DECISIONS.md` |
 | Glossary | **Complete** | The protocol, product, platform, security and project vocabulary — `../01-product/GLOSSARY.md` |
 | Research inputs | **Complete** | The briefs the specifications cite — `../09-research/` |
-| Implementation | **M0 started** | The four crates exist, the configuration module is implemented with 14 tests, the command line has `version`, `config path`, `config validate` and `config show` |
+| Implementation | **M0 done, M1.1–M1.2 started** | The four crates exist with the boundary enforced; the configuration module and the eight platform traits are implemented with 36 tests; the command line offers `version`, `config path`, `config validate` and `config show` |
 | Device evidence | **None** | Every device row reads `NOT TESTED` |
 | Release | **Not releasable** | `RELEASE-BLOCKERS.md` |
 
@@ -41,7 +41,7 @@ documentation baseline and the gates that will hold the implementation honest.
 | --- | --- |
 | `cargo fmt --all -- --check` | clean (it failed before this phase — the CLI entry point was reformatted) |
 | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
-| `cargo test --workspace` | 26 passed, 0 failed, 0 ignored (2 doctests included) |
+| `cargo test --workspace` | 36 passed, 0 failed, 0 ignored (3 doctests included) |
 | `scripts/check-file-size.sh` | `RESULT: PASS` |
 | `scripts/check-crate-boundaries.sh` | `RESULT: PASS` (3 sibling dependencies across 4 crate manifests) |
 | `cargo deny check licenses` | `licenses ok` (exit 0) |

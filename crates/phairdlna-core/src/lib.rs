@@ -21,6 +21,7 @@
 
 pub mod config;
 pub mod error;
+pub mod platform;
 
 pub use config::{Config, ConfigError};
 pub use error::CoreError;
