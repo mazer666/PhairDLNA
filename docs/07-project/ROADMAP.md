@@ -54,8 +54,9 @@ the real dependency set, the configuration module is implemented with its tests,
 the command line offers `version`, `config path`, `config validate` and
 `config show`.
 
-The manual CI run on Linux is green — all 13 gate steps, recorded as
-[run 43698100636](https://github.com/mazer666/PhairDLNA/actions/runs/43698100636).
+The manual CI runs on Linux are green — all 13 gate steps, recorded as
+[run 43699136828](https://github.com/mazer666/PhairDLNA/actions/runs/43699136828)
+and the two runs before it.
 
 M1.1 (the configuration), M1.2 (the platform traits) and M1.3 (the discovery
 protocol) are implemented: the typed, validated, versioned configuration; the eight

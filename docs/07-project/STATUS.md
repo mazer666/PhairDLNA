@@ -50,7 +50,7 @@ documentation baseline and the gates that will hold the implementation honest.
 | `scripts/check-doc-links.sh` | `RESULT: PASS` (118 relative links checked) |
 | `scripts/check-no-unsafe.sh` | `RESULT: PASS` (no unsafe code in 2 tracked Rust files) |
 | `python3 scripts/generate_requirement_views.py --check` | up to date; 346 requirements indexed |
-| GitHub Actions, manual run `43698100636` | **success** — all 13 gate steps green: https://github.com/mazer666/PhairDLNA/actions/runs/43698100636 |
+| GitHub Actions, manual runs | **success** — `43698100636`, `43698591233`, `43699136828`, all 13 gate steps green each time: https://github.com/mazer666/PhairDLNA/actions/runs/43699136828 |
 | `python3 scripts/generate_requirement_views.py` | 346 requirements indexed; index and traceability matrix regenerated |
 
 Toolchain used: rustc 1.100.0, cargo 1.100.0, clippy 0.1.100, rustfmt 1.11.0-stable.
