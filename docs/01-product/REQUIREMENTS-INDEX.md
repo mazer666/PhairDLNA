@@ -98,35 +98,35 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `INT-001` | Answer `M-SEARCH` requests on UDP 1900 within at most 1 second and shall answer with `HTTP/1.1… | MUST | `F-01` | M1 | Protocol conformance + device test | Baseline |
-| `INT-002` | Match `ST` against `ssdp:all`, `upnp:rootdevice`, the advertised MediaServer device type and… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-003` | Send its SSDP response unicast to the address and port of the requester. | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-004` | Send periodic `NOTIFY` advertisements with `NT: upnp:rootdevice` and `NTS: ssdp:alive` | MUST | `F-01` | M1 | Protocol conformance + device test | Baseline |
-| `INT-005` | The `USN` header shall have the form `uuid:<UDN>::<target>` where `<target>` is… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-006` | The `LOCATION` header shall contain an absolute HTTP URL of the device description document… | MUST | `F-01` | M1 | Protocol conformance + device test | Baseline |
-| `INT-007` | Bind SSDP to the IPv4 multicast group `239.255.255.250:1900` and shall support the IPv6… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-008` | Honour the `MX` header of an `M-SEARCH` by choosing a uniformly random delay inside `[0 | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
+| `INT-001` | Answer `M-SEARCH` requests on UDP 1900 within at most 1 second and shall answer with `HTTP/1.1… | MUST | `F-01` | M1 | Protocol conformance + device test | Implemented |
+| `INT-002` | Match `ST` against `ssdp:all`, `upnp:rootdevice`, the advertised MediaServer device type and… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
+| `INT-003` | Send its SSDP response unicast to the address and port of the requester. | MUST | `F-01` | M1 | Protocol conformance test | Verified |
+| `INT-004` | Send periodic `NOTIFY` advertisements with `NT: upnp:rootdevice` and `NTS: ssdp:alive` | MUST | `F-01` | M1 | Protocol conformance + device test | Implemented |
+| `INT-005` | The `USN` header shall have the form `uuid:<UDN>::<target>` where `<target>` is… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
+| `INT-006` | The `LOCATION` header shall contain an absolute HTTP URL of the device description document… | MUST | `F-01` | M1 | Protocol conformance + device test | Implemented |
+| `INT-007` | Bind SSDP to the IPv4 multicast group `239.255.255.250:1900` and shall support the IPv6… | MUST | `F-01` | M1 | Protocol conformance test | Implemented |
+| `INT-008` | Honour the `MX` header of an `M-SEARCH` by choosing a uniformly random delay inside `[0 | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-009` | Select the sending interface by the route of the incoming request and shall never answer a… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-010` | Ignore malformed `M-SEARCH` datagrams without logging them at error level and without affecting… | MUST | `F-01` | M1 | Protocol conformance + device test | Baseline |
+| `INT-010` | Ignore malformed `M-SEARCH` datagrams without logging them at error level and without affecting… | MUST | `F-01` | M1 | Protocol conformance + device test | Verified |
 | `INT-011` | Rate-limit discovery responses per source address so that a single host cannot force an… | SHOULD | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-012` | Expose the configured `friendlyName`, `manufacturer`, `modelName` and `UDN` in the SSDP… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-013` | Answer `M-SEARCH` only when the `MAN` header contains the quoted token `ssdp:discover` | SHOULD | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-014` | Use a stable `UDN` across restarts for the same installation unless the user resets the… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
+| `INT-012` | Expose the configured `friendlyName`, `manufacturer`, `modelName` and `UDN` in the SSDP… | MUST | `F-01` | M1 | Protocol conformance test | Implemented |
+| `INT-013` | Answer `M-SEARCH` only when the `MAN` header contains the quoted token `ssdp:discover` | SHOULD | `F-01` | M1 | Protocol conformance test | Verified |
+| `INT-014` | Use a stable `UDN` across restarts for the same installation unless the user resets the… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-015` | Provide a CLI switch to print the exact SSDP headers it would send | SHOULD | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-016` | Set the multicast time-to-live of its advertisements to 2 | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-017` | Answer `M-SEARCH` for the device type `urn:schemas-upnp-org:device:MediaServer:1` in addition… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
+| `INT-016` | Set the multicast time-to-live of its advertisements to 2 | MUST | `F-01` | M1 | Protocol conformance test | Implemented |
+| `INT-017` | Answer `M-SEARCH` for the device type `urn:schemas-upnp-org:device:MediaServer:1` in addition… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-018` | Not rely on mDNS for discovery; SSDP is the DLNA discovery mechanism and no mDNS advertisement… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-019` | Expose the version of the UPnP architecture it implements in the `SERVER` header | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
-| `INT-020` | Serve an XML device description at a stable URL path that contains a root device with… | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
+| `INT-019` | Expose the version of the UPnP architecture it implements in the `SERVER` header | MUST | `F-01` | M1 | Protocol conformance test | Verified |
+| `INT-020` | Serve an XML device description at a stable URL path that contains a root device with… | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-021` | List the `ContentDirectory:1` and `ConnectionManager:1` services | MUST | `F-02` | M1 | Protocol conformance test | Verified |
-| `INT-022` | All URLs inside the device description shall be absolute HTTP URLs or root-relative paths that… | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
-| `INT-023` | Serve a valid SCPD document for every advertised service | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
+| `INT-022` | All URLs inside the device description shall be absolute HTTP URLs or root-relative paths that… | MUST | `F-02` | M1 | Protocol conformance test | Verified |
+| `INT-023` | Serve a valid SCPD document for every advertised service | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-024` | The XML served by the server shall be well-formed | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-025` | Answer an unknown SOAP action with an HTTP fault using the UPnP error codes `401 Invalid… | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-026` | Respond to `GET` on the device description and on SCPD documents with `Content-Type: text/xml;… | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
 | `INT-027` | Not include a client-controllable value in the XML output without XML escaping. | MUST | `F-02` | M1 | Protocol conformance test | Verified |
-| `INT-028` | Advertise `ContentDirectory:1` in addition to any newer ContentDirectory version | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
-| `INT-029` | Reference the `ConnectionManager` service even when no transcoding is available | MUST | `F-02` | M1 | Protocol conformance test | Implemented |
+| `INT-028` | Advertise `ContentDirectory:1` in addition to any newer ContentDirectory version | MUST | `F-02` | M1 | Protocol conformance test | Verified |
+| `INT-029` | Reference the `ConnectionManager` service even when no transcoding is available | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-030` | Implement the `Browse` action with the arguments `ObjectID` | MUST | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-031` | The `Browse` response shall contain `Result`, `NumberReturned`, `TotalMatches` and `UpdateID`… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-032` | Honour `StartingIndex` and `RequestedCount` and shall never return more items than… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
@@ -195,7 +195,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-095` | Support HTTP/1.1 persistent connections, and every response shall carry either a… | MUST | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-096` | Emit the DLNA response headers `transferMode.dlna.org` and `contentFeatures.dlna.org` on media… | SHOULD | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-097` | Answer a request carrying `getcontentFeatures.dlna.org: 1` with the `contentFeatures.dlna.org`… | SHOULD | `F-06` | M1 | Protocol conformance test | Verified |
-| `INT-098` | Serve the media URL only when it resolves inside one of the configured roots. | MUST | `F-06` | M1 | Protocol conformance test | Implemented |
+| `INT-098` | Serve the media URL only when it resolves inside one of the configured roots. | MUST | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-099` | Emit `realTimeInfo.dlna.org` with `DLNA.ORG_TLAG=*` on media responses. | COULD | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-100` | Maintain a declarative profile of known client quirks | MUST | `F-07` | M4 | Protocol conformance + device test | Baseline |
 | `INT-101` | A quirk workaround shall never violate a normative requirement of the UPnP or DLNA… | MUST | `F-07` | M4 | Protocol conformance test | Baseline |
@@ -295,21 +295,21 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `OPS-001` | Provide a command that runs the daemon in the foreground with structured log output on standard… | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-001` | Provide a command that runs the daemon in the foreground with structured log output on standard… | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-002` | Provide a command that reports the current status: version | MUST | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-003` | Provide a command that scans a root on demand and reports progress and errors. | MUST | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-004` | Provide a command that lists the known network interfaces and which ones would be used for… | MUST | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-005` | Provide a command that prints the device description and the SSDP headers it would advertise | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
-| `OPS-006` | Write logs with a timestamp, a level, a component and a structured message. | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-006` | Write logs with a timestamp, a level, a component and a structured message. | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-007` | Log output shall be redactable: file system paths | MUST | `F-13` | M1 | Automated CLI test | Baseline |
-| `OPS-008` | Shut down gracefully on `SIGINT` and `SIGTERM` | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-008` | Shut down gracefully on `SIGINT` and `SIGTERM` | MUST | `F-13` | M1 | Automated CLI test | Implemented |
 | `OPS-009` | Support running as a background service on macOS (launchd) | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-010` | Support a configuration file that sets the service identity | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-011` | Provide `--help` and `--version` output that names the version | MUST | `F-13` | M1 | Automated CLI test | Baseline |
-| `OPS-012` | Expose its version in the `SERVER` header and in the device description. | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-012` | Expose its version in the `SERVER` header and in the device description. | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-013` | Write a structured diagnostic report (anonymised) that a user can attach to a bug report. | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-014` | Return a distinct exit code for configuration errors | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
-| `OPS-015` | Never require root privileges to serve media from the user's own directories. | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-015` | Never require root privileges to serve media from the user's own directories. | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-016` | Expose an unauthenticated route that serves the corresponding source of the exact running build | MUST | `F-14` | M2 | Automated CLI test | Baseline |
 | `OPS-017` | Report the exact source revision it was built from in its status output and in the source offer. | MUST | `F-14` | M2 | Automated CLI test | Baseline |
 | `OPS-020` | Bind to the loopback interface only by default and shall refuse to start when configured… | MUST | `F-14` | M2 | Automated CLI test | Baseline |

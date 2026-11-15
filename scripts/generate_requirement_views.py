@@ -114,24 +114,112 @@ DEVICE_VERIFICATION = {"INT-001", "INT-004", "INT-006", "INT-010", "INT-100",
 # The status vocabulary is the one of the requirements index:
 # `Baseline`, `Scheduled`, `Implemented`, `Verified`.
 EVIDENCE: dict[str, tuple[str, str]] = {
-    "INT-020": (
-        "`crates/phairdlna-core/tests/device_description.rs::the_root_device_carries_its_identity`"
-        " — the document is generated; it is not served over HTTP yet",
+    "INT-001": (
+        "`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`,"
+        " `crates/phairdlna-core/src/ssdp/request.rs::tests::the_reply_carries_the_required_headers`"
+        " — the daemon answers a real search with the headers of the specification; the deadline of one second"
+        " is not measured, the answer follows the `MX` window of INT-008",
         "Implemented",
     ),
+    "INT-002": (
+        "`crates/phairdlna-cli/tests/discovery.rs::an_unknown_search_is_ignored`,"
+        " `crates/phairdlna-core/src/ssdp/targets.rs::tests::a_search_for_all_answers_with_all`"
+        " — a search for an advertised target is answered, a search for anything else is not",
+        "Verified",
+    ),
+    "INT-003": (
+        "`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`"
+        " — the answer arrives on the socket of the client that sent the search",
+        "Verified",
+    ),
+    "INT-004": (
+        "`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`,"
+        " `::the_advertisements_are_withdrawn`"
+        " — the daemon sends the `ssdp:alive` advertisements when it starts and the `ssdp:byebye` when it stops;"
+        " the interval between two cycles (`max-age/4`) is implemented but not observed by a test",
+        "Implemented",
+    ),
+    "INT-005": (
+        "`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`,"
+        " `crates/phairdlna-core/src/ssdp/targets.rs::tests::five_targets_are_advertised`"
+        " — the `USN` of the answer carries the form of the specification",
+        "Verified",
+    ),
+    "INT-006": (
+        "`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`"
+        " — the answer names the description of the server; the address of the interface the request arrived on"
+        " is not chosen, the daemon has one address",
+        "Implemented",
+    ),
+    "INT-007": (
+        "`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`"
+        " — the daemon binds the IPv4 group and answers on it; the IPv6 link-local group is not implemented",
+        "Implemented",
+    ),
+    "INT-008": (
+        "`crates/phairdlna-core/src/ssdp/request.rs::tests::a_search_without_mx_is_ignored`,"
+        " `::tests::an_out_of_range_mx_is_ignored`, `::tests::the_reply_delay_stays_inside_the_window`",
+        "Verified",
+    ),
+    "INT-010": (
+        "`crates/phairdlna-core/src/ssdp/request.rs::tests::another_method_is_ignored`,"
+        " `::tests::a_wrong_man_is_ignored`"
+        " — a datagram the parser does not accept is dropped without a log record",
+        "Verified",
+    ),
+    "INT-012": (
+        "`crates/phairdlna-core/src/ssdp/request.rs::tests::the_server_header_names_the_platform`,"
+        " `crates/phairdlna-cli/tests/serve.rs::the_description_is_answered`"
+        " — the product identity travels in `SERVER` and the `UDN` in `USN`; the friendly name, the manufacturer and the"
+        " model name travel in the device description, not in the SSDP headers",
+        "Implemented",
+    ),
+    "INT-013": (
+        "`crates/phairdlna-core/src/ssdp/request.rs::tests::a_wrong_man_is_ignored`"
+        " — a search whose `MAN` header is not the quoted token is not answered",
+        "Verified",
+    ),
+    "INT-014": (
+        "`crates/phairdlna-core/src/identity.rs::tests::the_identity_survives_a_restart`",
+        "Verified",
+    ),
+    "INT-016": (
+        "`crates/phairdlna-cli/src/serve/ssdp.rs`"
+        " — the daemon sets the time to live of the advertisements to 2; the value is not observed on the wire",
+        "Implemented",
+    ),
+    "INT-017": (
+        "`crates/phairdlna-core/src/ssdp/targets.rs::tests::five_targets_are_advertised`,"
+        " `::tests::both_services_are_advertised`",
+        "Verified",
+    ),
+    "INT-019": (
+        "`crates/phairdlna-core/src/ssdp/request.rs::tests::the_server_header_names_the_platform`",
+        "Verified",
+    ),
+    "INT-020": (
+        "`crates/phairdlna-core/tests/device_description.rs::the_root_device_carries_its_identity`,"
+        " `crates/phairdlna-cli/tests/serve.rs::the_description_is_answered`"
+        " — the document is generated and the daemon serves it over HTTP",
+        "Verified",
+    ),
     "INT-021": (
-        "`crates/phairdlna-core/tests/device_description.rs::the_service_list_names_both_mandatory_services`",
+        "`crates/phairdlna-core/tests/device_description.rs::the_service_list_names_both_mandatory_services`,"
+        " `crates/phairdlna-cli/tests/serve.rs::the_description_is_answered`"
+        " — the description names the service documents and the control endpoints, and the daemon serves them",
         "Verified",
     ),
     "INT-022": (
-        "`crates/phairdlna-core/tests/device_description.rs::every_service_entry_carries_its_addresses`"
-        " — the URLs are absolute; their resolution against the request host needs the HTTP layer",
-        "Implemented",
+        "`crates/phairdlna-core/tests/device_description.rs::every_service_entry_carries_its_addresses`,"
+        " `crates/phairdlna-cli/tests/serve.rs::the_description_is_answered`"
+        " — the URLs are absolute and the daemon serves every one of them at the address it advertises",
+        "Verified",
     ),
     "INT-023": (
-        "`crates/phairdlna-core/tests/scpd.rs::every_state_variable_declares_its_data_type`"
-        " — the service descriptions are generated; they are not served over HTTP yet",
-        "Implemented",
+        "`crates/phairdlna-core/tests/scpd.rs::every_state_variable_declares_its_data_type`,"
+        " `crates/phairdlna-cli/tests/serve.rs::the_service_descriptions_are_answered`"
+        " — the service descriptions are generated and the daemon serves both of them",
+        "Verified",
     ),
     "INT-024": (
         "`crates/phairdlna-core/tests/device_description.rs::the_document_is_well_formed`",
@@ -142,14 +230,16 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "Verified",
     ),
     "INT-028": (
-        "`crates/phairdlna-core/tests/device_description.rs::the_content_directory_is_advertised_in_version_one`"
-        " — the service is advertised; serving it to a client needs the HTTP layer",
-        "Implemented",
+        "`crates/phairdlna-core/tests/device_description.rs::the_content_directory_is_advertised_in_version_one`,"
+        " `crates/phairdlna-cli/tests/serve.rs::the_service_descriptions_are_answered`"
+        " — the service is advertised and the daemon serves its description",
+        "Verified",
     ),
     "INT-029": (
-        "`crates/phairdlna-core/tests/device_description.rs::the_connection_manager_is_advertised_without_transcoding`"
-        " — the service is advertised; the reachability of its control URL needs the HTTP layer",
-        "Implemented",
+        "`crates/phairdlna-core/tests/device_description.rs::the_connection_manager_is_advertised_without_transcoding`,"
+        " `crates/phairdlna-cli/tests/serve.rs::the_connection_manager_is_answered`"
+        " — the service is advertised and its control endpoint answers",
+        "Verified",
     ),
     "INT-040": (
         "`crates/phairdlna-core/tests/scpd.rs::the_content_directory_lists_no_write_action`",
@@ -443,12 +533,40 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "Verified",
     ),
     "INT-098": (
-        "`crates/phairdlna-core/tests/http_path_containment.rs::a_traversal_attempt_is_answered_with_404`"
-        " — the repetition of the check with the canonical path belongs to the runtime",
-        "Implemented",
+        "`crates/phairdlna-core/tests/http_path_containment.rs::a_traversal_attempt_is_answered_with_404`,"
+        " `crates/phairdlna-cli/tests/serve.rs::a_file_that_left_the_root_is_not_served`"
+        " — the daemon resolves the path again before it opens the file and refuses one that left the root",
+        "Verified",
     ),
     "INT-099": (
         "`crates/phairdlna-core/tests/http_dlna_headers.rs::a_media_answer_carries_the_dlna_headers`",
+        "Verified",
+    ),
+    "OPS-001": (
+        "`crates/phairdlna-cli/tests/serve_command.rs::the_server_answers_a_client`"
+        " — the command starts the daemon in the foreground, and the daemon answers a client on the network",
+        "Verified",
+    ),
+    "OPS-006": (
+        "`crates/phairdlna-cli/src/serve/log.rs::tests::a_known_moment_is_read_correctly`,"
+        " `::tests::the_level_has_a_name`"
+        " — a record carries a timestamp, a level, a component and a message with named fields",
+        "Verified",
+    ),
+    "OPS-008": (
+        "`crates/phairdlna-cli/tests/serve_command.rs::the_server_answers_a_client`,"
+        " `crates/phairdlna-cli/tests/discovery.rs::the_advertisements_are_withdrawn`"
+        " — a `SIGTERM` makes the daemon withdraw its advertisements, stop the discovery, drain the HTTP server and"
+        " exit with the code 0; the flush of the index does not exist, because the index on disk (`FUN-009`) does not exist",
+        "Implemented",
+    ),
+    "OPS-012": (
+        "`crates/phairdlna-core/src/ssdp/request.rs::tests::the_server_header_names_the_platform`",
+        "Verified",
+    ),
+    "OPS-015": (
+        "`crates/phairdlna-cli/tests/serve_command.rs::the_server_answers_a_client`"
+        " — the daemon serves on a port above 1024 and needs no privilege",
         "Verified",
     ),
     "FUN-040": (

@@ -102,8 +102,9 @@ PhairDLNA/<version>`. [SPEC] The `SERVER` format is normative (standards §2.4, 
 
 ## 4. Technical requirements
 
-- **Module.** `phairdlna-core/src/ssdp/` owns the socket, the parser, the matching table, the advertisement timer and the interface selection; it knows nothing
-  about the catalogue (ARCHITECTURE §4.2). Identity and description URL arrive through a small trait, so the matching logic is testable without a socket.
+- **Module.** `phairdlna-core/src/ssdp/` owns the protocol — the parser, the matching table and the bytes of the advertisement and of the answer; it knows nothing
+  about the catalogue (ARCHITECTURE §4.2). The **socket** lives in `crates/phairdlna-cli/src/serve/ssdp.rs`, because the socket needs an asynchronous runtime and
+  the core stays portable and free of a runtime (see the decision in § 12, item 7).
 
 - **Request shape.** The parser accepts the UDA request form — `M-SEARCH * HTTP/1.1` with `HOST`, `MAN: "ssdp:discover"`, `MX`, `ST`, `USER-AGENT` (standards
   §2.2). Header names are case-insensitive; `MAN` is matched as a quoted token. [DESIGN] Every field is length-bounded before it is copied (SEC-060, SEC-011).
@@ -209,11 +210,17 @@ All criteria below are *planned*; no test file exists yet.
 
 **AC-01** — *Given* a running server, *when* a client sends `M-SEARCH` with `MAN: "ssdp:discover"`, `MX: 1` and `ST: upnp:rootdevice`, *then* a `HTTP/1.1 200
 OK` answer arrives carrying `ST`, `USN`, `LOCATION`, `CACHE-CONTROL: max-age=1800`, `SERVER`, `DATE` and `EXT`, and `SERVER` has the form `<OS>/<version>
-UPnP/1.1 PhairDLNA/<version>`. Requirements: INT-001, INT-019 · Verification: protocol conformance test · Planned location:
+UPnP/1.1 PhairDLNA/<version>`. Requirements: INT-001, INT-019 · Verification: protocol conformance test · **State: partly implemented** — the daemon
+answers a real search over a real socket (`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered` proves `ST`, `USN`, `LOCATION` and
+`CACHE-CONTROL`); the header set and the form of `SERVER` are proven by the unit tests of the core
+(`crates/phairdlna-core/src/ssdp/request.rs::tests::the_reply_carries_the_required_headers`, `::tests::the_server_header_names_the_platform`). The one
+second budget of INT-001 is not measured; the answer follows the `MX` window of INT-008. Planned location for the rest:
 `crates/phairdlna-core/tests/ssdp_discovery.rs`
 
 **AC-02** — *Given* a search sent to the multicast group, *when* the answer is observed, *then* it is a unicast datagram addressed to the source IP and port of
-the request. Requirements: INT-003 · Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/ssdp_discovery.rs`
+the request. Requirements: INT-003 · Verification: protocol conformance test · **State: implemented** — the answer arrives on the socket of the client that
+sent the search (`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`). Planned location for the rest:
+`crates/phairdlna-core/tests/ssdp_discovery.rs`
 
 **AC-03** — *Given* a search without an `MX` header, *when* the `MX` window would have elapsed, *then* no answer datagram was sent and no error was logged; and
 *given* a search with `MX: 30`, *then* the delay lies inside `[0, 5)` seconds. Requirements: INT-008, INT-010 · Verification: protocol conformance test ·
@@ -225,7 +232,11 @@ Planned location: `crates/phairdlna-core/tests/ssdp_discovery.rs`
 
 **AC-05** — *Given* searches for `upnp:rootdevice`, `uuid:<UDN>`, the MediaServer device type and each service type, *when* the answers are collected, *then*
 each carries the matching `ST` and the `USN` form `uuid:<UDN>::<target>`, and a search for an unadvertised `ST` produces no answer at all. Requirements:
-INT-002, INT-005, INT-017 · Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/ssdp_discovery.rs`
+INT-002, INT-005, INT-017 · Verification: protocol conformance test · **State: implemented** — the search for `ssdp:all` is answered over a real socket and a
+search for a device type the server does not advertise is not answered at all
+(`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`, `::an_unknown_search_is_ignored`); the matching table and the `USN` forms are proven by the
+unit tests of the core (`crates/phairdlna-core/src/ssdp/targets.rs::tests::a_search_for_all_answers_with_all`,
+`::tests::an_unknown_target_is_ignored`). Planned location for the rest: `crates/phairdlna-core/tests/ssdp_discovery.rs`
 
 **AC-06** — *Given* a server with two UPnP-enabled interfaces, *when* a search arrives on interface A, *then* the `LOCATION` header names an address of
 interface A and the answer is sent from interface A; and *given* a search on an interface excluded by configuration, *then* no answer is sent. Requirements:
@@ -234,16 +245,22 @@ INT-006, INT-009 · Verification: manual protocol check on a two-interface host,
 
 **AC-07** — *Given* the advertisement timer, *when* one cycle elapses, *then* a `NOTIFY` with `NTS: ssdp:alive` is sent for every advertised `NT` and the
 interval between two cycles is no longer than a third of the advertised `max-age`; and *given* a graceful shutdown, *then* one `NOTIFY` with `NTS: ssdp:byebye`
-is sent for every advertised `NT` before the socket closes. Requirements: INT-004, OPS-008 · Verification: protocol conformance test · Planned location:
-`crates/phairdlna-core/tests/ssdp_discovery.rs`
+is sent for every advertised `NT` before the socket closes. Requirements: INT-004, OPS-008 · Verification: protocol conformance test · **State: partly
+implemented** — the daemon sends the `ssdp:alive` advertisements when it starts and the `ssdp:byebye` when it stops, and both are observed on the wire
+(`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`, `::the_advertisements_are_withdrawn`); the interval between two cycles
+(`max-age/4`, 450 s) is implemented but not observed by a test, because a test that waits 450 s proves nothing that the code does not already say. Planned
+location for the rest: `crates/phairdlna-core/tests/ssdp_discovery.rs`
 
 **AC-08** — *Given* the server is started, *when* the sockets are inspected, *then* the IPv4 socket is a member of `239.255.255.250:1900` and, where the
 platform provides a link-local address, an IPv6 socket is a member of `FF02::C:1900`; and *given* an advertisement capture, *then* the multicast time-to-live is
 2. Requirements: INT-007, INT-016 · Verification: protocol conformance test · Planned location: `crates/phairdlna-core/tests/ssdp_discovery.rs`
 
 **AC-09** — *Given* a datagram that is not a valid `M-SEARCH`, *when* it is delivered, *then* it is dropped, no error-level log record is produced and the next
-valid search is answered normally. Requirements: INT-010 · Verification: protocol conformance test · Planned location:
-`crates/phairdlna-core/tests/ssdp_discovery.rs`
+valid search is answered normally. Requirements: INT-010 · Verification: protocol conformance test · **State: implemented** — a datagram the parser does not
+accept is dropped without a log record and without disturbing the socket
+(`crates/phairdlna-core/src/ssdp/request.rs::tests::another_method_is_ignored`,
+`::tests::a_wrong_man_is_ignored`, `::tests::a_search_without_mx_is_ignored`; the daemon path is
+`crates/phairdlna-cli/src/serve/ssdp.rs`). Planned location for the rest: `crates/phairdlna-core/tests/ssdp_discovery.rs`
 
 **AC-10** — *Given* one source address sends searches faster than the configured rate, *when* the limit is exceeded, *then* the excess answers are dropped, a
 counter is incremented and a source address with its own allowance is still answered. Requirements: INT-011 · Verification: protocol conformance test · Planned
@@ -269,16 +286,18 @@ location: `crates/phairdlna-core/tests/ssdp_discovery.rs`
 
 ## 11. Test strategy and dependencies
 
-**Planned test locations** (none of these files exists yet):
+**Test locations** (the ones that exist are marked):
 
-| Purpose | Planned path |
-| --- | --- |
-| Search handling, matching table, header set | `crates/phairdlna-core/tests/ssdp_discovery.rs` |
-| Parser and delay-scheduling unit tests | `crates/phairdlna-core/src/ssdp/msearch.rs` (inline `#[cfg(test)]` module) |
-| Advertisement timer and byebye sequence | `crates/phairdlna-core/src/ssdp/advertise.rs` (inline `#[cfg(test)]` module) |
-| Interface selection and rate limiter | `crates/phairdlna-core/src/ssdp/interfaces.rs` (inline `#[cfg(test)]` module) |
-| Diagnostic switch output | `crates/phairdlna-cli/tests/cli_diagnostics.rs` |
-| Device behaviour on a multi-interface host | `qa/device-matrix.toml` |
+| Purpose | Path | State |
+| --- | --- | --- |
+| Search handling, matching table, header set | `crates/phairdlna-core/tests/ssdp_discovery.rs` | planned |
+| Parser and delay-scheduling unit tests | `crates/phairdlna-core/src/ssdp/request.rs` (inline `#[cfg(test)]` module) | exists |
+| Matching table unit tests | `crates/phairdlna-core/src/ssdp/targets.rs` (inline `#[cfg(test)]` module) | exists |
+| The socket: alive, search answer, byebye | `crates/phairdlna-cli/src/serve/ssdp.rs` and `crates/phairdlna-cli/tests/discovery.rs` | exists |
+| Advertisement timer and byebye sequence | `crates/phairdlna-core/src/ssdp/advertise.rs` (inline `#[cfg(test)]` module) | planned |
+| Interface selection and rate limiter | `crates/phairdlna-core/src/ssdp/interfaces.rs` (inline `#[cfg(test)]` module) | planned |
+| Diagnostic switch output | `crates/phairdlna-cli/tests/cli.rs::the_ssdp_report_shows_the_bytes` | exists |
+| Device behaviour on a multi-interface host | `qa/device-matrix.toml` | planned |
 
 **Method.** The matching table and the answer builder are pure functions over a parsed request, so they are exercised without a socket; a UDP fixture on the
 loopback interface exercises the datagram path. A second host with two interfaces is required for AC-06 and is a manual protocol check.

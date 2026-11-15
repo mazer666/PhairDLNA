@@ -9,7 +9,12 @@ repository.workspace = true
 publish = false
 
 [dependencies]
+# The daemon serves the network from this crate; the core stays portable and
+# knows nothing about sockets (ADR-0001, ARCHITECTURE §2).
+axum = { workspace = true }
+futures-core = { workspace = true }
 phairdlna-core = { workspace = true }
+tokio = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

@@ -30,6 +30,12 @@ pub struct ServerSection {
     pub device_name: String,
     /// The TCP port the media server listens on.
     pub http_port: u16,
+    /// The UDP port the discovery socket listens on.
+    ///
+    /// The specification names the port 1900, and that is the default. A
+    /// machine that already runs a server on that port can move the socket of
+    /// this one (`INT-004`).
+    pub ssdp_port: u16,
     /// Whether SSDP discovery runs at all.
     pub discovery_enabled: bool,
     /// How symbolic links inside a media root are treated.

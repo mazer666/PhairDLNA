@@ -62,6 +62,16 @@ The SSDP and SOAP **fixture corpus** must be captured by the project itself: the
 public SSDP packet capture found contains no `M-SEARCH` requests at all. The corpus
 therefore starts empty and grows with every real client observed.
 
+**Where the checks of this list run.** Since M1.11 the daemon is not only a library of
+rules: `phairdlna-cli serve` serves the documents, the SOAP control and the media over a
+real socket, and the checks of this list are performed against that running daemon as
+well as against the pure layer. The evidence is in the test files
+`crates/phairdlna-cli/tests/serve.rs` (the documents, the control and the media with its
+byte ranges), `crates/phairdlna-cli/tests/discovery.rs` (the search, the answer and the
+withdrawal) and `crates/phairdlna-cli/tests/serve_command.rs` (the command and the
+graceful shutdown). A check that is listed here as *automated* and has no such test is
+still a **planned** check; the row names the method, not the proof.
+
 ---
 
 ## 3. Control points used for automated testing

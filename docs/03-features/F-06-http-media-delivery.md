@@ -206,20 +206,25 @@ All figures below are **targets** with a measurement method; none is a measured 
 
 ## 10. Acceptance criteria and traceability
 
-**Five of the thirteen criteria are implemented, three partly, and five are not.** The criteria
+**Seven of the thirteen criteria are implemented, two partly, and four are not.** The criteria
 that need a network runtime — the transfer table, the buffer and the event bus — cannot be
 implemented before F-13 and F-18, because the module under test does not exist yet. Every
 criterion that the *pure* layer can answer has a test; the state of each one is written below.
+Since M1.11 the daemon serves these answers over a real socket, and the two criteria that
+describe the transfer itself are proven by the daemon test as well.
 
 **AC-01** — *Given* a media file of 1 000 bytes, *when* a client sends `GET` and then `HEAD`, *then* the responses are
 `200 OK` with `Content-Type` equal to the MIME type of the `res` element, `Content-Length: 1000` and `Accept-Ranges:
 bytes`, and the `HEAD` body is empty. Requirements: INT-080, INT-084, INT-086, INT-064 · Verification: protocol
-conformance test · Location: `crates/phairdlna-core/tests/http_media.rs` — **implemented**
+conformance test · Location: `crates/phairdlna-core/tests/http_media.rs` — **implemented**; the daemon serves
+the same answer over a socket (`crates/phairdlna-cli/tests/serve.rs::a_media_file_is_served`,
+`::a_head_answers_without_a_body`)
 
 **AC-02** — *Given* the same file, *when* a client sends `GET` with `Range: bytes=100-199`, *then* the response is
 `206 Partial Content` with exactly 100 body bytes, `Content-Range: bytes 100-199/1000` and `Content-Length: 100`.
 Requirements: INT-081 · Verification: protocol conformance test · Location:
-`crates/phairdlna-core/tests/http_range.rs` — **implemented**
+`crates/phairdlna-core/tests/http_range.rs` — **implemented**; the daemon answers a range over a socket with the
+slice of the file (`crates/phairdlna-cli/tests/serve.rs::a_range_is_served`)
 
 **AC-03** — *Given* the same file, *when* a client sends `Range: bytes=1000-`, `Range: bytes=5000-6000` and a
 multi-range `Range: bytes=0-1,5-6`, *then* the first two are answered `416` with `Content-Range: bytes */1000`, and
@@ -265,9 +270,9 @@ Location: `crates/phairdlna-core/tests/http_dlna_headers.rs` — **implemented**
 **AC-10** — *Given* a media URL whose identifier resolves outside every configured root, *when* it is requested,
 *then* the server refuses to open the file and answers `404` without revealing the path. Requirements: INT-098,
 SEC-001 · Verification: automated test · Location: `crates/phairdlna-core/tests/http_path_containment.rs`
-— **implemented** for the identifier and for the lexical check; the repetition of the check with
-the canonical path, after the symbolic links have been resolved, needs the file system and
-belongs to the runtime
+— **implemented**: the identifier and the lexical check in the core, and the repetition of the check with
+the canonical path — after the symbolic links have been resolved — in the daemon, which refuses a file that
+left the root (`crates/phairdlna-cli/src/serve/media.rs`, `crates/phairdlna-cli/tests/serve.rs::a_file_that_left_the_root_is_not_served`)
 
 **AC-11** — *Given* the transfer limit of the configuration, *when* more clients than the limit request a stream,
 *then* the extra request is refused with `503 Service Unavailable` and a `Retry-After` header, and the running
@@ -297,6 +302,7 @@ Requirements: FUN-045, FUN-041 · Verification: automated test · Planned locati
 | Negative requests and error codes | `crates/phairdlna-core/tests/http_negative.rs` | **exists** |
 | DLNA headers | `crates/phairdlna-core/tests/http_dlna_headers.rs` | **exists** |
 | Path containment | `crates/phairdlna-core/tests/http_path_containment.rs` | **exists** |
+| The answers of the running daemon | `crates/phairdlna-cli/tests/serve.rs` | **exists** |
 | Cancellation and transfer limits | `crates/phairdlna-core/tests/http_cancel.rs`, `http_limits.rs` | planned |
 | Range-header and header-block fuzzing | `fuzz/fuzz_targets/fuzz_range_header.rs`, `fuzz_http_headers.rs` (qa-performance §4.2) | planned |
 | Throughput, memory and device behaviour | `qa/perf/scripts/run-*.sh`; `qa/device-matrix.toml` | planned |

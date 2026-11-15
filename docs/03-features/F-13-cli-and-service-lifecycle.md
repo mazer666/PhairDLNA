@@ -381,12 +381,16 @@ command may leave a half-written index behind (FUN-009).
 
 ## 10. Acceptance criteria and traceability
 
-All criteria below are *planned*; no test file exists yet.
+The criteria below are *planned*. The ones that M1.11 implemented say so and name the
+test that proves them; the others still have no test file.
 
 **AC-01** — *Given* the `serve` command, *when* it is started, *then* the daemon runs in the foreground, its log records
 are written to standard error as structured lines, and standard output carries no log record. Requirements:
-OPS-001, OPS-006 · Verification: automated CLI test · Planned location:
-`crates/phairdlna-cli/tests/cli_commands.rs`
+OPS-001, OPS-006 · Verification: automated CLI test · **State: implemented** — the command starts the daemon in the foreground, the daemon answers a
+client on the network and the log records go to standard error
+(`crates/phairdlna-cli/tests/serve_command.rs::the_server_answers_a_client`; the format of a record is proven by
+`crates/phairdlna-cli/src/serve/log.rs::tests::a_known_moment_is_read_correctly`). The switch `--port` names the port of the HTTP server; the
+discovery socket and the identity file follow the configuration and the platform.
 
 **AC-02** — *Given* a running daemon, *when* `status` is executed, *then* the output names the version, the uptime, the
 configured roots, the catalogue size, the number of active transfers and the result of the last scan.
@@ -425,11 +429,17 @@ Requirements: OPS-007, SEC-094 · Verification: automated CLI test · Planned lo
 **AC-09** — *Given* a running daemon with an open transfer, *when* it receives `SIGINT`, *then* it sends `ssdp:byebye`
 for every advertised target, closes the open transfer within the shutdown budget, flushes the index, exits
 with code 0, and the same happens for `SIGTERM`. Requirements: OPS-008, INT-004 · Verification: automated
-CLI test · Planned location: `crates/phairdlna-cli/tests/cli_shutdown.rs`
+CLI test · **State: partly implemented** — the daemon withdraws its advertisements, stops the discovery, drains the HTTP server and exits with the code 0
+after a `SIGTERM` (`crates/phairdlna-cli/tests/serve_command.rs::the_server_answers_a_client`,
+`crates/phairdlna-cli/tests/discovery.rs::the_advertisements_are_withdrawn`). The **flush of the index** does not exist, because the index on disk
+(`FUN-009`) is not implemented; the drain budget of 10 s is not measured. Planned location for the rest:
+`crates/phairdlna-cli/tests/cli_shutdown.rs`
 
 **AC-10** — *Given* a daemon that is shutting down and that receives a second signal, *when* the second signal arrives,
 *then* the process exits immediately without waiting for the drain deadline. Requirements: OPS-008 ·
-Verification: automated CLI test · Planned location: `crates/phairdlna-cli/tests/cli_shutdown.rs`
+Verification: automated CLI test · **State: implemented, not yet proven by a test** — the second signal ends the daemon at once
+(`crates/phairdlna-cli/src/serve/mod.rs::run`); the test that sends two signals is still planned. Planned location:
+`crates/phairdlna-cli/tests/cli_shutdown.rs`
 
 **AC-11** — *Given* the macOS `launchd` job files in the repository, *when* they are inspected, *then* the always-on
 server is a daemon (`/Library/LaunchDaemons`) and the user interface is an agent (`~/Library/LaunchAgents`),
@@ -533,13 +543,15 @@ CLI test · Planned location: `crates/phairdlna-cli/tests/recovery_timeline.rs`
 
 ## 11. Test strategy and dependencies
 
-**Planned test locations** (none of these files exists yet):
+**Test locations** (the ones that exist are marked):
 
-| Purpose | Planned path |
-| --- | --- |
-| Sub-command behaviour, exit codes, help and version | `crates/phairdlna-cli/tests/cli_commands.rs` |
-| Logging format and redaction | `crates/phairdlna-cli/tests/cli_logging.rs` |
-| Signal handling and the shutdown sequence | `crates/phairdlna-cli/tests/cli_shutdown.rs` |
+| Purpose | Path | State |
+| --- | --- | --- |
+| Sub-command behaviour, exit codes, help and version | `crates/phairdlna-cli/tests/cli.rs` | exists |
+| The `serve` command and the graceful shutdown | `crates/phairdlna-cli/tests/serve_command.rs` | exists |
+| The daemon that answers a client | `crates/phairdlna-cli/tests/serve.rs` | exists |
+| The discovery of the daemon | `crates/phairdlna-cli/tests/discovery.rs` | exists |
+| Logging format and redaction | `crates/phairdlna-cli/tests/cli_logging.rs` | planned |
 | Description and diagnostic output | `crates/phairdlna-cli/tests/cli_diagnostics.rs` |
 | Two instances side by side | `crates/phairdlna-cli/tests/cli_instances.rs` |
 | Shipped service files | `crates/phairdlna-cli/tests/service_units.rs` |

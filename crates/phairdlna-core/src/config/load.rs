@@ -47,6 +47,11 @@ impl Config {
         Ok(config)
     }
 
+    /// Parses, migrates and validates a configuration from inline text.
+    pub fn parse(text: &str) -> Result<Self, ConfigError> {
+        Self::from_str(text, "inline")
+    }
+
     /// Writes the configuration, with its schema version.
     pub fn save(&self, path: &Path) -> Result<(), ConfigError> {
         let text = self.render()?;

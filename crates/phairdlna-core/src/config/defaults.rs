@@ -33,6 +33,11 @@ pub fn current_schema_version() -> u32 {
 /// remembers the port finds it where it expects.
 pub const DEFAULT_HTTP_PORT: u16 = 8200;
 
+/// The port the discovery socket listens on by default.
+///
+/// The specification names the port 1900 for SSDP.
+pub const DEFAULT_SSDP_PORT: u16 = 1900;
+
 /// The default name a client sees.
 pub const DEFAULT_DEVICE_NAME: &str = "PhairDLNA";
 
@@ -98,6 +103,7 @@ impl Default for ServerSection {
         Self {
             device_name: DEFAULT_DEVICE_NAME.to_owned(),
             http_port: DEFAULT_HTTP_PORT,
+            ssdp_port: DEFAULT_SSDP_PORT,
             discovery_enabled: true,
             symlink_policy: SymlinkPolicy::Skip,
         }

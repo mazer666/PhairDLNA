@@ -1,6 +1,6 @@
 # Project status — PhairDLNA
 
-Status: **Baseline approved (2026-11-15) · M1.9 implemented** · Compiled: 2026-11-15
+Status: **Baseline approved (2026-11-15) · M1.11 implemented** · Compiled: 2026-11-15
 Owner role: Lead / Project Manager
 
 ---
@@ -8,12 +8,36 @@ Owner role: Lead / Project Manager
 ## 1. Where the project stands
 
 The **requirements baseline is approved** (2026-11-15), and the implementation is running:
-the milestones M1.1 to M1.9 are coded, and M1.9 has been through an independent review
-whose findings are addressed. Nothing is served over the network yet and **no device test
-has been performed**. The repository contains a Rust workspace, a
-complete documentation baseline and the gates that will hold the implementation honest.
+the milestones M1.1 to M1.11 are coded, and M1.9 has been through an independent review
+whose findings are addressed. The server now **serves over the network** — but **no device
+test has been performed**, so no milestone exit criterion is met yet. The repository
+contains a Rust workspace, a complete documentation baseline and the gates that will hold
+the implementation honest.
 
-The milestone that was closed last is **M1.9 — the catalogue over one root**: a scanner
+The milestone that was closed last is **M1.11 — the live daemon**: `phairdlna-cli serve`
+reads the configuration, loads the device identity, scans the library, opens the HTTP
+server and the discovery socket, and answers a client until it receives `SIGINT` or
+`SIGTERM`. The server serves the device description, the two service descriptions, the
+SOAP control endpoints, the media with its byte ranges and the artwork route; the
+discovery socket advertises the server, answers the searches of a client and withdraws its
+advertisements when the daemon stops. The order of the stop is the one of `OPS-008`:
+the advertisements go first, the discovery stops, the HTTP server drains its transfers,
+and the process exits with the code 0.
+
+**What is proven and how.** The daemon is tested as a client sees it, over a real socket:
+`crates/phairdlna-cli/tests/serve.rs` reads the description, browses the catalogue with
+a SOAP request, streams a file and asks for a byte range; `crates/phairdlna-cli/tests/discovery.rs`
+speaks the real SSDP protocol and observes the advertisement, the answer of a search and
+the withdrawal; `crates/phairdlna-cli/tests/serve_command.rs` starts the binary, reads the
+description and ends it with a `SIGTERM`. The rules themselves stay in the core, and the
+core is unchanged by M1.11 — it takes no new dependency.
+
+**What is still missing.** The IPv6 discovery, the interface selection of the sending
+socket (the daemon has one address), the rate limiter of the answers, the artwork (F-11
+is M2), the transfer limits and the index on disk. Each of them is named in the
+requirement index with the state that is true today.
+
+The milestone before it, **M1.9 — the catalogue over one root**, is unchanged: a scanner
 that reads a configured root, opaque blake3 identifiers that survive a rescan and a move
 of the library, and a ContentDirectory browse that shows real folders and files. The
 placeholder catalogue is retired; `phairdlna-cli catalogue scan` prints the tree with the
@@ -49,7 +73,7 @@ M2 with the rest of the index work.
 | Open decisions | **12 awaiting the owner** — OD-05 (minimum macOS version) was decided on 2026-11-15 | `OPEN-DECISIONS.md` |
 | Glossary | **Complete** | The protocol, product, platform, security and project vocabulary — `../01-product/GLOSSARY.md` |
 | Research inputs | **Complete** | The briefs the specifications cite — `../09-research/` |
-| Implementation | **M0 done, M1.1–M1.9 implemented** | The four crates exist with the boundary enforced; the configuration, the eight platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery and the catalogue over one root are implemented and reviewed; 443 tests; **no device test has been performed**, so no milestone exit criterion is met yet |
+| Implementation | **M0 done, M1.1–M1.11 implemented** | The four crates exist with the boundary enforced; the configuration, the eight platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root and the live daemon are implemented; 469 tests; **no device test has been performed**, so no milestone exit criterion is met yet |
 | Device evidence | **None** | Every device row reads `NOT TESTED` |
 | Release | **Not releasable** | `RELEASE-BLOCKERS.md` |
 
@@ -62,21 +86,21 @@ M2 with the rest of the index work.
 | `./scripts/local-ci.sh` | **all eleven gates green** (2026-11-15): format, clippy, tests, no unsafe, file size, crate boundaries, doc links, licences, bans and sources, advisories, requirement views |
 | `cargo fmt --all -- --check` | clean (it failed before this phase — the CLI entry point was reformatted) |
 | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
-| `cargo test --workspace` | **443 passed, 0 failed, 0 ignored** (10 doctests included) |
+| `cargo test --workspace` | **469 passed, 0 failed, 0 ignored** (10 doctests included) |
 | `scripts/check-file-size.sh` | `RESULT: PASS` |
 | `scripts/check-crate-boundaries.sh` | `RESULT: PASS` (3 sibling dependencies across 4 crate manifests) |
 | `cargo deny check licenses` | `licenses ok` (exit 0) |
 | `cargo deny check bans sources` | `bans ok, sources ok` (exit 0) |
-| `cargo audit` | exit 0 — 1509 advisories loaded, 35 dependencies scanned, no finding |
-| `scripts/check-doc-links.sh` | `RESULT: PASS` (118 relative links checked) |
-| `scripts/check-no-unsafe.sh` | `RESULT: PASS` (no unsafe code in 2 tracked Rust files) |
+| `cargo audit` | exit 0 — 1509 advisories loaded, 85 dependencies scanned, no finding |
+| `scripts/check-doc-links.sh` | `RESULT: PASS` (relative links checked) |
+| `scripts/check-no-unsafe.sh` | `RESULT: PASS` (no unsafe code in the tracked Rust files) |
 | `python3 scripts/generate_requirement_views.py --check` | up to date; 346 requirements indexed |
 | GitHub Actions, manual runs | **success** — `43698100636`, `43698591233`, `43699136828`, all 13 gate steps green each time: https://github.com/mazer666/PhairDLNA/actions/runs/43699136828 |
 | `python3 scripts/generate_requirement_views.py` | 346 requirements indexed; index and traceability matrix regenerated |
 
-Toolchain used for the M1.9 run: rustc 1.99.1, cargo 1.99.1, clippy 0.1.99, rustfmt
-1.8.0-stable (Homebrew). The previous run used rustc 1.100.0; `rust-toolchain.toml` pins
-the channel `stable`, so both are within the support window (`rust-version` is 1.89).
+Toolchain used for the M1.11 run: rustc 1.99.1, cargo 1.99.1, clippy 0.1.99, rustfmt
+1.8.0-stable (Homebrew). `rust-toolchain.toml` pins the channel `stable`, so the toolchain
+is within the support window (`rust-version` is 1.89).
 
 Everything else in this repository is **documented and unmeasured**. In particular:
 
@@ -96,12 +120,12 @@ Everything else in this repository is **documented and unmeasured**. In particul
 | Feature specifications | 22 (F-01 … F-19, F-22, plus two proposals, F-20 / F-21) |
 | Acceptance criteria | 330 across the 20 baseline specifications (F-20 and F-21 are proposals and define none) |
 | Glossary entries | 77 terms across five vocabularies |
-| Independent reviews | 2 — a beginner-experience review and a consistency review, both in `../05-quality/reviews/` |
+| Independent reviews | 3 — a beginner-experience review, a consistency review and the review of M1.9, all in `../05-quality/reviews/` |
 | Protocol conformance checks | 26 (`PC-01` … `PC-26`) |
 | Threats modelled | 28 (`SEC-TH-01` … `SEC-TH-28`) |
 | Quality gates | 28 (`QG-01` … `QG-28`), of which 11 can run today |
 | Milestone gates | 7 (`G0` … `G6`) |
-| Architecture decisions | The ADRs in `../02-architecture/adr/` + 32 decision-log entries |
+| Architecture decisions | The ADRs in `../02-architecture/adr/` + 36 decision-log entries |
 | Open owner decisions | 13 (`OD-01` … `OD-13`), of which OD-05 is decided |
 | Risks | 13 (`R-01` … `R-13`) |
 | Archived baselines | 2 snapshots, each with a SHA-256 manifest |
@@ -142,9 +166,10 @@ sitting. The order is not negotiable: each step needs the one before it.
 | 6 | DIDL-Lite generation | The escaping property test passes, and the XSD validation passes | done (M1.7) |
 | 7 | HTTP media delivery | A byte range returns 206 with a correct `Content-Range`; an unsatisfiable range returns 416 | done (M1.8) |
 | 8 | The catalogue over one root | A browse shows one folder of real files with stable ids | **done (M1.9)** |
-| 9 | The security baseline | Every threat row in F-16 has its negative test, and they pass | next |
+| 9 | The live daemon | `phairdlna-cli serve` answers a client over HTTP and over SSDP, and stops gracefully on a signal | **done (M1.11)** |
+| 10 | The security baseline | Every threat row in F-16 has its negative test, and they pass | next |
 
-**Step 9 is not optional and not last.** The threat rows are cheap to test while the
+**Step 10 is not optional and not last.** The threat rows are cheap to test while the
 code is small, and expensive to retrofit.
 
 ### 4.3 The first real device, and when

@@ -62,6 +62,10 @@ Architectural decisions with options and trade-offs live as ADRs in
 | DEC-030 | A folder of the library is a container in the DIDL-Lite document and not an item; the catalogue model carries `MediaKind::Folder` and the number of children | Accepted | 2026-11-15 | Lead (INT-042) |
 | DEC-031 | The requirements baseline of the v1.0 documents is approved, so feature implementation may proceed | Owner direction | 2026-11-15 | Owner |
 | DEC-032 | The minimum supported macOS version is macOS 15 (Sequoia) and later, with the launchd daemon model throughout (OD-05) | Owner direction | 2026-11-15 | Owner |
+| DEC-033 | The asynchronous runtime (`tokio`), the HTTP server (`axum`) and the sockets live in `phairdlna-cli`; the core keeps the rules and stays portable and free of a runtime | Accepted | 2026-11-15 | Lead (M1.11, ADR-0002) |
+| DEC-034 | The SSDP socket lives in the command-line crate; the core keeps the protocol — the parser, the matching table and the bytes of the advertisement and of the answer. The deviation from F-01 § 4 is recorded in that document | Accepted | 2026-11-15 | Lead (M1.11, F-01 § 12 item 7) |
+| DEC-035 | The daemon serves the paths the device description advertises (`/ContentDirectory.xml`, `/ConnectionManager.xml`, `/ctl/CD`, `/ctl/CM`) and serves the conventional paths as well, because a client may hard-code them | Accepted | 2026-11-15 | Lead (M1.11, F-13 § 12 item 9) |
+| DEC-036 | The `serve` command takes a `--port` switch, and the daemon accepts another port for the discovery socket and another path for the identity file, so that a test writes nothing into the configuration directory of the user and competes with no running server | Accepted | 2026-11-15 | Lead (M1.11, F-13 § 12 items 12 and 13) |
 
 ## Reviews and evidence
 

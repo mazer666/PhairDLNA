@@ -72,6 +72,7 @@ adoption, not as a quality judgement.
 | `image` | 0.25.10 | MIT OR Apache-2.0 | 1.88 | — | 2026-03-10 | **Evaluate** — dimensions and thumbnails; decoding happens in the sandbox |
 | `infer` | 0.22.0 | MIT | 1.74 | — | 2026-07-15 | **Adopt** — content sniffing |
 | `mime_guess` | 2.0.5 | MIT | — | — | 2024-06-29 | **Adopt** — extension → MIME |
+| `futures-core` | 0.3.34 | MIT OR Apache-2.0 | 1.36 | 305 000 000 | 2025-12-01 | **Adopt** — the `Stream` trait of the media body (M1.11) |
 
 ### 2.1 The crates `blake3` brings with it
 
@@ -104,6 +105,65 @@ an obligation from it.
 | `xmlschema` | 0.0.14 | MIT OR Apache-2.0 | XSD validation of DIDL-Lite — **low adoption (≈4 800 downloads), dev-only, risk flagged** |
 | `cargo-deny` | 0.20.2 | MIT OR Apache-2.0 | Licence, advisory, ban and source checks |
 | `cargo-audit` | 0.23.0 | MIT OR Apache-2.0 | RustSec advisories |
+
+### 2.3 The crates the network stack brings with it (M1.11)
+
+The milestone M1.11 added the runtime and the HTTP server to `phairdlna-cli`. The core
+takes **no** new dependency: it stays portable and free of a runtime (DEC-033). The
+following crates are **new** in the lock file because of the network stack. Every one of
+them is allowed by `deny.toml` and is covered by `cargo deny check licenses` and by
+`cargo audit` like every other crate.
+
+| Crate | Version | Licence | MSRV | Purpose |
+| --- | --- | --- | --- | --- |
+| `axum` | 0.8.9 | MIT | 1.80 | the router and the HTTP server of the daemon |
+| `axum-core` | 0.5.6 | MIT | 1.78 | the types of the router |
+| `tower` | 0.5.3 | MIT | — | the service layer |
+| `tower-layer` | 0.3.3 | MIT | — | the layers of the service |
+| `tower-service` | 0.3.3 | MIT | — | the service trait |
+| `hyper` | 1.12.0 | MIT | 1.63 | the HTTP/1.1 implementation under `axum` |
+| `hyper-util` | 0.1.21 | MIT | 1.63 | the helpers of `hyper` |
+| `http` | 1.5.0 | MIT OR Apache-2.0 | 1.57 | the header and status types |
+| `http-body` | 1.1.0 | MIT | 1.61 | the body trait |
+| `http-body-util` | 0.1.5 | MIT | 1.61 | the helpers of the body trait |
+| `httparse` | 1.10.1 | MIT OR Apache-2.0 | — | the parser of the request line and the headers |
+| `httpdate` | 1.0.3 | MIT OR Apache-2.0 | 1.56 | the date header |
+| `bytes` | 1.12.1 | MIT | 1.57 | the byte buffers of the body |
+| `mime` | 0.3.18 | MIT OR Apache-2.0 | — | the media types |
+| `matchit` | 0.8.4 | MIT AND BSD-3-Clause | — | the router of the paths |
+| `percent-encoding` | 2.3.2 | MIT OR Apache-2.0 | 1.51 | the escaping of the paths |
+| `tokio` | 1.54.1 | MIT | 1.85 | the runtime, the sockets and the signals |
+| `tokio-macros` | 2.7.1 | MIT | 1.71 | the macros of `tokio` |
+| `mio` | 1.2.5 | MIT | 1.71 | the readiness of the sockets |
+| `socket2` | 0.6.5 | MIT OR Apache-2.0 | 1.70 | the socket options |
+| `rustix` | 1.1.6 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | 1.65 | the system calls of the sockets |
+| `errno` | 0.3.15 | MIT OR Apache-2.0 | 1.56 | the error numbers |
+| `libc` | 0.2.191 | MIT OR Apache-2.0 | 1.65 | the platform calls |
+| `signal-hook-registry` | 1.4.8 | MIT OR Apache-2.0 | 1.26 | the registration of the signals |
+| `futures-core` | 0.3.34 | MIT OR Apache-2.0 | 1.36 | the `Stream` trait |
+| `futures-util` | 0.3.34 | MIT OR Apache-2.0 | 1.71 | the helpers of the futures |
+| `futures-task` | 0.3.34 | MIT OR Apache-2.0 | 1.71 | the waking of the tasks |
+| `pin-project-lite` | 0.2.17 | Apache-2.0 OR MIT | 1.37 | the pinning of the futures |
+| `slab` | 0.4.12 | MIT | 1.51 | the arenas of the runtime |
+| `once_cell` | 1.21.4 | MIT OR Apache-2.0 | 1.65 | the one-time initialisation |
+| `fastrand` | 2.5.0 | Apache-2.0 OR MIT | 1.63 | the jitter of the answer delay |
+| `itoa` | 1.0.19 | MIT OR Apache-2.0 | 1.68 | the conversion of the numbers |
+| `memchr` | 2.8.3 | Unlicense OR MIT | 1.61 | the search in the bytes |
+| `sync_wrapper` | 1.0.2 | Apache-2.0 | — | the shared access to the socket |
+
+**The assessment.** Every licence of the set is MIT, Apache-2.0, BSD-3-Clause, the
+Unlicense, or a combination of those. The two that deserve a word:
+
+- `rustix` carries the **LLVM exception**, which is the exception of the Apache-2.0
+  licence for the compiler runtimes; the project uses it as an ordinary Apache-2.0 crate.
+  `deny.toml` allows the three expressions of the crate.
+- `sync_wrapper` is **Apache-2.0 alone** (no MIT alternative). Apache-2.0 is a
+  permissive licence with an explicit patent grant, and it is compatible with AGPL-3.0.
+  `deny.toml` allows it.
+
+No crate of the set is a copyleft licence that would reach the work of the project
+(`GPL`, `LGPL`, `AGPL`, `SSPL`), no crate is a source-available licence, and none of
+them phones home: the network stack opens the sockets of the server and nothing else.
 
 ---
 

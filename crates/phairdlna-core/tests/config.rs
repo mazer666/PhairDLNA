@@ -59,6 +59,24 @@ fn a_broken_document_is_refused() {
     assert!(error.message().contains("cannot be parsed"));
 }
 
+/// The negative case: a discovery port of zero is refused.
+#[test]
+fn a_discovery_port_of_zero_is_refused() {
+    let document = "schema_version = 1\n[server]\nssdp_port = 0\n";
+    let error = Config::parse(document).expect_err("the port is refused");
+
+    assert_eq!(error.field_name(), Some("server.ssdp_port"));
+}
+
+/// The positive case: the discovery port may be moved.
+#[test]
+fn the_discovery_port_may_be_moved() {
+    let document = "schema_version = 1\n[server]\nssdp_port = 1901\n";
+    let config = Config::parse(document).expect("the configuration is valid");
+
+    assert_eq!(config.server.ssdp_port, 1901);
+}
+
 /// The boundary case: the port bounds are 1 and 65535, and 0 is refused.
 #[test]
 fn the_port_bounds_are_enforced() {

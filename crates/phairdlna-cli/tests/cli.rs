@@ -65,14 +65,17 @@ fn the_version_names_the_project_and_the_licence() {
     assert!(outcome.stdout.contains("AGPL-3.0-or-later"));
 }
 
-/// The honest case: the server says that it does not exist yet, rather than
-/// pretending to start.
+/// The honest case: the server refuses to start with a broken configuration,
+/// and says why.
 #[test]
-fn the_server_says_it_is_not_implemented() {
-    let path = write(VALID);
-    let outcome = run(&Command::Serve { path: Some(path) });
+fn the_server_refuses_a_broken_configuration() {
+    let path = write("schema_version = 1\n[server]\nhttp_port = 0\n");
+    let outcome = run(&Command::Serve {
+        path: Some(path),
+        port: None,
+    });
     assert_eq!(outcome.exit_code, 1);
-    assert!(outcome.stdout.contains("not implemented yet"));
+    assert!(outcome.stdout.contains("not usable"), "{}", outcome.stdout);
 }
 
 /// Writes a configuration file into a temporary directory and returns its path.

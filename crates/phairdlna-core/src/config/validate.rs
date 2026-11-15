@@ -41,6 +41,12 @@ fn validate_server(server: &ServerSection) -> Result<(), ConfigError> {
             "field \"server.http_port\" is 0; expected a TCP port between 1 and 65535",
         ));
     }
+    if server.ssdp_port == 0 {
+        return Err(ConfigError::field(
+            "server.ssdp_port",
+            "field \"server.ssdp_port\" is 0; expected a UDP port between 1 and 65535",
+        ));
+    }
     Ok(())
 }
 

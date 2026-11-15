@@ -22,10 +22,11 @@ Commands:
   ssdp headers             Print the SSDP headers the server would send
   catalogue scan           Print the tree of the library with the client identifiers
   catalogue browse <id>    Print the document a client receives for a container
-  serve                    Start the server (not implemented yet)
+  serve                    Start the server in the foreground
 
 Options:
   --config <path>          The configuration file to use
+  --port <number>          The port the server listens on (serve only)
   -h, --help               Print this text
 ";
 
@@ -51,6 +52,7 @@ fn main() -> ExitCode {
 /// one fewer licence to review.
 fn parse(arguments: &[String]) -> Result<Command, String> {
     let mut config_path: Option<PathBuf> = None;
+    let mut port: Option<u16> = None;
     let mut rest: Vec<&str> = Vec::new();
     let mut index = 0;
     while index < arguments.len() {
@@ -60,6 +62,15 @@ fn parse(arguments: &[String]) -> Result<Command, String> {
                 config_path = Some(PathBuf::from(value));
                 index += 2;
             }
+            "--port" => {
+                let value = arguments.get(index + 1).ok_or("--port needs a number")?;
+                port = Some(
+                    value
+                        .parse::<u16>()
+                        .map_err(|_| format!("\"{value}\" is not a port number"))?,
+                );
+                index += 2;
+            }
             "-h" | "--help" => return Err("help requested".to_owned()),
             other => {
                 rest.push(other);
@@ -67,18 +78,25 @@ fn parse(arguments: &[String]) -> Result<Command, String> {
             }
         }
     }
-    command_from(&rest, config_path)
+    command_from(&rest, config_path, port)
 }
 
 /// Builds a command from the positional arguments.
-fn command_from(rest: &[&str], config_path: Option<PathBuf>) -> Result<Command, String> {
+fn command_from(
+    rest: &[&str],
+    config_path: Option<PathBuf>,
+    port: Option<u16>,
+) -> Result<Command, String> {
     match rest.first().copied() {
         None => Ok(Command::Version),
         Some("version") => Ok(Command::Version),
         Some("config") => config_command(&rest[1..], config_path),
         Some("ssdp") => ssdp_command(&rest[1..], config_path),
         Some("catalogue") => catalogue_command(&rest[1..], config_path),
-        Some("serve") => Ok(Command::Serve { path: config_path }),
+        Some("serve") => Ok(Command::Serve {
+            path: config_path,
+            port,
+        }),
         Some(other) => Err(format!("unknown command \"{other}\"")),
     }
 }

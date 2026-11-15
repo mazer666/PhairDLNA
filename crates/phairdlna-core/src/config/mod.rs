@@ -24,7 +24,7 @@ mod validate;
 
 pub use defaults::{
     current_schema_version, default_admin_token_file, Config, CURRENT_SCHEMA_VERSION,
-    DEFAULT_DEVICE_NAME, DEFAULT_HTTP_PORT,
+    DEFAULT_DEVICE_NAME, DEFAULT_HTTP_PORT, DEFAULT_SSDP_PORT,
 };
 pub use error::ConfigError;
 pub use load::{resolve_path, CONFIG_PATH_ENV, DEFAULT_CONFIG_FILE_NAME};

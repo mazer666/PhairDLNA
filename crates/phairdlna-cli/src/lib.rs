@@ -8,6 +8,7 @@
 //!      configuration file, or says that it is valid.
 
 mod catalogue;
+pub mod serve;
 
 use std::path::PathBuf;
 
@@ -54,10 +55,12 @@ pub enum Command {
         /// The configuration file to read.
         path: Option<PathBuf>,
     },
-    /// Start the server. Not implemented yet.
+    /// Start the server in the foreground.
     Serve {
         /// The configuration file to use.
         path: Option<PathBuf>,
+        /// The port to listen on, or `None` for the configured one.
+        port: Option<u16>,
     },
 }
 
@@ -103,7 +106,7 @@ pub fn run(command: &Command) -> Outcome {
         Command::CatalogueBrowse { object_id, path } => {
             catalogue::browse(&resolve(path.as_deref()), object_id)
         }
-        Command::Serve { path } => serve(path.as_deref()),
+        Command::Serve { path, port } => serve(path.as_deref(), *port),
     }
 }
 
@@ -113,7 +116,7 @@ fn version() -> Outcome {
         "{} {} — AGPL-3.0-or-later\n{}\n",
         phairdlna_core::PROJECT_NAME,
         phairdlna_core::PROJECT_VERSION,
-        "The DLNA server is not implemented yet. See docs/07-project/ROADMAP.md."
+        "The server speaks DLNA on the local network. See docs/07-project/ROADMAP.md."
     ))
 }
 
@@ -232,10 +235,16 @@ fn ssdp_report(identity: &phairdlna_core::identity::InstalledIdentity, config: &
 }
 
 /// Starts the server.
-fn serve(path: Option<&std::path::Path>) -> Outcome {
+///
+/// The daemon runs in the foreground until it receives `SIGINT` or `SIGTERM`;
+/// its log records go to standard error, and standard output carries nothing
+/// but the result of the command (`OPS-001`).
+fn serve(path: Option<&std::path::Path>, port: Option<u16>) -> Outcome {
     let path = resolve(path);
-    Outcome::failure(format!(
-        "the server is not implemented yet; the configuration \"{}\" was not loaded\n",
-        path.display()
-    ))
+    let mut options = serve::ServeOptions::new(path);
+    options.http_port = port;
+    match serve::run(options) {
+        Ok(()) => Outcome::ok(""),
+        Err(message) => Outcome::failure(format!("{message}\n")),
+    }
 }
