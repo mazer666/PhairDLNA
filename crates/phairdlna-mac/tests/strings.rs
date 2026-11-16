@@ -22,15 +22,26 @@ const EXPECTED_KEYS: &[&str] = &[
     "cli.error.missing_value",
     "cli.error.no_menu_bar",
     "cli.error.not_macos",
-    "cli.error.token",
+    "cli.error.not_main_thread",
     "cli.error.unknown_option",
     "cli.help.equivalent",
     "cli.help.port",
     "cli.help.token_file",
     "cli.help.usage",
+    "error.answer_invalid",
+    "error.answer_unexpected",
+    "error.busy",
+    "error.cannot_open",
+    "error.configuration_unreadable",
     "error.preference_failed",
-    "error.server_refused",
-    "error.server_unreachable",
+    "error.request_refused",
+    "error.scan_silent",
+    "error.server_not_started",
+    "error.surface_unreachable",
+    "error.surface_unreadable",
+    "error.token_refused",
+    "error.token_unreadable",
+    "error.worker_not_started",
     "menu.accessibility.label",
     "menu.accessibility.refused",
     "menu.accessibility.running",
@@ -79,7 +90,47 @@ const TECHNICAL_LITERALS: &[&str] = &[
     "Bearer",
 ];
 
-/// Every language carries every key of the application.
+/// The literals of the code that are written down.
+///
+/// Every literal of the production code that holds a space is on this list
+/// or on [`TECHNICAL_LITERALS`]. The list holds the texts that the user never
+/// reads: the diagnostics of the reader of the answers, the diagnostics of
+/// the reader of the resource files and the parts of a request that are
+/// built. A new text of the user interface does not belong here: it belongs
+/// in a resource file (`UX-020`).
+const ALLOWED_LITERALS: &[&str] = &[
+    // The diagnostics of the reader of the answers.
+    "the answer carries no number",
+    "the answer does not begin with a version of the protocol",
+    "the answer has no empty line between the headers and the body",
+    "the document ends in the middle of a value",
+    "the document holds something after byte {position}",
+    "the document is not valid json at byte {position}",
+    "the document nests deeper than {depth} levels",
+    "the document of {length} bytes is too large",
+    "the number at byte {position} cannot be read",
+    "the text at byte {position} cannot be read",
+    // The diagnostics of the reader of the resource files.
+    "the key holds a character that is not a letter, a digit, a dot or an underscore",
+    "the language {locale} is not supported; the application ships with {}",
+    "the line has no `=` between the key and the value",
+    "the line has no key in front of the `=`",
+    "the line must hold the number: {line}",
+    "the value of the key is empty",
+    "line {} of the resource file: the key {key} is written twice",
+    "line {} of the resource file: {reason}",
+    // The parts of a request that are built.
+    ": ",
+    ", ",
+    "{bearer} {token}",
+    "{host}: {value}\r\n",
+    "{method} {path} {version}\r\n",
+    "{version} 200 {ok}\r\n{length}: 2\r\n\r\n{{}}",
+    "{} {}",
+    // The name of the defence of the surface.
+    "cross-site request forgery",
+];
+
 #[test]
 fn every_language_carries_every_key() {
     let mut expected = EXPECTED_KEYS.to_vec();
@@ -225,10 +276,15 @@ fn the_resource_files_are_well_formed() {
 
 /// No text of the user interface lives in the code.
 ///
-/// The rule is checked by reading the sources of the crate and looking for a
-/// literal that looks like a sentence the user could read. A literal of the
-/// protocol — "application/json", "User-Agent" — is not such a sentence and
-/// is not reported.
+/// The rule is checked twice. The first check looks for a literal that looks
+/// like a sentence the user could read. The second check looks for *every*
+/// literal that holds a space and asks whether it is on the list of the
+/// literals the code is allowed to hold: a text that the user never reads
+/// must be written down in [`ALLOWED_LITERALS`], so that a new sentence in
+/// the code is a decision and not an accident (`UX-020`).
+///
+/// The modules of the tests are not part of the code of the application: a
+/// test may hold the sentence it checks for.
 #[test]
 fn no_user_facing_text_lives_in_the_code() {
     let sources = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
@@ -238,6 +294,111 @@ fn no_user_facing_text_lives_in_the_code() {
         offenders.is_empty(),
         "these texts of the user interface live in the code and must move into a resource file: {offenders:?}"
     );
+}
+
+/// Every literal of the code that holds a space is written down.
+///
+/// The rule makes the first check above able to fail: a literal that is not
+/// on the list is reported, whether it is a sentence of the user or a
+/// diagnostic of the code.
+#[test]
+fn every_literal_of_the_code_is_written_down() {
+    let sources = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
+    let mut offenders = Vec::new();
+    collect_unknown_literals(&sources, &mut offenders);
+    assert!(
+        offenders.is_empty(),
+        "these literals of the code are not written down in ALLOWED_LITERALS: {offenders:?}"
+    );
+}
+
+/// The check of the literals is able to fail.
+///
+/// A gate that has never failed proves nothing; this test is the proof that
+/// the check above reports a literal that is not written down.
+#[test]
+fn the_check_of_the_literals_is_able_to_fail() {
+    let source = "fn probe() { let text = \"a sentence of the user\"; }";
+    let mut offenders = Vec::new();
+    for (_, literal) in string_literals(source) {
+        if is_unknown_literal(&literal) {
+            offenders.push(literal);
+        }
+    }
+    assert_eq!(offenders, vec!["a sentence of the user".to_owned()]);
+}
+
+/// Whether a literal of the code is one that is not written down.
+fn is_unknown_literal(literal: &str) -> bool {
+    if !literal.contains(' ') {
+        return false;
+    }
+    if TECHNICAL_LITERALS.contains(&literal) || ALLOWED_LITERALS.contains(&literal) {
+        return false;
+    }
+    true
+}
+
+/// Collects the literals of the code that are not written down.
+fn collect_unknown_literals(directory: &Path, found: &mut Vec<String>) {
+    let Ok(entries) = std::fs::read_dir(directory) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            collect_unknown_literals(&path, found);
+            continue;
+        }
+        if path.extension().and_then(|extension| extension.to_str()) != Some("rs") {
+            continue;
+        }
+        let Ok(source) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+        for (line, literal) in string_literals(&without_the_tests(&source)) {
+            if is_unknown_literal(&literal) {
+                found.push(format!("{}:{}: {literal}", path.display(), line));
+            }
+        }
+    }
+}
+
+/// The source without the modules of the tests.
+///
+/// A test may hold the sentence it checks for; the code of the application
+/// may not.
+fn without_the_tests(source: &str) -> String {
+    let mut kept = String::new();
+    let mut rest = source;
+    while let Some(start) = rest.find("#[cfg(test)]") {
+        kept.push_str(&rest[..start]);
+        let tail = &rest[start..];
+        if tail.find('{').is_none() {
+            return kept;
+        }
+        let mut depth = 0i32;
+        let mut opened = false;
+        let mut end = tail.len();
+        for (offset, character) in tail.char_indices() {
+            if character == '{' {
+                depth += 1;
+                opened = true;
+                continue;
+            }
+            if character != '}' {
+                continue;
+            }
+            depth -= 1;
+            if opened && depth == 0 {
+                end = offset + 1;
+                break;
+            }
+        }
+        rest = &tail[end..];
+    }
+    kept.push_str(rest);
+    kept
 }
 
 /// Reads the language of the environment and checks the result.

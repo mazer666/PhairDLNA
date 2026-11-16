@@ -48,6 +48,10 @@ impl Transport for Recorded {
     fn host(&self) -> String {
         "127.0.0.1:8210".to_owned()
     }
+
+    fn timeout(&self) -> Duration {
+        Duration::from_secs(5)
+    }
 }
 
 /// The answer of a surface that runs.

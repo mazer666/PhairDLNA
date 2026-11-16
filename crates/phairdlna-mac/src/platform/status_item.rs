@@ -27,7 +27,10 @@ use super::icon;
 /// The item in the menu bar and the menu that belongs to it.
 pub struct StatusItem {
     /// The item in the menu bar.
-    item: Retained<NSStatusItem>,
+    ///
+    /// The field is never read: it keeps the item of the menu bar alive for
+    /// as long as the application runs.
+    _item: Retained<NSStatusItem>,
     /// The menu of the item.
     menu: Retained<NSMenu>,
     /// The button of the item; it carries the picture and the labels.
@@ -49,7 +52,7 @@ impl StatusItem {
         let menu = NSMenu::new(mtm);
         item.setMenu(Some(&menu));
         Some(Self {
-            item,
+            _item: item,
             menu,
             button,
             target: MenuTarget::new(mtm),
@@ -116,13 +119,5 @@ impl StatusItem {
     /// The timer that ticks on the main thread.
     pub fn timer(&self, interval: f64) -> Retained<NSTimer> {
         self.target.timer(interval)
-    }
-
-    /// Removes the item from the menu bar.
-    ///
-    /// The application removes its item when it leaves, so that no empty
-    /// picture stays behind in the menu bar.
-    pub fn remove(&self) {
-        NSStatusBar::systemStatusBar().removeStatusItem(&self.item);
     }
 }

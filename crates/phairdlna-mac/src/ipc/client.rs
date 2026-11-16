@@ -16,10 +16,10 @@
 //! of a place other than the file the owner of the machine may read
 //! (`SEC-071`, `SEC-094`).
 
-use std::fmt;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::time::Duration;
 
-use crate::ipc::http::{HttpRequest, HttpResponse, Transport, TransportError};
+use crate::ipc::http::{HttpRequest, HttpResponse, Transport, TransportError, TransportKind};
 use crate::ipc::json::{Json, JsonError};
 use crate::ipc::snapshots::{
     number_of, roots_of, texts_of, transfers_of, DiagnosticsSnapshot, RescanReport, StatusSnapshot,
@@ -42,6 +42,8 @@ const CSRF_HEADER: &str = "X-Phair-Admin-Csrf";
 /// The surface names the header in lower case, and the name of a header does
 /// not matter in its case.
 const CSRF_ANSWER_HEADER: &str = "x-phairdlna-admin-csrf";
+/// The name of the header that names the length of a body.
+const CONTENT_LENGTH: &str = "Content-Length";
 /// The name of the header that names the wanted answer.
 const ACCEPT: &str = "Accept";
 /// The answer the client asks for.
@@ -54,10 +56,6 @@ const CLOSE: &str = "close";
 const METHOD_GET: &str = "GET";
 /// The method of a request that changes something.
 const METHOD_POST: &str = "POST";
-/// The permissions the token file must have: the owner reads it, nobody else.
-#[cfg(unix)]
-const PRIVATE_FILE: u32 = 0o600;
-
 /// The path of the state of the server.
 const PATH_STATUS: &str = "/api/status";
 /// The path of the diagnostics of the server.
@@ -65,11 +63,39 @@ const PATH_DIAGNOSTICS: &str = "/api/diagnostics";
 /// The path of the scan of the library.
 const PATH_RESCAN: &str = "/api/catalogue/rescan";
 
+/// How long the scan of the library may take, in seconds.
+///
+/// The scan reads every file of the library; the surface answers when it is
+/// done, and the answer may take a while (`UX-013`).
+const RESCAN_TIMEOUT: Duration = Duration::from_secs(120);
+
 /// Why the surface could not be asked.
+///
+/// The error carries the *kind* of the failure and the words of the system,
+/// and no sentence: the sentence that the user reads comes from the resource
+/// file of the language of the user (`UX-020`).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ClientError {
-    /// The bytes did not travel.
-    Transport(TransportError),
+    /// The surface cannot be reached.
+    Unreachable {
+        /// What the system said.
+        reason: String,
+    },
+    /// The surface cannot be read.
+    Unreadable {
+        /// What the system said.
+        reason: String,
+    },
+    /// The answer is not an answer of the protocol.
+    Invalid {
+        /// What was wrong with it.
+        reason: String,
+    },
+    /// The answer is not the answer the client expects.
+    Unexpected {
+        /// What was wrong with it.
+        reason: String,
+    },
     /// The token of the installation was refused.
     Unauthorised,
     /// The surface refused the request.
@@ -77,46 +103,62 @@ pub enum ClientError {
         /// The number of the refusal.
         status: u16,
     },
-    /// The answer was not the answer the client expects.
-    Malformed {
-        /// What was wrong with it.
-        reason: String,
-    },
     /// The token of the installation could not be read.
     Token {
-        /// What was wrong with it.
+        /// What the system said.
         reason: String,
     },
+    /// The file of the token is not there: the server was never started.
+    NoToken,
+    /// The application is busy and the request was dropped.
+    Busy,
 }
 
-impl fmt::Display for ClientError {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl ClientError {
+    /// What was wrong, in the words of the system.
+    ///
+    /// The answer is an empty text when the failure has no words of its own.
+    pub fn reason(&self) -> &str {
         match self {
-            Self::Transport(error) => write!(formatter, "{error}"),
-            Self::Unauthorised => formatter.write_str("the token of the installation was refused"),
-            Self::Refused { status } => {
-                write!(formatter, "the surface refused the request: {status}")
-            }
-            Self::Malformed { reason } => write!(formatter, "the answer is not expected: {reason}"),
-            Self::Token { reason } => write!(formatter, "the token cannot be read: {reason}"),
+            Self::Unreachable { reason }
+            | Self::Unreadable { reason }
+            | Self::Invalid { reason }
+            | Self::Unexpected { reason }
+            | Self::Token { reason } => reason,
+            Self::Unauthorised | Self::Refused { .. } | Self::NoToken | Self::Busy => "",
         }
     }
 }
 
-impl std::error::Error for ClientError {}
-
 impl From<TransportError> for ClientError {
     fn from(error: TransportError) -> Self {
-        Self::Transport(error)
+        let reason = error.reason().to_owned();
+        match error.kind() {
+            TransportKind::Unreachable => Self::Unreachable { reason },
+            TransportKind::Unreadable => Self::Unreadable { reason },
+            TransportKind::Invalid => Self::Invalid { reason },
+        }
     }
 }
 
 impl From<JsonError> for ClientError {
     fn from(error: JsonError) -> Self {
-        Self::Malformed {
+        Self::Unexpected {
             reason: error.to_string(),
         }
     }
+}
+
+/// Where the token of the installation comes from.
+#[derive(Clone, Debug)]
+enum TokenSource {
+    /// A token that the caller knows.
+    Fixed(String),
+    /// The file of the token of the installation.
+    ///
+    /// The file is read before every request: the server may be started
+    /// while the application runs, and the application must find it then.
+    File(PathBuf),
 }
 
 /// The client of the administration surface.
@@ -124,8 +166,8 @@ impl From<JsonError> for ClientError {
 pub struct AdminClient<T> {
     /// The way the bytes travel.
     transport: T,
-    /// The token of the installation.
-    token: String,
+    /// Where the token of the installation comes from.
+    token: TokenSource,
     /// The token of the "cross-site request forgery" defence.
     ///
     /// The surface hands the value out with every answer, and the client sends
@@ -138,7 +180,20 @@ impl<T: Transport> AdminClient<T> {
     pub fn new(transport: T, token: impl Into<String>) -> Self {
         Self {
             transport,
-            token: token.into(),
+            token: TokenSource::Fixed(token.into()),
+            csrf: None,
+        }
+    }
+
+    /// Builds the client of a surface whose token lives in a file.
+    ///
+    /// The file is read before every request. A file that is not there means
+    /// that the server was never started: the client says so and sends
+    /// nothing (`MB-001`).
+    pub fn with_token_file(transport: T, path: PathBuf) -> Self {
+        Self {
+            transport,
+            token: TokenSource::File(path),
             csrf: None,
         }
     }
@@ -189,7 +244,7 @@ impl<T: Transport> AdminClient<T> {
         if self.csrf.is_none() {
             let _ = self.status()?;
         }
-        let document = self.read(METHOD_POST, PATH_RESCAN)?;
+        let document = self.read_with_timeout(METHOD_POST, PATH_RESCAN, RESCAN_TIMEOUT)?;
         Ok(RescanReport {
             rescanned: document
                 .get("rescanned")
@@ -207,7 +262,20 @@ impl<T: Transport> AdminClient<T> {
 
     /// Asks the surface and reads its answer.
     fn read(&mut self, method: &str, path: &str) -> Result<Json, ClientError> {
-        let response = self.send(method, path)?;
+        self.read_with_timeout(method, path, self.transport.timeout())
+    }
+
+    /// Asks the surface and reads its answer, with a time of its own.
+    ///
+    /// The scan of the library reads every file of the library and may take
+    /// longer than the answer of a request that only reads (`UX-013`).
+    fn read_with_timeout(
+        &mut self,
+        method: &str,
+        path: &str,
+        timeout: Duration,
+    ) -> Result<Json, ClientError> {
+        let response = self.send_with_timeout(method, path, timeout)?;
         match response.status {
             200..=299 => Ok(Json::parse(&response.body_text())?),
             401 => Err(ClientError::Unauthorised),
@@ -216,15 +284,28 @@ impl<T: Transport> AdminClient<T> {
     }
 
     /// Builds the request, sends it and keeps the token of the defence.
-    fn send(&mut self, method: &str, path: &str) -> Result<HttpResponse, ClientError> {
+    fn send_with_timeout(
+        &mut self,
+        method: &str,
+        path: &str,
+        timeout: Duration,
+    ) -> Result<HttpResponse, ClientError> {
         let mut request = HttpRequest::new(method, path)
+            .with_timeout(timeout)
             .with_header(HOST, &self.transport.host())
-            .with_header(AUTHORIZATION, &self.authorization())
             .with_header(ADMIN_HEADER, ADMIN_HEADER_VALUE)
             .with_header(ACCEPT, APPLICATION_JSON)
             .with_header(CONNECTION, CLOSE);
+        if let Some(authorization) = self.authorization()? {
+            request = request.with_header(AUTHORIZATION, &authorization);
+        }
         if let Some(csrf) = &self.csrf {
             request = request.with_header(CSRF_HEADER, csrf);
+        }
+        if method == METHOD_POST {
+            // The request that changes something has no body; the length says
+            // so, so that the surface does not wait for one.
+            request = request.with_header(CONTENT_LENGTH, "0");
         }
         let response = self.transport.send(&request)?;
         if let Some(csrf) = response.header(CSRF_ANSWER_HEADER) {
@@ -234,10 +315,20 @@ impl<T: Transport> AdminClient<T> {
     }
 
     /// The value of the header that carries the token.
-    fn authorization(&self) -> String {
+    ///
+    /// The answer is `None` when there is no token: a request without a token
+    /// is refused by the surface, and a request with an empty token would be
+    /// refused as well.
+    fn authorization(&self) -> Result<Option<String>, ClientError> {
+        let token = match &self.token {
+            TokenSource::Fixed(token) => token.clone(),
+            TokenSource::File(path) => read_token(path)?,
+        };
+        if token.is_empty() {
+            return Ok(None);
+        }
         let bearer = BEARER;
-        let token = &self.token;
-        format!("{bearer} {token}")
+        Ok(Some(format!("{bearer} {token}")))
     }
 }
 
@@ -246,6 +337,9 @@ impl<T: Transport> AdminClient<T> {
 /// The file must be readable by its owner alone: a token that another program
 /// of the machine can read is no token at all (`SEC-071`).
 pub fn read_token(path: &Path) -> Result<String, ClientError> {
+    if !path.exists() {
+        return Err(ClientError::NoToken);
+    }
     check_private(path)?;
     let text = std::fs::read_to_string(path).map_err(|error| ClientError::Token {
         reason: error.to_string(),
@@ -253,7 +347,7 @@ pub fn read_token(path: &Path) -> Result<String, ClientError> {
     let token = text.trim().to_owned();
     if token.is_empty() {
         return Err(ClientError::Token {
-            reason: "the file holds no token".to_owned(),
+            reason: String::new(),
         });
     }
     Ok(token)
@@ -269,9 +363,8 @@ fn check_private(path: &Path) -> Result<(), ClientError> {
     })?;
     let mode = metadata.permissions().mode();
     if mode & 0o077 != 0 {
-        let expected = PRIVATE_FILE;
         return Err(ClientError::Token {
-            reason: format!("the file is readable by others; expected {expected:o}"),
+            reason: String::new(),
         });
     }
     Ok(())

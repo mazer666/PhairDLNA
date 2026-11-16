@@ -182,14 +182,18 @@ decisions are DEC-065 to DEC-071.
 `UX-003`, `MB-007`) is not built: the application starts, asks the surface for the state and
 shows it; it does not yet ask the user where the library is and does not yet walk the user
 through the first steps. The **verification step** (`UX-001`) is not built: the application does
-not yet tell the user that a client has found the server. The **audit of the screen reader**
-(`UX-017`) and the **protocol of the usability test** (`AC-01` … `AC-07`, `AC-15`, `AC-16`) need
-a machine with the application installed and are not done, so **no device test of the application
-has been performed**. The **universal binary** (`PLT-004`) is a step of the release and not of
-this milestone. The **server is started with the command line and not from the menu** (`MB-008`): the
-rule SEC-TH-11 of the workspace says that no program of the workspace starts another program, and
-the mechanics of the service are the decision of the installation of F-13 (M2.7). The menu shows
-that the server is stopped and stops there.
+not yet tell the user that a client has found the server. The **start and the stop of the
+server** (`UX-019`) and the **progress and the cancellation of a scan** (`UX-013`) are not built:
+the application starts no program at all, and the progress of the scan is the state of the server
+and not a progress of the application. The **audit of the screen reader** (`UX-017`) and the
+**protocol of the usability test** (`AC-01` … `AC-07`, `AC-15`, `AC-16`) need a machine with the
+application installed and are not done, so **no device test of the application has been
+performed**. The **universal binary** (`PLT-004`) is a step of the release and not of this
+milestone. The **server is started with the command line and not from the menu** (`UX-019`, `MB-008`): the
+rule of the workspace says that no program of the workspace starts another one, and the test
+`crates/phairdlna-core/tests/ssdp_hardening.rs::the_server_runs_no_process_at_all` holds that rule
+over the four crates (SEC-TH-11). The mechanics of the service are the decision of the
+installation of F-13 (M2.7). The menu shows that the server is stopped and stops there.
 
 **Two parts of M2.4 and M2.5 are still open, and they are named.** The **source offer**
 (`OPS-016`, `SEC-070`) does not exist: the archive, the route and the build step that produces

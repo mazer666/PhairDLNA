@@ -39,6 +39,6 @@
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSLocalNetworkUsageDescription</key>
-    <string>PhairDLNA shows the state of the media server that runs on this computer and lets you start it again.</string>
+    <string>PhairDLNA shows the state of the media server that runs on this computer.</string>
 </dict>
 </plist>

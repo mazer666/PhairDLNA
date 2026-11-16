@@ -11,6 +11,7 @@
 //!          whose `active_streams` is two.
 
 use std::collections::VecDeque;
+use std::time::Duration;
 
 use phairdlna_mac::ipc::client::{AdminClient, ClientError};
 use phairdlna_mac::ipc::http::{HttpRequest, HttpResponse, Transport, TransportError};
@@ -58,6 +59,10 @@ impl Transport for Recorded {
 
     fn host(&self) -> String {
         "127.0.0.1:8210".to_owned()
+    }
+
+    fn timeout(&self) -> Duration {
+        Duration::from_secs(5)
     }
 }
 
@@ -180,7 +185,7 @@ fn an_answer_that_is_not_json_is_refused() {
 
     let error = client.status().expect_err("the answer is refused");
 
-    assert!(matches!(error, ClientError::Malformed { .. }), "{error:?}");
+    assert!(matches!(error, ClientError::Unexpected { .. }), "{error:?}");
 }
 
 /// The negative case: a surface that is not there is a failure of the network.
@@ -193,7 +198,62 @@ fn a_surface_that_is_not_there_is_a_failure_of_the_network() {
 
     let error = client.status().expect_err("the surface is not there");
 
-    assert!(matches!(error, ClientError::Transport(_)), "{error:?}");
+    assert!(
+        matches!(error, ClientError::Unreachable { .. }),
+        "{error:?}"
+    );
+}
+
+/// A server that was never started is not a failure of the network.
+///
+/// The file of the token does not exist before the server runs for the first
+/// time. The client must then say so and send no request at all: the
+/// application shows a stopped server and not an error (`MB-001`).
+#[test]
+fn a_server_that_was_never_started_sends_no_request() {
+    let transport = Recorded::answering("{}");
+    let mut client =
+        AdminClient::with_token_file(transport, std::path::PathBuf::from("/nowhere/admin.token"));
+
+    let error = client.status().expect_err("the token file is not there");
+
+    assert_eq!(error, ClientError::NoToken);
+    assert!(
+        client.transport().requests.is_empty(),
+        "no request must be sent without a token"
+    );
+}
+
+/// The scan of the library waits longer than a request that only reads.
+#[test]
+fn the_scan_waits_longer_than_a_request_that_only_reads() {
+    let transport = Recorded::with(vec![
+        Ok(HttpResponse::new(
+            200,
+            vec![(
+                "x-phairdlna-admin-csrf".to_owned(),
+                "the-csrf-token".to_owned(),
+            )],
+            b"{}".to_vec(),
+        )),
+        Ok(HttpResponse::new(
+            200,
+            Vec::new(),
+            br#"{"rescanned": true, "objects": 1, "duration_seconds": 1, "message": "ok"}"#
+                .to_vec(),
+        )),
+    ]);
+    let mut client = AdminClient::new(transport, "the-token");
+
+    client.rescan().expect("the surface answers");
+
+    let requests = &client.transport().requests;
+    let reading = requests[0].timeout.expect("the read has a time");
+    let scanning = requests[1].timeout.expect("the scan has a time");
+    assert!(
+        scanning > reading,
+        "the scan waits longer: {scanning:?} {reading:?}"
+    );
 }
 
 /// The token of the installation is read out of its file.

@@ -22,7 +22,6 @@ use objc2_foundation::NSTimer;
 
 use crate::actions::MenuAction;
 use crate::app::{App, DesktopRequest};
-use crate::model::ServerState;
 use crate::worker::{Answer, Command, Worker};
 
 use super::bridge;
@@ -48,7 +47,10 @@ pub struct Desktop {
     /// The item in the menu bar.
     item: StatusItem,
     /// The timer that ticks on the main thread.
-    timer: Retained<NSTimer>,
+    ///
+    /// The field is never read: it keeps the timer alive for as long as the
+    /// application runs, so that the timer of the system does not stop.
+    _timer: Retained<NSTimer>,
     /// The entries that the menu shows now, so that the menu is built again
     /// only when they change.
     written: Vec<crate::menu::MenuEntry>,
@@ -62,7 +64,7 @@ impl Desktop {
     /// pretending to run.
     pub fn new(marker: MainThreadMarker, app: App, worker: Worker) -> Result<Self, String> {
         let Some(item) = StatusItem::new(marker) else {
-            return Err("the menu bar of the system is not there".to_owned());
+            return Err("no-button".to_owned());
         };
         let timer = item.timer(TICK_SECONDS);
         let mut desktop = Self {
@@ -70,7 +72,7 @@ impl Desktop {
             app,
             worker,
             item,
-            timer,
+            _timer: timer,
             written: Vec::new(),
         };
         desktop.write();
@@ -97,11 +99,14 @@ impl Desktop {
 
     /// The tick of the timer.
     ///
-    /// The tick takes the answers that are there and asks for a new state.
+    /// The tick takes the answers that are there and asks for a new state. A
+    /// scan that nobody answered for ends, so that the menu does not claim
+    /// that a scan runs when none does.
     fn tick(&mut self) {
         while let Some(answer) = self.worker.take() {
             self.take(answer);
         }
+        self.app.end_of_a_silent_scan();
         self.worker.ask(Command::Refresh);
         self.write();
     }
@@ -142,12 +147,29 @@ impl Desktop {
         };
         match request {
             DesktopRequest::OpenUrl(address) => {
-                workspace::open_url(&address);
+                if !workspace::open_url(&address) {
+                    self.app.set_notice(self.app.cannot_open_text());
+                }
             }
             DesktopRequest::OpenPath(path) => {
-                workspace::open_path(&path);
+                if !workspace::open_path(&path) {
+                    self.app.set_notice(self.app.cannot_open_text());
+                }
             }
+            DesktopRequest::OpenPaths(paths) => self.open_paths(&paths),
             DesktopRequest::Quit => self.quit(),
+        }
+    }
+
+    /// Opens several folders in the program of the user.
+    ///
+    /// A folder that cannot be opened does not stop the others: the notice
+    /// says that the folder could not be opened, and the rest is tried.
+    fn open_paths(&mut self, paths: &[std::path::PathBuf]) {
+        for path in paths {
+            if !workspace::open_path(path) {
+                self.app.set_notice(self.app.cannot_open_text());
+            }
         }
     }
 
@@ -172,19 +194,6 @@ impl Desktop {
         let (label, value) = self.app.accessibility();
         self.item.set_accessibility(&label, &value);
     }
-
-    /// The state of the server, as the menu bar shows it.
-    pub fn state(&self) -> ServerState {
-        self.app.snapshot().state
-    }
-
-    /// The timer that ticks on the main thread.
-    ///
-    /// The timer is kept alive by the application; the run loop of the system
-    /// holds it as well.
-    pub fn timer(&self) -> &Retained<NSTimer> {
-        &self.timer
-    }
 }
 
 /// The application on the screen, shared with the handler of the runtime.
@@ -205,6 +214,11 @@ pub fn shared(desktop: Desktop) -> Shared {
 /// worker and writes the menu.
 pub fn install_handler(desktop: Shared) {
     bridge::install_handler(Box::new(move |number| {
-        desktop.borrow_mut().handle(number);
+        // A message that arrives while the application is busy is a message
+        // of a later moment: the borrow that fails is a message that is
+        // dropped and not a panic.
+        if let Ok(mut application) = desktop.try_borrow_mut() {
+            application.handle(number);
+        }
     }));
 }

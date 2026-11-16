@@ -275,21 +275,21 @@ Requirement method, ID rules and the traceability chain are defined in
 | `UX-003` | The first-run output shall name the device name | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
 | `UX-004` | Every error message shall state what happened | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
 | `UX-005` | Never abort with a panic message that lacks context; unexpected failures shall produce a… | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-006` | Provide `--help` for every subcommand. | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-007` | Be accessible with the keyboard alone and shall expose the status of the server as text | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-006` | Provide `--help` for every subcommand. | MUST | `F-15` | M2 | Manual usability protocol | Implemented |
+| `UX-007` | Be accessible with the keyboard alone and shall expose the status of the server as text | MUST | `F-15` | M2 | Manual usability protocol | Implemented |
 | `UX-008` | Respect the system accessibility settings for contrast | SHOULD | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-009` | Show an accessible status item for assistive technologies. | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-010` | Use plain language and avoid protocol jargon in the user-facing text. | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-009` | Show an accessible status item for assistive technologies. | MUST | `F-15` | M2 | Manual usability protocol | Implemented |
+| `UX-010` | Use plain language and avoid protocol jargon in the user-facing text. | MUST | `F-15` | M2 | Manual usability protocol | Implemented |
 | `UX-011` | Diagnostics shall be copyable in one action and shall not contain personal data unless the user… | SHOULD | `F-14` | M2 | Manual usability protocol | Implemented |
 | `UX-012` | Tell the user which client is currently connected and what it is streaming. | SHOULD | `F-14` | M2 | Manual usability protocol | Implemented |
 | `UX-013` | Long-running operations shall report progress and allow cancellation. | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-014` | Present the server state, the scan progress, the shared folders and the last observed client… | SHOULD | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-015` | Provide a simple presentation mode and an advanced presentation mode over one configuration… | SHOULD | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-016` | A safety-critical warning raised in the advanced mode shall remain visible in the simple mode. | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-014` | Present the server state, the scan progress, the shared folders and the last observed client… | SHOULD | `F-15` | M2 | Manual usability protocol | Implemented |
+| `UX-015` | Provide a simple presentation mode and an advanced presentation mode over one configuration… | SHOULD | `F-15` | M2 | Manual usability protocol | Verified |
+| `UX-016` | A safety-critical warning raised in the advanced mode shall remain visible in the simple mode. | MUST | `F-15` | M2 | Manual usability protocol | Verified |
 | `UX-017` | Be operable with the keyboard alone, shall expose accessible labels and a deterministic focus… | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-018` | Expose the status of the server as text for assistive technologies | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-018` | Expose the status of the server as text for assistive technologies | MUST | `F-15` | M2 | Manual usability protocol | Verified |
 | `UX-019` | Be able to start and stop the server, pause and resume indexing, and remove a shared folder… | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-020` | All user-facing strings shall be prepared for translation | SHOULD | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-020` | All user-facing strings shall be prepared for translation | SHOULD | `F-15` | M2 | Manual usability protocol | Verified |
 
 ## OPS — Operations and administration
 
@@ -440,15 +440,15 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `MB-001` | Be able to run headless independently of the user interface; the interface shall reconnect and… | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
-| `MB-002` | Acknowledge every action visibly, report progress and explain errors, and shall never block its… | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-001` | Be able to run headless independently of the user interface; the interface shall reconnect and… | MUST | `F-15` | M2 | Manual macOS usability protocol | Verified |
+| `MB-002` | Acknowledge every action visibly, report progress and explain errors, and shall never block its… | MUST | `F-15` | M2 | Manual macOS usability protocol | Implemented |
 | `MB-003` | Support keyboard navigation, assistive-technology labels, scalable text, sufficient contrast… | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
-| `MB-004` | Open no popover or settings view that starts an index or a network scan it does not need. | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
-| `MB-005` | Communicate with the server only over the local administration surface by default | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
-| `MB-006` | Remain legible in light and dark appearance, on a small display and when the menu bar is… | SHOULD | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-004` | Open no popover or settings view that starts an index or a network scan it does not need. | MUST | `F-15` | M2 | Manual macOS usability protocol | Verified |
+| `MB-005` | Communicate with the server only over the local administration surface by default | MUST | `F-15` | M2 | Manual macOS usability protocol | Verified |
+| `MB-006` | Remain legible in light and dark appearance, on a small display and when the menu bar is… | SHOULD | `F-15` | M2 | Manual macOS usability protocol | Implemented |
 | `MB-007` | The first-run assistant shall offer an optional verification step that shows whether a… | SHOULD | `F-15` | M2 | Manual macOS usability protocol | Baseline |
 | `MB-008` | Uninstalling and stopping shall be safe and obvious | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
-| `MB-009` | Ship as a bundle with the metadata the operating system requires for its local-network and… | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-009` | Ship as a bundle with the metadata the operating system requires for its local-network and… | MUST | `F-15` | M2 | Manual macOS usability protocol | Implemented |
 
 ---
 

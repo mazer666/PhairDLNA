@@ -97,10 +97,21 @@ impl Options {
             }
             index += 1;
         }
-        let (default_port, default_token_file) = of_the_configuration();
+        let default_port = port
+            .is_none()
+            .then(of_the_configuration)
+            .map(|(port, _)| port);
+        let default_token_file = token_file
+            .is_none()
+            .then(of_the_configuration)
+            .map(|(_, path)| path);
         Ok(Some(Options {
-            port: port.unwrap_or(default_port),
-            token_file: token_file.unwrap_or(default_token_file),
+            port: port
+                .or(default_port)
+                .unwrap_or(phairdlna_core::config::DEFAULT_ADMIN_PORT),
+            token_file: token_file.or(default_token_file).unwrap_or_else(|| {
+                PathBuf::from(phairdlna_core::config::default_admin_token_file())
+            }),
         }))
     }
 }
@@ -158,24 +169,27 @@ fn print_help(strings: &Strings) {
 #[cfg(target_os = "macos")]
 fn start(options: &Options, strings: &Strings) -> Result<(), String> {
     use phairdlna_mac::app::App;
-    use phairdlna_mac::ipc::client::{read_token, AdminClient, ClientError};
+    use phairdlna_mac::ipc::client::AdminClient;
     use phairdlna_mac::ipc::http::TcpTransport;
     use phairdlna_mac::platform::desktop;
     use phairdlna_mac::worker::Worker;
 
     let Some(marker) = objc2::MainThreadMarker::new() else {
-        return Err(strings.text("cli.error.no_menu_bar").to_owned());
+        return Err(strings.text("cli.error.not_main_thread").to_owned());
     };
-    let token = read_token(&options.token_file).map_err(|error| {
-        let reason = match &error {
-            ClientError::Token { reason } => reason.clone(),
-            _ => error.to_string(),
-        };
-        strings.format("cli.error.token", &[("reason", &reason)])
-    })?;
-    let client = AdminClient::new(TcpTransport::loopback(options.port), token);
+    // The token of the installation is read out of its file before every
+    // request: a server that is started while the application runs is found
+    // then, and a server that was never started is a server that is not there
+    // (`MB-001`).
+    let client = AdminClient::with_token_file(
+        TcpTransport::loopback(options.port),
+        options.token_file.clone(),
+    );
     let address = client.address();
-    let worker = Worker::spawn(client).map_err(|error| error.to_string())?;
+    let worker = Worker::spawn(client).map_err(|error| {
+        let reason = error.reason.clone();
+        strings.format("error.worker_not_started", &[("reason", &reason)])
+    })?;
     let app = App::new(strings.clone(), config_path(), address);
     let desktop = desktop::Desktop::new(marker, app, worker)
         .map_err(|reason| strings.format("cli.error.no_menu_bar", &[("reason", &reason)]))?;

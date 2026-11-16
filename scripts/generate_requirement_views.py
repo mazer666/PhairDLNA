@@ -848,6 +848,109 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " and the time of the answer; the body of the surface is empty, so its own bound is small",
         "Implemented",
     ),
+    "UX-006": (
+        "`crates/phairdlna-mac/src/main.rs::print_help`,"
+        " `crates/phairdlna-mac/resources/en-US.strings`"
+        " — the help of the command line of the application names the equivalent command in"
+        " `phairdlna-cli`; the command line of the daemon has its own help (F-13)",
+        "Implemented",
+    ),
+    "UX-007": (
+        "`crates/phairdlna-mac/tests/menu.rs::a_running_server_shows_its_streams`,"
+        " `crates/phairdlna-mac/src/menu.rs::status_line`"
+        " — the state of the server is a sentence and never a coloured dot; the keyboard"
+        " navigation of the menu is the one of the system and is checked by the manual"
+        " protocol, which has not run yet",
+        "Implemented",
+    ),
+    "UX-009": (
+        "`crates/phairdlna-mac/src/platform/status_item.rs::set_accessibility`,"
+        " `crates/phairdlna-mac/src/menu.rs::accessibility_value`"
+        " — the item of the menu bar carries a label and a value that describe the state of"
+        " the server in words; the announcement of VoiceOver has not been observed yet",
+        "Implemented",
+    ),
+    "UX-010": (
+        "`crates/phairdlna-mac/resources/en-US.strings`,"
+        " `crates/phairdlna-mac/tests/strings.rs::no_user_facing_text_lives_in_the_code`"
+        " — the texts of the user interface are plain: a media folder, a library, a server",
+        "Implemented",
+    ),
+    "UX-014": (
+        "`crates/phairdlna-mac/tests/menu.rs::a_running_server_shows_its_streams`"
+        " — the menu shows the state, the shared folders and the client that plays in one"
+        " view; the progress of the scan is shown as the state of the server and not as a"
+        " progress of its own",
+        "Implemented",
+    ),
+    "UX-015": (
+        "`crates/phairdlna-mac/tests/presentation_modes.rs::switching_the_view_changes_nothing_but_the_view`,"
+        " `::both_views_show_the_same_state`"
+        " — the mode is a preference of the application, it lives in a file of its own beside"
+        " the configuration of the server, and switching it starts no work",
+        "Verified",
+    ),
+    "UX-016": (
+        "`crates/phairdlna-mac/tests/presentation_modes.rs::a_warning_stays_visible_in_the_short_view`"
+        " — a warning of the server stays a line of the menu in the short view",
+        "Verified",
+    ),
+    "UX-018": (
+        "`crates/phairdlna-mac/tests/menu.rs::the_state_is_a_text_for_the_screen_reader`"
+        " — the state of the server has a textual rendering that does not need the menu to"
+        " be open",
+        "Verified",
+    ),
+    "UX-020": (
+        "`crates/phairdlna-mac/tests/strings.rs::every_language_carries_every_key`,"
+        " `::every_literal_of_the_code_is_written_down`"
+        " — every text of the user interface lives in a resource file per language, and the"
+        " test fails when a text appears in the code; the list of the languages is the open"
+        " question of F-15",
+        "Verified",
+    ),
+    "MB-001": (
+        "`crates/phairdlna-mac/tests/application.rs::nothing_of_the_last_answer_stays_when_the_server_is_gone`,"
+        " `crates/phairdlna-mac/tests/ipc_client.rs::a_server_that_was_never_started_sends_no_request`"
+        " — the application holds no state of the server: it reads the state from the surface"
+        " and shows nothing of the last answer when the surface is gone",
+        "Verified",
+    ),
+    "MB-002": (
+        "`crates/phairdlna-mac/src/worker.rs`, `crates/phairdlna-mac/src/platform/desktop.rs`"
+        " — the requests run on a thread of their own, the main thread only draws and takes"
+        " the answers, and the channel of the commands holds one command; the progress of a"
+        " scan is the state of the server and not a progress of the application",
+        "Implemented",
+    ),
+    "MB-004": (
+        "`crates/phairdlna-mac/tests/presentation_modes.rs::switching_the_view_changes_nothing_but_the_view`"
+        " — no view of the application starts an index or a scan of the network",
+        "Verified",
+    ),
+    "MB-005": (
+        "`crates/phairdlna-mac/tests/no_egress.rs::no_source_names_an_address_but_the_loopback`,"
+        " `::the_transport_is_bound_to_the_loopback_interface`,"
+        " `::the_manifest_holds_no_library_of_the_network`"
+        " — the application talks to the administration surface on the loopback interface and"
+        " to nothing else; the crate holds no library that could open a connection",
+        "Verified",
+    ),
+    "MB-006": (
+        "`crates/phairdlna-mac/src/platform/icon.rs::image_of`"
+        " — the picture of the item is a template image of the system and therefore follows the"
+        " appearance of the menu bar; the state is a text as well; the legibility on a small"
+        " display has not been checked by the manual protocol yet",
+        "Implemented",
+    ),
+    "MB-009": (
+        "`crates/phairdlna-mac/tests/bundle_metadata.rs::the_bundle_is_an_application_of_the_menu_bar`,"
+        " `::the_bundle_explains_the_permission_of_the_local_network`"
+        " — the metadata of the bundle carries the key of the menu bar and the text of the"
+        " permission of the local network; the bundle itself is built and signed by the"
+        " release, which is not done",
+        "Implemented",
+    ),
     "UX-011": (
         "`crates/phairdlna-cli/tests/admin.rs::the_diagnostics_do_not_name_the_files_of_the_user`,"
         " `crates/phairdlna-admin/tests/admin_surface.rs::the_diagnostics_hide_the_paths`"

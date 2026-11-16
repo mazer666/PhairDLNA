@@ -16,7 +16,6 @@
 //! lives in the worker and not in the application, because the client opens a
 //! socket and a socket belongs to the thread that waits for it.
 
-use std::fmt;
 use std::sync::mpsc::{sync_channel, Receiver, SyncSender, TryRecvError, TrySendError};
 use std::thread::JoinHandle;
 
@@ -51,14 +50,6 @@ pub struct WorkerError {
     /// What the system said.
     pub reason: String,
 }
-
-impl fmt::Display for WorkerError {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(formatter, "the worker cannot be started: {}", self.reason)
-    }
-}
-
-impl std::error::Error for WorkerError {}
 
 /// The thread that talks to the administration surface.
 #[derive(Debug)]

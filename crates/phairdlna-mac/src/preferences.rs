@@ -15,7 +15,6 @@
 //! read is not an error: the application starts in the short view, because a
 //! missing preference must never keep the application from running.
 
-use std::fmt;
 use std::path::{Path, PathBuf};
 
 use crate::model::PresentationMode;
@@ -70,12 +69,34 @@ impl Preferences {
             std::fs::create_dir_all(folder).map_err(|error| PreferencesError {
                 reason: error.to_string(),
             })?;
+            make_private(folder);
         }
         std::fs::write(&self.path, mode.as_str()).map_err(|error| PreferencesError {
             reason: error.to_string(),
-        })
+        })?;
+        make_private(&self.path);
+        Ok(())
     }
 }
+
+/// Makes a file or a folder private to its owner.
+///
+/// The preference is no secret, but a file that only its owner may read is
+/// the rule of the folder of the configuration (`SEC-071`).
+#[cfg(unix)]
+fn make_private(path: &Path) {
+    use std::os::unix::fs::PermissionsExt;
+
+    let Ok(metadata) = std::fs::metadata(path) else {
+        return;
+    };
+    let mode = metadata.permissions().mode();
+    let _ = std::fs::set_permissions(path, std::fs::Permissions::from_mode(mode & 0o700));
+}
+
+/// The rule of the permissions exists only on the systems that have them.
+#[cfg(not(unix))]
+fn make_private(_path: &Path) {}
 
 /// Why a preference could not be written.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -83,18 +104,6 @@ pub struct PreferencesError {
     /// What the file system said.
     pub reason: String,
 }
-
-impl fmt::Display for PreferencesError {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            formatter,
-            "the preference cannot be written: {}",
-            self.reason
-        )
-    }
-}
-
-impl std::error::Error for PreferencesError {}
 
 #[cfg(test)]
 mod tests {

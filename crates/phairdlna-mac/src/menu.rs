@@ -82,13 +82,15 @@ pub fn entries(
 /// state, the folders and the actions (`UX-015`).
 fn detail_entries(snapshot: &ServerSnapshot, strings: &Strings) -> Vec<MenuEntry> {
     let objects = snapshot.catalogue_objects.to_string();
-    let seconds = snapshot.uptime_seconds.to_string();
+    // The uptime is shown in minutes and not in seconds: a line that changes
+    // every second would rebuild the menu on every tick of the timer.
+    let minutes = (snapshot.uptime_seconds / 60).to_string();
     let mut lines = vec![
         MenuEntry::Status {
             title: strings.format("menu.status.objects", &[("objects", &objects)]),
         },
         MenuEntry::Status {
-            title: strings.format("menu.status.uptime", &[("seconds", &seconds)]),
+            title: strings.format("menu.status.uptime", &[("minutes", &minutes)]),
         },
     ];
     if let Some(when) = &snapshot.last_scan {

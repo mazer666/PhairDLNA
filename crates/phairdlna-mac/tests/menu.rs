@@ -8,7 +8,7 @@
 //!      something else than the state of the server misleads the user
 //!      (`UX-007`, `UX-016`, `UX-018`).
 //! Example: a running server with two streams shows the line "Server running
-//!          — 2 active streams" and the six actions of the menu.
+//!          — 2 active streams" and the actions of the menu.
 
 use phairdlna_mac::actions::MenuAction;
 use phairdlna_mac::menu::{accessibility_value, entries, status_line, MenuEntry};

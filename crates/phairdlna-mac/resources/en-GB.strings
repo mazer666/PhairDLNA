@@ -44,19 +44,29 @@ menu.accessibility.refused = The server refuses the requests of the application
 notice.rescan_done = The library was read again — {objects} objects found
 notice.rescan_failed = The library could not be read again: {reason}
 
-# The messages of a failure.
-error.server_unreachable = The server cannot be reached: {reason}
-error.server_refused = The server refuses the requests of the application (status {status})
+# The messages of a failure. Every text names what happened, why it happened
+# and what the user can do next (`UX-004`).
+error.surface_unreachable = The server cannot be reached: {reason}. Start the server with the command line.
+error.surface_unreadable = The server cannot be read: {reason}. Try again in a moment.
+error.answer_invalid = The answer of the server is not valid: {reason}.
+error.answer_unexpected = The answer of the server is not what the application expects.
+error.token_refused = The token of the installation was refused. Check the token file of the server.
+error.request_refused = The server refused the request: {status}.
+error.token_unreadable = The token of the installation cannot be read. Check the token file of the server.
+error.server_not_started = The server was never started. Start it with the command line.
+error.busy = The server is busy; the library was not read again. Try again in a moment.
+error.scan_silent = The library was not read again: the server did not answer. Try again in a moment.
+error.cannot_open = The system did not open it.
+error.configuration_unreadable = The configuration of the server cannot be read: {reason}
+error.worker_not_started = The thread that reads the state of the server cannot be started: {reason}.
+error.preference_failed = The preference cannot be written: {reason}.
 
 # The detail of the server, in the detailed view.
 menu.status.objects = {objects} objects in the catalogue
-menu.status.uptime = the server runs for {seconds} seconds
+menu.status.uptime = the server runs for {minutes} minutes
 menu.status.last_scan = the library was read again: {when}
 menu.action.mode_advanced = Show the details of the server
 menu.action.mode_simple = Show the short view
-
-# The message of a preference that cannot be written.
-error.preference_failed = The preference cannot be written: {reason}
 
 # The texts of the command line.
 cli.help.usage = phairdlna-mac [--port <port>] [--token-file <file>]
@@ -66,6 +76,6 @@ cli.help.equivalent = Every action of this application has a command in phairdln
 cli.error.unknown_option = The option is not known: {option}
 cli.error.missing_value = The option {option} needs a value
 cli.error.bad_port = The port {value} is not a number between 1 and 65535
-cli.error.token = The token of the installation cannot be read: {reason}
-cli.error.no_menu_bar = The menu bar of the system is not there
+cli.error.no_menu_bar = The menu bar of the system is not there: {reason}
+cli.error.not_main_thread = The application did not start on the main thread
 cli.error.not_macos = This application needs macOS

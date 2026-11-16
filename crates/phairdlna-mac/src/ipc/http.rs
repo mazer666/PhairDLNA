@@ -12,7 +12,6 @@
 //! tests therefore answer the client with a recorded answer and need no
 //! socket (`MB-002`).
 
-use std::fmt;
 use std::io::{Read, Write};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr, TcpStream};
 use std::time::Duration;
@@ -39,6 +38,12 @@ pub struct HttpRequest {
     pub headers: Vec<(String, String)>,
     /// The body of the request.
     pub body: Vec<u8>,
+    /// How long the request waits for the answer.
+    ///
+    /// The answer of a request that changes something can take longer than
+    /// the answer of a request that only reads: the scan of the library
+    /// reads every file of the library (`UX-013`).
+    pub timeout: Option<Duration>,
 }
 
 impl HttpRequest {
@@ -49,7 +54,14 @@ impl HttpRequest {
             path: path.to_owned(),
             headers: Vec::new(),
             body: Vec::new(),
+            timeout: None,
         }
+    }
+
+    /// Sets how long the request waits for the answer.
+    pub fn with_timeout(mut self, timeout: Duration) -> Self {
+        self.timeout = Some(timeout);
+        self
     }
 
     /// Adds a header to the request.
@@ -180,6 +192,9 @@ pub trait Transport {
 
     /// The value of the header that names the host of the request.
     fn host(&self) -> String;
+
+    /// How long a request waits for the answer.
+    fn timeout(&self) -> Duration;
 }
 
 /// The transport that opens a socket to the loopback interface.
@@ -218,6 +233,10 @@ impl TcpTransport {
 }
 
 impl Transport for TcpTransport {
+    fn timeout(&self) -> Duration {
+        self.timeout
+    }
+
     fn address(&self) -> String {
         format!("{}:{}", self.address, self.port)
     }
@@ -227,14 +246,15 @@ impl Transport for TcpTransport {
     }
 
     fn send(&mut self, request: &HttpRequest) -> Result<HttpResponse, TransportError> {
+        let timeout = request.timeout.unwrap_or(self.timeout);
         let address = SocketAddr::new(self.address, self.port);
-        let mut stream = TcpStream::connect_timeout(&address, self.timeout).map_err(|error| {
+        let mut stream = TcpStream::connect_timeout(&address, timeout).map_err(|error| {
             TransportError::Connect {
                 reason: error.to_string(),
             }
         })?;
-        let _ = stream.set_read_timeout(Some(self.timeout));
-        let _ = stream.set_write_timeout(Some(self.timeout));
+        let _ = stream.set_read_timeout(Some(timeout));
+        let _ = stream.set_write_timeout(Some(timeout));
         stream
             .write_all(&request.to_bytes())
             .map_err(|error| TransportError::Io {
@@ -272,16 +292,31 @@ pub enum TransportError {
     },
 }
 
-impl fmt::Display for TransportError {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl TransportError {
+    /// What was wrong, in the words of the system.
+    pub fn reason(&self) -> &str {
         match self {
-            Self::Connect { reason } => {
-                write!(formatter, "the surface cannot be reached: {reason}")
-            }
-            Self::Io { reason } => write!(formatter, "the surface cannot be read: {reason}"),
-            Self::Malformed { reason } => write!(formatter, "the answer is not valid: {reason}"),
+            Self::Connect { reason } | Self::Io { reason } | Self::Malformed { reason } => reason,
+        }
+    }
+
+    /// The kind of the failure.
+    pub fn kind(&self) -> TransportKind {
+        match self {
+            Self::Connect { .. } => TransportKind::Unreachable,
+            Self::Io { .. } => TransportKind::Unreadable,
+            Self::Malformed { .. } => TransportKind::Invalid,
         }
     }
 }
 
-impl std::error::Error for TransportError {}
+/// The kind of a failure of the transport.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TransportKind {
+    /// The surface cannot be reached.
+    Unreachable,
+    /// The surface cannot be read.
+    Unreadable,
+    /// The answer is not an answer of the protocol.
+    Invalid,
+}

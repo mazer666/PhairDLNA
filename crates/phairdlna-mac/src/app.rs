@@ -20,6 +20,7 @@
 //! without a window (`MB-004`).
 
 use std::path::PathBuf;
+use std::time::{Duration, Instant};
 
 use phairdlna_core::config::Config;
 
@@ -47,6 +48,8 @@ pub enum DesktopRequest {
     OpenUrl(String),
     /// Open a file or a folder.
     OpenPath(PathBuf),
+    /// Open several folders.
+    OpenPaths(Vec<PathBuf>),
     /// Leave the application; the server keeps running.
     Quit,
 }
@@ -79,7 +82,16 @@ pub struct App {
     notice: Option<String>,
     /// Whether a scan is running.
     scanning: bool,
+    /// When the scan began, so that a scan without an answer can end.
+    scanning_since: Option<Instant>,
 }
+
+/// How long a scan may run before the application stops waiting for it.
+///
+/// The scan of the library is bounded by the surface; the application does
+/// not wait for it for ever, so that the menu never claims that a scan runs
+/// when none does (`MB-002`).
+const SCAN_DEADLINE: Duration = Duration::from_secs(180);
 
 impl App {
     /// Builds the application.
@@ -110,6 +122,7 @@ impl App {
             snapshot: ServerSnapshot::stopped(),
             notice: None,
             scanning: false,
+            scanning_since: None,
         }
     }
 
@@ -138,6 +151,11 @@ impl App {
         )
     }
 
+    /// The text of a file or an address that the system refuses to open.
+    pub fn cannot_open_text(&self) -> String {
+        self.strings.text("error.cannot_open").to_owned()
+    }
+
     /// The short text of the item in the menu bar.
     pub fn badge(&self) -> String {
         self.strings.text("menu.status.badge").to_owned()
@@ -153,6 +171,25 @@ impl App {
     /// Whether a scan is running.
     pub fn is_scanning(&self) -> bool {
         self.scanning
+    }
+
+    /// Ends a scan that nobody answered for.
+    ///
+    /// The answer is `true` when the scan ended: the menu then shows that no
+    /// scan runs, and the application does not claim that a scan runs when
+    /// none does.
+    pub fn end_of_a_silent_scan(&mut self) -> bool {
+        let Some(since) = self.scanning_since else {
+            return false;
+        };
+        if since.elapsed() < SCAN_DEADLINE {
+            return false;
+        }
+        self.scanning = false;
+        self.scanning_since = None;
+        self.snapshot.state = ServerState::Running;
+        self.notice = Some(self.strings.text("error.scan_silent").to_owned());
+        true
     }
 
     /// Takes the answer of the surface.
@@ -186,14 +223,21 @@ impl App {
     /// A surface that refuses the requests of the application is not a
     /// surface that is gone: the two are shown differently, so that the user
     /// knows whether to start the server or to look at the token.
+    ///
+    /// **Nothing of the last answer stays.** The menu shows the state of the
+    /// server and not the state it had: a server that is gone has no folders,
+    /// no objects and no warnings (`AC-02`).
     pub fn take_failure(&mut self, error: &ClientError) -> RefreshOutcome {
         let before = self.snapshot.clone();
-        self.snapshot.state = match error {
-            ClientError::Unauthorised | ClientError::Refused { .. } => ServerState::Refused,
-            _ => ServerState::Stopped,
+        self.snapshot = ServerSnapshot {
+            state: match error {
+                ClientError::Unauthorised | ClientError::Refused { .. } => ServerState::Refused,
+                _ => ServerState::Stopped,
+            },
+            ..ServerSnapshot::default()
         };
-        self.snapshot.active_streams = 0;
-        self.snapshot.transfers.clear();
+        self.scanning = false;
+        self.scanning_since = None;
         self.notice = Some(self.message_of(error));
         if before == self.snapshot {
             RefreshOutcome::Unchanged
@@ -205,6 +249,7 @@ impl App {
     /// Takes the result of a scan of the library.
     pub fn take_rescan(&mut self, report: &RescanReport) -> RefreshOutcome {
         self.scanning = false;
+        self.scanning_since = None;
         self.snapshot.catalogue_objects = report.objects;
         let objects = report.objects.to_string();
         self.notice = Some(
@@ -217,11 +262,8 @@ impl App {
     /// Takes the failure of a scan of the library.
     pub fn take_failed_rescan(&mut self, error: &ClientError) -> RefreshOutcome {
         self.scanning = false;
-        let reason = error.to_string();
-        self.notice = Some(
-            self.strings
-                .format("notice.rescan_failed", &[("reason", &reason)]),
-        );
+        self.scanning_since = None;
+        self.notice = Some(self.message_of(error));
         RefreshOutcome::Changed
     }
 
@@ -266,7 +308,7 @@ impl App {
     fn switch_view(&mut self) -> ActionOutcome {
         self.mode = self.mode.other();
         if let Err(error) = self.preferences.set_mode(self.mode) {
-            let reason = error.to_string();
+            let reason = error.reason.clone();
             self.notice = Some(
                 self.strings
                     .format("error.preference_failed", &[("reason", &reason)]),
@@ -276,46 +318,76 @@ impl App {
     }
 
     /// The text that tells the user what went wrong.
+    ///
+    /// The text names three things: what happened, why it happened and what
+    /// the user can do next (`UX-004`). Every text comes from the resource
+    /// file of the language of the user (`UX-020`).
     fn message_of(&self, error: &ClientError) -> String {
         match error {
+            ClientError::Unreachable { reason } => {
+                self.reason_text("error.surface_unreachable", reason)
+            }
+            ClientError::Unreadable { reason } => {
+                self.reason_text("error.surface_unreadable", reason)
+            }
+            ClientError::Invalid { reason } => self.reason_text("error.answer_invalid", reason),
+            ClientError::Unexpected { .. } => {
+                self.strings.text("error.answer_unexpected").to_owned()
+            }
+            ClientError::Unauthorised => self.strings.text("error.token_refused").to_owned(),
             ClientError::Refused { status } => {
                 let status = status.to_string();
                 self.strings
-                    .format("error.server_refused", &[("status", &status)])
+                    .format("error.request_refused", &[("status", &status)])
             }
-            ClientError::Unauthorised => {
-                let status = "401";
-                self.strings
-                    .format("error.server_refused", &[("status", status)])
-            }
-            _ => {
-                let reason = error.to_string();
-                self.strings
-                    .format("error.server_unreachable", &[("reason", &reason)])
-            }
+            ClientError::Token { .. } => self.strings.text("error.token_unreadable").to_owned(),
+            ClientError::NoToken => self.strings.text("error.server_not_started").to_owned(),
+            ClientError::Busy => self.strings.text("error.busy").to_owned(),
         }
     }
 
-    /// Opens the first media folder of the configuration.
-    fn open_media_folders(&mut self) -> ActionOutcome {
-        let Some(path) = self.first_media_root() else {
-            self.notice = Some(self.strings.text("menu.status.no_roots").to_owned());
-            return ActionOutcome::Nothing;
-        };
-        ActionOutcome::Request(DesktopRequest::OpenPath(path))
+    /// The text of a failure, with the words of the system.
+    ///
+    /// The words of the system are only added when they say something: an
+    /// empty reason would leave a hole in the sentence of the user.
+    fn reason_text(&self, key: &str, reason: &str) -> String {
+        if reason.is_empty() {
+            return self.strings.text(key).to_owned();
+        }
+        self.strings.format(key, &[("reason", reason)])
     }
 
-    /// The path of the first media folder of the configuration.
+    /// Opens the media folders of the configuration.
     ///
     /// The configuration of the user is read and not the catalogue of the
     /// server: the application never reads the database of the server
     /// (`MB-005`).
-    fn first_media_root(&self) -> Option<PathBuf> {
-        let config = Config::load(&self.config_path).ok()?;
-        config
+    fn open_media_folders(&mut self) -> ActionOutcome {
+        match self.media_roots() {
+            Ok(paths) if paths.is_empty() => {
+                self.notice = Some(self.strings.text("menu.status.no_roots").to_owned());
+                ActionOutcome::Nothing
+            }
+            Ok(paths) => ActionOutcome::Request(DesktopRequest::OpenPaths(paths)),
+            Err(reason) => {
+                let reason = reason.to_owned();
+                self.notice = Some(
+                    self.strings
+                        .format("error.configuration_unreadable", &[("reason", &reason)]),
+                );
+                ActionOutcome::Nothing
+            }
+        }
+    }
+
+    /// The paths of the media folders of the configuration.
+    fn media_roots(&self) -> Result<Vec<PathBuf>, String> {
+        let config = Config::load(&self.config_path).map_err(|error| error.to_string())?;
+        Ok(config
             .library
             .roots
-            .first()
+            .iter()
             .map(|root| PathBuf::from(&root.path))
+            .collect())
     }
 }

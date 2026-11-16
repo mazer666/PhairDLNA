@@ -74,11 +74,9 @@ fn a_surface_that_is_not_there_is_a_stopped_server() {
     let mut app = application();
     app.take_state(running());
 
-    let outcome = app.take_failure(&ClientError::Transport(
-        phairdlna_mac::ipc::http::TransportError::Connect {
-            reason: "no route to host".to_owned(),
-        },
-    ));
+    let outcome = app.take_failure(&ClientError::Unreachable {
+        reason: "no route to host".to_owned(),
+    });
 
     assert_eq!(outcome, phairdlna_mac::app::RefreshOutcome::Changed);
     assert_eq!(app.snapshot().state, ServerState::Stopped);
@@ -105,6 +103,54 @@ fn a_surface_that_refuses_is_not_a_surface_that_is_gone() {
     );
 }
 
+/// Nothing of the last answer stays when the server is gone.
+///
+/// The menu shows the state of the server and not the state it had: a server
+/// that is gone has no folders, no objects and no warnings (`AC-02`).
+#[test]
+fn nothing_of_the_last_answer_stays_when_the_server_is_gone() {
+    let mut app = application();
+    app.take_state(ServerSnapshot {
+        state: ServerState::Running,
+        catalogue_objects: 20,
+        roots: vec![phairdlna_mac::model::RootInfo {
+            name: "music".to_owned(),
+            mounted: true,
+            objects: 20,
+        }],
+        warnings: vec!["a warning of the server".to_owned()],
+        ..ServerSnapshot::default()
+    });
+
+    app.take_failure(&ClientError::Unreachable {
+        reason: "no route to host".to_owned(),
+    });
+
+    assert_eq!(app.snapshot().catalogue_objects, 0);
+    assert!(app.snapshot().roots.is_empty());
+    assert!(app.snapshot().warnings.is_empty());
+}
+
+/// A scan that the worker cannot take ends at once.
+///
+/// The menu must never claim that a scan runs when none does (`MB-002`).
+#[test]
+fn a_scan_that_the_worker_cannot_take_ends_at_once() {
+    let mut app = application();
+    app.take_state(running());
+    app.perform(MenuAction::RescanLibrary);
+    assert!(app.is_scanning());
+
+    app.take_failed_rescan(&ClientError::Busy);
+
+    assert!(!app.is_scanning());
+    let lines = lines_of(&app);
+    assert!(
+        lines.iter().any(|line| line.contains("busy")),
+        "the menu must say why: {lines:?}"
+    );
+}
+
 /// The scan of the library leaves a message that says what it found.
 #[test]
 fn a_scan_leaves_a_message() {
@@ -119,8 +165,10 @@ fn a_scan_leaves_a_message() {
     });
 
     let lines = lines_of(&app);
-    assert!(lines.iter().any(|line| line.contains('1')));
-    assert!(lines.iter().any(|line| line.contains("12")));
+    assert!(
+        lines.iter().any(|line| line.contains("12")),
+        "the message must name the number of the objects: {lines:?}"
+    );
 }
 
 /// The action that opens the administration page asks for the address of the
