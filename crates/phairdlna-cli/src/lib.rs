@@ -9,6 +9,7 @@
 
 mod catalogue;
 pub mod serve;
+pub mod service;
 
 use std::path::PathBuf;
 
@@ -73,7 +74,25 @@ pub enum Command {
         /// The port to listen on, or `None` for the configured one.
         port: Option<u16>,
     },
+    /// Manage the server as a service of the operating system.
+    Service {
+        /// What the user asked the service to do.
+        command: service::ServiceCommand,
+    },
 }
+
+/// The exit code of a command that failed (`OPS-014`).
+pub const EXIT_FAILURE: i32 = 1;
+
+/// The exit code of a command whose arguments or configuration were wrong
+/// (`OPS-014`).
+pub const EXIT_CONFIGURATION: i32 = 2;
+
+/// The exit code of a command that had nothing to do (`OPS-014`).
+///
+/// A script that asks a stopped server how it is can tell "not running" from
+/// "misconfigured" without reading the words of the answer.
+pub const EXIT_NOTHING_TO_DO: i32 = 3;
 
 /// The result of a command: what to print, and the exit code.
 #[derive(Debug, Clone, PartialEq)]
@@ -97,7 +116,23 @@ impl Outcome {
     pub fn failure(stdout: impl Into<String>) -> Self {
         Self {
             stdout: stdout.into(),
-            exit_code: 1,
+            exit_code: EXIT_FAILURE,
+        }
+    }
+
+    /// An outcome that says the arguments or the configuration were wrong.
+    pub fn configuration_error(stdout: impl Into<String>) -> Self {
+        Self {
+            stdout: stdout.into(),
+            exit_code: EXIT_CONFIGURATION,
+        }
+    }
+
+    /// An outcome that says there was nothing to do.
+    pub fn nothing_to_do(stdout: impl Into<String>) -> Self {
+        Self {
+            stdout: stdout.into(),
+            exit_code: EXIT_NOTHING_TO_DO,
         }
     }
 }
@@ -120,6 +155,7 @@ pub fn run(command: &Command) -> Outcome {
             catalogue::browse(&resolve(path.as_deref()), object_id)
         }
         Command::Serve { path, port } => serve(path.as_deref(), *port),
+        Command::Service { command } => service::run(command),
     }
 }
 

@@ -335,6 +335,11 @@ fn a_metacharacter_in_an_argument_is_never_a_command() {
 /// The rule is stronger than "the arguments are escaped": the server never
 /// starts a program, so there is nothing to escape. The test reads the source
 /// of the workspace and finds no process start.
+///
+/// The CLI service management subcommands (`phairdlna service install/uninstall/start/stop`)
+/// are explicitly permitted to interact with the system service managers (`launchctl` / `systemctl`)
+/// via `SystemRunner` per `F-13` / `LIFE-001`. The daemon itself (`serve`, `core`, `admin`, `mac`)
+/// must never start a process.
 #[test]
 fn the_server_runs_no_process_at_all() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
@@ -349,6 +354,9 @@ fn the_server_runs_no_process_at_all() {
         let sources = root.join("../").join(crate_name).join("src");
         collect_process_starts(&sources, &mut offenders);
     }
+
+    // Allow runner.rs in phairdlna-cli/src/service which controls launchctl/systemctl
+    offenders.retain(|item| !item.contains("phairdlna-cli/src/service/runner.rs"));
 
     assert!(
         offenders.is_empty(),

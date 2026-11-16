@@ -8,7 +8,8 @@
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use phairdlna_cli::{run, Command};
+use phairdlna_cli::service::ServiceCommand;
+use phairdlna_cli::{run, Command, EXIT_CONFIGURATION};
 
 /// The usage text.
 const USAGE: &str = "\
@@ -25,10 +26,18 @@ Commands:
   catalogue scan           Print the tree of the library with the client identifiers
   catalogue browse <id>    Print the document a client receives for a container
   serve                    Start the server in the foreground
+  service install          Write the service file and register the service
+  service uninstall        Remove the service and its file
+  service status           Say what the service manager knows about the service
+  service start            Start the service
+  service stop             Stop the service
 
 Options:
   --config <path>          The configuration file to use
   --port <number>          The port the server listens on (serve only)
+  --force                  Replace or remove a service file that is already there
+  --dry-run                Say what would be done, and do nothing (service install only)
+  --system                 Act on the service of the machine, not of the user
   -h, --help               Print this text
 ";
 
@@ -42,9 +51,24 @@ fn main() -> ExitCode {
         }
         Err(message) => {
             eprint!("{message}\n{USAGE}");
-            ExitCode::from(2)
+            ExitCode::from(EXIT_CONFIGURATION as u8)
         }
     }
+}
+
+/// The options that the parser understands.
+#[derive(Debug, Default)]
+struct Options {
+    /// The configuration file the command works on.
+    config: Option<PathBuf>,
+    /// The port the server listens on.
+    port: Option<u16>,
+    /// Whether a file that is already there may be replaced.
+    force: bool,
+    /// Whether the command only says what it would do.
+    dry_run: bool,
+    /// Whether the command acts on the service of the machine.
+    system: bool,
 }
 
 /// Parses the arguments into a command.
@@ -53,25 +77,36 @@ fn main() -> ExitCode {
 /// subcommands does not need a parsing framework, and one fewer dependency is
 /// one fewer licence to review.
 fn parse(arguments: &[String]) -> Result<Command, String> {
-    let mut config_path: Option<PathBuf> = None;
-    let mut port: Option<u16> = None;
+    let mut options = Options::default();
     let mut rest: Vec<&str> = Vec::new();
     let mut index = 0;
     while index < arguments.len() {
         match arguments[index].as_str() {
             "--config" => {
                 let value = arguments.get(index + 1).ok_or("--config needs a path")?;
-                config_path = Some(PathBuf::from(value));
+                options.config = Some(PathBuf::from(value));
                 index += 2;
             }
             "--port" => {
                 let value = arguments.get(index + 1).ok_or("--port needs a number")?;
-                port = Some(
+                options.port = Some(
                     value
                         .parse::<u16>()
                         .map_err(|_| format!("\"{value}\" is not a port number"))?,
                 );
                 index += 2;
+            }
+            "--force" => {
+                options.force = true;
+                index += 1;
+            }
+            "--dry-run" => {
+                options.dry_run = true;
+                index += 1;
+            }
+            "--system" => {
+                options.system = true;
+                index += 1;
             }
             "-h" | "--help" => return Err("help requested".to_owned()),
             other => {
@@ -80,27 +115,89 @@ fn parse(arguments: &[String]) -> Result<Command, String> {
             }
         }
     }
-    command_from(&rest, config_path, port)
+    command_from(&rest, options)
 }
 
 /// Builds a command from the positional arguments.
-fn command_from(
-    rest: &[&str],
-    config_path: Option<PathBuf>,
-    port: Option<u16>,
-) -> Result<Command, String> {
+fn command_from(rest: &[&str], options: Options) -> Result<Command, String> {
     match rest.first().copied() {
         None => Ok(Command::Version),
         Some("version") => Ok(Command::Version),
-        Some("config") => config_command(&rest[1..], config_path),
-        Some("ssdp") => ssdp_command(&rest[1..], config_path),
-        Some("catalogue") => catalogue_command(&rest[1..], config_path),
-        Some("serve") => Ok(Command::Serve {
-            path: config_path,
-            port,
-        }),
+        Some("config") => {
+            check_no_service_options(&options)?;
+            config_command(&rest[1..], options.config)
+        }
+        Some("ssdp") => {
+            check_no_service_options(&options)?;
+            ssdp_command(&rest[1..], options.config)
+        }
+        Some("catalogue") => {
+            check_no_service_options(&options)?;
+            catalogue_command(&rest[1..], options.config)
+        }
+        Some("serve") => {
+            check_no_service_options(&options)?;
+            Ok(Command::Serve {
+                path: options.config,
+                port: options.port,
+            })
+        }
+        Some("service") => service_command(&rest[1..], options),
         Some(other) => Err(format!("unknown command \"{other}\"")),
     }
+}
+
+/// Refuses the options of the service in a command that is not one.
+///
+/// The options belong to the service commands; a command that ignores them
+/// would take them silently, and the user would believe that something
+/// happened that did not happen.
+fn check_no_service_options(options: &Options) -> Result<(), String> {
+    if options.force {
+        return Err("--force belongs to the service commands".to_owned());
+    }
+    if options.dry_run {
+        return Err("--dry-run belongs to the service commands".to_owned());
+    }
+    if options.system {
+        return Err("--system belongs to the service commands".to_owned());
+    }
+    Ok(())
+}
+
+/// Builds a `service` subcommand.
+///
+/// The five commands of the service are the ones of `F-13`: the service file
+/// is written and registered, removed, asked about, started and stopped.
+fn service_command(rest: &[&str], options: Options) -> Result<Command, String> {
+    let command = match rest.first().copied() {
+        Some("install") => ServiceCommand::Install {
+            force: options.force,
+            dry_run: options.dry_run,
+            system: options.system,
+            config: options.config,
+        },
+        Some("uninstall") => ServiceCommand::Uninstall {
+            force: options.force,
+            system: options.system,
+        },
+        Some("status") => ServiceCommand::Status {
+            system: options.system,
+        },
+        Some("start") => ServiceCommand::Start {
+            system: options.system,
+        },
+        Some("stop") => ServiceCommand::Stop {
+            system: options.system,
+        },
+        Some(other) => return Err(format!("unknown service command \"{other}\"")),
+        None => {
+            return Err(
+                "service needs a subcommand: install, uninstall, status, start or stop".to_owned(),
+            )
+        }
+    };
+    Ok(Command::Service { command })
 }
 
 /// Builds an `ssdp` subcommand.
