@@ -59,14 +59,22 @@ PhairDLNA/
 **Dependency direction is one-way:**
 
 ```
-phairdlna-mac  ─┐
-phairdlna-admin ┼──▶ phairdlna-cli ──▶ phairdlna-core
-phairdlna-cli  ─┘
+phairdlna-mac   ──▶ phairdlna-core
+phairdlna-admin ──▶ phairdlna-core
+phairdlna-cli   ──▶ phairdlna-admin ──▶ phairdlna-core
 ```
 
 `phairdlna-core` depends on no sibling crate. `phairdlna-cli` contains the process
 lifecycle; `phairdlna-admin` and `phairdlna-mac` are optional front ends that talk to
 the core through its public API.
+
+The administration surface is an exception to the picture of ADR-0001, and the
+exception is recorded in **ADR-0012**: the surface runs in the process of the daemon,
+so the crate that owns the process starts the surface and therefore depends on it.
+The dependency of the daemon crate on the surface crate sits behind the cargo feature
+`admin`, and a build without that feature is a build without the surface
+(`OPS-025`). The direction stays one-way: the surface crate depends on the core and
+on no sibling crate, and the gate QG-28 refuses the edge the other way.
 
 The boundary check is **planned** (`scripts/check-crate-boundaries.sh`, gate QG-28): it
 parses the `Cargo.toml` dependency graph and fails when a crate depends "downwards".

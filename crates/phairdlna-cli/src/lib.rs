@@ -38,6 +38,17 @@ pub enum Command {
         /// The file to read. `None` means the resolved default location.
         path: Option<PathBuf>,
     },
+    /// Export the effective configuration.
+    ConfigExport {
+        /// The file to read. `None` means the resolved default location.
+        path: Option<PathBuf>,
+    },
+    /// Read a configuration file and print the effective configuration it
+    /// would become.
+    ConfigImport {
+        /// The file to read.
+        path: PathBuf,
+    },
     /// Print the SSDP headers the server would send.
     SsdpHeaders {
         /// The configuration file to read.
@@ -101,6 +112,8 @@ pub fn run(command: &Command) -> Outcome {
         Command::ConfigPath => config_path(),
         Command::ConfigValidate { path } => config_validate(path.as_deref()),
         Command::ConfigShow { path } => config_show(path.as_deref()),
+        Command::ConfigExport { path } => config_export(path.as_deref()),
+        Command::ConfigImport { path } => config_import(path),
         Command::SsdpHeaders { path } => ssdp_headers(path.as_deref()),
         Command::CatalogueScan { path } => catalogue::scan(&resolve(path.as_deref())),
         Command::CatalogueBrowse { object_id, path } => {
@@ -156,6 +169,37 @@ fn config_show(path: Option<&std::path::Path>) -> Outcome {
     match Config::load(&path) {
         Ok(config) => match config.render() {
             Ok(text) => Outcome::ok(text),
+            Err(error) => Outcome::failure(format!("cannot render the configuration: {error}\n")),
+        },
+        Err(error) => Outcome::failure(format!(
+            "the configuration \"{}\" is not usable:\n{}\n",
+            path.display(),
+            error.message()
+        )),
+    }
+}
+
+/// Exports the effective configuration.
+///
+/// The export is the configuration as the server understands it: every setting
+/// that was left out is written down with its default, and the schema version
+/// is the one of the file it was read from (`CFG-012`).
+fn config_export(path: Option<&std::path::Path>) -> Outcome {
+    config_show(path)
+}
+
+/// Reads a configuration file and prints the configuration it would become.
+///
+/// The command writes nothing: it tells the user what the file would look like
+/// after the import, and the user decides what to do with it (`CFG-012`).
+fn config_import(path: &std::path::Path) -> Outcome {
+    match Config::load(path) {
+        Ok(config) => match config.render() {
+            Ok(text) => Outcome::ok(format!(
+                "the configuration \"{}\" would become (schema version {}):\n{text}",
+                path.display(),
+                config.schema_version
+            )),
             Err(error) => Outcome::failure(format!("cannot render the configuration: {error}\n")),
         },
         Err(error) => Outcome::failure(format!(

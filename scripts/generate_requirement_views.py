@@ -741,6 +741,143 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " (F-13)",
         "Implemented",
     ),
+    "CFG-005": (
+        "`crates/phairdlna-core/src/config/validate/admin.rs::tests::a_non_loopback_address_is_refused`,"
+        " `crates/phairdlna-core/src/config/validate/admin.rs::tests::the_user_may_override_the_refusal`"
+        " — a configuration that would put the administration surface on an address of the network is refused"
+        " and the refusal names the setting; the user may override the refusal, and then the address is"
+        " accepted",
+        "Verified",
+    ),
+    "CFG-007": (
+        "`crates/phairdlna-core/tests/symlink_policy.rs::a_link_is_not_followed_by_default`,"
+        " `crates/phairdlna-core/tests/symlink_policy.rs::a_root_may_have_a_policy_of_its_own`"
+        " — the policy of a root decides whether a symbolic link is followed, and the default follows none",
+        "Verified",
+    ),
+    "CFG-009": (
+        "`crates/phairdlna-cli/tests/serve.rs::a_client_that_is_not_on_the_list_is_refused`,"
+        " `crates/phairdlna-cli/tests/serve.rs::a_client_that_is_on_the_list_is_answered`,"
+        " `crates/phairdlna-core/src/security/access.rs::tests::a_network_admits_its_addresses`"
+        " — the list of the clients is read from the configuration and checked against the address of the"
+        " socket; a client that is not on the list is refused with 403 before a handler sees the request",
+        "Verified",
+    ),
+    "CFG-012": (
+        "`crates/phairdlna-cli/tests/cli.rs::the_effective_configuration_is_exported`,"
+        " `crates/phairdlna-cli/tests/cli.rs::a_configuration_file_is_imported`"
+        " — the export writes the configuration as the server understands it, with the schema version, and the"
+        " import reads a file and reports the configuration it would become; the import writes nothing, and"
+        " that is the part that is still open",
+        "Implemented",
+    ),
+    "CFG-013": (
+        "`crates/phairdlna-core/tests/config.rs::an_unknown_key_is_refused`"
+        " — a key that the server does not know is an error and not a silent no-op",
+        "Verified",
+    ),
+    "CFG-014": (
+        "`crates/phairdlna-admin/tests/admin_surface.rs::the_token_file_is_private`,"
+        " `crates/phairdlna-cli/tests/admin.rs::the_token_file_belongs_to_its_owner_alone`"
+        " — the file that holds the token of the administration surface has the permissions 600 inside a"
+        " folder with the permissions 700, and a file that others may read stops the surface",
+        "Verified",
+    ),
+    "OPS-017": (
+        "`crates/phairdlna-core/build.rs`, `crates/phairdlna-cli/src/serve/admin.rs`"
+        " — the revision is embedded into the binary when it is built and the status output names it; the"
+        " source offer does not exist yet, so the two cannot be compared",
+        "Implemented",
+    ),
+    "OPS-020": (
+        "`crates/phairdlna-admin/src/server.rs`,"
+        " `crates/phairdlna-core/src/config/validate/admin.rs::tests::a_non_loopback_address_is_refused`"
+        " — the surface listens on 127.0.0.1 and ::1 and on no other address, and a configuration that asks"
+        " for another address is refused unless the user says so",
+        "Verified",
+    ),
+    "OPS-021": (
+        "`crates/phairdlna-admin/tests/admin_surface.rs::a_request_without_a_token_is_refused`,"
+        " `crates/phairdlna-admin/tests/admin_surface.rs::a_request_with_a_wrong_token_is_refused`,"
+        " `crates/phairdlna-admin/src/token.rs::tests::the_token_file_is_written_and_read_back`"
+        " — every request carries the bearer token, a request without it or with a wrong one is refused with"
+        " 401, and the token is read from a file that belongs to the owner alone; the token is asked for on"
+        " every request and not only on the requests that change something",
+        "Verified",
+    ),
+    "OPS-022": (
+        "`crates/phairdlna-admin/tests/admin_surface.rs::a_request_that_names_another_host_is_refused`,"
+        " `crates/phairdlna-admin/src/guard.rs::tests::a_name_the_attacker_controls_is_refused`"
+        " — the surface answers only to a Host header that names the loopback interface; a name the attacker"
+        " controls is refused with 421 before a handler sees the request",
+        "Verified",
+    ),
+    "OPS-023": (
+        "`crates/phairdlna-admin/tests/admin_surface.rs::a_change_without_the_csrf_token_is_refused`,"
+        " `crates/phairdlna-admin/tests/admin_surface.rs::a_change_with_a_wrong_csrf_token_is_refused`,"
+        " `crates/phairdlna-admin/src/token.rs::tests::the_csrf_token_belongs_to_the_token`"
+        " — a request that changes something carries the token of the cross-site request forgery defence, and"
+        " the value is bound to the session, which is the token of the installation",
+        "Verified",
+    ),
+    "OPS-024": (
+        "`crates/phairdlna-cli/tests/admin.rs::the_media_server_does_not_know_the_routes_of_the_surface`,"
+        " `crates/phairdlna-admin/tests/admin_surface.rs::an_unknown_path_is_refused`"
+        " — the surface has its own listener and its own three routes; the media server knows none of them,"
+        " and a path the surface does not know is a generic 404",
+        "Verified",
+    ),
+    "OPS-025": (
+        "`crates/phairdlna-cli/Cargo.toml` (the feature admin),"
+        " `scripts/local-ci.sh` (the build without the default features)"
+        " — the surface sits behind the cargo feature admin and behind security.admin_enabled; a build"
+        " without the feature has no administration socket, no token and no administration code",
+        "Verified",
+    ),
+    "OPS-026": (
+        "`crates/phairdlna-cli/src/serve/setup.rs::explain_the_admin_surface`"
+        " — the daemon names the address of the surface and the file of its token when it starts; the"
+        " explanation in plain language and the sentence for the disabled case are the work of the first-run"
+        " output of the command line",
+        "Implemented",
+    ),
+    "OPS-027": (
+        "`crates/phairdlna-admin/src/server.rs` (the limits of the surface),"
+        " `crates/phairdlna-admin/src/guard.rs`"
+        " — the surface reads the same limit table as the media server and bounds the head of the request"
+        " and the time of the answer; the body of the surface is empty, so its own bound is small",
+        "Implemented",
+    ),
+    "UX-011": (
+        "`crates/phairdlna-cli/tests/admin.rs::the_diagnostics_do_not_name_the_files_of_the_user`,"
+        " `crates/phairdlna-admin/tests/admin_surface.rs::the_diagnostics_hide_the_paths`"
+        " — the diagnostics of the surface name no file of the user; the report as plain text and the"
+        " switch of the redaction are the work of the command line",
+        "Implemented",
+    ),
+    "UX-012": (
+        "`crates/phairdlna-cli/src/serve/transfers.rs::tests::a_transfer_is_counted_while_it_runs`,"
+        " `crates/phairdlna-cli/src/serve/admin.rs`"
+        " — the diagnostics name the client and the title of the item it is playing, and the status counts"
+        " the transfers that run; the address of the client is not known yet, because the listener does not"
+        " hand the address of the peer to the route of the media server",
+        "Implemented",
+    ),
+    "SEC-071": (
+        "`crates/phairdlna-cli/src/serve/guard.rs`,"
+        " `crates/phairdlna-admin/tests/admin_surface.rs::a_request_that_names_another_host_is_refused`"
+        " — the media server answers only to the host names of the configuration, and the administration"
+        " surface only to the names of the loopback interface; a name the attacker controls is refused"
+        " before a handler sees the request",
+        "Verified",
+    ),
+    "SEC-072": (
+        "`crates/phairdlna-admin/tests/admin_surface.rs::a_request_without_the_custom_header_is_refused`,"
+        " `crates/phairdlna-admin/tests/admin_surface.rs::the_answer_never_carries_a_cross_origin_header`"
+        " — every request of the administration surface carries the custom header, and no answer of the"
+        " surface carries a header that would let another origin read it",
+        "Verified",
+    ),
 }
 
 

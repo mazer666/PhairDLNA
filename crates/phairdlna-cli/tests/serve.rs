@@ -442,3 +442,27 @@ fn a_request_for_another_service_is_refused() {
         answer.text()
     );
 }
+
+/// The negative case: a client that is not on the access-control list is
+/// refused.
+///
+/// The list of the test names an address that is not the address of the test,
+/// so the daemon refuses the client of the test itself (`CFG-009`).
+#[test]
+fn a_client_that_is_not_on_the_list_is_refused() {
+    let server = Server::start_with_clients(&["203.0.113.7"]);
+
+    let answer = server.get("/description.xml");
+
+    assert_eq!(answer.status, 403, "{}", answer.text());
+}
+
+/// The positive case: a client that is on the access-control list is answered.
+#[test]
+fn a_client_that_is_on_the_list_is_answered() {
+    let server = Server::start_with_clients(&["127.0.0.1", "::1"]);
+
+    let answer = server.get("/description.xml");
+
+    assert_eq!(answer.status, 200, "{}", answer.text());
+}

@@ -18,11 +18,13 @@
 //! ```
 
 mod local;
+mod memory;
 mod path;
 mod traits;
 mod unsupported;
 
 pub use local::{LocalFileSystem, LOCAL_VOLUME};
+pub use memory::{LocalProcessMemory, ProcessMemory};
 pub use path::{
     display_name, identity_of, identity_of_with, is_readable_folder, CaseSensitivity, FileId,
     MediaPath, VolumeFingerprint, VolumeId,

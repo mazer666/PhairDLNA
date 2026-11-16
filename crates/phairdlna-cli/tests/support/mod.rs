@@ -9,6 +9,8 @@
 //! Example: `Server::start()` brings a daemon up on a free port and hands out
 //!       its address.
 
+#[cfg(feature = "admin")]
+mod admin;
 pub mod artwork;
 pub mod soap;
 
@@ -57,6 +59,12 @@ pub struct Server {
     _directory: tempfile::TempDir,
     address: SocketAddr,
     library: PathBuf,
+    /// The address of the administration surface, when it runs.
+    #[cfg(feature = "admin")]
+    admin: Option<SocketAddr>,
+    /// The token of the administration surface.
+    #[cfg(feature = "admin")]
+    admin_token: Option<String>,
     stop: Option<tokio::sync::oneshot::Sender<()>>,
     thread: Option<std::thread::JoinHandle<()>>,
 }
@@ -65,6 +73,57 @@ impl Server {
     /// Starts a daemon with a library of one film.
     pub fn start() -> Self {
         Self::start_with_film(FILM)
+    }
+
+    /// Starts a daemon whose access-control list names the given clients.
+    ///
+    /// The daemon answers only the clients of the list; a test uses the list to
+    /// refuse the client of the test itself (`CFG-009`).
+    pub fn start_with_clients(clients: &[&str]) -> Self {
+        let directory = tempfile::tempdir().expect("a temporary directory");
+        let library = directory.path().join("Library");
+        std::fs::create_dir_all(&library).expect("the library is created");
+        std::fs::write(library.join("King Kong.mkv"), FILM).expect("the file is written");
+        let list: Vec<String> = clients
+            .iter()
+            .map(|client| format!("\"{client}\""))
+            .collect();
+        let security = format!("[security]\nallowed_clients = [{}]\n", list.join(", "));
+        let config = write_config_with(directory.path(), &library, &security);
+        let identity = directory.path().join("identity");
+        let mut options = ServeOptions::new(config);
+        options.http_port = Some(0);
+        options.ssdp = false;
+        options.host = Some(std::net::Ipv4Addr::LOCALHOST);
+        options.identity_path = Some(identity);
+        let (ready_tx, ready_rx) = mpsc::channel();
+        let (stop, stopped) = tokio::sync::oneshot::channel::<()>();
+        let thread = std::thread::spawn(move || {
+            let runtime = tokio::runtime::Builder::new_multi_thread()
+                .enable_all()
+                .build()
+                .expect("the runtime starts");
+            runtime.block_on(async move {
+                let mut daemon = Daemon::start(options).await.expect("the daemon starts");
+                ready_tx.send(daemon.local_addr()).ok();
+                let _ = stopped.await;
+                daemon.shutdown().await.expect("the daemon stops");
+            });
+        });
+        let address = ready_rx
+            .recv_timeout(Duration::from_secs(10))
+            .expect("the daemon announces its address");
+        Self {
+            _directory: directory,
+            address,
+            library,
+            #[cfg(feature = "admin")]
+            admin: None,
+            #[cfg(feature = "admin")]
+            admin_token: None,
+            stop: Some(stop),
+            thread: Some(thread),
+        }
     }
 
     /// Starts a daemon with a library of one film of the given size.
@@ -111,6 +170,10 @@ impl Server {
             _directory: directory,
             address,
             library,
+            #[cfg(feature = "admin")]
+            admin: None,
+            #[cfg(feature = "admin")]
+            admin_token: None,
             stop: Some(stop),
             thread: Some(thread),
         }
@@ -286,12 +349,17 @@ pub fn find_item(catalogue: &Catalogue, title: &str) -> Option<String> {
 
 /// Writes a configuration file with one root.
 pub fn write_config(directory: &Path, library: &Path) -> PathBuf {
+    write_config_with(directory, library, "")
+}
+
+/// Writes a configuration file with one root and a security section.
+pub fn write_config_with(directory: &Path, library: &Path, security: &str) -> PathBuf {
     let path = directory.join("phairdlna.toml");
     // The cache of the pictures lives in the folder of the test, so that a test
     // run never writes into the data directory of the user.
     let text = format!(
         "schema_version = 1\n\n[server]\ndevice_name = \"Living room\"\n\n\
-         [library]\ncache_directory = \"{}\"\n[[library.roots]]\nname = \"Films\"\npath = \"{}\"\n",
+         [library]\ncache_directory = \"{}\"\n[[library.roots]]\nname = \"Films\"\npath = \"{}\"\n\n{security}",
         directory.join("cache").display(),
         library.display()
     );

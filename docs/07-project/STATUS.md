@@ -1,6 +1,6 @@
 # Project status — PhairDLNA
 
-Status: **Baseline approved (2026-11-15) · M1.11 implemented · M2.1 implemented · M2.2 implemented · M2.3 implemented** · Compiled: 2026-11-16
+Status: **Baseline approved (2026-11-15) · M1.11 implemented · M2.1 implemented · M2.2 implemented · M2.3 implemented · M2.4 implemented (partly) · M2.5 implemented (partly)** · Compiled: 2026-11-16
 Owner role: Lead / Project Manager
 
 ---
@@ -93,6 +93,61 @@ the identifier of the object does not change. The evidence is
 `crates/phairdlna-cli/tests/subtitles.rs`; the decisions are DEC-048 to DEC-057 of
 `../00-governance/DECISION-LOG.md`.
 
+**The fourth step of M2 is closed in part: M2.4 — the configuration that means something.**
+Two settings of the configuration were written down long ago and were never obeyed, and that is
+the worst kind of setting: the user believes in it and it does not exist. The **access-control
+list** (`security.allowed_clients`) is now read at the start, checked against the **address of
+the socket** — and not against a header, which a client that is not allowed may write as it
+likes — and a client that is not on the list is refused with `403` before a handler sees the
+request. An entry of the list is an address (`192.168.1.20`), a network (`192.168.1.0/24`) or the
+word `any`; an entry that cannot be read stops the server before a socket is opened, because a
+list that is silently ignored is a list that the user believes in. The **administration surface**
+has its own settings now: the port it listens on, the addresses it binds to, the file that holds
+its token, and the word that lets it leave the machine — a configuration that would put the
+surface on an address of the network is **refused** unless the user says so in the configuration
+(`CFG-005`, DEC-061). The **export** and the **import** of the configuration exist as commands:
+`phairdlna config export` writes the configuration as the server understands it, with the schema
+version, and `phairdlna config import <file>` reads a file and reports the configuration it
+would become — it writes nothing, and that is the part that is still open. The evidence is
+`crates/phairdlna-cli/tests/serve.rs`, `crates/phairdlna-cli/tests/cli.rs` and
+`crates/phairdlna-core/src/security/access.rs`.
+
+**The fifth step of M2 is closed in part: M2.5 — the local administration surface.** The server
+now has a door for its owner, and the door is narrow on purpose. The surface lives in the crate
+`phairdlna-admin`, listens on the **loopback interface only** (`127.0.0.1` and `::1`), on a
+port of its own, and is started only when the configuration asks for it; a build without the
+cargo feature `admin` has no surface at all. Every request must carry the **bearer token** of
+the installation — a random secret of 256 bits in a file with the permissions `600` inside a
+folder with the permissions `700`; a file that others may read stops the surface instead of being
+repaired silently. The surface answers only to a `Host` header that names the loopback, so that
+the "DNS rebinding" attack finds nothing; it answers only to a request that carries the custom
+header `X-Phair-Admin`, which a form in a browser cannot send; it carries **no header that would
+let another origin read the answer**, and it answers no question about permissions. A request
+that changes something carries the token of the **"cross-site request forgery"** defence, which
+is bound to the session — the session *is* the token of the installation (DEC-060).
+
+The surface answers three questions. **`/api/status`** says how long the server has been running,
+how many streams are running, how many objects the catalogue holds, how much memory the process
+occupies (where the platform can say), what the roots of the library look like and which
+identifier the server tells its clients that it has changed. **`/api/catalogue/rescan`** reads
+the library again. **`/api/diagnostics`** shows the records of the log and the warnings of the
+server — with the paths of the user replaced by their pseudonyms, and the surface redacts again
+what the daemon behind it hands over, so that a leak needs two mistakes and not one. The
+transfers that run are registered, so that the diagnostics name the client and what it is
+playing. The **source revision** is embedded into the binary when it is built, so that the
+running server and the source it will offer cannot disagree. The evidence is
+`crates/phairdlna-admin/tests/admin_surface.rs` and `crates/phairdlna-cli/tests/admin.rs`; the
+decisions are DEC-058 to DEC-064 and **ADR-0012**.
+
+**Two parts of M2.4 and M2.5 are still open, and they are named.** The **source offer**
+(`OPS-016`, `SEC-070`) does not exist: the archive, the route and the build step that produces
+the artefact are not written, and the open question 2 of F-14 asks the owner how the archive is
+to be produced. The **plain-language text** of the first-run output and the command that prints
+the diagnostics as text (F-13, `UX-011`, `UX-014`) belong to the command line. The
+**trusted-client list** (`CFG-010`) waits for the device profiles of F-07. The **address of the
+client** is not known to the routes of the media server yet, so the diagnostics name the client
+and the title but not the address.
+
 **One deviation is on the record.** The picture pipeline of M2.2 parses **in the server
 process**, not in the sandboxed child that ADR-0008 prescribes, because that child does not
 exist yet — it is the work of M-06. Every read and every allocation of the pipeline is
@@ -132,7 +187,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | Requirements | **Complete** | 346 requirements with IDs, priorities, features, milestones and verification methods — `../01-product/REQUIREMENTS-INDEX.md` |
 | Traceability | **Complete** | Generated matrix requirement → feature → milestone → module → verification → evidence — `TRACEABILITY-MATRIX.md` |
 | Architecture | **Complete** | Module boundaries, data flows, runtime model — `../02-architecture/ARCHITECTURE.md` |
-| Decisions | **Complete** | The ADRs in `../02-architecture/adr/` plus 57 entries in the decision log — `../00-governance/DECISION-LOG.md` |
+| Decisions | **Complete** | The ADRs in `../02-architecture/adr/` plus 64 entries in the decision log — `../00-governance/DECISION-LOG.md` |
 | Security model | **Complete** | Eight mitigations, 28 threats, each with its verification — `../04-security/SECURITY-MODEL.md` |
 | Privacy model | **Complete** | Data inventory, network posture, source offer — `../04-security/PRIVACY.md` |
 | Dependency review | **Complete** | Licence data for every candidate crate, retrieved 2026-11-14 — `../04-security/DEPENDENCY-LICENSE-REVIEW.md` |
@@ -145,7 +200,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | Open decisions | **12 awaiting the owner** — OD-05 (minimum macOS version) was decided on 2026-11-15 | `OPEN-DECISIONS.md` |
 | Glossary | **Complete** | The protocol, product, platform, security and project vocabulary — `../01-product/GLOSSARY.md` |
 | Research inputs | **Complete** | The briefs the specifications cite — `../09-research/` |
-| Implementation | **M0 done, M1.1–M1.11 implemented, M2.1, M2.2 and M2.3 implemented** | The four crates exist with the boundary enforced; the configuration, the eight platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root, the catalogue over several roots with the memory of their volumes, the live daemon, and the picture pipeline of the library are implemented; **no device test has been performed**, so no milestone exit criterion is met yet |
+| Implementation | **M0 done, M1.1–M1.11 implemented, M2.1, M2.2 and M2.3 implemented, M2.4 and M2.5 in part** | The four crates exist with the boundary enforced; the configuration, the platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root, the catalogue over several roots with the memory of their volumes, the live daemon, the picture pipeline of the library, the access-control list and the local administration surface are implemented; the source offer, the plain-language first-run output and the trusted-client profiles are not; **no device test has been performed**, so no milestone exit criterion is met yet |
 | Device evidence | **None** | Every device row reads `NOT TESTED` |
 | Release | **Not releasable** | `RELEASE-BLOCKERS.md` |
 

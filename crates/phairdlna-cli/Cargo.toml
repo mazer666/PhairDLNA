@@ -8,12 +8,22 @@ license.workspace = true
 repository.workspace = true
 publish = false
 
+[features]
+# The administration surface is optional: the daemon runs completely without it
+# (`OPS-025`). The build without it has no administration socket, no token and
+# no administration route.
+default = ["admin"]
+admin = ["dep:phairdlna-admin"]
+
 [dependencies]
 # The daemon serves the network from this crate; the core stays portable and
 # knows nothing about sockets (ADR-0001, ARCHITECTURE §2).
 axum = { workspace = true }
 futures-core = { workspace = true }
 phairdlna-core = { workspace = true }
+# The loopback administration surface. The dependency is optional, so that a
+# build without the feature is a build without the surface (ADR-0012).
+phairdlna-admin = { workspace = true, optional = true }
 tokio = { workspace = true }
 
 [dev-dependencies]

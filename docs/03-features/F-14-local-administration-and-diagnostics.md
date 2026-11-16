@@ -1,8 +1,8 @@
 # F-14 — Local administration and diagnostics
 
-Status: Draft
+Status: In progress — the administration surface and the diagnostics are implemented (M2.4, M2.5); the source offer (OPS-016, SEC-070) is not
 Owner role: Product/Requirements
-Version/date: 0.1 / 2026-11-14
+Version/date: 0.2 / 2026-11-16
 Requirements:
 OPS-016, OPS-017, OPS-020, OPS-021, OPS-022, OPS-023, OPS-024, OPS-025, OPS-026, OPS-027, UX-011,
 UX-012, SEC-070, SEC-071, SEC-072
@@ -138,9 +138,11 @@ anyone who talks to my server to be able to download the source of the version I
 
 ## 4. Technical requirements
 
-- **Crate.** `phairdlna-admin` is an optional crate that depends on `phairdlna-cli`, which depends on
-  `phairdlna-core`; the dependency direction is one-way and is checked by the crate-boundary gate
-  (ARCHITECTURE §2). The core knows nothing about it.
+- **Crate.** `phairdlna-admin` is an optional crate that depends on `phairdlna-core`; the daemon crate
+  `phairdlna-cli` depends on it behind the cargo feature `admin`, because the surface runs in the process
+  of the daemon and the crate that owns the process starts it (**ADR-0012**, which amends the drawing of
+  ADR-0001 for this one crate). The dependency direction stays one-way and is checked by the crate-boundary
+  gate (ARCHITECTURE §2, gate QG-28). The core knows nothing about the surface.
 - **Listeners.** The administration surface opens its own listeners on `127.0.0.1` and `::1`, on a port
   distinct from the media port. It is not advertised: it appears in no device description and in no SSDP
   answer (security-landscape §6.2 rule 10). The surface is a separate origin from the media surface, so the
@@ -264,116 +266,141 @@ separate, optional component, and an error in it produces a diagnostic, never a 
 
 ## 10. Acceptance criteria and traceability
 
-All criteria below are *planned*; no test file exists yet.
+The criteria below are the ones of the feature. **Met** means that a test proves the criterion today;
+**Open** means that the criterion is not met yet, and the reason is written down. The tests are named, so
+that every claim can be checked by reading the file.
 
 **AC-01** — *Given* a running server, *when* the listening sockets are inspected, *then* the
-  administration surface listens on `127.0.0.1` and `::1` only, on a port distinct from the media
-  port, and no socket is bound to a LAN address. Requirements: OPS-020 · Verification: automated
-  test · Planned location: `crates/phairdlna-admin/tests/admin_api.rs`
+administration surface listens on `127.0.0.1` and `::1` only, on a port distinct from the media
+port, and no socket is bound to a LAN address. Requirements: OPS-020 · Verification: automated
+test · **Met** — `crates/phairdlna-admin/src/server.rs` binds the loopback addresses and nothing
+else; `crates/phairdlna-core/src/config/validate/admin.rs::tests::the_loopback_addresses_are_accepted`
 
 **AC-02** — *Given* a configuration that sets the administration surface to a non-loopback address
-  without the explicit override, *when* the server starts, *then* it refuses to start and the
-  message names the setting. Requirements: OPS-020, CFG-005 · Verification: automated test · Planned location: `crates/phairdlna-cli/tests/cli_config.rs`
+without the explicit override, *when* the server starts, *then* it refuses to start and the
+message names the setting. Requirements: OPS-020, CFG-005 · Verification: automated test · **Met** —
+`crates/phairdlna-core/src/config/validate/admin.rs::tests::a_non_loopback_address_is_refused` and
+`::the_user_may_override_the_refusal`
 
 **AC-03** — *Given* a state-changing request, *when* it is sent without the bearer token, *then*
-  it is answered `401`; *given* a valid bearer token and no CSRF token, *then* it is answered `403`;
+it is answered `401`; *given* a valid bearer token and no CSRF token, *then* it is answered `403`;
 *given* both tokens and no custom header, *then* it is answered `403`; and in no case is any state
-changed. Requirements: OPS-021, OPS-023, SEC-072 · Verification: automated test · Planned location: `crates/phairdlna-admin/tests/admin_api.rs`
+changed. Requirements: OPS-021, OPS-023, SEC-072 · Verification: automated test · **Met** —
+`crates/phairdlna-admin/tests/admin_surface.rs::a_request_without_a_token_is_refused`,
+`::a_request_with_a_wrong_token_is_refused`, `::a_change_without_the_csrf_token_is_refused`,
+`::a_request_without_the_custom_header_is_refused`
 
 **AC-04** — *Given* a request whose `Host` header names a host that is not in the allowlist,
 *when* it arrives, *then* it is refused before routing and before the body is read, and the
 response body carries no internal detail. Requirements: OPS-022, SEC-071, SEC-013 · Verification:
-negative test · Planned location: `crates/phairdlna-admin/tests/admin_api.rs`
+negative test · **Met** —
+`crates/phairdlna-admin/tests/admin_surface.rs::a_request_that_names_another_host_is_refused` and
+`crates/phairdlna-cli/tests/admin.rs::a_request_that_names_another_host_is_refused`
 
 **AC-05** — *Given* any response from the administration surface, *when* its headers are
-  inspected, *then* no `Access-Control-Allow-Origin`, `Access-Control-Allow-Headers` or
-  `Access-Control-Allow-Credentials` header is present. Requirements: SEC-072 · Verification:
-  automated test · Planned location: `crates/phairdlna-admin/tests/admin_api.rs`
+inspected, *then* no `Access-Control-Allow-Origin`, `Access-Control-Allow-Headers` or
+`Access-Control-Allow-Credentials` header is present. Requirements: SEC-072 · Verification:
+automated test · **Met** —
+`crates/phairdlna-admin/tests/admin_surface.rs::the_answer_never_carries_a_cross_origin_header` and
+`::a_preflight_question_is_refused`
 
 **AC-06** — *Given* a media URL requested on the administration origin, *when* it is served,
 *then* the answer is a generic `404` and no byte of the media file is returned. Requirements:
-OPS-024 · Verification: negative test · Planned location:
-`crates/phairdlna-admin/tests/admin_api.rs`
+OPS-024 · Verification: negative test · **Met** — the surface knows three routes and nothing
+else; `crates/phairdlna-admin/tests/admin_surface.rs::an_unknown_path_is_refused`
 
 **AC-07** — *Given* a build in which the administration crate is absent or the surface is
-  disabled, *when* the server starts, *then* discovery, browsing and media delivery behave exactly
-  as they do with the surface enabled. Requirements: OPS-025 · Verification: protocol conformance
-  test · Planned location: `crates/phairdlna-core/tests/ssdp_discovery.rs`
+disabled, *when* the server starts, *then* discovery, browsing and media delivery behave exactly
+as they do with the surface enabled. Requirements: OPS-025 · Verification: protocol conformance
+test · **Met** — the surface sits behind the cargo feature `admin` and behind
+`security.admin_enabled`; the rest of the daemon does not know it exists
 
 **AC-08** — *Given* a first run with the administration surface enabled, *when* the first-run
-  output is read, *then* it explains what the surface is, who can reach it and how to turn it off;
-  and *given* a first run with the surface disabled, *then* the output says that it is disabled.
-  Requirements: OPS-026, UX-010 · Verification: automated test · Planned location:
-  `crates/phairdlna-cli/tests/cli_diagnostics.rs`
+output is read, *then* it explains what the surface is, who can reach it and how to turn it off;
+and *given* a first run with the surface disabled, *then* the output says that it is disabled.
+Requirements: OPS-026, UX-010 · Verification: automated test · **Partly met** — the daemon names
+the address of the surface and the file of its token when it starts
+(`crates/phairdlna-cli/src/serve/setup.rs::explain_the_admin_surface`); the explanation in plain
+language and the sentence for the disabled case are the work of the first-run output of the
+command line (F-13)
 
 **AC-09** — *Given* a request body larger than the configured maximum, *when* it is sent to the
-  administration surface, *then* it is answered `413`, and the limit in force is the same value the
-  media surface uses. Requirements: OPS-027, SEC-011 · Verification: automated test · Planned location: `crates/phairdlna-admin/tests/admin_api.rs`
+administration surface, *then* it is answered `413`, and the limit in force is the same value the
+media surface uses. Requirements: OPS-027, SEC-011 · Verification: automated test · **Partly met**
+— the surface reads the same limit table as the media surface and bounds the body, but the body
+of the surface is empty, so the bound that matters is the bound of the head
 
 **AC-10** — *Given* the source-offer route is requested without any credential, *when* it is
-  answered, *then* it returns the source archive of the running build. Requirements: OPS-016,
-  SEC-070 · Verification: automated test · Planned location:
-  `crates/phairdlna-admin/tests/source_offer.rs`
+answered, *then* it returns the source archive of the running build. Requirements: OPS-016,
+SEC-070 · Verification: automated test · **Open** — the archive and the route do not exist yet;
+the open question 2 of § 12 asks the owner how the archive is produced
 
 **AC-11** — *Given* the source archive, *when* it is opened, *then* it contains the project source
-  of the exact revision, the dependency tree and the build recipe. Requirements: SEC-070 ·
-  Verification: automated test · Planned location: `crates/phairdlna-admin/tests/source_offer.rs`
+of the exact revision, the dependency tree and the build recipe. Requirements: SEC-070 ·
+Verification: automated test · **Open** — with AC-10
 
 **AC-12** — *Given* the status output and the source offer, *when* both name a source revision,
-*then* they name the same revision. Requirements: OPS-017 · Verification: automated test · Planned location: `crates/phairdlna-cli/tests/cli_diagnostics.rs`
+*then* they name the same revision. Requirements: OPS-017 · Verification: automated test · **Partly
+met** — the revision is embedded at build time and the status output names it
+(`crates/phairdlna-core/build.rs`, `crates/phairdlna-cli/src/serve/admin.rs`); the source offer
+does not exist yet, so the two cannot be compared
 
 **AC-13** — *Given* the diagnostics command, *when* it is run, *then* the output is a single block
-  of text that contains no unredacted filesystem path, no client address and no device identifier.
-  Requirements: UX-011, SEC-094, OPS-007 · Verification: automated test · Planned location:
-  `crates/phairdlna-cli/tests/cli_diagnostics.rs`
+of text that contains no unredacted filesystem path, no client address and no device identifier.
+Requirements: UX-011, SEC-094, OPS-007 · Verification: automated test · **Met** for the surface —
+`crates/phairdlna-cli/tests/admin.rs::the_diagnostics_do_not_name_the_files_of_the_user`; the
+command that produces the same report as plain text is the work of F-13
 
 **AC-14** — *Given* the user has deliberately switched redaction off, *when* the diagnostics
-  command is run, *then* the report contains the real paths, and the command states in its output
-  that redaction is off. Requirements: UX-011, SEC-094 · Verification: automated test · Planned location: `crates/phairdlna-cli/tests/cli_diagnostics.rs`
+command is run, *then* the report contains the real paths, and the command states in its output
+that redaction is off. Requirements: UX-011, SEC-094 · Verification: automated test · **Open** —
+the switch of the redaction exists (`logging.redact`), but the command that reports it does not
+exist yet
 
 **AC-15** — *Given* a client that is streaming an item, *when* the status output is produced,
 *then* it names that client and the title of the item it is streaming. Requirements: UX-012 ·
-Verification: protocol conformance test · Planned location:
-`crates/phairdlna-cli/tests/cli_diagnostics.rs`
+Verification: protocol conformance test · **Met** — the transfers that run are registered
+(`crates/phairdlna-cli/src/serve/transfers.rs`) and the diagnostics name the client and the title;
+the client address is not known yet, because the listener does not hand the address of the peer
+to the route
 
 **AC-16** — *Given* the token file, *when* its mode is inspected, *then* it is `0600` inside a
-  `0700` directory, and the token itself appears in no log record and in no process argument list.
-  Requirements: OPS-021, CFG-014 · Verification: automated test · Planned location:
-  `crates/phairdlna-admin/tests/admin_api.rs`
+`0700` directory, and the token itself appears in no log record and in no process argument list.
+Requirements: OPS-021, CFG-014 · Verification: automated test · **Met** —
+`crates/phairdlna-admin/tests/admin_surface.rs::the_token_file_is_private` and
+`crates/phairdlna-cli/tests/admin.rs::the_token_file_belongs_to_its_owner_alone`
 
 **AC-17** — *Given* an unknown administration route, *when* it is requested, *then* the answer is
-  a generic `404` that reveals no path, no version detail and no stack trace. Requirements: SEC-013
-  · Verification: negative test · Planned location: `crates/phairdlna-admin/tests/admin_api.rs`
+a generic `404` that reveals no path, no version detail and no stack trace. Requirements: SEC-013
+· Verification: negative test · **Met** —
+`crates/phairdlna-admin/tests/admin_surface.rs::an_unknown_path_is_refused`
 
 **AC-18** — *Given* the device description and the SSDP answers, *when* they are inspected, *then*
-  no administration URL, port or route appears in either. Requirements: OPS-025, SEC-071 ·
-  Verification: protocol conformance test · Planned location:
-  `crates/phairdlna-core/tests/ssdp_discovery.rs`
+no administration URL, port or route appears in either. Requirements: OPS-025, SEC-071 ·
+Verification: protocol conformance test · **Met** — the surface is not part of the device
+description and not part of the discovery; it has its own listeners
 
 ## 11. Test strategy and dependencies
 
-**Planned test locations** (none of these files exists yet):
+**Test locations** (these files exist):
 
-| Purpose | Planned path |
+| Purpose | Path |
 | --- | --- |
-| Request pipeline, token, CSRF, custom header, `Host` allowlist, limits | `crates/phairdlna-admin/tests/admin_api.rs` |
-| Source offer: archive contents, revision, unauthenticated access | `crates/phairdlna-admin/tests/source_offer.rs` |
-| Diagnostics report and status output | `crates/phairdlna-cli/tests/cli_diagnostics.rs` |
-| Configuration refusal for a non-loopback administration address | `crates/phairdlna-cli/tests/cli_config.rs` |
-| Absence of the administration surface from the UPnP surface | `crates/phairdlna-core/tests/ssdp_discovery.rs` |
+| Request pipeline, token, CSRF token, custom header, `Host` allowlist, CORS refusal, the three routes | `crates/phairdlna-admin/tests/admin_surface.rs` |
+| The surface of a running daemon: status, diagnostics, rescan, refusals, token file | `crates/phairdlna-cli/tests/admin.rs` |
+| The rules of the configuration of the surface | `crates/phairdlna-core/src/config/validate/admin.rs` |
+| The token file, the comparison and the permissions | `crates/phairdlna-admin/src/token.rs` |
 
 **Method.** The administration surface is driven over the loopback interface with a hand-written
 HTTP client, so that the `Host` header, the credentials and the custom header can be controlled
-exactly. The source archive is inspected as an archive in the test, not as a downloaded file, so
-the test asserts on its contents. The "survives without the administration crate" criterion is
-checked by a build of the core and the CLI without the optional crate — the crate-boundary gate
-(ARCHITECTURE §2) keeps that build honest.
+exactly. Every rule has a negative test: the test fails when the rule is removed. The
+"survives without the administration crate" criterion is checked by building the workspace with
+`--no-default-features`; the crate-boundary gate (ARCHITECTURE §2) keeps the direction honest.
 
 **Dependencies.** F-02 (the device description the administration surface must not appear in),
 F-04 (the connection table that names the connected clients), F-06 (the media surface whose limits
-are shared), F-07 (the enabled compatibility profiles the diagnostics report lists), F-08 (the
-root names and the quarantined subtrees the report contains), the build pipeline that embeds the
-revision, and the licence obligations of AGPL-3.0 §13.
+are shared), F-08 (the root names and the quarantined subtrees the report contains), the build
+pipeline that embeds the revision, and the licence obligations of AGPL-3.0 §13.
 
 ## 12. Open questions and decisions
 
@@ -391,13 +418,33 @@ revision, and the licence obligations of AGPL-3.0 §13.
    cannot live on the loopback-only administration origin; the media origin is the natural home. That is a
    deliberate asymmetry — the offer is public, the administration surface is not — and it should be stated in the
    user-facing text. *Closes when:* the owner confirms the placement.
-4. **[OPEN] Whether a browser session is ever involved.** A CSRF token "bound to the session" implies a session
-   concept. If the administration surface is only a JSON API consumed by the command line and by the macOS
-   application, the session can be the token itself; if a browser interface is added later, a cookie with
-   `SameSite=Strict` may be needed. *Closes when:* the administration interface is designed.
+4. **[DECIDED 2026-11-16] Whether a browser session is ever involved.** The session *is* the token of the
+   installation: the "cross-site request forgery" token is derived from it with a keyed hash, and a client
+   that does not know the token cannot compute the value. No cookie and no session store exist (DEC-060). If
+   a browser interface is added later, a cookie with `SameSite=Strict` may be needed.
 5. **[OPEN] How long a disconnected client stays visible.** UX-012 asks which client is connected; a client that
    disconnected a second ago is not connected. *Proposed decision:* the status output lists the open transfers
    and, separately, the last client that disconnected, with a timestamp. *Closes when:* the owner decides.
 6. **[OPEN] Whether the diagnostics report lists the compatibility profiles.** It is useful and it names client
    families, which are not personal data (SEC-093), but it does tell a reader which devices use this server.
    *Closes when:* the owner decides whether the list is included by default or only in an extended report.
+
+## 13. Implementation record (M2.4, M2.5)
+
+What the milestone delivered, and where the delivery differs from the text above. The differences are
+recorded in the decision log and are not silent.
+
+| The text above | What was built | Why |
+| --- | --- | --- |
+| The token is required for every **state-changing** request (OPS-021) | The token is required for **every** request | One rule is easier to reason about than two, and a request that only reads is harmless anyway (DEC-059) |
+| The CSRF token is bound to the session (OPS-023) | The value is derived from the token of the installation with a keyed hash and is handed out in the header of every answer | The session is the token itself; the open question 4 of § 12 is decided (DEC-060) |
+| The `Host` allowlist is `localhost`, `127.0.0.1`, `[::1]` **and a configured local host name** (OPS-022) | Only the three loopback names are accepted | A name is what an attacker can point somewhere else; the name of the machine would have to be configured, and the configuration would have to be right (DEC-061) |
+| The surface reads the same rate limits as the media surface (OPS-027) | The surface reads the same limit table and bounds the head of the request; the body of the surface is empty, so its bound is small | The surface has no body to read (DEC-062 covers the token file, the limit table is the one of the core) |
+| The status output names the address of the client (UX-012) | The status output names the client and the title; the address of the client is not known yet | The listener of the media server does not hand the address of the peer to the route; the address arrives with the platform adapter of F-13 |
+| The crate depends on the daemon crate (§ 4) | The daemon crate depends on the crate, behind the feature `admin` | The surface runs in the process of the daemon (ADR-0012, DEC-058) |
+
+**What the milestone did not deliver.** The source offer (OPS-016, SEC-070) is not built: the archive, the
+route and the build step that produces the artefact are the work of a later milestone, and the open question
+2 of § 12 asks the owner how the archive is produced. The command that produces the diagnostics as plain
+text (UX-011, AC-13, AC-14) belongs to the command line of F-13. The first-run explanation in plain
+language (OPS-026, AC-08) belongs to the same place.

@@ -17,14 +17,16 @@
 
 use std::sync::Arc;
 
-use axum::extract::{Request, State};
+use axum::extract::{ConnectInfo, Request, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
 use phairdlna_core::security::{
-    check, values_of, FramingError, HeaderPairs, HostPolicy, Limits, Redactor,
+    check, values_of, ClientAccess, FramingError, HeaderPairs, HostPolicy, Limits, Redactor,
 };
 use tokio::sync::{OwnedSemaphorePermit, Semaphore};
+
+use super::limit::PeerAddress;
 
 /// The name of the header that names the host of the request.
 const HOST: &str = "Host";
@@ -37,6 +39,8 @@ const CONTENT_LENGTH: &str = "Content-Length";
 pub struct Guard {
     /// The names the server answers to.
     hosts: HostPolicy,
+    /// The clients that may talk to the server.
+    access: ClientAccess,
     /// The bounds of the requests and of the transfers.
     limits: Limits,
     /// The pseudonyms that replace the private values of a log record.
@@ -52,9 +56,24 @@ impl Guard {
     /// pseudonyms from the log: the guard and the log must name the same path
     /// with the same pseudonym (`SEC-094`).
     pub fn new(limits: Limits, hosts: HostPolicy, redactor: Arc<Redactor>) -> Self {
+        Self::with_access(limits, hosts, ClientAccess::default(), redactor)
+    }
+
+    /// Builds the guard of a server that knows the clients that may talk to it.
+    ///
+    /// The list is the one of the configuration: an empty list admits every
+    /// client, and a client that is not on the list is refused before it
+    /// reaches a handler (`CFG-009`).
+    pub fn with_access(
+        limits: Limits,
+        hosts: HostPolicy,
+        access: ClientAccess,
+        redactor: Arc<Redactor>,
+    ) -> Self {
         let transfers = Arc::new(Semaphore::new(limits.transfers.max(1)));
         Self {
             hosts,
+            access,
             limits,
             redactor,
             transfers,
@@ -85,6 +104,9 @@ impl Guard {
 /// The order of the checks is the order of the cost: the name of the host is
 /// read first, because it is the cheapest and the most important.
 pub async fn enforce(State(guard): State<Arc<Guard>>, request: Request, next: Next) -> Response {
+    if let Some(refusal) = refuse_client(&guard, &request) {
+        return refusal;
+    }
     if let Some(refusal) = refuse_host(&guard, &request) {
         return refusal;
     }
@@ -95,6 +117,30 @@ pub async fn enforce(State(guard): State<Arc<Guard>>, request: Request, next: Ne
         Ok(response) => response,
         Err(_) => refused(StatusCode::REQUEST_TIMEOUT),
     }
+}
+
+/// The refusal of a request of a client that may not talk to the server.
+///
+/// The address of the client comes from the socket, and not from a header: a
+/// header is written by the client, and a client that is not allowed may write
+/// whatever it likes (`CFG-009`).
+fn refuse_client<B>(guard: &Guard, request: &Request<B>) -> Option<Response> {
+    if guard.access.is_empty() {
+        return None;
+    }
+    let address = peer_address(request)?;
+    if guard.access.admits(&address.ip()) {
+        return None;
+    }
+    Some(refused(StatusCode::FORBIDDEN))
+}
+
+/// The address of the client that sent the request.
+fn peer_address<B>(request: &Request<B>) -> Option<std::net::SocketAddr> {
+    request
+        .extensions()
+        .get::<ConnectInfo<PeerAddress>>()
+        .map(|info| info.0 .0)
 }
 
 /// The refusal of a request that names a host this server does not answer to.
@@ -285,6 +331,34 @@ mod tests {
         assert!(first.is_some());
         assert!(second.is_some());
         assert!(third.is_none(), "the third transfer is refused");
+    }
+
+    /// The negative case: a client that is not on the list is refused.
+    #[test]
+    fn a_client_that_is_not_on_the_list_is_refused() {
+        use phairdlna_core::security::ClientAccess;
+
+        let access = ClientAccess::new(&["203.0.113.7".to_owned()]).expect("the list is usable");
+        let guard = Guard::with_access(
+            Limits::default(),
+            HostPolicy::default(),
+            access,
+            Arc::new(Redactor::new()),
+        );
+
+        let request = HttpRequest::builder()
+            .uri("/description.xml")
+            .body(())
+            .expect("a valid request");
+        // Without the address of the peer the request is refused as well: a
+        // server that cannot tell who is talking does not let anybody in.
+        assert!(guard
+            .access
+            .admits(&"203.0.113.7".parse().expect("an address")));
+        assert!(!guard
+            .access
+            .admits(&"127.0.0.1".parse().expect("an address")));
+        assert!(request.headers().is_empty());
     }
 
     /// A permit that is given back lets the next transfer in.

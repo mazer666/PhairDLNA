@@ -16,6 +16,8 @@
 //! (`OPS-008`).
 
 pub mod address;
+#[cfg(feature = "admin")]
+pub mod admin;
 pub mod guard;
 pub mod http;
 pub mod library;
@@ -28,6 +30,7 @@ pub mod setup;
 pub mod signal;
 pub mod ssdp;
 pub mod stream;
+pub mod transfers;
 pub mod watch;
 
 use std::net::{Ipv4Addr, SocketAddr};
@@ -91,6 +94,12 @@ pub struct ServeOptions {
     /// The tests point it at a temporary file, so that a test run never writes
     /// into the configuration directory of the user.
     pub identity_path: Option<PathBuf>,
+    /// The port of the administration surface, or `None` for the configured
+    /// one.
+    ///
+    /// The port `0` asks the operating system for a free port, which is what
+    /// the tests use.
+    pub admin_port: Option<u16>,
 }
 
 impl ServeOptions {
@@ -104,6 +113,7 @@ impl ServeOptions {
             ssdp_port: None,
             ssdp_advertise_port: None,
             identity_path: None,
+            admin_port: None,
         }
     }
 }
@@ -119,6 +129,9 @@ pub struct Daemon {
     ssdp_task: Option<JoinHandle<()>>,
     stop_watch: Option<tokio::sync::watch::Sender<bool>>,
     watch_task: Option<JoinHandle<()>>,
+    /// The administration surface, when it runs.
+    #[cfg(feature = "admin")]
+    admin: Option<phairdlna_admin::AdminServer>,
 }
 
 impl Daemon {
@@ -139,6 +152,17 @@ impl Daemon {
     /// The base URL the documents are built with.
     pub fn base_url(&self) -> &str {
         &self.context.base_url
+    }
+
+    /// The address of the administration surface, when it runs.
+    ///
+    /// The answer is `None` when the surface is switched off, when the build
+    /// does not contain it, or when it could not be started.
+    #[cfg(feature = "admin")]
+    pub fn admin_addr(&self) -> Option<SocketAddr> {
+        self.admin
+            .as_ref()
+            .and_then(|server| server.addresses().first().copied())
     }
 
     /// Runs the daemon until the shutdown signal arrives.
@@ -190,8 +214,22 @@ impl Daemon {
         self.withdraw_advertisements().await;
         self.stop_discovery().await;
         self.stop_watch().await;
+        #[cfg(feature = "admin")]
+        self.stop_admin();
         self.stop_http().await;
         Ok(())
+    }
+
+    /// Stops the administration surface.
+    ///
+    /// The surface is closed before the media server drains its transfers: a
+    /// user who asks the daemon to stop does not expect the administration
+    /// surface to stay open while it does (`OPS-008`).
+    #[cfg(feature = "admin")]
+    fn stop_admin(&mut self) {
+        if let Some(mut server) = self.admin.take() {
+            server.stop();
+        }
     }
 
     /// Sends the advertisements that say the server is gone.

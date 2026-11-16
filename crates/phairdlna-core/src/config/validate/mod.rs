@@ -10,9 +10,13 @@
 use super::defaults::Config;
 use super::error::ConfigError;
 
+mod admin;
 mod library;
+use crate::security::ClientAccess;
+
 use super::sections::{NetworkSection, SecuritySection, ServerSection};
 
+use self::admin::validate_admin;
 use self::library::validate_library;
 
 /// Checks the whole document and returns the first problem it finds.
@@ -169,7 +173,26 @@ fn validate_security(security: &SecuritySection) -> Result<(), ConfigError> {
     for (index, name) in security.allowed_host_names.iter().enumerate() {
         validate_host_name(index, name)?;
     }
-    Ok(())
+    validate_clients(security)?;
+    validate_admin(security)
+}
+
+/// The rules of the list of the clients that may talk to the server.
+///
+/// An entry that cannot be read stops the server: a list that is silently
+/// ignored would be a list that the user believes in and that does not exist
+/// (`CFG-002`, `CFG-009`).
+fn validate_clients(security: &SecuritySection) -> Result<(), ConfigError> {
+    ClientAccess::new(&security.allowed_clients)
+        .map(|_| ())
+        .map_err(|reason| {
+            ConfigError::field(
+                "security.allowed_clients",
+                format!(
+                    "field \"security.allowed_clients\" holds an entry that cannot be read: {reason}"
+                ),
+            )
+        })
 }
 
 /// The names the server answers to must be names, and nothing else.

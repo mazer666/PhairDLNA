@@ -157,6 +157,23 @@ impl axum::serve::Listener for CappedListener {
     }
 }
 
+/// The address of the client that sent a request.
+///
+/// The address comes from the socket and not from a header: a header is
+/// written by the client, and a client that is not allowed may write whatever
+/// it likes (`CFG-009`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PeerAddress(pub SocketAddr);
+
+impl axum::extract::connect_info::Connected<axum::serve::IncomingStream<'_, CappedListener>>
+    for PeerAddress
+{
+    /// The address of the peer of the connection.
+    fn connect_info(stream: axum::serve::IncomingStream<'_, CappedListener>) -> Self {
+        PeerAddress(*stream.remote_addr())
+    }
+}
+
 /// A connection with a deadline on every read and every write.
 ///
 /// The deadline is a deadline of *silence*: it is set again after every piece

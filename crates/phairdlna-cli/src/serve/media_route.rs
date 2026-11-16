@@ -17,6 +17,7 @@ use axum::body::Body;
 use axum::extract::{Path, State};
 use axum::http::{HeaderMap as AxumHeaders, HeaderValue, Method, StatusCode};
 use axum::response::{IntoResponse, Response};
+use phairdlna_core::catalogue::ContentSource;
 use phairdlna_core::http::headers::{GET_CONTENT_FEATURES, IF_RANGE, RANGE, TRANSFER_MODE};
 use phairdlna_core::http::request::{MediaRequest, Method as CoreMethod};
 use phairdlna_core::http::response::Body as CoreBody;
@@ -26,6 +27,7 @@ use tokio::sync::OwnedSemaphorePermit;
 use super::guard;
 use super::http::ServerContext;
 use super::stream::{FileStream, PermittedStream};
+use super::transfers::{TrackedStream, TransferHandle};
 
 /// Answers a request for a media file.
 ///
@@ -54,7 +56,35 @@ pub(super) async fn media(
         );
         return guard::too_many_transfers();
     }
-    media_answer(&answer, &context, &id, is_head, permit).await
+    // The transfer is registered before the file is opened: the status of the
+    // server must show a stream that is running, even when the file cannot be
+    // read (`UX-012`).
+    let transfer = context
+        .transfers
+        .start(&client_of(&headers), &title_of(&context, &id));
+    media_answer(&answer, &context, &id, is_head, permit, transfer).await
+}
+
+/// The name of the client that asks for the file.
+///
+/// The name comes from the header the client sends. A client that sends no
+/// name is called *unknown*: the server does not guess.
+fn client_of(headers: &AxumHeaders) -> String {
+    headers
+        .get("User-Agent")
+        .and_then(|value| value.to_str().ok())
+        .map(|value| value.trim().to_owned())
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| "unknown".to_owned())
+}
+
+/// The title of the object the client asks for.
+fn title_of(context: &ServerContext, id: &str) -> String {
+    context
+        .library
+        .with_catalogue(|catalogue| catalogue.item_of(id))
+        .map(|item| item.title)
+        .unwrap_or_else(|| id.to_owned())
 }
 
 /// Answers a request for artwork.
@@ -130,6 +160,7 @@ async fn media_answer(
     id: &str,
     is_head: bool,
     permit: Option<OwnedSemaphorePermit>,
+    transfer: TransferHandle,
 ) -> Response {
     let mut response = Response::new(Body::empty());
     *response.status_mut() =
@@ -147,17 +178,32 @@ async fn media_answer(
         CoreBody::Whole => {
             with_file(
                 response,
-                path,
-                0,
-                answer.content_length,
+                Delivery {
+                    path,
+                    offset: 0,
+                    length: answer.content_length,
+                    id: id.to_owned(),
+                    permit,
+                    transfer,
+                },
                 context,
-                id,
-                permit,
             )
             .await
         }
         CoreBody::Slice { offset, length } => {
-            with_file(response, path, offset, length, context, id, permit).await
+            with_file(
+                response,
+                Delivery {
+                    path,
+                    offset,
+                    length,
+                    id: id.to_owned(),
+                    permit,
+                    transfer,
+                },
+                context,
+            )
+            .await
         }
         CoreBody::Text(text) => {
             if !is_head {
@@ -175,6 +221,22 @@ async fn media_answer(
     response
 }
 
+/// What the answer of a media request needs to deliver the file.
+struct Delivery {
+    /// The path of the file, when the catalogue knows it.
+    path: Option<PathBuf>,
+    /// The first byte of the answer.
+    offset: u64,
+    /// The number of bytes of the answer.
+    length: u64,
+    /// The identifier of the object that is played.
+    id: String,
+    /// The place of the transfer, when the transfer may run.
+    permit: Option<OwnedSemaphorePermit>,
+    /// The transfer that the answer carries.
+    transfer: TransferHandle,
+}
+
 /// Puts the bytes of a file into the answer.
 ///
 /// The length of the catalogue may be older than the file on the disk: a file
@@ -186,15 +248,19 @@ async fn media_answer(
 /// must not become a list of the files of the user (`SEC-094`).
 async fn with_file(
     mut response: Response,
-    path: Option<PathBuf>,
-    offset: u64,
-    length: u64,
+    delivery: Delivery,
     context: &ServerContext,
-    id: &str,
-    permit: Option<OwnedSemaphorePermit>,
 ) -> Response {
+    let Delivery {
+        path,
+        offset,
+        length,
+        id,
+        permit,
+        transfer,
+    } = delivery;
     let Some(path) = path else {
-        return refused(response, context, id);
+        return refused(response, context, &id);
     };
     let mut stream = match FileStream::open(path.clone(), offset).await {
         Ok(stream) => stream,
@@ -202,9 +268,9 @@ async fn with_file(
             let path = path.display().to_string();
             context.logger.warn(
                 "a file could not be opened",
-                &[("id", id), ("path", &path), ("reason", &error.to_string())],
+                &[("id", &id), ("path", &path), ("reason", &error.to_string())],
             );
-            return refused(response, context, id);
+            return refused(response, context, &id);
         }
     };
     let size = stream.size();
@@ -213,7 +279,7 @@ async fn with_file(
         // cannot be satisfied (`INT-082`).
         context.logger.warn(
             "a range is behind the end of the file",
-            &[("id", id), ("size", &size.to_string())],
+            &[("id", &id), ("size", &size.to_string())],
         );
         return unsatisfiable(response, size);
     }
@@ -231,9 +297,11 @@ async fn with_file(
             &format!("bytes {}-{}/{}", offset, offset + served - 1, size),
         );
     }
-    // The place of the transfer is given back when the answer has been sent.
+    // The place of the transfer is given back when the answer has been sent,
+    // and the transfer ends with it (`SEC-012`, `UX-012`).
     if let Some(permit) = permit {
-        *response.body_mut() = Body::from_stream(PermittedStream::new(stream, permit));
+        let stream = PermittedStream::new(stream, permit);
+        *response.body_mut() = Body::from_stream(TrackedStream::new(stream, transfer));
     }
     response
 }

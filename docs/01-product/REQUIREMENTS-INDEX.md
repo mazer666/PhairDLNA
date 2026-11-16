@@ -236,8 +236,8 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SEC-068` | Treat playlist entries as untrusted paths, shall resolve and contain them, and shall refuse… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-069` | Not resolve or follow a macOS Finder alias as if it were a symbolic link; aliases shall be… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-070` | Offer the corresponding source of the running build | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-071` | Accept only a `Host` header that matches a configured local host name | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-072` | Require a custom, non-standard request header on every state-changing administration request,… | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-071` | Accept only a `Host` header that matches a configured local host name | MUST | `F-16` | M1 | Negative security test | Verified |
+| `SEC-072` | Require a custom, non-standard request header on every state-changing administration request,… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-090` | Contain no telemetry, no analytics and no crash reporting to any third party. | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-091` | Make no outbound network connection other than the SSDP multicast announcements and responses | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-092` | Not attempt to configure the user's router, and shall not speak the UPnP Internet Gateway… | MUST | `F-16` | M1 | Negative security test | Baseline |
@@ -280,8 +280,8 @@ Requirement method, ID rules and the traceability chain are defined in
 | `UX-008` | Respect the system accessibility settings for contrast | SHOULD | `F-15` | M2 | Manual usability protocol | Baseline |
 | `UX-009` | Show an accessible status item for assistive technologies. | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
 | `UX-010` | Use plain language and avoid protocol jargon in the user-facing text. | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-011` | Diagnostics shall be copyable in one action and shall not contain personal data unless the user… | SHOULD | `F-14` | M2 | Manual usability protocol | Baseline |
-| `UX-012` | Tell the user which client is currently connected and what it is streaming. | SHOULD | `F-14` | M2 | Manual usability protocol | Baseline |
+| `UX-011` | Diagnostics shall be copyable in one action and shall not contain personal data unless the user… | SHOULD | `F-14` | M2 | Manual usability protocol | Implemented |
+| `UX-012` | Tell the user which client is currently connected and what it is streaming. | SHOULD | `F-14` | M2 | Manual usability protocol | Implemented |
 | `UX-013` | Long-running operations shall report progress and allow cancellation. | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
 | `UX-014` | Present the server state, the scan progress, the shared folders and the last observed client… | SHOULD | `F-15` | M2 | Manual usability protocol | Baseline |
 | `UX-015` | Provide a simple presentation mode and an advanced presentation mode over one configuration… | SHOULD | `F-15` | M2 | Manual usability protocol | Baseline |
@@ -311,15 +311,15 @@ Requirement method, ID rules and the traceability chain are defined in
 | `OPS-014` | Return a distinct exit code for configuration errors | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-015` | Never require root privileges to serve media from the user's own directories. | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-016` | Expose an unauthenticated route that serves the corresponding source of the exact running build | MUST | `F-14` | M2 | Automated CLI test | Baseline |
-| `OPS-017` | Report the exact source revision it was built from in its status output and in the source offer. | MUST | `F-14` | M2 | Automated CLI test | Baseline |
-| `OPS-020` | Bind to the loopback interface only by default and shall refuse to start when configured… | MUST | `F-14` | M2 | Automated CLI test | Baseline |
-| `OPS-021` | Require a per-installation random token for every state-changing request. | MUST | `F-14` | M2 | Automated CLI test | Baseline |
-| `OPS-022` | Validate the `Host` header against the loopback names to resist DNS-rebinding attacks. | MUST | `F-14` | M2 | Automated CLI test | Baseline |
-| `OPS-023` | State-changing administration requests shall require a CSRF token bound to the session. | MUST | `F-14` | M2 | Automated CLI test | Baseline |
-| `OPS-024` | Not expose media file contents, only metadata and control actions. | MUST | `F-14` | M2 | Automated CLI test | Baseline |
-| `OPS-025` | Be optional; the server shall run completely without it. | MUST | `F-14` | M2 | Automated CLI test | Baseline |
-| `OPS-026` | Expose a clear "what is this, who can see it, how to turn it off" explanation in the first-run… | MUST | `F-14` | M2 | Automated CLI test | Baseline |
-| `OPS-027` | Apply the same rate limiting and request-size limits as the media surface. | MUST | `F-14` | M2 | Automated CLI test | Baseline |
+| `OPS-017` | Report the exact source revision it was built from in its status output and in the source offer. | MUST | `F-14` | M2 | Automated CLI test | Implemented |
+| `OPS-020` | Bind to the loopback interface only by default and shall refuse to start when configured… | MUST | `F-14` | M2 | Automated CLI test | Verified |
+| `OPS-021` | Require a per-installation random token for every state-changing request. | MUST | `F-14` | M2 | Automated CLI test | Verified |
+| `OPS-022` | Validate the `Host` header against the loopback names to resist DNS-rebinding attacks. | MUST | `F-14` | M2 | Automated CLI test | Verified |
+| `OPS-023` | State-changing administration requests shall require a CSRF token bound to the session. | MUST | `F-14` | M2 | Automated CLI test | Verified |
+| `OPS-024` | Not expose media file contents, only metadata and control actions. | MUST | `F-14` | M2 | Automated CLI test | Verified |
+| `OPS-025` | Be optional; the server shall run completely without it. | MUST | `F-14` | M2 | Automated CLI test | Verified |
+| `OPS-026` | Expose a clear "what is this, who can see it, how to turn it off" explanation in the first-run… | MUST | `F-14` | M2 | Automated CLI test | Implemented |
+| `OPS-027` | Apply the same rate limiting and request-size limits as the media surface. | MUST | `F-14` | M2 | Automated CLI test | Implemented |
 
 ## CFG — Configuration
 
@@ -329,16 +329,16 @@ Requirement method, ID rules and the traceability chain are defined in
 | `CFG-002` | Be typed and validated at start-up; an invalid value shall abort start-up with a message naming… | MUST | `F-12` | M2 | Automated configuration test | Baseline |
 | `CFG-003` | Carry a `schema_version`, and the server shall migrate an older known schema version… | MUST | `F-12` | M2 | Automated configuration test | Baseline |
 | `CFG-004` | Provide documented defaults for every setting such that an empty configuration file yields a… | MUST | `F-12` | M2 | Automated configuration test | Baseline |
-| `CFG-005` | Refuse to start when the configuration would expose an administration interface to a… | MUST | `F-12` | M2 | Automated configuration test | Baseline |
+| `CFG-005` | Refuse to start when the configuration would expose an administration interface to a… | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-006` | Support selecting the network interfaces used for discovery and for media delivery. | MUST | `F-12` | M2 | Automated configuration test | Baseline |
-| `CFG-007` | Support a per-root setting for symbolic link following | MUST | `F-12` | M2 | Automated configuration test | Baseline |
+| `CFG-007` | Support a per-root setting for symbolic link following | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-008` | Support resource limits: maximum concurrent streams | SHOULD | `F-12` | M2 | Automated configuration test | Implemented |
-| `CFG-009` | Support an optional access-control list of client addresses allowed to browse or to stream. | SHOULD | `F-12` | M2 | Automated configuration test | Baseline |
+| `CFG-009` | Support an optional access-control list of client addresses allowed to browse or to stream. | SHOULD | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-010` | Support a "trusted client" list whose quirks are handled by a specific device profile. | SHOULD | `F-12` | M2 | Automated configuration test | Baseline |
 | `CFG-011` | Provide a command that validates a configuration file without starting the server. | MUST | `F-12` | M2 | Automated configuration test | Baseline |
-| `CFG-012` | Provide a command that exports the effective configuration and one that imports it | SHOULD | `F-12` | M2 | Automated configuration test | Baseline |
-| `CFG-013` | Unknown configuration keys shall be reported as errors rather than ignored | MUST | `F-12` | M2 | Automated configuration test | Baseline |
-| `CFG-014` | Secrets (such as an administration token) shall be readable from a file with owner-only… | MUST | `F-12` | M2 | Automated configuration test | Baseline |
+| `CFG-012` | Provide a command that exports the effective configuration and one that imports it | SHOULD | `F-12` | M2 | Automated configuration test | Implemented |
+| `CFG-013` | Unknown configuration keys shall be reported as errors rather than ignored | MUST | `F-12` | M2 | Automated configuration test | Verified |
+| `CFG-014` | Secrets (such as an administration token) shall be readable from a file with owner-only… | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-015` | Never contain a value that is expanded from an environment variable without an explicit opt-in | SHOULD | `F-12` | M2 | Automated configuration test | Baseline |
 
 ## PLT — Platform and portability

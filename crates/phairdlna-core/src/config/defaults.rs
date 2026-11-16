@@ -38,6 +38,12 @@ pub const DEFAULT_HTTP_PORT: u16 = 8200;
 /// The specification names the port 1900 for SSDP.
 pub const DEFAULT_SSDP_PORT: u16 = 1900;
 
+/// The default TCP port of the administration surface.
+///
+/// The port is not the port of the media server: the two surfaces are two
+/// origins (`OPS-020`).
+pub const DEFAULT_ADMIN_PORT: u16 = 8210;
+
 /// The default name a client sees.
 pub const DEFAULT_DEVICE_NAME: &str = "PhairDLNA";
 
@@ -138,6 +144,9 @@ impl Default for SecuritySection {
             trusted_clients: Vec::new(),
             admin_enabled: false,
             admin_token_file: default_admin_token_file(),
+            admin_port: DEFAULT_ADMIN_PORT,
+            admin_bind_addresses: Vec::new(),
+            admin_allow_non_loopback: false,
             allowed_host_names: Vec::new(),
         }
     }

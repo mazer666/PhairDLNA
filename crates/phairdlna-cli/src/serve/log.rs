@@ -11,12 +11,20 @@
 //! the commands, so that `phairdlna config export > config.toml` writes a valid
 //! file (`OPS-001`).
 
+use std::collections::VecDeque;
 use std::io::Write;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::SystemTime;
 
 use phairdlna_core::config::LogLevel;
 use phairdlna_core::security::Redactor;
+
+/// How many records the daemon keeps for the diagnostics.
+///
+/// The records are a memory of what happened, not a log file: the number is
+/// small and bounded, so that the diagnostics of the server cannot cost the
+/// server its memory.
+const KEPT_RECORDS: usize = 256;
 
 /// How much the daemon says.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -54,6 +62,25 @@ impl Level {
     }
 }
 
+/// One record of the log, kept so that the diagnostics can show it.
+///
+/// The record carries the private values already replaced by their pseudonyms:
+/// the diagnostics of the server must not name the files of the user
+/// (`SEC-094`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Record {
+    /// When the record was written.
+    pub time: String,
+    /// How serious the record is.
+    pub level: String,
+    /// Which part of the server wrote the record.
+    pub component: String,
+    /// What the record says.
+    pub message: String,
+    /// The fields of the record.
+    pub fields: Vec<(String, String)>,
+}
+
 /// The log of the daemon.
 ///
 /// The logger writes to standard error and never fails: a log that cannot be
@@ -69,6 +96,8 @@ pub struct Logger {
     component: &'static str,
     redactor: Arc<Redactor>,
     redact: bool,
+    /// The records the daemon keeps for the diagnostics.
+    records: Arc<Mutex<VecDeque<Record>>>,
 }
 
 impl Logger {
@@ -79,6 +108,7 @@ impl Logger {
             component,
             redactor: Arc::new(Redactor::new()),
             redact: true,
+            records: Arc::new(Mutex::new(VecDeque::new())),
         }
     }
 
@@ -93,6 +123,7 @@ impl Logger {
             component,
             redactor,
             redact: true,
+            records: Arc::new(Mutex::new(VecDeque::new())),
         }
     }
 
@@ -116,18 +147,60 @@ impl Logger {
             component,
             redactor: Arc::clone(&self.redactor),
             redact: self.redact,
+            records: Arc::clone(&self.records),
         }
     }
 
     /// Writes a record.
+    ///
+    /// The record is written to standard error and kept in the memory of the
+    /// log, so that the diagnostics of the server can show what happened
+    /// (`OPS-020`).
     pub fn write(&self, level: Level, message: &str, fields: &[(&str, &str)]) {
         if level < self.level {
             return;
         }
         let line = self.record(level, message, fields);
+        self.keep(level, message, fields);
         let mut error = std::io::stderr();
         let _ = error.write_all(line.as_bytes());
         let _ = error.flush();
+    }
+
+    /// Keeps a record in the memory of the log.
+    ///
+    /// The memory is bounded: the oldest record is dropped when the memory is
+    /// full, so that a server that runs for weeks does not grow without end.
+    fn keep(&self, level: Level, message: &str, fields: &[(&str, &str)]) {
+        let record = Record {
+            time: timestamp(),
+            level: level.as_str().to_owned(),
+            component: self.component.to_owned(),
+            message: message.to_owned(),
+            fields: self.fields_of(fields),
+        };
+        let mut records = self.records();
+        records.push_back(record);
+        while records.len() > KEPT_RECORDS {
+            records.pop_front();
+        }
+    }
+
+    /// The records the log keeps, the newest last.
+    ///
+    /// The number of records is bounded by the caller: a person wants the last
+    /// few, not a thousand.
+    pub fn recent(&self, limit: usize) -> Vec<Record> {
+        let records = self.records();
+        let start = records.len().saturating_sub(limit);
+        records.iter().skip(start).cloned().collect()
+    }
+
+    /// The records of the log.
+    fn records(&self) -> MutexGuard<'_, VecDeque<Record>> {
+        self.records
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
     }
 
     /// Builds a record without writing it.

@@ -20,6 +20,7 @@ use phairdlna_core::media::{ArtworkFinder, PictureCache, PictureLimits, RootBoun
 use super::library::Library;
 
 /// The pictures the daemon keeps.
+#[derive(Clone)]
 pub struct Pictures {
     cache: PictureCache,
 }

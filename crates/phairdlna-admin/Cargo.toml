@@ -8,7 +8,15 @@ license.workspace = true
 repository.workspace = true
 publish = false
 
-# The administration surface is optional: the server runs completely without it.
-
 [dependencies]
+axum = { workspace = true }
+# The "cross-site request forgery" token is derived from the token of the
+# installation with a keyed hash; the crate is already part of the build
+# through the core.
+blake3 = { workspace = true }
 phairdlna-core = { workspace = true }
+tokio = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

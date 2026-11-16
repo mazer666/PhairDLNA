@@ -62,7 +62,7 @@ once the code exists. None of them is a claim about software you can download to
 
 | Property | Requirement | Delivered by | State |
 | --- | --- | --- | --- |
-| The administration surface binds to the loopback interface only and validates the `Host` header against an allowlist | `OPS-020`, `SEC-071` | F-14 | specified, not implemented |
+| The administration surface binds to the loopback interface only and validates the `Host` header against an allowlist | `OPS-020`, `SEC-071` | F-14 | **implemented and tested (M2.5)** — `crates/phairdlna-admin/tests/admin_surface.rs` |
 | Media paths are canonicalised and verified to be inside a configured root, including after symbolic links and aliases are resolved | `SEC-001` … `SEC-004`, `SEC-069` | F-08, F-16 | specified, not implemented |
 | XML is parsed without DTD processing or external entity resolution, with bounded size and depth | `SEC-010`, `SEC-060` | F-16 | specified, not implemented |
 | No SOAP action ever reaches a shell, and no Internet Gateway Device action exists | `SEC-005`, `INT-058` | F-03, F-16 | specified, not implemented |
@@ -72,6 +72,14 @@ once the code exists. None of them is a claim about software you can download to
 The threat model, the eight mitigations and the verification that will prove each one
 are in [docs/04-security/SECURITY-MODEL.md](docs/04-security/SECURITY-MODEL.md). A
 security claim will only be published once its negative test has been observed.
+
+**The first property of this table that is implemented.** The administration surface
+binds to the loopback interface only, validates the `Host` header against the names of
+the loopback, refuses a request without the bearer token, refuses a request without the
+custom header, and never answers a request of another origin. The negative tests are in
+`crates/phairdlna-admin/tests/admin_surface.rs` and in
+`crates/phairdlna-cli/tests/admin.rs`. The other properties of the table are still
+requirements and not behaviour.
 
 ## Licence
 

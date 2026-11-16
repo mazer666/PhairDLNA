@@ -154,6 +154,23 @@ pub struct SecuritySection {
     pub admin_enabled: bool,
     /// The path of the file holding the administration token.
     pub admin_token_file: String,
+    /// The TCP port the administration surface listens on.
+    ///
+    /// The port is not the port of the media server: the two surfaces are two
+    /// origins, and the browser of the user keeps them apart (`OPS-020`).
+    pub admin_port: u16,
+    /// The addresses the administration surface binds to.
+    ///
+    /// An empty list means the loopback addresses of the machine, `127.0.0.1`
+    /// and `::1`. A name is never accepted here: a name is what an attacker
+    /// can point somewhere else (`OPS-020`, `SEC-071`).
+    pub admin_bind_addresses: Vec<String>,
+    /// Whether the administration surface may bind to a non-loopback address.
+    ///
+    /// The surface is meant for the machine the server runs on. A user who
+    /// really wants it on the network has to say so, and the server refuses to
+    /// start without that word (`CFG-005`, `OPS-020`).
+    pub admin_allow_non_loopback: bool,
     /// The host names the server answers to (`SEC-071`).
     ///
     /// A name is accepted only when it is written down here: a name is what

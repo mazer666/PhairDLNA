@@ -41,6 +41,13 @@ pub const PROJECT_NAME: &str = "PhairDLNA";
 /// The version of the project, taken from the crate metadata.
 pub const PROJECT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
+/// The source revision the binary was built from.
+///
+/// The revision is read when the binary is built, so that the running server
+/// and the source it offers cannot disagree (`OPS-017`, `ADR-0010`). A build
+/// without a repository behind it reports `unknown`.
+pub const SOURCE_REVISION: &str = env!("PHAIRDLNA_SOURCE_REVISION");
+
 #[cfg(test)]
 mod tests {
     use super::{PROJECT_NAME, PROJECT_VERSION};

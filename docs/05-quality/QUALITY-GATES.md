@@ -102,7 +102,7 @@ recorded, may be accepted with a reason.
 | QG-25 | Outdated dependencies | `cargo outdated` | INFO | — | planned | Informational only |
 | QG-26 | Coverage | `cargo llvm-cov` | INFO | — | planned | Informational; never a quality claim on its own |
 | QG-27 | Mutation testing | `cargo mutants` | INFO | — | planned | Informational, optional |
-| QG-28 | Crate boundaries | `scripts/check-crate-boundaries.sh` | blocker | M0+ | **exists** | Fails when a crate depends "downwards" (ADR-0001). **Implemented and running** — 3 sibling dependencies checked across 4 crate manifests |
+| QG-28 | Crate boundaries | `scripts/check-crate-boundaries.sh` | blocker | M0+ | **exists** | Fails when a crate depends "downwards" (ADR-0001, amended for one edge by ADR-0012). **Implemented and running** — 4 sibling dependencies checked across 4 crate manifests |
 
 ### 3.0 The canonical register
 
@@ -142,7 +142,7 @@ a **negative test**:
 | QG-18 | Break the escaping function → the property test finds a counterexample |
 | QG-19 | Feed a malformed input → the fuzz target aborts (this one *must* crash) |
 | QG-11 | Add a broken relative link → the link checker fails — **demonstrated on 2026-11-14** (it found six broken links in the README on its first run) |
-| QG-28 | Make a core crate depend on the CLI crate → the boundary check fails and names the edge — **demonstrated on 2026-11-16** |
+| QG-28 | Make a core crate depend on the CLI crate → the boundary check fails and names the edge — **demonstrated on 2026-11-16**. Make the administration crate depend on the daemon crate → the check fails and names the edge — **demonstrated on 2026-11-16** (the amendment of ADR-0012 allows the edge the other way and refuses this one) |
 
 ---
 

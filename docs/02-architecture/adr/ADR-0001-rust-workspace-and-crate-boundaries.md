@@ -1,6 +1,6 @@
 # ADR-0001 — Rust workspace and crate boundaries
 
-Status: **Accepted**
+Status: **Accepted** (the edge `phairdlna-cli → phairdlna-admin` is amended by ADR-0012)
 Date: 2026-11-14
 Owner role: Architect
 Requirements: `PLT-001`, `PLT-002`, `PLT-003`, `PLT-010`, `DOC-003`
@@ -28,6 +28,12 @@ phairdlna-admin ┼──▶ phairdlna-cli ──▶ phairdlna-core
 phairdlna-cli  ─┘
 ```
 
+**Amendment of 2026-11-16 (ADR-0012).** The edge between the administration crate
+and the daemon crate is turned around: the daemon crate now depends on the
+administration crate, because the surface runs in the process of the daemon and the
+crate that owns the process starts it. The direction stays one-way, the core still
+depends on no sibling crate, and the gate QG-28 refuses the edge the other way.
+
 - `phairdlna-core` is the portable domain core. It depends on **no sibling crate** and
   on **no OS-specific crate**. Everything platform-specific is reached through the
   `Platform` trait (ADR-0003).
@@ -53,6 +59,9 @@ gate red.
   that compiles on three platforms.
 - The crate list will grow. Each new crate needs a reason in an ADR; the default is
   to stay inside an existing crate.
+- The administration surface is wired by the daemon crate, not the other way round;
+  the amendment is written down in ADR-0012 and in the decision log, so that the
+  decision of ADR-0001 is not silently rewritten.
 
 ## Alternatives considered
 

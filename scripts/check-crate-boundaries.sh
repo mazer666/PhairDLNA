@@ -7,12 +7,17 @@
 #
 # The allowed direction is:
 #
-#   phairdlna-mac  ─┐
-#   phairdlna-admin ┼──▶ phairdlna-cli ──▶ phairdlna-core
-#   phairdlna-cli  ─┘
+#   phairdlna-mac   ──▶ phairdlna-core
+#   phairdlna-admin ──▶ phairdlna-core
+#   phairdlna-cli   ──▶ phairdlna-admin ──▶ phairdlna-core
 #
-# A crate may depend on the crate to its right in that line, and on nothing
+# A crate may depend on the crates to its right in that line, and on nothing
 # else. `phairdlna-core` may depend on no sibling crate at all.
+#
+# The edge from the daemon crate to the administration crate is the amendment
+# of ADR-0012: the surface runs in the process of the daemon, so the crate
+# that owns the process starts the surface. The edge the other way is still
+# refused: a cycle is a cycle.
 #
 # Exit codes: 0 = pass, 1 = fail, 77 = skipped (with a reason).
 set -uo pipefail
@@ -53,7 +58,7 @@ from pathlib import Path
 # What each crate is allowed to depend on, from the ADR-0001 diagram.
 ALLOWED = {
     "phairdlna-core": set(),
-    "phairdlna-cli": {"phairdlna-core"},
+    "phairdlna-cli": {"phairdlna-core", "phairdlna-admin"},
     "phairdlna-admin": {"phairdlna-core"},
     "phairdlna-mac": {"phairdlna-core"},
 }

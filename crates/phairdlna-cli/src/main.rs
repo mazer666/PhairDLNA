@@ -19,6 +19,8 @@ Commands:
   config path              Print the path the configuration would be read from
   config validate          Check a configuration file and report the first problem
   config show              Print the effective configuration
+  config export            Export the effective configuration
+  config import <file>     Read a configuration file and print what it would become
   ssdp headers             Print the SSDP headers the server would send
   catalogue scan           Print the tree of the library with the client identifiers
   catalogue browse <id>    Print the document a client receives for a container
@@ -135,7 +137,14 @@ fn config_command(rest: &[&str], config_path: Option<PathBuf>) -> Result<Command
         Some("path") => Ok(Command::ConfigPath),
         Some("validate") => Ok(Command::ConfigValidate { path: config_path }),
         Some("show") => Ok(Command::ConfigShow { path: config_path }),
+        Some("export") => Ok(Command::ConfigExport { path: config_path }),
+        Some("import") => {
+            let file = rest.get(1).copied().ok_or("config import needs a file")?;
+            Ok(Command::ConfigImport {
+                path: PathBuf::from(file),
+            })
+        }
         Some(other) => Err(format!("unknown config command \"{other}\"")),
-        None => Err("config needs a subcommand: path, validate or show".to_owned()),
+        None => Err("config needs a subcommand: path, validate, show, export or import".to_owned()),
     }
 }

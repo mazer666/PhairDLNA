@@ -56,6 +56,48 @@ fn the_effective_configuration_is_shown() {
     assert!(outcome.stdout.contains("Living room"));
 }
 
+/// The positive case: the effective configuration can be exported.
+#[test]
+fn the_effective_configuration_is_exported() {
+    let path = write(VALID);
+    let outcome = run(&Command::ConfigExport { path: Some(path) });
+    assert_eq!(outcome.exit_code, 0, "{}", outcome.stdout);
+    assert!(outcome.stdout.contains("Living room"));
+    assert!(
+        outcome.stdout.contains("schema_version"),
+        "the export keeps the schema version: {}",
+        outcome.stdout
+    );
+}
+
+/// The positive case: a configuration file can be imported.
+#[test]
+fn a_configuration_file_is_imported() {
+    let path = write(VALID);
+    let outcome = run(&Command::ConfigImport { path: path.clone() });
+    assert_eq!(outcome.exit_code, 0, "{}", outcome.stdout);
+    assert!(outcome.stdout.contains("would become"));
+    assert!(outcome.stdout.contains("Living room"));
+}
+
+/// The negative case: a broken configuration file is not imported.
+#[test]
+fn a_broken_configuration_file_is_not_imported() {
+    let path = write("schema_version = 1\n[server]\nhttp_port = 0\n");
+    let outcome = run(&Command::ConfigImport { path });
+    assert_eq!(outcome.exit_code, 1);
+    assert!(outcome.stdout.contains("not usable"));
+}
+
+/// The negative case: a list of clients that cannot be read stops the server.
+#[test]
+fn a_client_list_that_cannot_be_read_is_reported() {
+    let path = write("schema_version = 1\n[security]\nallowed_clients = [\"not an address\"]\n");
+    let outcome = run(&Command::ConfigValidate { path: Some(path) });
+    assert_eq!(outcome.exit_code, 1);
+    assert!(outcome.stdout.contains("security.allowed_clients"));
+}
+
 /// The positive case: the version names the project and the licence.
 #[test]
 fn the_version_names_the_project_and_the_licence() {

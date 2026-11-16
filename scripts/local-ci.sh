@@ -19,6 +19,12 @@ cargo clippy --workspace --all-targets -- \
 echo "=== 3. Running workspace unit and integration tests (QG-04, QG-05, QG-06, QG-07) ==="
 cargo test --workspace
 
+# OPS-025: the server must run without the administration surface. The proof is
+# a build of the workspace without the default features: the daemon compiles
+# without the surface crate, the routes and the token.
+echo "=== 3a. Building without the administration surface (OPS-025) ==="
+cargo build --workspace --no-default-features
+
 echo "=== 4. Checking no unsafe code (QG-03) ==="
 ./scripts/check-no-unsafe.sh
 

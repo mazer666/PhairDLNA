@@ -218,6 +218,14 @@ impl Catalogue {
         self.containers.len()
     }
 
+    /// The number of objects the catalogue holds.
+    ///
+    /// The count is the containers and the items together: those are the
+    /// objects a client browses (`INT-020`).
+    pub fn object_count(&self) -> usize {
+        self.containers.len() + self.items.len()
+    }
+
     /// Whether the catalogue holds no container at all.
     pub fn is_empty(&self) -> bool {
         self.containers.is_empty()

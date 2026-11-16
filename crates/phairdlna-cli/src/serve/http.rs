@@ -28,6 +28,7 @@ use super::log::Logger;
 use super::media::MediaLibrary;
 use super::media_route::{artwork, media};
 use super::pictures::Pictures;
+use super::transfers::Transfers;
 
 /// What the handlers of the daemon share.
 pub struct ServerContext {
@@ -45,6 +46,8 @@ pub struct ServerContext {
     pub logger: Logger,
     /// The rules every request must pass.
     pub guard: Arc<Guard>,
+    /// The transfers that are running.
+    pub transfers: Transfers,
 }
 
 /// The content type of an XML answer.
