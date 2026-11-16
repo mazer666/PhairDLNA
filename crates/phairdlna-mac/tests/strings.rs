@@ -10,10 +10,13 @@
 //! Example: the key `menu.status.running` of the language `en-GB` holds
 //!          "Server running — {streams} active streams".
 
+mod support;
+
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 use phairdlna_mac::text::{Strings, StringsError, SUPPORTED_LOCALES};
+use support::{collect_unknown_literals, collect_user_texts, is_unknown_literal, string_literals};
 
 /// The keys the application needs. Every language must carry every one of
 /// them, and the test below fails as soon as one is missing.
@@ -289,7 +292,7 @@ fn the_resource_files_are_well_formed() {
 fn no_user_facing_text_lives_in_the_code() {
     let sources = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
     let mut offenders = Vec::new();
-    collect_user_texts(&sources, &mut offenders);
+    collect_user_texts(&sources, TECHNICAL_LITERALS, &mut offenders);
     assert!(
         offenders.is_empty(),
         "these texts of the user interface live in the code and must move into a resource file: {offenders:?}"
@@ -305,7 +308,12 @@ fn no_user_facing_text_lives_in_the_code() {
 fn every_literal_of_the_code_is_written_down() {
     let sources = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
     let mut offenders = Vec::new();
-    collect_unknown_literals(&sources, &mut offenders);
+    collect_unknown_literals(
+        &sources,
+        TECHNICAL_LITERALS,
+        ALLOWED_LITERALS,
+        &mut offenders,
+    );
     assert!(
         offenders.is_empty(),
         "these literals of the code are not written down in ALLOWED_LITERALS: {offenders:?}"
@@ -321,84 +329,11 @@ fn the_check_of_the_literals_is_able_to_fail() {
     let source = "fn probe() { let text = \"a sentence of the user\"; }";
     let mut offenders = Vec::new();
     for (_, literal) in string_literals(source) {
-        if is_unknown_literal(&literal) {
+        if is_unknown_literal(&literal, TECHNICAL_LITERALS, ALLOWED_LITERALS) {
             offenders.push(literal);
         }
     }
     assert_eq!(offenders, vec!["a sentence of the user".to_owned()]);
-}
-
-/// Whether a literal of the code is one that is not written down.
-fn is_unknown_literal(literal: &str) -> bool {
-    if !literal.contains(' ') {
-        return false;
-    }
-    if TECHNICAL_LITERALS.contains(&literal) || ALLOWED_LITERALS.contains(&literal) {
-        return false;
-    }
-    true
-}
-
-/// Collects the literals of the code that are not written down.
-fn collect_unknown_literals(directory: &Path, found: &mut Vec<String>) {
-    let Ok(entries) = std::fs::read_dir(directory) else {
-        return;
-    };
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if path.is_dir() {
-            collect_unknown_literals(&path, found);
-            continue;
-        }
-        if path.extension().and_then(|extension| extension.to_str()) != Some("rs") {
-            continue;
-        }
-        let Ok(source) = std::fs::read_to_string(&path) else {
-            continue;
-        };
-        for (line, literal) in string_literals(&without_the_tests(&source)) {
-            if is_unknown_literal(&literal) {
-                found.push(format!("{}:{}: {literal}", path.display(), line));
-            }
-        }
-    }
-}
-
-/// The source without the modules of the tests.
-///
-/// A test may hold the sentence it checks for; the code of the application
-/// may not.
-fn without_the_tests(source: &str) -> String {
-    let mut kept = String::new();
-    let mut rest = source;
-    while let Some(start) = rest.find("#[cfg(test)]") {
-        kept.push_str(&rest[..start]);
-        let tail = &rest[start..];
-        if tail.find('{').is_none() {
-            return kept;
-        }
-        let mut depth = 0i32;
-        let mut opened = false;
-        let mut end = tail.len();
-        for (offset, character) in tail.char_indices() {
-            if character == '{' {
-                depth += 1;
-                opened = true;
-                continue;
-            }
-            if character != '}' {
-                continue;
-            }
-            depth -= 1;
-            if opened && depth == 0 {
-                end = offset + 1;
-                break;
-            }
-        }
-        rest = &tail[end..];
-    }
-    kept.push_str(rest);
-    kept
 }
 
 /// Reads the language of the environment and checks the result.
@@ -418,176 +353,4 @@ fn resource_path(locale: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("resources")
         .join(format!("{locale}.strings"))
-}
-
-/// Collects the literals of the sources that look like a text of the user
-/// interface, with the file and the line they stand in.
-fn collect_user_texts(directory: &Path, found: &mut Vec<String>) {
-    let Ok(entries) = std::fs::read_dir(directory) else {
-        return;
-    };
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if path.is_dir() {
-            collect_user_texts(&path, found);
-            continue;
-        }
-        if path.extension().and_then(|extension| extension.to_str()) != Some("rs") {
-            continue;
-        }
-        let Ok(source) = std::fs::read_to_string(&path) else {
-            continue;
-        };
-        for (line, literal) in string_literals(&source) {
-            if looks_like_a_user_text(&literal) {
-                found.push(format!("{}:{}: {literal}", path.display(), line));
-            }
-        }
-    }
-}
-
-/// The string literals of a source, with the line they stand in.
-///
-/// The reader understands the comments, the texts, the raw texts, the
-/// characters and the byte characters of the language of Rust: a text that
-/// begins with a quote inside a character is not the beginning of a text.
-fn string_literals(source: &str) -> Vec<(usize, String)> {
-    let mut literals = Vec::new();
-    let mut line = 1usize;
-    let mut characters = source.chars().peekable();
-    while let Some(character) = characters.next() {
-        match character {
-            '\n' => line += 1,
-            '/' if characters.peek() == Some(&'/') => skip_line_comment(&mut characters, &mut line),
-            '/' if characters.peek() == Some(&'*') => {
-                skip_block_comment(&mut characters, &mut line)
-            }
-            '"' => {
-                let start_line = line;
-                read_text(&mut characters, &mut line, &mut literals, start_line);
-            }
-            '\'' => skip_character(&mut characters),
-            'r' if characters.peek() == Some(&'"') => {
-                skip_raw_text(&mut characters, &mut line);
-            }
-            _ => {}
-        }
-    }
-    literals
-}
-
-/// Reads a text and remembers it.
-fn read_text(
-    characters: &mut std::iter::Peekable<std::str::Chars>,
-    line: &mut usize,
-    literals: &mut Vec<(usize, String)>,
-    start_line: usize,
-) {
-    let mut text = String::new();
-    while let Some(character) = characters.next() {
-        match character {
-            '"' => {
-                literals.push((start_line, text));
-                return;
-            }
-            '\\' => {
-                text.push(character);
-                if let Some(next) = characters.next() {
-                    text.push(next);
-                }
-            }
-            '\n' => {
-                *line += 1;
-                text.push(character);
-            }
-            _ => text.push(character),
-        }
-    }
-}
-
-/// Skips a raw text, which ends at the first quote and a number of hashes.
-fn skip_raw_text(characters: &mut std::iter::Peekable<std::str::Chars>, line: &mut usize) {
-    let mut hashes = 0usize;
-    while characters.peek() == Some(&'#') {
-        hashes += 1;
-        characters.next();
-    }
-    if characters.next() != Some('"') {
-        return;
-    }
-    for character in characters.by_ref() {
-        if character == '\n' {
-            *line += 1;
-        }
-        if character == '"' {
-            break;
-        }
-    }
-    let mut closed = 0usize;
-    while closed < hashes && characters.peek() == Some(&'#') {
-        characters.next();
-        closed += 1;
-    }
-}
-
-/// Skips a character or the beginning of a lifetime.
-fn skip_character(characters: &mut std::iter::Peekable<std::str::Chars>) {
-    match characters.peek() {
-        Some('\\') => {
-            characters.next();
-            characters.next();
-            if characters.peek() == Some(&'\'') {
-                characters.next();
-            }
-        }
-        Some(_) => {
-            characters.next();
-            if characters.peek() == Some(&'\'') {
-                characters.next();
-            }
-        }
-        None => {}
-    }
-}
-
-/// Skips a comment that ends with the line.
-fn skip_line_comment(characters: &mut std::iter::Peekable<std::str::Chars>, line: &mut usize) {
-    for next in characters.by_ref() {
-        if next == '\n' {
-            *line += 1;
-            break;
-        }
-    }
-}
-
-/// Skips a comment that ends with a star and a slash.
-fn skip_block_comment(characters: &mut std::iter::Peekable<std::str::Chars>, line: &mut usize) {
-    characters.next();
-    let mut previous = '\0';
-    for next in characters.by_ref() {
-        if next == '\n' {
-            *line += 1;
-        }
-        if previous == '*' && next == '/' {
-            return;
-        }
-        previous = next;
-    }
-}
-
-/// Whether a literal looks like a text the user reads.
-///
-/// The rule is deliberately narrow: a literal is a text of the user
-/// interface when it holds a space and a word that begins with a capital
-/// letter. The literals of the protocol hold no such word and are not texts.
-fn looks_like_a_user_text(literal: &str) -> bool {
-    if TECHNICAL_LITERALS.contains(&literal) {
-        return false;
-    }
-    if !literal.contains(' ') {
-        return false;
-    }
-    literal
-        .split(|character: char| !character.is_alphabetic())
-        .any(|word| word.len() >= 2 && word.starts_with(|character: char| character.is_uppercase()))
 }

@@ -95,6 +95,7 @@
 | `crates/phairdlna-mac/src/platform/` | The AppKit adapter: the status item, its menu, the bridge to the runtime, the workspace and the service | F-15 |
 | `crates/phairdlna-mac/resources/` | The resource files of the languages and the metadata of the bundle | F-15 |
 | `crates/phairdlna-mac/tests/` | The acceptance criteria of F-15 — the client, the menu, the application, the worker, the views, the bundle and the network | F-15 |
+| `crates/phairdlna-mac/tests/support/` | The reader of the sources of the crate, which the test of the texts uses | F-15 |
 | `scripts/` | Repository gates and the requirement-view generator | F-19 |
 | `.github/workflows/` | Manual-only continuous integration | F-19 |
 | `docs/` | The documentation tree | F-19 |
