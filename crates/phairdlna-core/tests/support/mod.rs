@@ -14,6 +14,7 @@
 //! Example: `assert_well_formed(&description.to_xml())` panics with the
 //!       offending fragment if the document is malformed.
 
+pub mod artwork;
 pub mod catalogue;
 pub mod didl;
 pub mod media;

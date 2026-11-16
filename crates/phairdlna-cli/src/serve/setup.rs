@@ -13,7 +13,6 @@ use std::sync::Arc;
 
 use phairdlna_core::config::Config;
 use phairdlna_core::identity;
-use phairdlna_core::platform::LocalFileSystem;
 use phairdlna_core::security::{HostPolicy, Limits, Redactor};
 use phairdlna_core::upnp::BaseUrl;
 use phairdlna_core::upnp::DeviceDescription;
@@ -25,10 +24,11 @@ use tokio::task::JoinHandle;
 use super::address;
 use super::guard::Guard;
 use super::http;
-use super::library::Library;
+use super::library::{build_library, Library};
 use super::limit::CappedListener;
 use super::log::{Level, Logger};
 use super::media;
+use super::pictures::Pictures;
 use super::ssdp;
 use super::watch;
 use super::Daemon;
@@ -59,27 +59,6 @@ pub fn load_identity(
     };
     identity::load_or_create(&path, &config.server.device_name)
         .map_err(|error| format!("the device identity cannot be read: {error}"))
-}
-
-/// Builds the library of the daemon.
-///
-/// A file the scanner could not read is a warning, not a reason to refuse the
-/// start: the rest of the library is still worth serving (`F-08`).
-pub fn build_library(config: &Config, logger: &Logger) -> Library {
-    let library = Library::build(
-        &config.library.roots,
-        config.server.symlink_policy,
-        &LocalFileSystem,
-    );
-    library.with_catalogue(|catalogue| {
-        for diagnostic in catalogue.diagnostics() {
-            logger.warn(
-                "the catalogue could not read everything",
-                &[("reason", diagnostic)],
-            );
-        }
-    });
-    library
 }
 
 /// The identity strings of the device description.
@@ -282,12 +261,14 @@ fn build_server_context(
     )
     .map_err(|error| format!("the device description is not usable: {error}"))?;
     let media = media::MediaLibrary::new(library.clone(), roots_of(config));
+    let pictures = Pictures::new(config);
     let limits = Limits::from_section(&config.limits);
     let hosts = HostPolicy::new(config.security.allowed_host_names.clone());
     let guard = Arc::new(Guard::new(limits, hosts, redactor));
     let context = Arc::new(http::ServerContext {
         library,
         media,
+        pictures,
         description,
         base_url: base_url.origin().to_owned(),
         logger: logger.clone(),

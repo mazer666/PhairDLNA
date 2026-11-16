@@ -25,6 +25,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use crate::config::{MediaRoot, SymlinkPolicy};
+use crate::media::{Artwork, ArtworkFinder, ArtworkSource};
 use crate::platform::{FileSystem, VolumeEvent, VolumeId};
 
 use super::volumes::{VolumeRegistry, VolumeReport};
@@ -47,6 +48,11 @@ pub struct Catalogue {
     pub(super) system_update_id: u32,
     pub(super) diagnostics: Vec<String>,
     pub(super) roots: Vec<RootSummary>,
+    /// The finder of the pictures of the library, when the server looks for them.
+    ///
+    /// The finder is `None` when the pictures are switched off: the catalogue
+    /// then reads no file of the library to look for a cover (`PERF-004`).
+    pub(super) pictures: Option<ArtworkFinder>,
 }
 
 /// One container of the catalogue.
@@ -94,7 +100,11 @@ impl Catalogue {
         registry: &mut VolumeRegistry,
     ) -> VolumeReport {
         let outcome = super::builder::build_with(roots, symlink_policy, filesystem, registry);
+        // The pictures belong to the library and not to the scan: a catalogue
+        // that is read again keeps looking for them.
+        let pictures = self.pictures.take();
         *self = outcome.catalogue;
+        self.pictures = pictures;
         outcome.report
     }
 
@@ -164,6 +174,43 @@ impl Catalogue {
         self.files.get(object_id).map(PathBuf::as_path)
     }
 
+    /// Lets the catalogue look for the pictures of the library.
+    ///
+    /// The finder is given to the catalogue and not built by it, because the
+    /// roots and the bounds of the pictures are the settings of the server
+    /// (`CFG-008`, `PERF-004`).
+    pub fn with_pictures(&mut self, finder: ArtworkFinder) {
+        self.pictures = Some(finder);
+    }
+
+    /// The picture of an object, when the object has one.
+    ///
+    /// The bytes are read only when a client asks for them, and the answer is
+    /// remembered, so that a browse that asks again reads no file again
+    /// (`F-10` § 5).
+    pub fn picture_of(&self, object_id: &str) -> Option<Artwork> {
+        let finder = self.pictures.as_ref()?;
+        let path = self.files.get(object_id)?;
+        finder.picture_of(object_id, path)
+    }
+
+    /// Where the picture of an object comes from, when the object has one.
+    pub fn picture_source_of(&self, object_id: &str) -> Option<ArtworkSource> {
+        let finder = self.pictures.as_ref()?;
+        let path = self.files.get(object_id)?;
+        finder.source_of(object_id, path)
+    }
+
+    /// The identifier of the artwork of an object, when the object has one.
+    ///
+    /// The identifier is the one of the object itself: the address of the
+    /// artwork is built from it, and the address never carries a path of the
+    /// disk (`INT-067`, `PLT-008`).
+    fn artwork_id_of(&self, object_id: &str) -> Option<String> {
+        self.picture_source_of(object_id)
+            .map(|_| object_id.to_owned())
+    }
+
     /// The number of containers in the catalogue.
     pub fn len(&self) -> usize {
         self.containers.len()
@@ -181,18 +228,32 @@ impl ContentSource for Catalogue {
     }
 
     fn container(&self, object_id: &str) -> Option<ContentContainer> {
-        self.containers.get(object_id).map(|node| ContentContainer {
+        let node = self.containers.get(object_id)?;
+        let mut container = ContentContainer {
             id: node.id.clone(),
             parent_id: node.parent_id.clone(),
             title: node.title.clone(),
             update_id: node.update_id,
             children: node.children.clone(),
             total: Some(node.children.len() as u32),
-        })
+        };
+        // The artwork of the children is looked for here, and not while the
+        // catalogue is built: the scan of the library reads no file to look
+        // for a cover (`PERF-004`).
+        for child in &mut container.children {
+            if let Some(artwork) = self.artwork_id_of(&child.id) {
+                child.metadata.album_art_id = Some(artwork);
+            }
+        }
+        Some(container)
     }
 
     fn item_of(&self, object_id: &str) -> Option<ContentItem> {
-        self.items.get(object_id).cloned()
+        let mut item = self.items.get(object_id).cloned()?;
+        if let Some(artwork) = self.artwork_id_of(object_id) {
+            item.metadata.album_art_id = Some(artwork);
+        }
+        Some(item)
     }
 }
 

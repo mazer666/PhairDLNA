@@ -1,8 +1,8 @@
 //! The library of the daemon: the catalogue and the rules that keep it fresh.
 //!
-//! What: the shared catalogue of the daemon, the memory of the volumes of the
-//!       roots, and the way the catalogue is read again when a drive comes or
-//!       goes.
+//! What: the building of the shared catalogue of the daemon, the memory of the
+//!       volumes of the roots, and the way the catalogue is read again when a
+//!       drive comes or goes.
 //! Why: the daemon runs for hours, and the library of a person changes while it
 //!       runs: a drive is plugged in, a network share comes back, a disk is
 //!       replaced. The catalogue has to follow, and the protocol layer must
@@ -14,14 +14,19 @@
 use std::sync::{Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 use phairdlna_core::catalogue::{Catalogue, VolumeRegistry, VolumeReport};
-use phairdlna_core::config::{MediaRoot, SymlinkPolicy};
-use phairdlna_core::platform::FileSystem;
+use phairdlna_core::config::{Config, MediaRoot, SymlinkPolicy};
+use phairdlna_core::media::ArtworkFinder;
+use phairdlna_core::platform::{FileSystem, LocalFileSystem};
+
+use super::log::Logger;
+use super::pictures;
 
 /// The library of the daemon.
 #[derive(Clone)]
 pub struct Library {
     catalogue: Arc<RwLock<Catalogue>>,
     memory: Arc<Mutex<Memory>>,
+    pictures: Option<ArtworkFinder>,
 }
 
 /// The state the library keeps between two reads of the catalogue.
@@ -29,6 +34,31 @@ struct Memory {
     registry: VolumeRegistry,
     roots: Vec<MediaRoot>,
     policy: SymlinkPolicy,
+}
+
+/// Builds the library of the daemon.
+///
+/// A file the scanner could not read is a warning, not a reason to refuse the
+/// start: the rest of the library is still worth serving (`F-08`).
+pub fn build_library(config: &Config, logger: &Logger) -> Library {
+    let library = Library::build(
+        &config.library.roots,
+        config.server.symlink_policy,
+        &LocalFileSystem,
+    );
+    // The pictures are looked for only when the user wants them: a library
+    // with many files may switch them off, and then no file of the library is
+    // read to look for a cover (`PERF-004`).
+    let library = pictures::attach(library, config);
+    library.with_catalogue(|catalogue| {
+        for diagnostic in catalogue.diagnostics() {
+            logger.warn(
+                "the catalogue could not read everything",
+                &[("reason", diagnostic)],
+            );
+        }
+    });
+    library
 }
 
 impl Library {
@@ -47,6 +77,19 @@ impl Library {
                 roots: roots.to_vec(),
                 policy,
             })),
+            pictures: None,
+        }
+    }
+
+    /// Lets the library look for the pictures of the catalogue.
+    ///
+    /// The finder is kept beside the catalogue, so that a catalogue that is
+    /// read again keeps looking for the pictures (`F-10` § 5).
+    pub fn with_pictures(self, finder: ArtworkFinder) -> Self {
+        self.write_catalogue().with_pictures(finder.clone());
+        Self {
+            pictures: Some(finder),
+            ..self
         }
     }
 
@@ -89,7 +132,13 @@ impl Library {
         let policy = memory.policy;
         let outcome = Catalogue::build_with(&roots, policy, filesystem, &mut memory.registry);
         let report = outcome.report;
-        *self.write_catalogue() = outcome.catalogue;
+        let mut catalogue = self.write_catalogue();
+        *catalogue = outcome.catalogue;
+        // The finder belongs to the library and not to the scan: the pictures
+        // are looked for again after every read of the catalogue.
+        if let Some(finder) = &self.pictures {
+            catalogue.with_pictures(finder.clone());
+        }
         report
     }
 

@@ -63,6 +63,13 @@ Two structural facts shape the whole model:
 │  · parsed OUT OF PROCESS in a sandboxed child (SEC-066)           │
 └────────────────────────────────────────────────────────────────────┘
 
+**A note on the state of boundary B (2026-11-16).** The picture pipeline of M2.2 parses
+**in the server process**, in pure Rust and with bounded reads, because the sandbox child of
+M-06 does not exist yet. The boundary above therefore holds for the parsers of the picture
+and **not** for the isolation: a bug in them would run in the server process. The deviation
+is written down in `../02-architecture/adr/ADR-0011-picture-pipeline-parses-in-process-until-the-sandbox-child-exists.md`
+and in DEC-042, and it ends with the child.
+
 ┌────────────────────────────────────────────────────────────────────┐
 │  LOOPBACK-ONLY: the administration surface                         │
 │  · loopback is NOT a boundary: DNS rebinding reaches it.           │
@@ -115,8 +122,8 @@ without the mitigation.
 | SEC-TH-16 | Range-header amplification | LAN attacker | 100 overlapping ranges | Memory and CPU exhaustion | Low–Med | M-04, M-07 | A single response, never a multipart body; memory flat | Planned |
 | SEC-TH-17 | Path traversal in the HTTP path | LAN attacker | `..%2f..%2f`, double-encoded, absolute path | Read of files outside the root | Medium | M-05 | `..%2f..%2fetc/passwd`, `%252e%252e%252f`, an absolute path and a NUL byte are all rejected, and an `open` audit hook shows **no file outside the root** was opened | Planned |
 | SEC-TH-18 | Symbolic link / alias escape | Local user, synced folder | A link inside a shared folder pointing outside | Read of arbitrary user files (e.g. `~/.ssh`) | Medium | M-05 | A symbolic link *and* a Finder alias to `~/.ssh` inside the library are both refused | Open — macOS alias resolution semantics not yet verified |
-| SEC-TH-19 | Malformed media metadata | Anyone who can place a file | A malformed ID3/MP4/Matroska/EXIF file | Memory unsafety or denial of service in the server | Med–High | M-06 | A malformed file does not affect the server process; the child is killed at the timeout; the file is quarantined | Planned |
-| SEC-TH-20 | Image dimension bomb | Anyone who can place a file | A header declaring enormous dimensions | Host out of memory | Medium | M-06, M-07 | The child is killed and the parent's memory never exceeds the cap | Planned |
+| SEC-TH-19 | Malformed media metadata | Anyone who can place a file | A malformed ID3/MP4/Matroska/EXIF file | Memory unsafety or denial of service in the server | Med–High | M-06 | A malformed file does not affect the server process; the child is killed at the timeout; the file is quarantined | Partly implemented (M2.2) — the picture pipeline is bounded and a broken file gives no picture, no error and no panic (`crates/phairdlna-core/tests/artwork.rs::a_broken_file_gives_no_picture_and_no_panic`, `::a_tag_that_lies_about_its_size_is_refused`); the **sandbox child and the quarantine are M-06** (ADR-0011) |
+| SEC-TH-20 | Image dimension bomb | Anyone who can place a file | A header declaring enormous dimensions | Host out of memory | Medium | M-06, M-07 | The child is killed and the parent's memory never exceeds the cap | Partly implemented (M2.2) — the declared size of a picture is refused before a single pixel is allocated (`crates/phairdlna-core/src/media/thumbnail.rs::tests::a_picture_that_lies_about_its_size_is_refused_before_it_is_decoded`); the **child and the resident-set cap are M-06** (ADR-0011) |
 | SEC-TH-21 | Playlist path injection | File supplier | A playlist entry pointing outside the root, or using a network scheme | Read outside the root; SSRF | Low | M-05, M-06 | `../../etc/passwd` and `http://evil/x` entries are dropped and no outbound request is made | Planned |
 | SEC-TH-22 | Oversized browse page | LAN attacker | `RequestedCount = 2^31-1` | Memory growth, latency | Medium | M-02, M-07 | The response is capped at the configured page size; memory is flat | Planned |
 | SEC-TH-23 | DNS rebinding | Web attacker + victim browser | A hostname that resolves to the LAN address | Media exfiltration through the browser (as in CVE-2022-26505) | Medium | M-06 | A page whose hostname resolves to loopback and then to the LAN address is blocked, and the server logs a `Host` mismatch | Planned |

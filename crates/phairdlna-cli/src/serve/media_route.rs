@@ -20,6 +20,7 @@ use axum::response::{IntoResponse, Response};
 use phairdlna_core::http::headers::{GET_CONTENT_FEATURES, IF_RANGE, RANGE, TRANSFER_MODE};
 use phairdlna_core::http::request::{MediaRequest, Method as CoreMethod};
 use phairdlna_core::http::response::Body as CoreBody;
+use phairdlna_core::media::cache_key;
 use tokio::sync::OwnedSemaphorePermit;
 
 use super::guard;
@@ -58,10 +59,50 @@ pub(super) async fn media(
 
 /// Answers a request for artwork.
 ///
-/// The catalogue has no artwork yet (F-11 is the work of M2), so the answer is
-/// `404` — and never a placeholder that a client would cache (`INT-065`).
-pub(super) async fn artwork(Path(_id): Path<String>) -> Response {
-    StatusCode::NOT_FOUND.into_response()
+/// The picture of an object comes from the library: the image that lies next to
+/// the file, the cover that is embedded in it, or the thumbnail of a photo. A
+/// file that has no picture gets a truthful `404` and never a placeholder that
+/// a client would keep (`INT-065`, `F-10` § 6).
+///
+/// The picture is kept in the disposable cache, so that a client that asks
+/// again is answered without reading the library again (`F-10` § 5).
+pub(super) async fn artwork(
+    State(context): State<Arc<ServerContext>>,
+    Path(id): Path<String>,
+) -> Response {
+    let catalogue = context.library.catalogue();
+    let Some(path) = catalogue.path_of(&id) else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    let key = cache_key(&id, path);
+    if let Some((mime_type, bytes)) = context.pictures.cache().get(&key) {
+        return picture_response(&mime_type, bytes);
+    }
+    let Some(picture) = catalogue.picture_of(&id) else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    if let Err(error) = context
+        .pictures
+        .cache()
+        .put(&key, &picture.mime_type, &picture.bytes)
+    {
+        context.logger.warn(
+            "a picture could not be kept in the cache",
+            &[("reason", &error.to_string())],
+        );
+    }
+    picture_response(&picture.mime_type, picture.bytes)
+}
+
+/// Builds the answer that carries a picture.
+fn picture_response(mime_type: &str, bytes: Vec<u8>) -> Response {
+    let mut response = Response::new(Body::from(bytes));
+    if let Ok(value) = HeaderValue::from_str(mime_type) {
+        response
+            .headers_mut()
+            .insert(axum::http::header::CONTENT_TYPE, value);
+    }
+    response
 }
 
 /// Builds the request the delivery layer of the core reads.

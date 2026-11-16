@@ -26,3 +26,14 @@ pub fn home_directory() -> PathBuf {
 pub fn user_config_dir() -> PathBuf {
     home_directory().join(".config").join(PROJECT_DIRECTORY)
 }
+
+/// The project's own directory inside the user's data directory.
+///
+/// The disposable cache of the produced pictures lives here. The cache may be
+/// deleted at any time; it is rebuilt when it is needed again (`FUN-018`).
+pub fn user_data_dir() -> PathBuf {
+    home_directory()
+        .join(".local")
+        .join("share")
+        .join(PROJECT_DIRECTORY)
+}

@@ -73,11 +73,40 @@ pub struct MediaRoot {
 }
 
 /// The media library.
-#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct LibrarySection {
     /// The folders to share.
     pub roots: Vec<MediaRoot>,
+    /// Whether the pictures of the library are looked for and served.
+    ///
+    /// The setting is on by default: a control point asks for the cover of an
+    /// album before it plays anything. A library with many files may turn it
+    /// off, and then the scan reads no file to look for a picture (`PERF-004`).
+    #[serde(default = "yes_by_default")]
+    pub extract_artwork: bool,
+    /// Where the disposable cache of the produced pictures is kept.
+    ///
+    /// `None` means the data directory of the user. The cache may be deleted
+    /// at any time; it is rebuilt when it is needed again (`FUN-018`).
+    #[serde(default)]
+    pub cache_directory: Option<String>,
+}
+
+impl Default for LibrarySection {
+    /// A library without roots and with the pictures switched on.
+    fn default() -> Self {
+        Self {
+            roots: Vec::new(),
+            extract_artwork: true,
+            cache_directory: None,
+        }
+    }
+}
+
+/// The answer of a setting that is on unless the user turns it off.
+fn yes_by_default() -> bool {
+    true
 }
 
 /// The resource ceilings the server must not exceed.

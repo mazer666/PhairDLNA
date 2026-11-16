@@ -283,17 +283,24 @@ fn an_open_transfer_ends_with_the_daemon() {
     // The client reads slowly, so that the transfer is still running when the
     // daemon is told to stop.
     let reader = std::thread::spawn(move || {
-        // The head of the answer is read first; the body is what counts.
+        // The head of the answer is read first; the body is what counts. The
+        // head and the first bytes of the body may arrive in one piece, and
+        // the bytes behind the separator belong to the body: they are counted
+        // from the start, or the body looks shorter than it is.
         let mut head = Vec::new();
         let mut chunk = [0u8; 4096];
-        while !head.windows(4).any(|window| window == b"\r\n\r\n") {
+        let mut received = 0usize;
+        loop {
             let read = stream.read(&mut chunk).expect("the head is read");
             if read == 0 {
                 break;
             }
             head.extend_from_slice(&chunk[..read]);
+            if let Some(end) = head.windows(4).position(|window| window == b"\r\n\r\n") {
+                received = head.len() - (end + 4);
+                break;
+            }
         }
-        let mut received = head.len() - 4;
         loop {
             match stream.read(&mut chunk) {
                 Ok(0) | Err(_) => break,
@@ -303,7 +310,7 @@ fn an_open_transfer_ends_with_the_daemon() {
                 }
             }
         }
-        received - head.len() + 4
+        received
     });
 
     std::thread::sleep(std::time::Duration::from_millis(200));

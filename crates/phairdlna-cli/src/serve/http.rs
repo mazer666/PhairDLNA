@@ -27,6 +27,7 @@ use super::library::Library;
 use super::log::Logger;
 use super::media::MediaLibrary;
 use super::media_route::{artwork, media};
+use super::pictures::Pictures;
 
 /// What the handlers of the daemon share.
 pub struct ServerContext {
@@ -34,6 +35,8 @@ pub struct ServerContext {
     pub library: Library,
     /// The media of the library, and the roots they may not leave.
     pub media: MediaLibrary,
+    /// The pictures the daemon produced and keeps.
+    pub pictures: Pictures,
     /// The description of the device, with the base URL of this server.
     pub description: DeviceDescription,
     /// The base URL the documents are built with.

@@ -28,7 +28,7 @@ pub use defaults::{
 };
 pub use error::ConfigError;
 pub use load::{resolve_path, CONFIG_PATH_ENV, DEFAULT_CONFIG_FILE_NAME};
-pub use paths::{home_directory, user_config_dir, PROJECT_DIRECTORY};
+pub use paths::{home_directory, user_config_dir, user_data_dir, PROJECT_DIRECTORY};
 pub use sections::{
     LibrarySection, LimitsSection, LogLevel, LoggingSection, MediaRoot, NetworkSection,
     SecuritySection, ServerSection, SymlinkPolicy,

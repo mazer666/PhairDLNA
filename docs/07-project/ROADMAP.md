@@ -116,7 +116,7 @@ multiple roots, artwork, playlists.
 | Step | Content | Requirements | State |
 | --- | --- | --- | --- |
 | M2.1 | Multiple roots, external volumes, network shares | `FUN-017` … `FUN-019`, `PLT-011` | **done (2026-11-16)** — the roots keep their own identifiers and boundaries, the catalogue remembers the volume of every root, and the daemon reads the catalogue again when a drive comes or goes (`F-08` D-15 … D-20) |
-| M2.2 | Metadata extraction, artwork, thumbnails | `FUN-013`, `FUN-014` | next |
+| M2.2 | Metadata extraction, artwork, thumbnails | `FUN-013`, `FUN-014` | **done (2026-11-16)** — the cover of an ID3v2 tag and of an MP4 container is read in pure Rust, the image that lies next to a file wins over the cover in the tag, the picture is served at `/art/<id>` and the document names it in `upnp:albumArtURI`; the picture pipeline parses in the server process until the sandbox child of ADR-0008 exists (ADR-0011, F-10 D-01 … D-08) |
 | M2.3 | Playlists, subtitles, organisation | `FUN-015`, `FUN-016`, `FUN-020` … `FUN-022` | — |
 | M2.4 | Full configuration, access control, resource limits | `CFG-007` … `CFG-015` | — |
 | M2.5 | Local administration surface and diagnostics | `OPS-020` … `OPS-027`, `OPS-016`, `OPS-017`, `UX-011`, `UX-012` | — |

@@ -9,6 +9,7 @@
 //! Example: `Server::start()` brings a daemon up on a free port and hands out
 //!       its address.
 
+pub mod artwork;
 pub mod soap;
 
 use std::io::{Read, Write};
@@ -68,10 +69,20 @@ impl Server {
 
     /// Starts a daemon with a library of one film of the given size.
     pub fn start_with_film(film: &[u8]) -> Self {
+        Self::start_with_files(&[("King Kong.mkv", film)])
+    }
+
+    /// Starts a daemon with a library of the given files.
+    ///
+    /// The names are the names of the files, and the bytes are their content.
+    /// A test that needs a picture in the library writes the file itself.
+    pub fn start_with_files(files: &[(&str, &[u8])]) -> Self {
         let directory = tempfile::tempdir().expect("a temporary directory");
         let library = directory.path().join("Library");
         std::fs::create_dir_all(&library).expect("the library is created");
-        std::fs::write(library.join("King Kong.mkv"), film).expect("the film is written");
+        for (name, bytes) in files {
+            std::fs::write(library.join(name), bytes).expect("the file is written");
+        }
         let config = write_config(directory.path(), &library);
         let identity = directory.path().join("identity");
         let mut options = ServeOptions::new(config);
@@ -117,8 +128,13 @@ impl Server {
 
     /// The identifier of the film in the catalogue.
     pub fn media_id(&self) -> String {
+        self.item_id("King Kong.mkv")
+    }
+
+    /// The identifier of an item of the catalogue, by its title.
+    pub fn item_id(&self, title: &str) -> String {
         let catalogue = catalogue_of(&self.library);
-        find_item(&catalogue, "King Kong.mkv").expect("the film is in the catalogue")
+        find_item(&catalogue, title).expect("the item is in the catalogue")
     }
 
     /// The identifier of the folder that holds the film.
@@ -132,6 +148,11 @@ impl Server {
             .expect("the library is in the catalogue")
             .id
             .clone()
+    }
+
+    /// The folder of the library, so that a test can put a file into it.
+    pub fn library_folder(&self) -> &Path {
+        &self.library
     }
 
     /// Sends a `GET`.
@@ -203,11 +224,18 @@ impl Drop for Server {
 }
 
 /// Reads an answer of the daemon.
+///
+/// The head is text and the body may not be: a picture is a picture, and its
+/// bytes must reach the test unchanged. The two are therefore separated on
+/// the raw bytes and not on a decoded text.
 pub fn parse(raw: &[u8]) -> Answer {
-    let text = String::from_utf8_lossy(raw);
-    let (head, body) = text
-        .split_once("\r\n\r\n")
+    let separator = b"\r\n\r\n";
+    let end = raw
+        .windows(separator.len())
+        .position(|part| part == separator)
         .expect("the answer has a head and a body");
+    let head = String::from_utf8_lossy(&raw[..end]).into_owned();
+    let body = raw[end + separator.len()..].to_vec();
     let mut lines = head.lines();
     let status_line = lines.next().expect("the answer has a status line");
     let status: u16 = status_line
@@ -222,7 +250,7 @@ pub fn parse(raw: &[u8]) -> Answer {
     Answer {
         status,
         headers,
-        body: body.as_bytes().to_vec(),
+        body,
     }
 }
 
@@ -259,9 +287,12 @@ pub fn find_item(catalogue: &Catalogue, title: &str) -> Option<String> {
 /// Writes a configuration file with one root.
 pub fn write_config(directory: &Path, library: &Path) -> PathBuf {
     let path = directory.join("phairdlna.toml");
+    // The cache of the pictures lives in the folder of the test, so that a test
+    // run never writes into the data directory of the user.
     let text = format!(
         "schema_version = 1\n\n[server]\ndevice_name = \"Living room\"\n\n\
-         [library]\n[[library.roots]]\nname = \"Films\"\npath = \"{}\"\n",
+         [library]\ncache_directory = \"{}\"\n[[library.roots]]\nname = \"Films\"\npath = \"{}\"\n",
+        directory.join("cache").display(),
         library.display()
     );
     std::fs::write(&path, text).expect("the configuration is written");

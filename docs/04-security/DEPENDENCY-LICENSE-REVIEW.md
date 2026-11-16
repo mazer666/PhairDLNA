@@ -69,7 +69,7 @@ adoption, not as a quality judgement.
 | `objc2-app-kit` | 0.3.2 | Zlib OR Apache-2.0 OR MIT | 1.71 | 89 033 565 | 2025-10-04 | **Adopt (macOS only)** — `NSStatusItem` and friends |
 | `mp4` | 0.14.0 | MIT | — | — | 2023-08-01 | **Not adopted** — unmaintained since 2023 |
 | `matroska` | 0.30.1 | MIT OR Apache-2.0 | — | — | 2026-04-15 | **Evaluate** — Matroska/WebM container parsing |
-| `image` | 0.25.10 | MIT OR Apache-2.0 | 1.88 | — | 2026-03-10 | **Evaluate** — dimensions and thumbnails; decoding happens in the sandbox |
+| `image` | 0.25.10 | MIT OR Apache-2.0 | 1.88 | — | 2026-03-10 | **Adopt** — the thumbnail of a photo (M2.2, § 2.4); only the `jpeg` and the `png` feature are compiled in |
 | `infer` | 0.22.0 | MIT | 1.74 | — | 2026-07-15 | **Adopt** — content sniffing |
 | `mime_guess` | 2.0.5 | MIT | — | — | 2024-06-29 | **Adopt** — extension → MIME |
 | `futures-core` | 0.3.34 | MIT OR Apache-2.0 | 1.36 | 305 000 000 | 2025-12-01 | **Adopt** — the `Stream` trait of the media body (M1.11) |
@@ -164,6 +164,65 @@ Unlicense, or a combination of those. The two that deserve a word:
 No crate of the set is a copyleft licence that would reach the work of the project
 (`GPL`, `LGPL`, `AGPL`, `SSPL`), no crate is a source-available licence, and none of
 them phones home: the network stack opens the sockets of the server and nothing else.
+
+### 2.4 The crates the picture decoder brings with it (M2.2)
+
+The milestone M2.2 added the thumbnail of a photo. The decoder is the `image` crate,
+and the project compiles **only** its `jpeg` and its `png` feature: a server that
+serves JPEG and PNG does not need a decoder for GIF, TIFF, WebP or AVIF, and every
+format that is left out is a decoder that is left out of the attack surface
+(`SEC-067`). The following crates are **new** in the lock file because of it. Every
+one of them is allowed by `deny.toml` and is covered by `cargo deny check licenses`
+and by `cargo audit` like every other crate.
+
+| Crate | Version | Licence | MSRV | Purpose |
+| --- | --- | --- | --- | --- |
+| `image` | 0.25.10 | MIT OR Apache-2.0 | 1.88 | the decoder and the encoder of the thumbnail |
+| `png` | 0.18.1 | MIT OR Apache-2.0 | 1.88 | the PNG decoder |
+| `zune-core` | 0.5.3 | MIT OR Apache-2.0 | — | the shared types of the JPEG decoder |
+| `zune-jpeg` | 0.5.15 | MIT OR Apache-2.0 | — | the JPEG decoder |
+| `bytemuck` | 1.25.2 | MIT OR Apache-2.0 | 1.60 | the byte casts of the decoded picture |
+| `byteorder-lite` | 0.1.0 | MIT OR Apache-2.0 | — | the reading of the big-endian numbers |
+| `moxcms` | 0.8.1 | MIT OR Apache-2.0 | — | the colour management of the pictures |
+| `pxfm` | 0.1.30 | MIT OR Apache-2.0 | — | the pixel format helpers |
+| `num-traits` | 0.2.19 | MIT OR Apache-2.0 | 1.60 | the numeric traits of the colour management |
+| `crc32fast` | 1.5.5 | MIT OR Apache-2.0 | 1.65 | the checksum of the PNG chunks |
+| `bitflags` | 2.13.2 | MIT OR Apache-2.0 | 1.56 | the flags of the PNG chunks |
+| `flate2` | 1.1.11 | MIT OR Apache-2.0 | 1.63 | the decompression of the PNG data |
+| `miniz_oxide` | 0.8.9 / 0.9.1 | MIT OR Zlib OR Apache-2.0 | 1.63 | the compressor of `flate2` |
+| `adler2` | 2.0.1 | MIT OR Zlib OR Apache-2.0 | — | the checksum of the compressed data |
+| `simd-adler32` | 0.3.10 | MIT OR Apache-2.0 | — | the fast checksum of the compressed data |
+| `fdeflate` | 0.3.7 | MIT OR Apache-2.0 | — | the fast decompressor of the PNG data |
+| `zlib-rs` | 0.6.8 | MIT OR Apache-2.0 | — | the alternative backend of `flate2` |
+| `cfg-if` | 1.0.5 | MIT OR Apache-2.0 | — | the conditional compilation |
+| `autocfg` | 1.5.1 | MIT OR Apache-2.0 | — | the build script of `num-traits` |
+
+**The assessment.** Every licence of the set is MIT, Apache-2.0, Zlib or a combination
+of those — all of them are allowed by `deny.toml` and all of them are compatible with
+AGPL-3.0. The set contains no copyleft licence that would reach the work of the
+project, no source-available licence, and nothing that phones home: the decoder reads
+the bytes of a file and gives back the pixels.
+
+**What the decoder is not allowed to do.** The decoder is the one part of the project
+that turns bytes of a stranger into memory of the server. Two rules follow, and both
+are enforced in `crates/phairdlna-core/src/media/thumbnail.rs`:
+
+1. The **declared** size of the picture is checked before the picture is decoded, so
+   that a file that claims enormous dimensions is refused before a single pixel is
+   allocated (`SEC-067`).
+2. The decoder is only reached for a picture that the library already holds inside a
+   root. A file that lies outside the root never reaches it (`SEC-003`).
+
+The decoder is a **pure-Rust** crate: it needs no C compiler, no system library and no
+external program, so the core stays portable and the build matrix is unaffected
+(ADR-0001, `QG-28`).
+
+**Where the decoder runs.** Until the sandbox child of ADR-0008 exists (M-06), the decoder
+runs **in the server process**. The picture pipeline reads only files that lie inside a
+root, bounds every read and every allocation, and refuses a picture that claims enormous
+dimensions before a pixel is allocated. The deviation from ADR-0008 is recorded in ADR-0011
+and in DEC-042, and it ends with the child — the decoder was chosen so that it can move
+into that child without a change of its interface.
 
 ---
 
@@ -299,5 +358,6 @@ dependency is read, recorded and reviewed by a named person.
 | macOS platform crates | Proposed in ADR-0002 | Architect | 2026-11-14 |
 | `symphonia` MPL-2.0 | **Accepted with conditions** (§3) | Security | 2026-11-14 |
 | FFmpeg exclusion | **Accepted** (§1 rule 7) | Security | 2026-11-14 |
+| `image` (the thumbnail decoder) | **Accepted with conditions** (§ 2.4) | Security | 2026-11-16 |
 
 Every proposal becomes an ADR before the dependency is added to `Cargo.toml`.

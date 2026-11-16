@@ -65,8 +65,8 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-010` | Recover from a corrupted index database by rebuilding it automatically | MUST | `F-09` | M2 | Automated test | Baseline |
 | `FUN-011` | Assign stable object identifiers that do not change when the catalogue is rebuilt. | MUST | `F-09` | M1 | Automated test | Baseline |
 | `FUN-012` | Extract duration, dimensions, bitrate and codec information for media files where it can do so… | SHOULD | `F-09` | M1 | Automated test | Baseline |
-| `FUN-013` | Extract embedded artwork from audio files and use a sidecar image when one exists. | SHOULD | `F-10` | M2 | Automated test | Baseline |
-| `FUN-014` | Generate thumbnails for image files and video posters on demand and cache them in a disposable… | SHOULD | `F-10` | M2 | Automated test | Baseline |
+| `FUN-013` | Extract embedded artwork from audio files and use a sidecar image when one exists. | SHOULD | `F-10` | M2 | Automated test | Implemented |
+| `FUN-014` | Generate thumbnails for image files and video posters on demand and cache them in a disposable… | SHOULD | `F-10` | M2 | Automated test | Implemented |
 | `FUN-015` | Support playlists in M3U, M3U8 and PLS format, resolving entries relative to the playlist file. | SHOULD | `F-11` | M2 | Automated test | Baseline |
 | `FUN-016` | Expose a subtitle sidecar file (`.srt`, `.vtt`, `.sub`, `.ass`) as an additional `res` element… | SHOULD | `F-11` | M2 | Automated test | Baseline |
 | `FUN-017` | Support media stored on removable volumes and network shares | MUST | `F-08` | M2 | Automated test | Implemented |
@@ -232,7 +232,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SEC-064` | Bound the size of its on-disk cache and shall evict entries when the limit is exceeded. | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-065` | Never allocate memory proportional to a client-supplied length field without validating it… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-066` | Parse media metadata and generate thumbnails in a separate | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-067` | Bound the declared dimensions of an image before allocating any buffer for it | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-067` | Bound the declared dimensions of an image before allocating any buffer for it | MUST | `F-16` | M1 | Negative security test | Implemented |
 | `SEC-068` | Treat playlist entries as untrusted paths, shall resolve and contain them, and shall refuse… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-069` | Not resolve or follow a macOS Finder alias as if it were a symbolic link; aliases shall be… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-070` | Offer the corresponding source of the running build | MUST | `F-16` | M1 | Negative security test | Baseline |
@@ -332,7 +332,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `CFG-005` | Refuse to start when the configuration would expose an administration interface to a… | MUST | `F-12` | M2 | Automated configuration test | Baseline |
 | `CFG-006` | Support selecting the network interfaces used for discovery and for media delivery. | MUST | `F-12` | M2 | Automated configuration test | Baseline |
 | `CFG-007` | Support a per-root setting for symbolic link following | MUST | `F-12` | M2 | Automated configuration test | Baseline |
-| `CFG-008` | Support resource limits: maximum concurrent streams | SHOULD | `F-12` | M2 | Automated configuration test | Baseline |
+| `CFG-008` | Support resource limits: maximum concurrent streams | SHOULD | `F-12` | M2 | Automated configuration test | Implemented |
 | `CFG-009` | Support an optional access-control list of client addresses allowed to browse or to stream. | SHOULD | `F-12` | M2 | Automated configuration test | Baseline |
 | `CFG-010` | Support a "trusted client" list whose quirks are handled by a specific device profile. | SHOULD | `F-12` | M2 | Automated configuration test | Baseline |
 | `CFG-011` | Provide a command that validates a configuration file without starting the server. | MUST | `F-12` | M2 | Automated configuration test | Baseline |

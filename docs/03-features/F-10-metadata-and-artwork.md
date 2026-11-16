@@ -2,10 +2,17 @@
 
 Status: Draft
 Owner role: Product/Requirements
-Version/date: 0.1 / 2026-11-14
+Version/date: 0.2 / 2026-11-16
 Requirements: FUN-013, FUN-014, PERF-004
 Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
 Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
+
+**Revision history**
+
+| Version | Date | What changed |
+| --- | --- | --- |
+| 0.1 | 2026-11-14 | The baseline of the v1.0 documents |
+| 0.2 | 2026-11-16 | M2.2: the acceptance criteria carry the state that is true today (§ 10), the decisions of the implementation are written down (§ 12.1), and the two questions that the implementation answered are closed (§ 12.2) |
 
 ## 1. Purpose and user story
 
@@ -104,7 +111,10 @@ in F-09.
   `image` crate has shipped soundness defects (`RUSTSEC-2020-0073`, `RUSTSEC-2019-0014`)
   and the EXIF parser `kamadak-exif` has an infinite-loop advisory
   (`RUSTSEC-2021-0143`); Matroska metadata parsing has produced a use-after-free in a
-  media stack (security §4.5).
+  media stack (security §4.5). **The milestone M2.2 deviates from this rule on purpose and
+  for a bounded time:** the picture pipeline parses in the server process, in pure Rust and
+  with bounded reads, because the sandbox child does not exist yet. The deviation is written
+  down in ADR-0011 and in DEC-042, and it ends with the child (M-06) — see § 12.1 D-01.
 - **Sandbox bounds.** The child runs with no network access, a bounded resident set, a
   bounded wall-clock time per file, a file-size cap and an allowlist of formats
   (M-06). [DESIGN] The bounds proposed in security §8 — 5 s wall clock, 256 MiB
@@ -217,82 +227,119 @@ task: a picture failure produces a missing picture, never a panic (UX-005).
 
 ## 10. Acceptance criteria and traceability
 
-All criteria below are *planned*; no test file exists yet.
+The criteria below carry the state that is true today. **Implemented** means that a
+test proves the criterion; **Open** means that the criterion belongs to a later
+milestone and names it.
 
 **AC-01** — *Given* an audio file with embedded artwork, *when* the catalogue is built, *then* the embedded picture is
 extracted, and the object carries an absolute artwork URL that contains no path fragment. Requirements:
-FUN-013, INT-067, PLT-008 · Verification: automated test · Planned location:
-`crates/phairdlna-core/tests/artwork.rs`
+FUN-013, INT-067, PLT-008 · Verification: automated test · **Implemented** — the cover of an ID3v2 tag and the cover
+of an MP4 container are read by the parsers of the `media` module
+(`crates/phairdlna-core/src/media/id3/`, `::mp4/`), and the address is built by the DIDL writer:
+`crates/phairdlna-core/tests/artwork.rs::an_embedded_cover_is_found`,
+`::an_embedded_cover_of_a_m4a_is_found`,
+`crates/phairdlna-cli/tests/artwork.rs::the_address_of_the_cover_is_absolute_and_names_no_profile`.
 
 **AC-02** — *Given* an audio file with a sidecar image next to it, *when* the catalogue is built, *then* the sidecar is
-used as the artwork for that object, and the sidecar is resolved and contained like any other path.
-Requirements: FUN-013, SEC-001 · Verification: automated test · Planned location:
-`crates/phairdlna-core/tests/artwork.rs`
+used as the artwork for that object, and the sidecar is resolved and contained like any other path. Requirements:
+FUN-013, SEC-001 · Verification: automated test · **Implemented** — the sidecar is resolved, canonicalised and
+checked against the root before it is read:
+`crates/phairdlna-core/tests/artwork.rs::a_sidecar_wins_over_the_embedded_cover`,
+`::a_sidecar_may_carry_the_name_of_the_file`,
+`crates/phairdlna-core/src/media/sidecar.rs::tests::the_names_of_the_folder_follow`.
 
 **AC-03** — *Given* a sidecar image placed outside the media root, *when* the catalogue is built, *then* the sidecar is
 not used, no file outside the root is opened, and the object carries no artwork URL. Requirements: FUN-013,
-SEC-001, SEC-003, SEC-006 · Verification: automated test (filesystem audit hook) · Planned location:
-`crates/phairdlna-core/tests/artwork.rs`
+SEC-001, SEC-003, SEC-006 · Verification: automated test (filesystem audit hook) · **Implemented** — a link that
+leads out of the root is refused, and a file outside the root has no picture at all:
+`crates/phairdlna-core/tests/artwork.rs::a_sidecar_outside_the_root_is_not_used`,
+`::a_file_outside_the_root_has_no_picture`,
+`crates/phairdlna-cli/tests/artwork.rs::a_hostile_identifier_reaches_no_file`.
 
 **AC-04** — *Given* an audio file with neither artwork nor sidecar, *when* the catalogue is built, *then* the object
-carries no artwork URL and no error is raised. Requirements: FUN-013 · Verification: automated test ·
-Planned location: `crates/phairdlna-core/tests/artwork.rs`
+carries no artwork URL and no error is raised. Requirements: FUN-013 · Verification: automated test · **Implemented** —
+`crates/phairdlna-core/tests/artwork.rs::a_track_without_a_picture_has_none`,
+`crates/phairdlna-cli/tests/artwork.rs::a_track_without_a_picture_is_refused`,
+`::the_browse_of_a_track_without_a_picture_names_no_address`.
 
 **AC-05** — *Given* an image file, *when* a client requests a thumbnail, *then* a thumbnail is produced within the time
 budget of §5, is cached, and a second request for the same picture is served from the cache without
-producing it again. Requirements: FUN-014 · Verification: automated test · Planned location:
-`crates/phairdlna-core/tests/thumbnails.rs`
+producing it again. Requirements: FUN-014 · Verification: automated test · **Implemented, with one exception** — the
+thumbnail is produced on demand, is written into the disposable cache and is read back from it; the *time budget* is
+not measured yet (the measurement needs the reference hardware of `qa-performance` §2, and the benchmark belongs to
+M2.9): `crates/phairdlna-core/src/media/thumbnail.rs::tests::the_produced_picture_is_a_jpeg`,
+`crates/phairdlna-cli/tests/artwork.rs::the_thumbnail_of_a_photo_is_answered`,
+`::the_second_request_is_answered_from_the_cache`.
 
-**AC-06** — *Given* an image file that is changed after its thumbnail was cached, *when* a client requests the thumbnail
+**AC-06** — *Given* an image file that is changed after its thumbnail was cached, *when* the client requests the thumbnail
 again, *then* the changed file yields a different cache key, so that the stale picture is never served.
-Requirements: FUN-014 · Verification: automated test · Planned location:
-`crates/phairdlna-core/tests/thumbnails.rs`
+Requirements: FUN-014 · Verification: automated test · **Implemented** — the key carries the size and the
+modification time of the file: `crates/phairdlna-core/tests/artwork.rs::a_file_that_changed_gets_a_new_key`,
+`::the_key_of_a_picture_carries_no_path`.
 
 **AC-07** — *Given* a configured cache size bound, *when* the cache is filled beyond that bound, *then* the cache on
 disk never exceeds the bound, entries are evicted, and the pictures that remain are the correct ones for
-their objects. Requirements: FUN-014, SEC-064, CFG-008 · Verification: automated test · Planned location:
-`crates/phairdlna-core/tests/thumbnails.rs`
+their objects. Requirements: FUN-014, SEC-064, CFG-008 · Verification: automated test · **Implemented** — the oldest
+pictures are removed until the cache is inside its bound again:
+`crates/phairdlna-core/src/media/cache.rs::tests::the_cache_stays_inside_its_bound`,
+`::a_picture_that_is_larger_than_the_bound_is_refused`.
 
 **AC-08** — *Given* a media file whose parsing makes the sandbox child exceed its time bound, *when* the catalogue is
 built, *then* the child is killed at the bound, the file is quarantined, the server process is unaffected
 and its resident memory stays within the cap. Requirements: FUN-013, FUN-014, SEC-066, SEC-TH-19 ·
-Verification: automated test · Planned location: `crates/phairdlna-core/tests/media_sandbox.rs`
+Verification: automated test · Planned location:
+`crates/phairdlna-core/tests/media_sandbox.rs` · **Open (M-06)** — the sandbox child does not exist yet; until it
+does, the picture pipeline parses in the server process (ADR-0011, § 12.1 D-01).
 
 **AC-09** — *Given* an image that declares enormous dimensions, *when* a thumbnail is requested, *then* the file is
 rejected before any buffer is sized, the child is killed, and the parent's resident memory never exceeds the
 cap. Requirements: FUN-014, SEC-067, SEC-TH-20 · Verification: automated test · Planned location:
-`crates/phairdlna-core/tests/media_sandbox.rs`
+`crates/phairdlna-core/tests/media_sandbox.rs` · **Partly implemented** — the declared size of the picture is
+checked before a single pixel is allocated, and the file is refused with a readable reason
+(`crates/phairdlna-core/src/media/thumbnail.rs::tests::a_picture_that_lies_about_its_size_is_refused_before_it_is_decoded`,
+`::a_picture_with_too_many_pixels_is_refused`); the *child* and the resident-set measurement belong to M-06.
 
 **AC-10** — *Given* the sandbox child, *when* it runs, *then* it has no network access — asserted by an egress counter
 that stays at zero — and it can only read the file it was given and write to the cache directory it was
 given. Requirements: SEC-066, SEC-091, M-06 · Verification: automated test · Planned location:
-`crates/phairdlna-core/tests/media_sandbox.rs`
+`crates/phairdlna-core/tests/media_sandbox.rs` · **Open (M-06)** — there is no child yet. The picture pipeline of
+M2.2 starts no process and opens no socket at all, which is the property the test will have to show once the
+child exists.
 
 **AC-11** — *Given* a library of 100 000 files and metadata extraction disabled, *when* the catalogue is indexed, *then*
-the throughput is at least 200 files per second and no child process was started, because the picture
-pipeline is not on the scan path. Requirements: PERF-004 · Verification: benchmark · Planned location:
-`crates/phairdlna-bench/benches/indexing.rs`
+the throughput is at least 200 files per second and no child process was started, because the picture pipeline
+is not on the scan path. Requirements: PERF-004 · Verification: benchmark · Planned location:
+`crates/phairdlna-bench/benches/indexing.rs` · **Open (M2.9)** — the switch exists and the picture pipeline reads
+no file of the library while the catalogue is scanned (`library.extract_artwork`), but the throughput itself is
+not measured yet.
 
 **AC-12** — *Given* a quarantined file, *when* the diagnostics are read, *then* the file is named and the reason is
 given in plain language, and the rest of the library is indexed. Requirements: FUN-013, FUN-014, UX-004 ·
-Verification: automated test · Planned location: `crates/phairdlna-core/tests/media_sandbox.rs`
+Verification: automated test · Planned location: `crates/phairdlna-core/tests/media_sandbox.rs` · **Open (M-06)** —
+the quarantine belongs to the sandbox child. Until then, a file that cannot be read gives no picture and no
+error, and the rest of the library is browsable
+(`crates/phairdlna-cli/tests/artwork.rs::a_broken_track_does_not_stop_the_browse`).
 
 **AC-13** — *Given* the disposable cache, *when* the whole cache directory is deleted, *then* the server continues to
 serve media and produces the pictures again on demand, with no error to the client. Requirements: FUN-014 ·
-Verification: automated test · Planned location: `crates/phairdlna-core/tests/thumbnails.rs`
+Verification: automated test · **Implemented** — the cache is created again when a picture is written into it:
+`crates/phairdlna-core/src/media/cache.rs::tests::a_deleted_directory_is_recreated`.
 
 ## 11. Test strategy and dependencies
 
-**Planned test locations** (none of these files exists yet):
+**Test locations** — the files that exist carry the work of M2.2; the ones that do not
+belong to the sandbox child of M-06:
 
-| Purpose | Planned path |
-| --- | --- |
-| Artwork discovery, precedence, containment | `crates/phairdlna-core/tests/artwork.rs` |
-| Thumbnail generation, caching, eviction | `crates/phairdlna-core/tests/thumbnails.rs` |
-| Sandbox bounds, quarantine, no network | `crates/phairdlna-core/tests/media_sandbox.rs` |
-| Artwork and thumbnail unit tests | `crates/phairdlna-core/src/media/artwork.rs`, `crates/phairdlna-core/src/media/thumbnails.rs`, `crates/phairdlna-core/src/media/sandbox.rs` (inline `#[cfg(test)]` modules) |
-| Indexing throughput with extraction disabled | `crates/phairdlna-bench/benches/indexing.rs` |
-| Picture rendering on a real device | `qa/device-matrix.toml` |
+| Purpose | Path | State |
+| --- | --- | --- |
+| Artwork discovery, precedence, containment, broken files | `crates/phairdlna-core/tests/artwork.rs` | exists |
+| The route that serves a picture, and the address in the document | `crates/phairdlna-cli/tests/artwork.rs` | exists |
+| The parsers of the cover, the sidecar names, the thumbnail, the cache | `crates/phairdlna-core/src/media/id3/`, `::mp4/`, `::sidecar.rs`, `::thumbnail.rs`, `::cache.rs`, `::artwork/` (inline `#[cfg(test)]` modules) | exist |
+| The fixtures of the tests | `crates/phairdlna-core/tests/support/artwork.rs`, `crates/phairdlna-cli/tests/support/artwork.rs` | exist |
+| Thumbnail generation, caching, eviction as a separate file | `crates/phairdlna-core/tests/thumbnails.rs` | planned; the criteria are proved in `media/thumbnail.rs` and `media/cache.rs` |
+| Sandbox bounds, quarantine, no network | `crates/phairdlna-core/tests/media_sandbox.rs` | planned (M-06) |
+| Indexing throughput with extraction disabled | `crates/phairdlna-bench/benches/indexing.rs` | planned (M2.9) |
+| Picture rendering on a real device | `qa/device-matrix.toml` | planned; no device test has been performed |
 
 **Method.** The sandbox child is a separate executable, so it is exercised for real: a
 malformed corpus (a truncated ID3 frame, a Matroska file with a hostile `CodecPrivate`,
@@ -307,6 +354,92 @@ HTTP), F-11 (the identity key), F-12 (cache size and extraction-time limits, CFG
 and F-14 (the administration surface that lists quarantined files).
 
 ## 12. Open questions and decisions
+
+### 12.1 Decisions taken by the implementation (M2.2)
+
+These decisions are implemented and covered by a test. The ones marked **[owner decision]**
+change a documented behaviour and are reported to the owner with this work package.
+
+**D-01 — The picture pipeline parses in the server process, in pure Rust, until the sandbox
+child exists (SEC-066, M-06, ADR-0008). [owner decision]**
+The milestone M2.2 ships the picture pipeline the way the owner directed it: a **pure-Rust**
+parser of the embedded cover (ID3v2 `APIC`, the `covr` atom of MP4) and a **pure-Rust** decoder
+of the picture (`image`, with the `jpeg` and the `png` feature only). The parsers run **in the
+server process**, not in the sandbox child that ADR-0008 prescribes, because that child does
+not exist yet — it is the work of M-06, and the milestone plan of the roadmap places it there.
+
+The deviation is deliberate and bounded, and it is recorded rather than hidden:
+
+- every read is bounded (`PictureLimits`): a tag of more than 16 MiB is refused, an embedded
+  cover of more than 8 MiB is refused, a sidecar of more than 16 MiB is refused, and a picture
+  of more than 8192 pixels per edge or of more than 40 million pixels is refused **before** a
+  single pixel is allocated (`SEC-067`);
+- no parser of this module can panic: a broken tag, a broken atom and a broken image give no
+  picture and no error, and the library stays browsable (`UX-004`, `UX-005`);
+- no file outside a root is ever opened, and a link that leads out of the root is refused
+  (`SEC-001`, `SEC-003`, `SEC-006`);
+- the parser reads no file while the catalogue is scanned, so the indexing path stays free of
+  picture work (`PERF-004`).
+
+The parsers are written behind a small interface (`media::id3`, `media::mp4`,
+`media::thumbnail`), so that the sandbox child of M-06 can call them without a change of the
+caller. ADR-0011 records the decision and its revisit condition. **The owner may decide that
+the child comes earlier; until then, the deviation from ADR-0008 stands.**
+
+**D-02 — A sidecar wins over the cover in the tag (FUN-013, § 12 Q2).**
+The reading proposed in § 12 Q2 is implemented: the search looks for the image that lies next
+to the file first, and looks into the tag only when there is none. The reason is the one of
+the proposal: a person who placed a cover next to a track meant it to be seen, and the sidecar
+is the cheaper path. *Implemented; the owner may reverse it.*
+
+**D-03 — An embedded cover that is larger than the bound is discarded, and the sidecar is
+used instead (FUN-013, § 12 Q3).**
+The reading proposed in § 12 Q3 is implemented: a cover in the tag that is larger than the
+bound of the pipeline is not a cover of this server. The search goes on, and the sidecar that
+lies next to the file is used. No cover is re-encoded. *Implemented; the owner may fix the
+bound.*
+
+**D-04 — The picture of a file is looked for when a client asks for it, and the answer is
+remembered (PERF-004, FUN-014).**
+The catalogue reads **no** file of the library while it is scanned. The picture is looked for
+when the object is asked for, and the answer is remembered under a key that carries the size
+and the modification time of the file, so that a file that changed is looked at again and a
+file that did not change is not. The key is a digest: it carries no part of the path
+(`PLT-008`, `SEC-005`). *Implemented.*
+
+**D-05 — The address of a picture is `/art/<id>`, and the identifier is the identifier of the
+object (INT-067, PLT-008).**
+The route that answers a request for a picture takes the identifier of the catalogue object and
+nothing else; the object must be known to the catalogue, so a request for an unknown or a
+hostile identifier reaches no file at all. The address in the DIDL-Lite document is built from
+the base address of the server, so it is absolute, it names no path of the disk, and it carries
+no `dlna:profileID` attribute. *Implemented.*
+
+**D-06 — The picture of a file that is a picture is a thumbnail of it (FUN-014).**
+A photo of the library is its own picture: the server produces a small JPEG of it, whose
+longest edge is at most 512 pixels, and it is never enlarged. A picture that is smaller than
+that is served as it is. The half of FUN-014 that asks for a **video poster** is not
+implemented — no video decoder exists in the baseline (§ 12 Q1). *Implemented, except for the
+poster.*
+
+**D-07 — The pictures of a library are looked for only when the user wants them, and the
+cache of the produced pictures lives in its own folder (PERF-004, CFG-008, FUN-018).**
+Two settings of the `[library]` section decide this: `extract_artwork` (on by default) turns
+the search for pictures off, and `cache_directory` names the folder of the disposable cache;
+without it the cache lives in the data directory of the user. The cache is disposable: it may
+be deleted at any time, it never grows beyond `limits.max_cache_bytes`, and the oldest
+pictures are removed when it does. *Implemented.*
+
+**D-08 — A folder of the library carries no picture of its own.**
+The picture of a **container** is not emitted in the DIDL-Lite document: the model of the
+document has no place for it yet, and the container of the model is F-05's business. The
+album cover of a folder therefore reaches the client through the **items** of that folder,
+which carry the picture of the sidecar that lies next to them (`cover.jpg`, `folder.jpg`,
+`album.jpg`). A client that shows an album as a list of tracks shows the cover; a client that
+shows the album as a single entry shows no cover until the document model carries one. *Known
+limitation of M2.2; it is named in the traceability matrix of F-05.*
+
+### 12.2 Open questions
 
 1. **[OPEN] Video posters cannot be produced in the baseline.** FUN-014 asks for
    thumbnails *and* video posters, but a poster requires decoding a video frame, and
@@ -329,12 +462,12 @@ and F-14 (the administration surface that lists quarantined files).
    *Proposed:* a quarantined file is not retried automatically, is reported in the
    diagnostics, and is retried only when the user asks for a rescan or the file's
    modification time changes. *Closes when:* the owner decides.
-5. **[OPEN] Where the disposable cache lives.** ARCHITECTURE §9 defines the storage
-   class but not the location, and FUN-018 permits the cache inside a media root only
-   when it is configured that way. *Proposed:* the user's data directory by default.
-   *Closes when:* the platform adapter documents the per-instance data directory
-   (F-13, OPS-010).
-6. **[OPEN] ADR-0008 is missing.** ARCHITECTURE §4.6 refers to "ADR-0008" for the
-   decision that no external program is invoked, but `docs/02-architecture/adr/` has no
-   such ADR; the video-poster decision of §12 Q1 belongs there. *Closes when:* the ADR
-   is written or the reference is corrected.
+5. **[CLOSED — D-07] Where the disposable cache lives.** ARCHITECTURE §9 defines the
+   storage class but not the location, and FUN-018 permits the cache inside a media root
+   only when it is configured that way. *Decided:* the user's data directory by default,
+   and the folder `library.cache_directory` when the user names one. The per-instance
+   data directory of the platform adapter (F-13, OPS-010) may refine the default.
+6. **[CLOSED] ADR-0008 is not missing.** `docs/02-architecture/adr/ADR-0008-media-parsing-runs-out-of-process.md`
+   exists and decides that the media parsing runs in a sandboxed child. M2.2 deviates from
+   it on purpose and for a bounded time; ADR-0011 records the deviation and the date it
+   ends (see § 12.1 D-01).

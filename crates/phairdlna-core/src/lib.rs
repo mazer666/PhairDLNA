@@ -25,6 +25,7 @@ pub mod didl;
 pub mod error;
 pub mod http;
 pub mod identity;
+pub mod media;
 pub mod platform;
 pub mod security;
 pub mod ssdp;

@@ -23,6 +23,7 @@ pub mod limit;
 pub mod log;
 pub mod media;
 pub mod media_route;
+pub mod pictures;
 pub mod setup;
 pub mod signal;
 pub mod ssdp;

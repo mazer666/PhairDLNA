@@ -1,6 +1,6 @@
 # Project status — PhairDLNA
 
-Status: **Baseline approved (2026-11-15) · M1.11 implemented · M2.1 implemented** · Compiled: 2026-11-16
+Status: **Baseline approved (2026-11-15) · M1.11 implemented · M2.1 implemented · M2.2 implemented** · Compiled: 2026-11-16
 Owner role: Lead / Project Manager
 
 ---
@@ -50,9 +50,30 @@ root is noticed by the next full scan, and the schedule of the scans is the work
 `crates/phairdlna-core/tests/volume_platform_events.rs`; the decisions are D-15 to
 D-20 of `../03-features/F-08-media-roots-and-filesystem.md`.
 
+**The second step of M2 is closed: M2.2 — metadata extraction, artwork and thumbnails.**
+The library now shows its pictures. A **pure-Rust** parser reads the cover out of an ID3v2
+tag (`APIC`, versions 2.2, 2.3 and 2.4) and out of an MP4 container (the `covr` atom), and
+the image that lies **next to** a file — `cover.jpg`, `folder.jpg`, `album.jpg` or the name of
+the file itself with an image extension — wins over the cover in the tag. A photo of the
+library is its own picture: the server produces a small JPEG of it, never larger than it, and
+keeps it in a **disposable cache** that may be deleted at any time, that never grows beyond
+its bound and that removes its oldest pictures when it does. The picture is served at
+`/art/<id>`, and the DIDL-Lite document names it in `upnp:albumArtURI` — an absolute address
+of this server, with no path of the disk and no `dlna:profileID`. A file that is broken
+gives no picture and no error: the library stays browsable and the daemon keeps serving. The
+evidence is `crates/phairdlna-core/tests/artwork.rs` and `crates/phairdlna-cli/tests/artwork.rs`.
+
+**One deviation is on the record.** The picture pipeline of M2.2 parses **in the server
+process**, not in the sandboxed child that ADR-0008 prescribes, because that child does not
+exist yet — it is the work of M-06. Every read and every allocation of the pipeline is
+bounded, and the parsers are written so that they move into the child without a change of
+their interface. The deviation is written down in **ADR-0011** and in DEC-042, and it ends
+with the child.
+
 **What is still missing.** The IPv6 discovery, the interface selection of the sending
-socket (the daemon has one address), the rate limiter of the answers, the artwork (F-11
-is M2), the transfer limits and the index on disk. Each of them is named in the
+socket (the daemon has one address), the rate limiter of the answers, the video posters
+(the baseline ships no video decoder), the sandbox child of the picture pipeline (M-06,
+ADR-0011), the transfer limits and the index on disk. Each of them is named in the
 requirement index with the state that is true today.
 
 The milestone before it, **M1.9 — the catalogue over one root**, is unchanged: a scanner
@@ -81,7 +102,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | Requirements | **Complete** | 346 requirements with IDs, priorities, features, milestones and verification methods — `../01-product/REQUIREMENTS-INDEX.md` |
 | Traceability | **Complete** | Generated matrix requirement → feature → milestone → module → verification → evidence — `TRACEABILITY-MATRIX.md` |
 | Architecture | **Complete** | Module boundaries, data flows, runtime model — `../02-architecture/ARCHITECTURE.md` |
-| Decisions | **Complete** | The ADRs in `../02-architecture/adr/` plus 41 entries in the decision log — `../00-governance/DECISION-LOG.md` |
+| Decisions | **Complete** | The ADRs in `../02-architecture/adr/` plus 47 entries in the decision log — `../00-governance/DECISION-LOG.md` |
 | Security model | **Complete** | Eight mitigations, 28 threats, each with its verification — `../04-security/SECURITY-MODEL.md` |
 | Privacy model | **Complete** | Data inventory, network posture, source offer — `../04-security/PRIVACY.md` |
 | Dependency review | **Complete** | Licence data for every candidate crate, retrieved 2026-11-14 — `../04-security/DEPENDENCY-LICENSE-REVIEW.md` |
@@ -94,7 +115,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | Open decisions | **12 awaiting the owner** — OD-05 (minimum macOS version) was decided on 2026-11-15 | `OPEN-DECISIONS.md` |
 | Glossary | **Complete** | The protocol, product, platform, security and project vocabulary — `../01-product/GLOSSARY.md` |
 | Research inputs | **Complete** | The briefs the specifications cite — `../09-research/` |
-| Implementation | **M0 done, M1.1–M1.11 implemented, M2.1 implemented** | The four crates exist with the boundary enforced; the configuration, the eight platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root, the catalogue over several roots with the memory of their volumes, and the live daemon are implemented; **no device test has been performed**, so no milestone exit criterion is met yet |
+| Implementation | **M0 done, M1.1–M1.11 implemented, M2.1 and M2.2 implemented** | The four crates exist with the boundary enforced; the configuration, the eight platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root, the catalogue over several roots with the memory of their volumes, the live daemon, and the picture pipeline of the library are implemented; **no device test has been performed**, so no milestone exit criterion is met yet |
 | Device evidence | **None** | Every device row reads `NOT TESTED` |
 | Release | **Not releasable** | `RELEASE-BLOCKERS.md` |
 

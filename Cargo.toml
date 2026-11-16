@@ -20,6 +20,10 @@ phairdlna-core = { path = "crates/phairdlna-core", version = "0.0.0" }
 # build free of a C compiler, so the core stays portable and every platform in the
 # build matrix compiles it without a toolchain beyond Rust itself.
 blake3 = { version = "1.8", default-features = false, features = ["std", "pure"] }
+# The pictures of the library: the thumbnail of a photo and the re-encoding of
+# an embedded cover. Only the two formats the server serves are compiled in, so
+# that the decoder surface stays small (F-10, SEC-067).
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
 # The network serving of the daemon. These live in the CLI crate and not in the
 # core, so that the core stays portable and free of a runtime (ADR-0001).
 axum = { version = "0.8", default-features = false, features = ["http1", "tokio", "original-uri"] }

@@ -17,4 +17,7 @@ phairdlna-core = { workspace = true }
 tokio = { workspace = true }
 
 [dev-dependencies]
+# The tests write a real picture, so that the thumbnail of the daemon is
+# produced from a file that a decoder can really read.
+image = { workspace = true }
 tempfile = { workspace = true }

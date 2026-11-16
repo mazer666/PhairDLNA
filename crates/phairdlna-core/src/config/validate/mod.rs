@@ -9,7 +9,11 @@
 
 use super::defaults::Config;
 use super::error::ConfigError;
-use super::sections::{MediaRoot, NetworkSection, SecuritySection, ServerSection};
+
+mod library;
+use super::sections::{NetworkSection, SecuritySection, ServerSection};
+
+use self::library::validate_library;
 
 /// Checks the whole document and returns the first problem it finds.
 ///
@@ -20,7 +24,7 @@ use super::sections::{MediaRoot, NetworkSection, SecuritySection, ServerSection}
 pub fn validate(config: &Config) -> Result<(), ConfigError> {
     validate_server(&config.server)?;
     validate_network(&config.network)?;
-    validate_library(&config.library.roots)?;
+    validate_library(&config.library)?;
     validate_limits(config)?;
     validate_security(&config.security)?;
     Ok(())
@@ -62,90 +66,6 @@ fn validate_network(network: &NetworkSection) -> Result<(), ConfigError> {
                 ),
             ));
         }
-    }
-    Ok(())
-}
-
-/// The shared folders.
-fn validate_library(roots: &[MediaRoot]) -> Result<(), ConfigError> {
-    for (index, root) in roots.iter().enumerate() {
-        validate_root(index, root)?;
-    }
-    validate_distinct_roots(roots)
-}
-
-/// Two roots may not share a name and may not share a path.
-///
-/// A name is how a person and a client tell the roots apart, and a path says
-/// which folder is published. Two roots with one name would be two folders
-/// with one label, and two roots with one path would publish the same files
-/// twice under two identifiers (`FUN-017`, `CFG-002`).
-fn validate_distinct_roots(roots: &[MediaRoot]) -> Result<(), ConfigError> {
-    let mut names: Vec<&str> = Vec::new();
-    let mut paths: Vec<&str> = Vec::new();
-    for (index, root) in roots.iter().enumerate() {
-        let field = format!("library.roots[{index}]");
-        let name = root.name.trim();
-        let path = root.path.trim();
-        if names.contains(&name) {
-            return Err(ConfigError::field(
-                format!("{field}.name"),
-                format!(
-                    "field \"{field}.name\" is \"{name}\"; expected a name that no other root uses, \
-                     because a client tells the roots apart by their name"
-                ),
-            ));
-        }
-        if paths.iter().any(|known| same_folder(known, path)) {
-            return Err(ConfigError::field(
-                format!("{field}.path"),
-                format!(
-                    "field \"{field}.path\" is \"{path}\"; expected a path that no other root uses, \
-                     because the same folder published twice is the same file twice"
-                ),
-            ));
-        }
-        names.push(name);
-        paths.push(path);
-    }
-    Ok(())
-}
-
-/// Whether two paths name the same folder.
-///
-/// The written paths are compared first; a folder that exists is compared by
-/// the folder it resolves to, because `/Media/Films` and `/Media/Films/` are
-/// one folder, and so are a folder and a link that points at it.
-fn same_folder(left: &str, right: &str) -> bool {
-    if left == right {
-        return true;
-    }
-    match (std::fs::canonicalize(left), std::fs::canonicalize(right)) {
-        (Ok(left), Ok(right)) => left == right,
-        _ => false,
-    }
-}
-
-/// One shared folder.
-fn validate_root(index: usize, root: &MediaRoot) -> Result<(), ConfigError> {
-    let field = format!("library.roots[{index}]");
-    if root.name.trim().is_empty() {
-        return Err(ConfigError::field(
-            format!("{field}.name"),
-            format!(
-                "field \"{field}.name\" is empty; expected a name a client can read, \
-                 for example \"Films\""
-            ),
-        ));
-    }
-    if root.path.trim().is_empty() {
-        return Err(ConfigError::field(
-            format!("{field}.path"),
-            format!(
-                "field \"{field}.path\" is empty; expected an absolute path, \
-                 for example \"/Users/me/Movies\""
-            ),
-        ));
     }
     Ok(())
 }
