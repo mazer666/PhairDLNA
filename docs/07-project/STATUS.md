@@ -47,24 +47,25 @@ document a client would receive.
 **The configuration takes a list of roots**, and M1.9 verifies one root; the second root
 and the union of two roots are implemented and tested, but the milestone was scoped to one.
 
-**One requirement group of M1.9 is still open.** The roadmap assigns `FUN-008`, `FUN-009`
-and `FUN-010` — the SQLite index that survives a rescan, that can be rebuilt and that
-recovers from corruption — to M1.9. The scope the owner approved for M1.9 was the
-scanner, the opaque identifiers and the browse over one root; the index on disk was not
-part of it, so the catalogue of this milestone lives in memory and those three
-requirements **remain open**. The owner decides whether they come into M1.9 or move to
-M2 with the rest of the index work.
+**The requirement group of M1.9 that was open is now decided.** The roadmap assigned
+`FUN-008`, `FUN-009` and `FUN-010` — the SQLite index that survives a rescan, that can
+be rebuilt and that recovers from corruption — to M1.9. The scope the owner approved for
+M1.9 was the scanner, the opaque identifiers and the browse over one root; the index on
+disk was not part of it, so the catalogue of M1 lives in memory. The owner decided on
+2026-11-16 (**DEC-037**) that the three requirements **move to M2**, where the rest of the
+index work lives (step M2.9 of the roadmap). The in-memory catalogue of M1 is the
+accepted baseline, and the requirement index carries the new milestone.
 
 | Area | State | Evidence |
 | --- | --- | --- |
 | Requirements | **Complete** | 346 requirements with IDs, priorities, features, milestones and verification methods — `../01-product/REQUIREMENTS-INDEX.md` |
 | Traceability | **Complete** | Generated matrix requirement → feature → milestone → module → verification → evidence — `TRACEABILITY-MATRIX.md` |
 | Architecture | **Complete** | Module boundaries, data flows, runtime model — `../02-architecture/ARCHITECTURE.md` |
-| Decisions | **Complete** | The ADRs in `../02-architecture/adr/` plus 32 entries in the decision log — `../00-governance/DECISION-LOG.md` |
+| Decisions | **Complete** | The ADRs in `../02-architecture/adr/` plus 38 entries in the decision log — `../00-governance/DECISION-LOG.md` |
 | Security model | **Complete** | Eight mitigations, 28 threats, each with its verification — `../04-security/SECURITY-MODEL.md` |
 | Privacy model | **Complete** | Data inventory, network posture, source offer — `../04-security/PRIVACY.md` |
 | Dependency review | **Complete** | Licence data for every candidate crate, retrieved 2026-11-14 — `../04-security/DEPENDENCY-LICENSE-REVIEW.md` |
-| Quality gates | **Defined** | 28 gates with their commands, the label vocabulary and 12 recorded negative tests; 11 gates can run today — `../05-quality/QUALITY-GATES.md` |
+| Quality gates | **Defined** | 28 gates with their commands, the label vocabulary and 15 recorded negative tests; 13 gates can run today — `../05-quality/QUALITY-GATES.md` |
 | Test strategy | **Complete** | Test layers, property tests, negative catalogue, fuzz targets — `../05-quality/TEST-STRATEGY.md` |
 | Interoperability | **Framework complete, evidence empty** | 26 conformance checks defined; **no device test has been performed** — `../05-quality/INTEROPERABILITY-MATRIX.md` |
 | Performance | **Budgets defined, not measured** | Budgets and the measurement protocol — `../05-quality/PERFORMANCE-BUDGETS.md` |
@@ -123,9 +124,9 @@ Everything else in this repository is **documented and unmeasured**. In particul
 | Independent reviews | 3 — a beginner-experience review, a consistency review and the review of M1.9, all in `../05-quality/reviews/` |
 | Protocol conformance checks | 26 (`PC-01` … `PC-26`) |
 | Threats modelled | 28 (`SEC-TH-01` … `SEC-TH-28`) |
-| Quality gates | 28 (`QG-01` … `QG-28`), of which 11 can run today |
+| Quality gates | 28 (`QG-01` … `QG-28`), of which 13 can run today |
 | Milestone gates | 7 (`G0` … `G6`) |
-| Architecture decisions | The ADRs in `../02-architecture/adr/` + 36 decision-log entries |
+| Architecture decisions | The ADRs in `../02-architecture/adr/` + 38 decision-log entries |
 | Open owner decisions | 13 (`OD-01` … `OD-13`), of which OD-05 is decided |
 | Risks | 13 (`R-01` … `R-13`) |
 | Archived baselines | 2 snapshots, each with a SHA-256 manifest |
@@ -137,21 +138,18 @@ Everything else in this repository is **documented and unmeasured**. In particul
 
 ## 4. What we should do next — the proposal
 
-### 4.1 The first thing: M0, and it is small
+### 4.1 M0 is closed, with two items still open
 
-M0 has four pieces of work left, and all four are mechanical:
+M0 was the foundation: the approved baseline, the architecture, the four crates with the
+boundary enforced, the licence and advisory gates on the real dependency set, and the
+manual CI workflow. All of it is done. Two items of it are not:
 
-| Step | What | Done when |
+| Item | What | Done when |
 | --- | --- | --- |
-| M0.1 | The four crates exist: `phairdlna-core`, `phairdlna-cli`, `phairdlna-admin`, `phairdlna-mac` | `cargo build --workspace` succeeds on macOS, Linux and Windows |
-| M0.2 | `scripts/check-crate-boundaries.sh` (gate QG-28) | an intentionally inverted dependency turns it red |
-| M0.3 | `deny.toml` proven on the real dependency set | `cargo deny check licenses bans sources` is green, and `cargo audit` is green |
-| M0.4 | The manual CI workflow has been run once on every platform | three run URLs exist in the run list, and every step passed |
+| M0.5 | The manual CI workflow has been run on macOS and on Windows, not only on Linux | three run URLs exist in the run list, one per platform, and every step passed |
+| M0.6 | The Intel macOS target of the build matrix builds | the matrix shows a green x86_64-apple-darwin build |
 
-**Why this order:** the boundary check is the gate that protects everything the
-project builds afterwards. It is cheap to write now and expensive to retrofit.
-
-### 4.2 Then M1, in nine small steps
+### 4.2 M1, in ten small steps
 
 Each step ends in something observable, and each is small enough to review in one
 sitting. The order is not negotiable: each step needs the one before it.
@@ -170,7 +168,8 @@ sitting. The order is not negotiable: each step needs the one before it.
 | 10 | The security baseline | Every threat row in F-16 has its negative test, and they pass | next |
 
 **Step 10 is not optional and not last.** The threat rows are cheap to test while the
-code is small, and expensive to retrofit.
+code is small, and expensive to retrofit. It is also the step that M1.11 was implemented
+ahead of; it is closed next, against the code that is already written.
 
 ### 4.3 The first real device, and when
 

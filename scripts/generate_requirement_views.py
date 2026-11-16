@@ -678,6 +678,11 @@ MILESTONE_OVERRIDES = [
     ("DOC", "001", "012", "M0", "the documentation quality is foundation work"),
     ("SUP", "001", "009", "M0", "the licence and supply-chain policy is foundation work"),
     ("LIFE", "001", "011", "M2", "the lifecycle and recovery work is M2"),
+    # The catalogue of M1 is clean and in memory; the index on disk belongs to
+    # M2. The owner decided this on 2026-11-16 (DEC-037). This entry must stay
+    # above the broad "FUN 001..012 is M1" rule below, because the first match
+    # wins.
+    ("FUN", "008", "010", "M2", "the persistent index on disk belongs to M2; M1 keeps a clean in-memory catalogue"),
     ("FUN", "001", "012", "M1", "the library core is M1"),
 ]
 

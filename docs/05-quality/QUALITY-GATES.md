@@ -79,8 +79,8 @@ recorded, may be accepted with a reason.
 | QG-02 | Lints | `cargo clippy --workspace --all-targets -- -D warnings` | blocker | every milestone | **exists** | No `#[allow]` without a justifying comment |
 | QG-03 | No `unsafe` | `scripts/check-no-unsafe.sh` | blocker | every milestone | **exists** | `SUP-008`; any `unsafe` needs an ADR. **Implemented and running** |
 | QG-04 | Build | `cargo build --workspace --all-targets` | blocker | every milestone | **exists** | Plus the release profile and the macOS universal binary |
-| QG-05 | Unit tests | `cargo nextest run --workspace` | blocker | every milestone | **exists** | Requires `cargo-nextest`. |
-| QG-06 | Integration tests | `cargo nextest run --workspace --test '*'` | blocker | M1+ | planned |  |
+| QG-05 | Unit tests | `cargo test --workspace` | blocker | every milestone | **exists** | `cargo-nextest` is the planned switch (it is not installed in the reference environment); `cargo test --workspace` is what the CI runs |
+| QG-06 | Integration tests | `cargo test --workspace --test '*'` | blocker | M1+ | **exists** | **Implemented and running** — 26 integration test targets, all green. `cargo-nextest` is the planned switch |
 | QG-07 | Doctests | `cargo test --workspace --doc` | blocker | every milestone | **exists** | nextest does not cover these |
 | QG-08 | Licences | `cargo deny check licenses` | blocker | M0+ | **exists** | `AGPL-3.0-only` + `MPL-2.0`; `unused-allowed-license = warn` Requires `cargo-deny`. |
 | QG-09 | Advisories | `cargo audit` | blocker | M0+ | **exists** | Fail on any un-waived advisory Requires `cargo-audit`. |
@@ -88,7 +88,7 @@ recorded, may be accepted with a reason.
 | QG-11 | Link check | `scripts/check-doc-links.sh` | blocker | every milestone | **exists** | Resolves every relative link in the tracked markdown. **Implemented and running**; `lychee` is the planned replacement for external links |
 | QG-12 | Spelling | `typos` | warning | every milestone | planned |  |
 | QG-13 | File size | `scripts/check-file-size.sh` | blocker | M1+ | **exists** | ≤ 300 lines target, > 500 hard limit; no maintained Rust tool exists, so the project writes its own. **Implemented and running** |
-| QG-14 | Complexity | `clippy::excessive_nesting` + `clippy::too_many_lines` (blocking) | blocker | M1+ | planned | `rust-code-analysis-cli` is stale (2023) and MPL-2.0 → advisory only, never gating |
+| QG-14 | Complexity | `clippy::excessive_nesting` + `clippy::too_many_lines` (blocking) | blocker | M1+ | **exists** | The thresholds are in `clippy.toml`: 60 lines per function, 3 levels of nesting — the hard limits of `PROJECT-STANDARDS.md`. The 40-line target stays a review rule. `rust-code-analysis-cli` is stale (2023) and MPL-2.0 → advisory only, never gating |
 | QG-15 | Binary size | *planned* — an `xtask` command | warning | release | planned | Budget per binary, documented |
 | QG-16 | Snapshot review | `cargo insta test --check` | blocker | M1+ | planned | `INSTA_UPDATE=no`, `INSTA_FORCE_PASS` unset |
 | QG-17 | DIDL-Lite conformance | *planned* — an `xtask` command validating against the vendored `didl-lite.xsd` via the `xmlschema` crate | blocker | M1+ | planned | Arrives with the DIDL-Lite writer |
@@ -102,7 +102,7 @@ recorded, may be accepted with a reason.
 | QG-25 | Outdated dependencies | `cargo outdated` | INFO | — | planned | Informational only |
 | QG-26 | Coverage | `cargo llvm-cov` | INFO | — | planned | Informational; never a quality claim on its own |
 | QG-27 | Mutation testing | `cargo mutants` | INFO | — | planned | Informational, optional |
-| QG-28 | Crate boundaries | *planned* — `scripts/check-crate-boundaries.sh` | blocker | M0+ | planned | Fails when a crate depends "downwards". Arrives with the crates it guards (ADR-0001) |
+| QG-28 | Crate boundaries | `scripts/check-crate-boundaries.sh` | blocker | M0+ | **exists** | Fails when a crate depends "downwards" (ADR-0001). **Implemented and running** — 3 sibling dependencies checked across 4 crate manifests |
 
 ### 3.0 The canonical register
 
@@ -114,10 +114,11 @@ The **State** column says whether the gate can run today. `exists` means the com
 is in the repository and works; `planned` means it arrives with the code it guards.
 A gate in the `planned` state is reported as `NOT RUN — <reason>`, never as a pass.
 
-Three gates have a script of their own and were observed running on 2026-11-14:
-**QG-03** (no `unsafe`), **QG-11** (link check) and **QG-13** (file size). The
-formatting, lint, build and test gates come with the Rust toolchain and are marked
-`exists` for the same reason. The generator script
+**Thirteen gates can run today**: QG-01 … QG-11, QG-13, QG-14 and QG-28. Five of them have
+a script of their own and are observed running: **QG-03** (no `unsafe`), **QG-06**
+(integration tests), **QG-11** (link check), **QG-13** (file size) and **QG-28** (crate
+boundaries). The formatting, lint, build, complexity and test gates come with the Rust
+toolchain and are marked `exists` for the same reason. The generator script
 `scripts/generate_requirement_views.py` is **not** a quality gate: it is a
 documentation generator that the CI runs as a check step.
 
@@ -131,15 +132,17 @@ a **negative test**:
 | QG-01 | Introduce a mis-indented line → the check reports a diff |
 | QG-02 | Introduce a lint violation → clippy fails with `-D warnings` |
 | QG-03 | Add one `unsafe` block → the check fails and names the file — **demonstrated on 2026-11-14** |
+| QG-06 | Break an integration test → the integration target fails and the command exits non-zero — **demonstrated on 2026-11-16** |
 | QG-08 | Add a dependency with an incompatible licence → the check fails |
 | QG-09 | Add a dependency with a known advisory → the check fails |
 | QG-13 | Add a 600-line file → the check fails and names the file — **demonstrated on 2026-11-14** |
-| QG-14 | Add a function with six nesting levels → clippy fails |
+| QG-14 | Add a function with 70 lines or four levels of nesting → clippy fails on `too_many_lines` or `excessive_nesting` — **demonstrated on 2026-11-16** |
 | QG-16 | Change a DIDL-Lite output → the snapshot check fails |
 | QG-17 | Emit DIDL-Lite with a missing required attribute → the XSD check fails |
 | QG-18 | Break the escaping function → the property test finds a counterexample |
 | QG-19 | Feed a malformed input → the fuzz target aborts (this one *must* crash) |
 | QG-11 | Add a broken relative link → the link checker fails — **demonstrated on 2026-11-14** (it found six broken links in the README on its first run) |
+| QG-28 | Make a core crate depend on the CLI crate → the boundary check fails and names the edge — **demonstrated on 2026-11-16** |
 
 ---
 

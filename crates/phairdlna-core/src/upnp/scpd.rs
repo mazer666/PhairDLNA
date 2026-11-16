@@ -177,17 +177,23 @@ impl ServiceSpec {
             writer.open("stateVariable", &[("sendEvents", events)]);
             writer.text("name", variable.name);
             writer.text("dataType", variable.data_type);
-            if !variable.allowed_values.is_empty() {
-                writer.open("allowedValueList", &[]);
-                for value in variable.allowed_values {
-                    writer.text("allowedValue", value);
-                }
-                writer.close("allowedValueList");
-            }
+            write_allowed_values(writer, variable.allowed_values);
             writer.close("stateVariable");
         }
         writer.close("serviceStateTable");
     }
+}
+
+/// Writes the allowed values of a state variable.
+fn write_allowed_values(writer: &mut XmlWriter, values: &[&'static str]) {
+    if values.is_empty() {
+        return;
+    }
+    writer.open("allowedValueList", &[]);
+    for value in values {
+        writer.text("allowedValue", value);
+    }
+    writer.close("allowedValueList");
 }
 
 #[cfg(test)]
@@ -242,15 +248,20 @@ mod tests {
                 .map(|variable| variable.name)
                 .collect();
             for action in service.actions() {
-                for argument in action.arguments {
-                    assert!(
-                        declared.contains(&argument.related_state_variable),
-                        "{} refers to an undeclared variable",
-                        argument.name
-                    );
-                    assert!(matches!(argument.direction, Direction::In | Direction::Out));
-                }
+                check_action_arguments(action, &declared);
             }
+        }
+    }
+
+    /// Verifies all arguments of an action.
+    fn check_action_arguments(action: &super::ActionSpec, declared: &[&str]) {
+        for argument in action.arguments {
+            assert!(
+                declared.contains(&argument.related_state_variable),
+                "{} refers to an undeclared variable",
+                argument.name
+            );
+            assert!(matches!(argument.direction, Direction::In | Direction::Out));
         }
     }
 

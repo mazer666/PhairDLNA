@@ -16,7 +16,9 @@
 //! (`OPS-008`).
 
 pub mod address;
+pub mod guard;
 pub mod http;
+pub mod limit;
 pub mod log;
 pub mod media;
 pub mod setup;

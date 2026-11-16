@@ -185,16 +185,20 @@ mod tests {
             if child.title == title {
                 return child.id.clone();
             }
-            let folder = library
-                .catalogue
-                .container(&child.id)
-                .expect("the folder is in the catalogue");
-            for item in &folder.children {
-                if item.title == title {
-                    return item.id.clone();
-                }
+            if let Some(id) = find_in_folder(library, &child.id, title) {
+                return id;
             }
         }
         panic!("the file is not in the catalogue");
+    }
+
+    fn find_in_folder(library: &MediaLibrary, folder_id: &str, title: &str) -> Option<String> {
+        let folder = library.catalogue.container(folder_id)?;
+        for item in &folder.children {
+            if item.title == title {
+                return Some(item.id.clone());
+            }
+        }
+        None
     }
 }

@@ -88,7 +88,7 @@ target of the build matrix.
 | M1.6 | ConnectionManager with an honest protocolInfo | `INT-050` … `INT-056` |
 | M1.7 | DIDL-Lite generation | `INT-060` … `INT-079` |
 | M1.8 | HTTP media delivery, ranges and seeking | `INT-080` … `INT-099`, `FUN-040` … `FUN-046` |
-| M1.9 | A minimal catalogue over one root | `FUN-001` … `FUN-007`, `FUN-008` … `FUN-011` |
+| M1.9 | A minimal catalogue over one root | `FUN-001` … `FUN-007`, `FUN-011`, `FUN-012` |
 | M1.10 | The security baseline | `SEC-001` … `SEC-018`, `SEC-060` … `SEC-065`, `SEC-090` … `SEC-096` |
 | M1.11 | The CLI: run, status, scan, interfaces | `OPS-001` … `OPS-008`, `OPS-011` |
 
@@ -123,6 +123,7 @@ multiple roots, artwork, playlists.
 | M2.6 | The macOS menu bar application | `UX-001` … `UX-010`, `UX-013` … `UX-020`, `MB-001` … `MB-009` |
 | M2.7 | Service installation and lifecycle | `LIFE-001` … `LIFE-011`, `PLT-013` |
 | M2.8 | Adaptive resource management | `RES-001` … `RES-009` |
+| M2.9 | The catalogue index on disk: the SQLite index, its rebuild and its recovery | `FUN-008`, `FUN-009`, `FUN-010` |
 
 **Exit criteria**
 

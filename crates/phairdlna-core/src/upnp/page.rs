@@ -21,7 +21,7 @@ pub const PAGE_LIMIT: usize = 500;
 ///
 /// The page never holds more items than the page limit, even when the client
 /// asks for all of them (`SEC-061`).
-pub(super) fn page(children: &[ContentItem], arguments: &BrowseArguments) -> Vec<ContentItem> {
+pub fn page(children: &[ContentItem], arguments: &BrowseArguments) -> Vec<ContentItem> {
     let start = (arguments.starting_index as usize).min(children.len());
     let limit = if arguments.requested_count == 0 {
         PAGE_LIMIT

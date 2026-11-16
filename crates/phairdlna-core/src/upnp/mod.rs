@@ -64,7 +64,7 @@ pub use device_model::{
 pub use dispatcher::Dispatcher;
 pub use error::{fault_description, UpnpError};
 pub use mime::{sink_list, source_list, source_protocol_info};
-pub use page::PAGE_LIMIT;
+pub use page::{page, PAGE_LIMIT};
 pub use scpd::{
     ActionSpec, ArgumentSpec, Direction, ServiceSpec, StateVariableSpec, SCPD_NAMESPACE,
 };
@@ -73,6 +73,7 @@ pub use services::{
     SERVICE_ID_CONNECTION_MANAGER, SERVICE_ID_CONTENT_DIRECTORY,
 };
 pub use soap::{
-    check_soap_action, fault_body, parse_request, response_body, SoapRequest, SoapResponse,
-    SOAP_ENCODING_STYLE, SOAP_ENVELOPE_NAMESPACE, UPNP_CONTROL_NAMESPACE, XML_CONTENT_TYPE,
+    check_soap_action, fault_body, parse_request, parse_request_with_limits, response_body,
+    SoapRequest, SoapResponse, SOAP_ENCODING_STYLE, SOAP_ENVELOPE_NAMESPACE,
+    UPNP_CONTROL_NAMESPACE, XML_CONTENT_TYPE,
 };

@@ -64,6 +64,13 @@ jobs:
       - name: QG-02 lints
         run: cargo clippy --workspace --all-targets -- -D warnings
 
+      - name: QG-14 complexity
+        run: |
+          cargo clippy --workspace --all-targets -- \
+            -D warnings \
+            -D clippy::excessive_nesting \
+            -D clippy::too_many_lines
+
       - name: QG-03 no unsafe code
         run: ./scripts/check-no-unsafe.sh
 
@@ -72,6 +79,9 @@ jobs:
 
       - name: QG-05 unit and integration tests
         run: cargo test --workspace
+
+      - name: QG-06 integration tests
+        run: cargo test --workspace --test '*'
 
       - name: QG-07 doctests
         run: cargo test --workspace --doc

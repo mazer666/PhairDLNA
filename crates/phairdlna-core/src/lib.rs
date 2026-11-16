@@ -26,6 +26,7 @@ pub mod error;
 pub mod http;
 pub mod identity;
 pub mod platform;
+pub mod security;
 pub mod ssdp;
 pub mod upnp;
 pub mod xml;

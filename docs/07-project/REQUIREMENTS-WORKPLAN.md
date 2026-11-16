@@ -51,9 +51,9 @@ priority client families in `docs/05-quality/INTEROPERABILITY-MATRIX.md` § 4.1.
 *Feature by feature: functional, technical, performance, usability, security and
 interoperability requirements with stable IDs.*
 
-**Done.** 341 requirements with stable IDs, defined once in
+**Done.** 346 requirements with stable IDs, defined once in
 `docs/01-product/TECHNICAL-REQUIREMENTS.md` and
-`docs/01-product/PRODUCT-REQUIREMENTS.md`, and elaborated by 21 feature
+`docs/01-product/PRODUCT-REQUIREMENTS.md`, and elaborated by 22 feature
 specifications with 298 acceptance criteria. The index and the traceability matrix
 are generated, so they cannot drift from the definitions.
 
@@ -63,7 +63,7 @@ are generated, so they cannot drift from the definitions.
 indexing, the transcoding boundary, the external dependencies and the licence
 compatibility.*
 
-**Done.** Ten ADRs in `docs/02-architecture/adr/`, 23 decision-log entries, a
+**Done.** Ten ADRs in `docs/02-architecture/adr/`, 38 decision-log entries, a
 dependency and licence review with the crates.io data retrieved on 2026-11-14, and
 the threat model with its eight mitigations.
 
@@ -85,8 +85,16 @@ are addressed, and its report is kept at
 *Only after the owner approves the requirements baseline, begin M0/M1 in small
 verified increments.*
 
-**Not started. Blocked on the owner's approval of the baseline and on the twelve
-open decisions in `docs/07-project/OPEN-DECISIONS.md`.**
+**Running.** The baseline was approved on 2026-11-15 (DEC-031) and the implementation
+follows: M0 is complete and the milestones M1.1 to M1.9 and M1.11 are coded. M1.10, the
+security baseline, is in progress — the work is recorded in `docs/07-project/STATUS.md`
+and in `docs/04-security/SECURITY-MODEL.md`.
+
+**Done.** 346 requirements with stable IDs, defined once in
+`docs/01-product/TECHNICAL-REQUIREMENTS.md` and
+`docs/01-product/PRODUCT-REQUIREMENTS.md`, and elaborated by 21 feature
+specifications with 298 acceptance criteria. The index and the traceability matrix
+are generated, so they cannot drift from the definitions.
 
 ---
 

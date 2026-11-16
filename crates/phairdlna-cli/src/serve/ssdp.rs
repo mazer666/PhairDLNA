@@ -216,14 +216,24 @@ impl SsdpSocket {
             tokio::time::sleep(Duration::from_millis(delay)).await;
             for target in matching {
                 let answer = build_response(&target, &server, &location);
-                if let Err(error) = socket.send_to(answer.as_bytes(), from).await {
-                    logger.warn(
-                        "an answer could not be sent",
-                        &[("reason", &error.to_string())],
-                    );
-                }
+                Self::send_one_answer(&socket, &answer, from, &logger).await;
             }
         });
+    }
+
+    /// Sends a single unicast SSDP search reply.
+    async fn send_one_answer(
+        socket: &tokio::net::UdpSocket,
+        answer: &str,
+        to: SocketAddr,
+        logger: &Logger,
+    ) {
+        if let Err(error) = socket.send_to(answer.as_bytes(), to).await {
+            logger.warn(
+                "an answer could not be sent",
+                &[("reason", &error.to_string())],
+            );
+        }
     }
 
     /// Sends a datagram to the multicast group.

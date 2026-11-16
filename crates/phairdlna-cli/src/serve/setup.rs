@@ -15,6 +15,7 @@ use phairdlna_core::catalogue::Catalogue;
 use phairdlna_core::config::Config;
 use phairdlna_core::identity;
 use phairdlna_core::platform::LocalFileSystem;
+use phairdlna_core::security::{HostPolicy, Limits, Redactor};
 use phairdlna_core::upnp::BaseUrl;
 use phairdlna_core::upnp::DeviceDescription;
 use phairdlna_core::upnp::DeviceInfo;
@@ -23,7 +24,9 @@ use tokio::sync::oneshot;
 use tokio::task::JoinHandle;
 
 use super::address;
+use super::guard::Guard;
 use super::http;
+use super::limit::CappedListener;
 use super::log::{Level, Logger};
 use super::media;
 use super::ssdp;
@@ -120,7 +123,7 @@ pub struct HttpServer {
 }
 
 /// Starts the HTTP server in its own task.
-pub fn start_http(listener: TcpListener, context: Arc<http::ServerContext>) -> HttpServer {
+pub fn start_http(listener: CappedListener, context: Arc<http::ServerContext>) -> HttpServer {
     let (stop, stopped) = oneshot::channel::<()>();
     let (report, ended) = oneshot::channel::<Result<(), std::io::Error>>();
     let (done, finished) = tokio::sync::watch::channel(false);
@@ -169,7 +172,7 @@ pub async fn start_ssdp(
         port,
         multicast_port,
         advertise_port,
-        Logger::new(Level::Info, "ssdp"),
+        logger.for_component("ssdp"),
     )
     .await
     {
@@ -192,7 +195,15 @@ pub async fn start_ssdp(
 /// HTTP server and the discovery socket.
 pub async fn start(options: ServeOptions) -> Result<super::Daemon, String> {
     let config = load_config(&options.config_path)?;
-    let logger = Logger::new(Level::Info, "daemon");
+    // The pseudonyms of the log belong to the daemon: every component names
+    // the same path with the same pseudonym (`SEC-094`).
+    let redactor = Arc::new(Redactor::new());
+    let logger = Logger::with_redactor(
+        Level::from_config(config.logging.level),
+        "daemon",
+        Arc::clone(&redactor),
+    )
+    .redacting(config.logging.redact);
     let identity = load_identity(&config, options.identity_path.as_deref())?;
     let catalogue = build_catalogue(&config, &logger);
     let (host, port) = address_and_port(&options, &config);
@@ -208,21 +219,16 @@ pub async fn start(options: ServeOptions) -> Result<super::Daemon, String> {
     // (`INT-022`, `INT-006`).
     let base_url = BaseUrl::new(&format!("http://{host}:{}", address.port()))
         .map_err(|error| format!("the base URL is not usable: {error}"))?;
-    let description = DeviceDescription::new(
-        &base_url,
-        &identity.as_device_identity().uuid(),
-        device_info(&config),
-    )
-    .map_err(|error| format!("the device description is not usable: {error}"))?;
-    let catalogue = Arc::new(catalogue);
-    let library = media::MediaLibrary::new(Arc::clone(&catalogue), roots_of(&config));
-    let context = Arc::new(http::ServerContext {
-        catalogue,
-        library,
-        description,
-        base_url: base_url.origin().to_owned(),
-        logger: logger.clone(),
-    });
+    let (context, limits) =
+        build_server_context(&config, &identity, base_url, catalogue, &logger, redactor)?;
+    // The listener keeps the connections inside the bounds and gives every
+    // connection a deadline (`SEC-012`, `SEC-016`).
+    let listener = CappedListener::new(
+        listener,
+        limits.connections,
+        limits.read_timeout,
+        limits.write_timeout,
+    );
     let server = start_http(listener, context.clone());
     let (ssdp, stop_ssdp, ssdp_task) =
         start_ssdp(&options, &identity, &config, host, address.port(), &logger).await;
@@ -242,4 +248,35 @@ pub async fn start(options: ServeOptions) -> Result<super::Daemon, String> {
         stop_ssdp,
         ssdp_task,
     })
+}
+
+/// Builds the shared HTTP server context and extracts resource limits.
+fn build_server_context(
+    config: &Config,
+    identity: &identity::InstalledIdentity,
+    base_url: BaseUrl,
+    catalogue: Catalogue,
+    logger: &Logger,
+    redactor: Arc<Redactor>,
+) -> Result<(Arc<http::ServerContext>, Limits), String> {
+    let description = DeviceDescription::new(
+        &base_url,
+        &identity.as_device_identity().uuid(),
+        device_info(config),
+    )
+    .map_err(|error| format!("the device description is not usable: {error}"))?;
+    let catalogue = Arc::new(catalogue);
+    let library = media::MediaLibrary::new(Arc::clone(&catalogue), roots_of(config));
+    let limits = Limits::from_section(&config.limits);
+    let hosts = HostPolicy::new(config.security.allowed_host_names.clone());
+    let guard = Arc::new(Guard::new(limits, hosts, redactor));
+    let context = Arc::new(http::ServerContext {
+        catalogue,
+        library,
+        description,
+        base_url: base_url.origin().to_owned(),
+        logger: logger.clone(),
+        guard,
+    });
+    Ok((context, limits))
 }

@@ -8,6 +8,13 @@ Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world 
 Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
 PERF-005, PERF-008, PERF-009, PERF-012
 
+**Milestone split.** This specification describes the feature as a whole. It is delivered in
+two parts: the scanner, the opaque identifiers and the browse over one root are M1 (M1.9); the
+index on disk — `FUN-008`, `FUN-009` and `FUN-010` — is M2 (step M2.9), by the decision of the
+owner of 2026-11-16 (**DEC-037**). The M1 part runs on a clean in-memory catalogue; the M2 part
+adds the SQLite index of ADR-0006. The requirement index is the authority on the milestone of a
+requirement.
+
 ## 1. Purpose and user story
 
 The **catalogue** is the server's own list of the user's media: which folders exist, which
@@ -427,9 +434,10 @@ and it happens when the owner asks for it (`catalogue scan`) or when the server 
 > `FUN-008`, `FUN-009` and `FUN-010` to M1.9, and those three requirements ask for a
 > SQLite index that survives a rescan, that can be rebuilt and that recovers from
 > corruption. **They are therefore not implemented by this milestone and remain open.**
-> The owner decides whether they come into M1.9 (with `rusqlite` and a database format)
-> or move to M2 together with the rest of the index work. Nothing in this document
-> reports them as done.
+> The owner decided on 2026-11-16 (**DEC-037**) that they **move to M2**, where the rest of
+> the index work lives (`ROADMAP.md` § M2, step M2.9), together with the SQLite index of
+> ADR-0006. The catalogue of M1 is clean and in memory; that is the accepted baseline of
+> M1. Nothing in this document reports the three requirements as done.
 
 **D-02 — The identifier of an object is the hash of the volume, the root key and the relative identity
 (INT-062, ADR-0007). [owner decision]** The owner directed blake3; the hash input and the length are

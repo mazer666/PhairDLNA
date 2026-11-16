@@ -14,7 +14,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use axum::body::Body;
-use axum::extract::{Path, State};
+use axum::extract::{DefaultBodyLimit, Path, State};
 use axum::http::{HeaderMap as AxumHeaders, HeaderValue, Method, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{any, get, post};
@@ -26,10 +26,12 @@ use phairdlna_core::http::response::Body as CoreBody;
 use phairdlna_core::upnp::DeviceDescription;
 use phairdlna_core::upnp::Dispatcher;
 use phairdlna_core::upnp::ServiceSpec;
+use tokio::sync::OwnedSemaphorePermit;
 
+use super::guard::{self, Guard};
 use super::log::Logger;
 use super::media::MediaLibrary;
-use super::stream::FileStream;
+use super::stream::{FileStream, PermittedStream};
 
 /// What the handlers of the daemon share.
 pub struct ServerContext {
@@ -43,6 +45,8 @@ pub struct ServerContext {
     pub base_url: String,
     /// Where the daemon writes what it has to say.
     pub logger: Logger,
+    /// The rules every request must pass.
+    pub guard: Arc<Guard>,
 }
 
 /// The content type of an XML answer.
@@ -54,9 +58,15 @@ const XML: &str = "text/xml; charset=\"utf-8\"";
 /// device description advertises, so that a client that follows the
 /// description finds them (`INT-021`, `INT-022`). The paths other servers use
 /// are served as well, because a client may hard-code them.
+///
+/// **The rules come first.** The guard reads the request before a handler
+/// sees it, and the body of a request is bounded before it is read: a request
+/// that names another host, or that is too large, never reaches the library
+/// (`SEC-011`, `SEC-071`).
 pub fn router(context: Arc<ServerContext>) -> Router {
     let content = ServiceSpec::content_directory();
     let manager = ServiceSpec::connection_manager();
+    let limits = context.guard.limits();
     Router::new()
         .route("/description.xml", get(description))
         .route(content.definition().scpd_path, get(content_directory_scpd))
@@ -80,6 +90,11 @@ pub fn router(context: Arc<ServerContext>) -> Router {
         .route(manager.definition().event_path, any(event_subscription))
         .route("/media/{id}", get(media).head(media))
         .route("/art/{id}", get(artwork))
+        .layer(DefaultBodyLimit::max(limits.body_bytes))
+        .layer(axum::middleware::from_fn_with_state(
+            Arc::clone(&context.guard),
+            guard::enforce,
+        ))
         .with_state(context)
 }
 
@@ -192,6 +207,11 @@ fn fault_response(status: StatusCode) -> Response {
 }
 
 /// Answers a request for a media file.
+///
+/// A transfer takes a place out of the bound of the transfers, and gives it
+/// back when the answer has been sent. A request that arrives when the bound
+/// is reached is refused, and the client is told to come back later
+/// (`SEC-012`).
 async fn media(
     State(context): State<Arc<ServerContext>>,
     Path(id): Path<String>,
@@ -200,7 +220,20 @@ async fn media(
 ) -> Response {
     let request = media_request(&id, &method, &headers);
     let answer = phairdlna_core::http::delivery::evaluate(&request, &context.library);
-    media_answer(&answer, &context, &id, method == Method::HEAD).await
+    let is_head = method == Method::HEAD;
+    let permit = if is_head {
+        None
+    } else {
+        context.guard.transfer_permit()
+    };
+    if !is_head && permit.is_none() {
+        context.logger.warn(
+            "a transfer was refused: too many transfers are running",
+            &[],
+        );
+        return guard::too_many_transfers();
+    }
+    media_answer(&answer, &context, &id, is_head, permit).await
 }
 
 /// Answers a request for artwork.
@@ -235,6 +268,7 @@ async fn media_answer(
     context: &ServerContext,
     id: &str,
     is_head: bool,
+    permit: Option<OwnedSemaphorePermit>,
 ) -> Response {
     let mut response = Response::new(Body::empty());
     *response.status_mut() =
@@ -249,9 +283,20 @@ async fn media_answer(
     }
     let path = context.library.path_of(id);
     response = match answer.body {
-        CoreBody::Whole => with_file(response, path, 0, answer.content_length, context, id).await,
+        CoreBody::Whole => {
+            with_file(
+                response,
+                path,
+                0,
+                answer.content_length,
+                context,
+                id,
+                permit,
+            )
+            .await
+        }
         CoreBody::Slice { offset, length } => {
-            with_file(response, path, offset, length, context, id).await
+            with_file(response, path, offset, length, context, id, permit).await
         }
         CoreBody::Text(text) => {
             if !is_head {
@@ -275,6 +320,9 @@ async fn media_answer(
 /// may have grown, or shrunk, since the scan. The answer then carries the
 /// length the file really has, and its `Content-Range` describes the bytes
 /// that are really sent (`INT-081`, `INT-088`).
+///
+/// The path of the file is written to the log only as a pseudonym: the log
+/// must not become a list of the files of the user (`SEC-094`).
 async fn with_file(
     mut response: Response,
     path: Option<PathBuf>,
@@ -282,16 +330,18 @@ async fn with_file(
     length: u64,
     context: &ServerContext,
     id: &str,
+    permit: Option<OwnedSemaphorePermit>,
 ) -> Response {
     let Some(path) = path else {
         return refused(response, context, id);
     };
-    let mut stream = match FileStream::open(path, offset).await {
+    let mut stream = match FileStream::open(path.clone(), offset).await {
         Ok(stream) => stream,
         Err(error) => {
+            let path = path.display().to_string();
             context.logger.warn(
                 "a file could not be opened",
-                &[("id", id), ("reason", &error.to_string())],
+                &[("id", id), ("path", &path), ("reason", &error.to_string())],
             );
             return refused(response, context, id);
         }
@@ -320,7 +370,10 @@ async fn with_file(
             &format!("bytes {}-{}/{}", offset, offset + served - 1, size),
         );
     }
-    *response.body_mut() = Body::from_stream(stream);
+    // The place of the transfer is given back when the answer has been sent.
+    if let Some(permit) = permit {
+        *response.body_mut() = Body::from_stream(PermittedStream::new(stream, permit));
+    }
     response
 }
 

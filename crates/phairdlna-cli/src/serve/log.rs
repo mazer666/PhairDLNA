@@ -12,7 +12,11 @@
 //! file (`OPS-001`).
 
 use std::io::Write;
+use std::sync::Arc;
 use std::time::SystemTime;
+
+use phairdlna_core::config::LogLevel;
+use phairdlna_core::security::Redactor;
 
 /// How much the daemon says.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -34,22 +38,85 @@ impl Level {
             Level::Error => "error",
         }
     }
+
+    /// The level of the configuration.
+    ///
+    /// The configuration knows a level *debug* that the daemon does not write:
+    /// the daemon says what a user wants to know, and the detail of a request
+    /// belongs to a future release (`OPS-006`).
+    pub fn from_config(level: LogLevel) -> Self {
+        match level {
+            LogLevel::Debug => Level::Info,
+            LogLevel::Info => Level::Info,
+            LogLevel::Warn => Level::Warn,
+            LogLevel::Error => Level::Error,
+        }
+    }
 }
 
 /// The log of the daemon.
 ///
 /// The logger writes to standard error and never fails: a log that cannot be
 /// written must not stop a server that serves media (`F-13` § 9).
+///
+/// The logger also hides: a path, an address and the identifier of the device
+/// are replaced by a pseudonym, so that the log does not become a list of the
+/// files of the user (`SEC-094`). The same path keeps the same pseudonym in
+/// every record, so that the log stays useful.
 #[derive(Debug, Clone)]
 pub struct Logger {
     level: Level,
     component: &'static str,
+    redactor: Arc<Redactor>,
+    redact: bool,
 }
 
 impl Logger {
     /// A logger for one component.
     pub fn new(level: Level, component: &'static str) -> Self {
-        Self { level, component }
+        Self {
+            level,
+            component,
+            redactor: Arc::new(Redactor::new()),
+            redact: true,
+        }
+    }
+
+    /// A logger that shares the pseudonyms of the other loggers.
+    ///
+    /// The pseudonyms belong to the daemon, not to a component: a path that
+    /// is named in the log of the HTTP server and in the log of the discovery
+    /// must carry the same pseudonym (`SEC-094`).
+    pub fn with_redactor(level: Level, component: &'static str, redactor: Arc<Redactor>) -> Self {
+        Self {
+            level,
+            component,
+            redactor,
+            redact: true,
+        }
+    }
+
+    /// Whether the values of the records are replaced by pseudonyms.
+    ///
+    /// The user may turn the redaction off; the default is on, and the log of
+    /// a server that says nothing about the files of the user is the safer one
+    /// (`SEC-094`).
+    pub fn redacting(mut self, redact: bool) -> Self {
+        self.redact = redact;
+        self
+    }
+
+    /// The same logger, for another component.
+    ///
+    /// The new logger shares the pseudonyms: a path that is named by two
+    /// components carries the same pseudonym in both logs (`SEC-094`).
+    pub fn for_component(&self, component: &'static str) -> Self {
+        Self {
+            level: self.level,
+            component,
+            redactor: Arc::clone(&self.redactor),
+            redact: self.redact,
+        }
     }
 
     /// Writes a record.
@@ -76,11 +143,22 @@ impl Logger {
             self.component,
             message
         );
-        for (name, value) in fields {
+        for (name, value) in self.fields_of(fields) {
             line.push_str(&format!(" {name}={value}"));
         }
         line.push('\n');
         line
+    }
+
+    /// The fields of a record, with the private values replaced.
+    fn fields_of(&self, fields: &[(&str, &str)]) -> Vec<(String, String)> {
+        if self.redact {
+            return self.redactor.fields(fields);
+        }
+        fields
+            .iter()
+            .map(|(name, value)| ((*name).to_owned(), (*value).to_owned()))
+            .collect()
     }
 
     /// Writes a record of level *info*.
@@ -232,5 +310,55 @@ mod tests {
         let logger = Logger::new(Level::Error, "test");
         // The record is not written, and the call returns without a panic.
         logger.info("nothing to see", &[("key", "value")]);
+    }
+
+    /// The negative case: a path in a record is replaced by a pseudonym, so
+    /// that the log does not name the files of the user (`SEC-094`).
+    #[test]
+    fn a_path_in_a_record_is_hidden() {
+        let logger = Logger::new(Level::Warn, "daemon");
+        let record = logger.record(
+            Level::Warn,
+            "a file was refused",
+            &[("path", "/Users/me/Movies/film.mkv")],
+        );
+
+        assert!(!record.contains("Users"), "the path is gone: {record}");
+        assert!(
+            record.contains("<path:1>"),
+            "the pseudonym is there: {record}"
+        );
+    }
+
+    /// The same path carries the same pseudonym in every record.
+    #[test]
+    fn a_path_keeps_its_pseudonym() {
+        let logger = Logger::new(Level::Warn, "daemon");
+        let first = logger.record(
+            Level::Warn,
+            "a file was refused",
+            &[("path", "/Users/me/a.mkv")],
+        );
+        let second = logger.record(
+            Level::Warn,
+            "a file was read",
+            &[("path", "/Users/me/a.mkv")],
+        );
+
+        assert!(first.contains("<path:1>"), "{first}");
+        assert!(second.contains("<path:1>"), "{second}");
+    }
+
+    /// The user may turn the redaction off.
+    #[test]
+    fn the_redaction_may_be_turned_off() {
+        let logger = Logger::new(Level::Warn, "daemon").redacting(false);
+        let record = logger.record(
+            Level::Warn,
+            "a file was refused",
+            &[("path", "/Users/me/Movies/film.mkv")],
+        );
+
+        assert!(record.contains("/Users/me/Movies/film.mkv"), "{record}");
     }
 }

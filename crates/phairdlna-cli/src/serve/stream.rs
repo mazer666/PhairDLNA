@@ -15,6 +15,7 @@ use axum::body::Bytes;
 use futures_core::Stream;
 use tokio::fs::File;
 use tokio::io::{AsyncRead, AsyncSeekExt, ReadBuf};
+use tokio::sync::OwnedSemaphorePermit;
 
 /// The size of one piece of a transfer.
 const CHUNK: usize = 64 * 1024;
@@ -91,5 +92,36 @@ impl Stream for FileStream {
         buffer.truncate(read);
         this.remaining -= read as u64;
         Poll::Ready(Some(Ok(Bytes::from(buffer))))
+    }
+}
+
+/// A file stream that holds the place of a transfer.
+///
+/// The place is given back when the stream is dropped, and the stream is
+/// dropped when the answer has been sent. A transfer that is cut off in the
+/// middle therefore does not keep its place forever (`SEC-012`).
+pub struct PermittedStream {
+    /// The bytes of the file.
+    inner: FileStream,
+    /// The place of the transfer.
+    _permit: OwnedSemaphorePermit,
+}
+
+impl PermittedStream {
+    /// Builds a stream that holds the place of a transfer.
+    pub fn new(inner: FileStream, permit: OwnedSemaphorePermit) -> Self {
+        Self {
+            inner,
+            _permit: permit,
+        }
+    }
+}
+
+impl Stream for PermittedStream {
+    type Item = Result<Bytes, std::io::Error>;
+
+    /// Reads the next piece of the file.
+    fn poll_next(self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        Pin::new(&mut self.get_mut().inner).poll_next(context)
     }
 }

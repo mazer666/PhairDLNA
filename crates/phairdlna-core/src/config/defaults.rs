@@ -118,6 +118,14 @@ impl Default for LimitsSection {
             max_cache_bytes: 512 * 1024 * 1024,
             metadata_timeout_seconds: 5,
             index_workers: 2,
+            max_request_line_bytes: 8 * 1024,
+            max_header_block_bytes: 32 * 1024,
+            max_header_count: 64,
+            max_body_bytes: 64 * 1024,
+            max_concurrent_connections: 64,
+            max_didl_bytes: 2 * 1024 * 1024,
+            read_timeout_seconds: 30,
+            write_timeout_seconds: 30,
         }
     }
 }
@@ -130,6 +138,7 @@ impl Default for SecuritySection {
             trusted_clients: Vec::new(),
             admin_enabled: false,
             admin_token_file: default_admin_token_file(),
+            allowed_host_names: Vec::new(),
         }
     }
 }

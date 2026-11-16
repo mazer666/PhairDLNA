@@ -1,0 +1,16 @@
+# The lint thresholds of the project standards, expressed for clippy.
+#
+# Why: docs/00-governance/PROJECT-STANDARDS.md sets the limits that a function
+#      and a module must respect — a function targets 40 lines and must be
+#      refactored above 60, the nesting of a block is at most 3. Without this
+#      file clippy would use its own defaults, which are far looser, and the
+#      standard would be a wish rather than a gate.
+# How: the thresholds below are the hard limits of the standard. The 40-line
+#      target stays a review rule, because a lint that fires on every long
+#      function would make the signal useless.
+
+# A function longer than this is refused. The standard's hard limit is 60.
+too-many-lines-threshold = 60
+
+# The nesting of a block: target <= 3, hard limit > 4 (PROJECT-STANDARDS.md).
+excessive-nesting-threshold = 4

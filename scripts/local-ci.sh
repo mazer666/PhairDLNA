@@ -8,10 +8,15 @@ cd "$ROOT"
 echo "=== 1. Checking format (QG-01) ==="
 cargo fmt --all -- --check
 
-echo "=== 2. Checking clippy lints (QG-02) ==="
-cargo clippy --workspace --all-targets -- -D warnings
+echo "=== 2. Checking clippy lints (QG-02, QG-14) ==="
+# QG-14: the complexity lints of the project standards are blocking. The
+# thresholds live in clippy.toml — 60 lines per function, 3 levels of nesting.
+cargo clippy --workspace --all-targets -- \
+    -D warnings \
+    -D clippy::excessive_nesting \
+    -D clippy::too_many_lines
 
-echo "=== 3. Running workspace unit and integration tests (QG-04, QG-05, QG-07) ==="
+echo "=== 3. Running workspace unit and integration tests (QG-04, QG-05, QG-06, QG-07) ==="
 cargo test --workspace
 
 echo "=== 4. Checking no unsafe code (QG-03) ==="

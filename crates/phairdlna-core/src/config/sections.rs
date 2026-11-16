@@ -93,6 +93,22 @@ pub struct LimitsSection {
     pub metadata_timeout_seconds: u64,
     /// How many files may be inspected in parallel.
     pub index_workers: usize,
+    /// The largest request line the server reads, in bytes (`SEC-011`).
+    pub max_request_line_bytes: usize,
+    /// The largest header block the server reads, in bytes (`SEC-011`).
+    pub max_header_block_bytes: usize,
+    /// The largest number of headers the server reads (`SEC-011`).
+    pub max_header_count: usize,
+    /// The largest body the server reads, in bytes (`SEC-011`).
+    pub max_body_bytes: usize,
+    /// How many connections may be open at the same time (`SEC-012`).
+    pub max_concurrent_connections: usize,
+    /// The largest DIDL-Lite document the server writes, in bytes (`SEC-061`).
+    pub max_didl_bytes: usize,
+    /// How long a connection may stay idle before it is closed (`SEC-016`).
+    pub read_timeout_seconds: u64,
+    /// How long the server may take to write an answer (`SEC-016`).
+    pub write_timeout_seconds: u64,
 }
 
 /// Who may talk to the server.
@@ -109,6 +125,12 @@ pub struct SecuritySection {
     pub admin_enabled: bool,
     /// The path of the file holding the administration token.
     pub admin_token_file: String,
+    /// The host names the server answers to (`SEC-071`).
+    ///
+    /// A name is accepted only when it is written down here: a name is what
+    /// an attacker can point somewhere else, an address is not. The list is
+    /// empty by default, and a server without a name answers to addresses only.
+    pub allowed_host_names: Vec<String>,
 }
 
 /// How much the server says about itself.

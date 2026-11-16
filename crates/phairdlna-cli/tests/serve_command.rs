@@ -13,19 +13,11 @@ use std::net::SocketAddr;
 use std::process::{Child, Command, Stdio};
 use std::time::{Duration, Instant};
 
-/// The positive case: the `serve` command starts a server that answers a
-/// client on the network.
-///
-/// The daemon runs in a process of its own, because it only stops when it
-/// receives a signal; the test asks it for the device description and then
-/// ends it.
-#[test]
-fn the_server_answers_a_client() {
-    let directory = tempfile::tempdir().expect("a temporary directory");
+/// Sets up the test directory and writes the test configuration.
+fn setup_test_server(directory: &tempfile::TempDir, port: u16) -> std::path::PathBuf {
     let library = directory.path().join("Library");
     std::fs::create_dir_all(&library).expect("the library is created");
     std::fs::write(library.join("King Kong.mkv"), b"a film").expect("the film is written");
-    let port = free_port();
     let config = directory.path().join("phairdlna.toml");
     std::fs::write(
         &config,
@@ -37,6 +29,20 @@ fn the_server_answers_a_client() {
         ),
     )
     .expect("the configuration is written");
+    config
+}
+
+/// The positive case: the `serve` command starts a server that answers a
+/// client on the network.
+///
+/// The daemon runs in a process of its own, because it only stops when it
+/// receives a signal; the test asks it for the device description and then
+/// ends it.
+#[test]
+fn the_server_answers_a_client() {
+    let directory = tempfile::tempdir().expect("a temporary directory");
+    let port = free_port();
+    let config = setup_test_server(&directory, port);
 
     let mut child = Command::new(env!("CARGO_BIN_EXE_phairdlna-cli"))
         .arg("serve")
@@ -125,25 +131,29 @@ fn wait_for_the_end(child: &mut Child) -> std::process::ExitStatus {
 /// Waits for the server to answer, and reads the device description.
 fn wait_for_the_description(address: SocketAddr) -> String {
     for _ in 0..100 {
-        if let Ok(mut stream) =
-            std::net::TcpStream::connect_timeout(&address, Duration::from_millis(200))
-        {
-            let request = format!(
-                "GET /description.xml HTTP/1.1\r\nHost: {address}\r\nConnection: close\r\n\r\n"
-            );
-            if stream.write_all(request.as_bytes()).is_ok() {
-                let mut raw = Vec::new();
-                if stream.read_to_end(&mut raw).is_ok() {
-                    let text = String::from_utf8_lossy(&raw).into_owned();
-                    if text.contains("<root") {
-                        return text;
-                    }
-                }
-            }
+        if let Some(text) = try_fetch_description(&address) {
+            return text;
         }
         std::thread::sleep(Duration::from_millis(100));
     }
     panic!("the server did not answer the device description");
+}
+
+/// Tries to fetch the device description once.
+fn try_fetch_description(address: &SocketAddr) -> Option<String> {
+    let mut stream =
+        std::net::TcpStream::connect_timeout(address, Duration::from_millis(200)).ok()?;
+    let request =
+        format!("GET /description.xml HTTP/1.1\r\nHost: {address}\r\nConnection: close\r\n\r\n");
+    stream.write_all(request.as_bytes()).ok()?;
+    let mut raw = Vec::new();
+    stream.read_to_end(&mut raw).ok()?;
+    let text = String::from_utf8_lossy(&raw).into_owned();
+    if text.contains("<root") {
+        Some(text)
+    } else {
+        None
+    }
 }
 
 /// A port that is free at the moment of the call.

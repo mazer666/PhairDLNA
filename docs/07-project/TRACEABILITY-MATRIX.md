@@ -48,9 +48,9 @@ that was actually observed; an empty cell means *not implemented*, not *passed*.
 | `FUN-005` | `F-08` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
 | `FUN-006` | `F-08` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
 | `FUN-007` | `F-08` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
-| `FUN-008` | `F-09` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
-| `FUN-009` | `F-09` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
-| `FUN-010` | `F-09` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
+| `FUN-008` | `F-09` | M2 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
+| `FUN-009` | `F-09` | M2 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
+| `FUN-010` | `F-09` | M2 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
 | `FUN-011` | `F-09` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
 | `FUN-012` | `F-09` | M1 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
 | `FUN-013` | `F-10` | M2 | `crates/phairdlna-core/src/catalogue, crates/phairdlna-core/src/media` | Automated test | — | Not implemented |
