@@ -1,0 +1,65 @@
+# The texts of the menu bar application, in the language of the United States.
+#
+# One entry per line: `key = value`. A line that starts with `#` is a
+# comment and an empty line is ignored; a line that is neither is an error.
+# The value may hold named placeholders in braces, for example `{streams}`.
+# The placeholders are part of the contract: the code fills them in, and a
+# placeholder without a value stays visible.
+
+# The state of the server, and the title of the first group of the menu.
+menu.status.header = PhairDLNA
+menu.status.badge = DLNA
+menu.status.running = Server running — {streams} active streams
+menu.status.scanning = Scanning the library…
+menu.status.stopped = Server stopped
+menu.status.refused = Server refuses the connection
+
+# The shared folders and the streams that run.
+menu.status.no_roots = No media folder is shared
+menu.status.root = {name} — {objects} objects
+menu.status.root_missing = {name} is not available
+menu.status.transfer = {client} is playing {title}
+
+# The entries of the menu.
+menu.action.open_admin = Open the administration page
+menu.action.open_folders = Open the media folders
+menu.action.rescan = Read the library again
+menu.action.preferences = Open the configuration file
+menu.action.quit = Quit PhairDLNA
+
+# The name the screen reader reads, and the value it reads per state.
+menu.accessibility.label = PhairDLNA server status
+menu.accessibility.running = The server is running and serves {streams} active streams
+menu.accessibility.scanning = The server is reading the library
+menu.accessibility.stopped = The server is stopped
+menu.accessibility.refused = The server refuses the requests of the application
+
+# The messages after a scan of the library.
+notice.rescan_done = The library was read again — {objects} objects found
+notice.rescan_failed = The library could not be read again: {reason}
+
+# The messages of a failure.
+error.server_unreachable = The server cannot be reached: {reason}
+error.server_refused = The server refuses the requests of the application (status {status})
+
+# The detail of the server, in the detailed view.
+menu.status.objects = {objects} objects in the catalogue
+menu.status.uptime = the server runs for {seconds} seconds
+menu.status.last_scan = the library was read again: {when}
+menu.action.mode_advanced = Show the details of the server
+menu.action.mode_simple = Show the short view
+
+# The message of a preference that cannot be written.
+error.preference_failed = The preference cannot be written: {reason}
+
+# The texts of the command line.
+cli.help.usage = phairdlna-mac [--port <port>] [--token-file <file>]
+cli.help.port = --port <port> : the port of the administration surface
+cli.help.token_file = --token-file <file> : the file that holds the token of the installation
+cli.help.equivalent = Every action of this application has a command in phairdlna-cli
+cli.error.unknown_option = The option is not known: {option}
+cli.error.missing_value = The option {option} needs a value
+cli.error.bad_port = The port {value} is not a number between 1 and 65535
+cli.error.token = The token of the installation cannot be read: {reason}
+cli.error.no_menu_bar = The menu bar of the system is not there
+cli.error.not_macos = This application needs macOS

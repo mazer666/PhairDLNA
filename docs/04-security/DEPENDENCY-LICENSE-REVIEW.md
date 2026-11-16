@@ -65,8 +65,9 @@ adoption, not as a quality judgement.
 | `cpufeatures` | 0.2.17 | MIT OR Apache-2.0 | 1.60 | 302 118 751 | 2026-03-24 | **Adopt** — new with `blake3`; reads the CPU flags for the assembly backend |
 | `muda` | 0.21.2 | Apache-2.0 OR MIT | 1.90 | 51 346 421 | 2026-10-08 | **Evaluate** — macOS menu bar |
 | `tray-icon` | 0.26.1 | MIT OR Apache-2.0 | 1.90 | 44 016 004 | 2026-10-07 | **Evaluate** — tray/status item |
-| `objc2` | 0.6.5 | MIT | 1.71 | 162 826 258 | 2026-10-05 | **Adopt (macOS only)** — modern Objective-C bindings |
-| `objc2-app-kit` | 0.3.2 | Zlib OR Apache-2.0 OR MIT | 1.71 | 89 033 565 | 2025-10-04 | **Adopt (macOS only)** — `NSStatusItem` and friends |
+| `objc2` | 0.6.5 | MIT | 1.71 | 162 826 258 | 2026-10-05 | **Adopted (macOS only, M2.6)** — modern Objective-C bindings; the runtime of the classes that receive the actions of the menu (ADR-0013) |
+| `objc2-app-kit` | 0.3.2 | Zlib OR Apache-2.0 OR MIT | 1.71 | 89 033 565 | 2025-10-04 | **Adopted (macOS only, M2.6)** — `NSStatusItem`, `NSMenu`, `NSWorkspace` and the accessibility labels of the status item |
+| `objc2-foundation` | 0.3.2 | MIT | 1.71 | — | 2025-10-04 | **Adopted (macOS only, M2.6)** — the texts, the URLs and the timer of the application; new with M2.6 |
 | `mp4` | 0.14.0 | MIT | — | — | 2023-08-01 | **Not adopted** — unmaintained since 2023 |
 | `matroska` | 0.30.1 | MIT OR Apache-2.0 | — | — | 2026-04-15 | **Evaluate** — Matroska/WebM container parsing |
 | `image` | 0.25.10 | MIT OR Apache-2.0 | 1.88 | — | 2026-03-10 | **Adopt** — the thumbnail of a photo (M2.2, § 2.4); only the `jpeg` and the `png` feature are compiled in |

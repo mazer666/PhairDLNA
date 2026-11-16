@@ -1,6 +1,6 @@
 # F-15 — Native macOS experience
 
-Status: Draft
+Status: In progress — the menu bar application, the client of the administration surface and the two views are implemented (M2.6); the first-run assistant, the verification step, the audit of the screen reader and the universal binary are not
 
 Owner role: Product/Requirements
 
@@ -257,7 +257,9 @@ No failure in the application may affect the daemon, and no failure in the daemo
 
 ## 10. Acceptance criteria and traceability
 
-All criteria below are *planned*; no test file exists yet.
+The criteria below are *planned*; the automated ones that exist carry the path
+of their test file in the table of § 11. The criteria that need a real Mac
+stay manual until the application is installed on one.
 
 **AC-01** — *Given* the daemon stopped and the application running, *when* the user activates the status item, *then* the state is reported as "server
 stopped" in text, and activating "Start" brings the server up without the application restarting anything. Requirements: MB-001, UX-018, UX-019 ·
@@ -332,20 +334,25 @@ Requirements: UX-020, UX-010 · Verification: automated test · Planned location
 
 ## 11. Test strategy and dependencies
 
-**Planned test locations** (none of these files exists yet):
+**Test locations and their state.** The files of the first column that carry a
+test exist; the ones that do not yet exist are named with the reason.
 
-| Purpose | Planned path |
-| --- | --- |
-| Mode switching, shared schema, warning visibility | `crates/phairdlna-mac/tests/presentation_modes.rs` |
-| Progress reporting and cancellation | `crates/phairdlna-mac/tests/scan_progress.rs` |
-| No side effects from opening a view | `crates/phairdlna-mac/tests/view_side_effects.rs` |
-| Bundle metadata and permissions keys | `crates/phairdlna-mac/tests/bundle_metadata.rs` |
-| No network egress from the application | `crates/phairdlna-mac/tests/no_egress.rs` |
-| String resources and locale coverage | `crates/phairdlna-mac/tests/strings.rs` |
-| Status item state machine | `crates/phairdlna-mac/src/status_item.rs` (inline `#[cfg(test)]` module) |
-| Keyboard navigation, labels, focus order | `crates/phairdlna-mac/src/accessibility.rs` (inline `#[cfg(test)]` module) |
-| Manual macOS usability protocol | `qa/macos-usability-protocol.md` |
-| Device and platform matrix rows | `qa/device-matrix.toml` |
+| Purpose | Path | State |
+| --- | --- | --- |
+| Mode switching, shared schema, warning visibility | `crates/phairdlna-mac/tests/presentation_modes.rs` | **exists** (AC-08, AC-09, AC-10) |
+| The requests of the client and the answers of the surface | `crates/phairdlna-mac/tests/ipc_client.rs` | **exists** |
+| The entries of the menu and the state as text | `crates/phairdlna-mac/tests/menu.rs` | **exists** |
+| The wiring: the state, the failure and the actions | `crates/phairdlna-mac/tests/application.rs` | **exists** |
+| The thread that talks to the surface | `crates/phairdlna-mac/tests/worker.rs` | **exists** |
+| Bundle metadata and permissions keys | `crates/phairdlna-mac/tests/bundle_metadata.rs` | **exists** (AC-14) |
+| No network egress from the application | `crates/phairdlna-mac/tests/no_egress.rs` | **exists** (AC-13) |
+| String resources and locale coverage | `crates/phairdlna-mac/tests/strings.rs` | **exists** (AC-18) |
+| Progress reporting and cancellation | `crates/phairdlna-mac/tests/scan_progress.rs` | **not built** — the progress of the scan of the library is a property of the catalogue of F-08, and the application observes the state of the surface instead of a progress of its own (AC-11) |
+| No side effects from opening a view | `crates/phairdlna-mac/tests/view_side_effects.rs` | **not built** — the rule is covered by `presentation_modes.rs`, which shows that switching the view starts no work (AC-12) |
+| Status item state machine | `crates/phairdlna-mac/src/platform/status_item.rs` | **exists** — the state machine is in `src/model.rs` and is tested without a window |
+| Keyboard navigation, labels, focus order | `crates/phairdlna-mac/src/platform/accessibility.rs` | **not built** — the labels are written in `src/platform/status_item.rs` and the text of the state in `src/menu.rs`; the order of the keyboard is a property of the menu of the system and is checked by the manual protocol (AC-07) |
+| Manual macOS usability protocol | `qa/macos-usability-protocol.md` | **not built** — the protocol waits for a machine with the application installed (AC-01, AC-02, AC-04, AC-05, AC-06, AC-07, AC-15, AC-16) |
+| Device and platform matrix rows | `qa/device-matrix.toml` | **not built** — the matrix belongs to M2.7 and to the release (AC-17) |
 
 **Method.** The presentation-mode and side-effect rules are pure logic over the administration-surface client and are exercised without a GUI.
 Everything that only a real Mac can answer — the menu bar, VoiceOver labels, the text-size setting, the Local Network prompt, the firewall prompt and

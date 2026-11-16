@@ -11,6 +11,14 @@
 # would be a false positive. That is acceptable for a gate whose failure mode is
 # "a human looks at the file".
 #
+# One exemption exists, and it is narrow: a file may use `unsafe` when it
+# carries the marker `gate: unsafe-exempt ADR-0013` in a comment and the
+# record that the marker names exists in docs/02-architecture/adr/. The
+# exemption is the answer of the standard to the question "which files may use
+# unsafe": the files whose record carries the safety argument. A file with
+# `unsafe` and without the marker still fails the gate, and a marker that
+# names a record that does not exist fails the gate as well (ADR-0013).
+#
 # Exit codes: 0 = pass, 1 = fail, 77 = skipped (with a reason).
 set -uo pipefail
 
@@ -50,15 +58,31 @@ from pathlib import Path
 BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.S)
 LINE_COMMENT = re.compile(r"//[^\n]*")
 UNSAFE = re.compile(r"\bunsafe\b")
+# A file may carry the keyword `unsafe` when it names the record that allows
+# it. The record must exist, so that the marker cannot point at nothing.
+MARKER = re.compile(r"gate:\s*unsafe-exempt\s+(ADR-\d{4})")
+ADR_FOLDER = Path("docs/02-architecture/adr")
 
 findings = []
+exempted = []
 for name in sys.argv[1:]:
     path = Path(name)
     if not path.exists():
         continue
-    text = path.read_text(encoding="utf-8", errors="replace")
+    raw = path.read_text(encoding="utf-8", errors="replace")
+    marker = MARKER.search(raw)
+    if marker:
+        record = marker.group(1)
+        if list(ADR_FOLDER.glob(f"{record}-*.md")):
+            exempted.append((name, record))
+        else:
+            findings.append(
+                f"{name}: the marker names {record}, but no such record exists "
+                f"in {ADR_FOLDER}"
+            )
+        continue
     # Keep the line structure so that a finding can name a line number.
-    text = LINE_COMMENT.sub("", BLOCK_COMMENT.sub("", text))
+    text = LINE_COMMENT.sub("", BLOCK_COMMENT.sub("", raw))
     for number, line in enumerate(text.splitlines(), 1):
         if UNSAFE.search(line):
             findings.append(f"{name}:{number}: {line.strip()[:100]}")
@@ -75,5 +99,7 @@ if findings:
     sys.exit(1)
 
 print(f"RESULT: PASS (no unsafe code in {len(sys.argv) - 1} tracked Rust source file(s))")
+for name, record in exempted:
+    print(f"        {name} is exempt by {record} (the safety argument is in that record)")
 PYTHON
 exit $?

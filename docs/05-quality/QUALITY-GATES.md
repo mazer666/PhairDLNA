@@ -77,7 +77,7 @@ recorded, may be accepted with a reason.
 | --- | --- | --- | --- | --- | --- | --- |
 | QG-01 | Formatting | `cargo fmt --all -- --check` | blocker | every milestone | **exists** |  |
 | QG-02 | Lints | `cargo clippy --workspace --all-targets -- -D warnings` | blocker | every milestone | **exists** | No `#[allow]` without a justifying comment |
-| QG-03 | No `unsafe` | `scripts/check-no-unsafe.sh` | blocker | every milestone | **exists** | `SUP-008`; any `unsafe` needs an ADR. **Implemented and running** |
+| QG-03 | No `unsafe` | `scripts/check-no-unsafe.sh` | blocker | every milestone | **exists** | `SUP-008`; any `unsafe` needs an ADR. **Implemented and running** — one file of the workspace is exempt: the bridge to the Objective-C runtime of the menu bar application, which carries the marker `gate: unsafe-exempt ADR-0013`; the gate fails when the record does not exist |
 | QG-04 | Build | `cargo build --workspace --all-targets` | blocker | every milestone | **exists** | Plus the release profile and the macOS universal binary |
 | QG-05 | Unit tests | `cargo test --workspace` | blocker | every milestone | **exists** | `cargo-nextest` is the planned switch (it is not installed in the reference environment); `cargo test --workspace` is what the CI runs |
 | QG-06 | Integration tests | `cargo test --workspace --test '*'` | blocker | M1+ | **exists** | **Implemented and running** — 26 integration test targets, all green. `cargo-nextest` is the planned switch |
@@ -131,7 +131,7 @@ a **negative test**:
 | --- | --- |
 | QG-01 | Introduce a mis-indented line → the check reports a diff |
 | QG-02 | Introduce a lint violation → clippy fails with `-D warnings` |
-| QG-03 | Add one `unsafe` block → the check fails and names the file — **demonstrated on 2026-11-14** |
+| QG-03 | Add one `unsafe` block → the check fails and names the file — **demonstrated on 2026-11-14** and again on 2026-11-16 with the exemption of ADR-0013: a file with `unsafe` and without the marker fails the gate, and a marker that names a record that does not exist fails the gate as well |
 | QG-06 | Break an integration test → the integration target fails and the command exits non-zero — **demonstrated on 2026-11-16** |
 | QG-08 | Add a dependency with an incompatible licence → the check fails |
 | QG-09 | Add a dependency with a known advisory → the check fails |

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The metadata of the bundle of the application.
+
+  What: the keys that the system of the operating system needs to run the
+        application as a menu bar application and to ask the user for the
+        permission of the local network.
+  Why: the application is a bundle and not a bare program; without these keys
+        the system shows it in the dock and asks it for the permission of the
+        local network at the wrong moment (`MB-009`, F-15 section 1).
+  Example: `LSUIElement` marks the application as one that has no window and
+          no icon in the dock.
+
+  The helper of the server is not part of this bundle: the server is
+  installed as a `launchd` daemon by the command line, and the installation
+  owns that decision (F-13, `M2.7`, the open question OD-04 of F-15).
+-->
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>PhairDLNA</string>
+    <key>CFBundleDisplayName</key>
+    <string>PhairDLNA</string>
+    <key>CFBundleIdentifier</key>
+    <string>org.phairdlna.phairdlna-mac</string>
+    <key>CFBundleExecutable</key>
+    <string>phairdlna-mac</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>CFBundleVersion</key>
+    <string>0.1.0</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>13.0</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>PhairDLNA shows the state of the media server that runs on this computer and lets you start it again.</string>
+</dict>
+</plist>

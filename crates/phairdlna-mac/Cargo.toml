@@ -10,6 +10,22 @@ publish = false
 
 # The application is a front end for the headless server. It never embeds server
 # logic, and it is built only on macOS.
+#
+# The AppKit bindings are a dependency of the macOS target alone: the crate
+# itself compiles on every platform of the build matrix, so that the tests of
+# the menu logic and of the client of the administration surface run
+# everywhere (F-15, ADR-0013).
 
 [dependencies]
 phairdlna-core = { workspace = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+# The Objective-C runtime bindings and the AppKit bindings. `objc2` is the
+# modern successor of the `cocoa` crate, and `objc2-app-kit` is the binding of
+# `NSStatusItem` and `NSMenu` (F-15 section 4, dependency licence review).
+objc2 = "0.6.5"
+objc2-app-kit = "0.3.2"
+objc2-foundation = "0.3.2"
+
+[dev-dependencies]
+tempfile = { workspace = true }

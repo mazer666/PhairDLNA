@@ -1,6 +1,6 @@
 # Project status — PhairDLNA
 
-Status: **Baseline approved (2026-11-15) · M1.11 implemented · M2.1 implemented · M2.2 implemented · M2.3 implemented · M2.4 implemented (partly) · M2.5 implemented (partly)** · Compiled: 2026-11-16
+Status: **Baseline approved (2026-11-15) · M1.11 implemented · M2.1 implemented · M2.2 implemented · M2.3 implemented · M2.4 implemented (partly) · M2.5 implemented (partly) · M2.6 implemented (partly)** · Compiled: 2026-11-16
 Owner role: Lead / Project Manager
 
 ---
@@ -139,6 +139,58 @@ running server and the source it will offer cannot disagree. The evidence is
 `crates/phairdlna-admin/tests/admin_surface.rs` and `crates/phairdlna-cli/tests/admin.rs`; the
 decisions are DEC-058 to DEC-064 and **ADR-0012**.
 
+**The sixth step of M2 is closed in part: M2.6 — the macOS menu bar application.** The crate
+`phairdlna-mac` holds a real application now, and the application is nothing but a front end: it
+holds **no state of the server of its own**, asks the administration surface of M2.5 what the
+server does, and shows the answer as a line of text in the menu bar (DEC-065). The client of the
+surface is **written in this project** — a small HTTP/1.1 client, a small reader of JSON with
+bounds on its size and its depth, and a transport that is a trait, so that the tests answer the
+client with a recorded answer and need no socket (DEC-066). The crate depends on the core of
+the project and on the bindings of the system and on **nothing else**: no network library, no
+serialization framework, and no connection to anything but the loopback interface — a test walks
+the sources and the manifest of the crate and proves it (`tests/no_egress.rs`). The requests run
+on a **thread of their own**, so that the main thread of the application never waits for the
+network and the menu never stutters (DEC-067); the channel of the commands holds one command,
+so that the application never has more than one request in flight. The token of the
+"cross-site request forgery" defence is read out of the header that the surface hands with every
+answer and sent back with the request that changes something (DEC-068).
+
+The **texts of the user interface live in one resource file per language** — `en-US` and `en-GB`
+— and in no other place: the lines of the menu, the labels that the screen reader reads, the
+messages of a failure and the help of the command line (DEC-071). A test reads the sources of
+the crate and refuses every text that a user would read. The **two views** — the short one and
+the detailed one — read the same state, and the mode is a preference of the *application* that
+lives in a file of its own, beside the configuration of the server and not inside it: switching
+the view changes no setting of the server, restarts nothing and interrupts no transfer (DEC-070,
+`UX-015`, `UX-016`). The state of the server is **text and never a colour alone**: the item
+carries the label and the value that the screen reader reads, and the picture of the system
+follows the appearance of the menu bar (`UX-009`, `UX-018`, `MB-006`).
+
+The **only file of the workspace that uses `unsafe`** is the bridge to the Objective-C runtime of
+the menu bar application, because AppKit hands the action of a menu item to a target object as a
+message and a class of our own cannot be written without it. The record **ADR-0013** carries the
+safety argument of every block, and the gate **QG-03** knows that one file by that record: a
+file with `unsafe` and without the marker still fails the gate, and a marker that names a record
+that does not exist fails the gate as well (DEC-069). The evidence is
+`crates/phairdlna-mac/tests/ipc_client.rs`, `crates/phairdlna-mac/tests/menu.rs`,
+`crates/phairdlna-mac/tests/application.rs`, `crates/phairdlna-mac/tests/worker.rs`,
+`crates/phairdlna-mac/tests/presentation_modes.rs`, `crates/phairdlna-mac/tests/bundle_metadata.rs`,
+`crates/phairdlna-mac/tests/no_egress.rs` and `crates/phairdlna-mac/tests/strings.rs`; the
+decisions are DEC-065 to DEC-071.
+
+**Parts of M2.6 are still open, and they are named.** The **first-run assistant** (`UX-002`,
+`UX-003`, `MB-007`) is not built: the application starts, asks the surface for the state and
+shows it; it does not yet ask the user where the library is and does not yet walk the user
+through the first steps. The **verification step** (`UX-001`) is not built: the application does
+not yet tell the user that a client has found the server. The **audit of the screen reader**
+(`UX-017`) and the **protocol of the usability test** (`AC-01` … `AC-07`, `AC-15`, `AC-16`) need
+a machine with the application installed and are not done, so **no device test of the application
+has been performed**. The **universal binary** (`PLT-004`) is a step of the release and not of
+this milestone. The **server is started with the command line and not from the menu** (`MB-008`): the
+rule SEC-TH-11 of the workspace says that no program of the workspace starts another program, and
+the mechanics of the service are the decision of the installation of F-13 (M2.7). The menu shows
+that the server is stopped and stops there.
+
 **Two parts of M2.4 and M2.5 are still open, and they are named.** The **source offer**
 (`OPS-016`, `SEC-070`) does not exist: the archive, the route and the build step that produces
 the artefact are not written, and the open question 2 of F-14 asks the owner how the archive is
@@ -200,7 +252,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | Open decisions | **12 awaiting the owner** — OD-05 (minimum macOS version) was decided on 2026-11-15 | `OPEN-DECISIONS.md` |
 | Glossary | **Complete** | The protocol, product, platform, security and project vocabulary — `../01-product/GLOSSARY.md` |
 | Research inputs | **Complete** | The briefs the specifications cite — `../09-research/` |
-| Implementation | **M0 done, M1.1–M1.11 implemented, M2.1, M2.2 and M2.3 implemented, M2.4 and M2.5 in part** | The four crates exist with the boundary enforced; the configuration, the platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root, the catalogue over several roots with the memory of their volumes, the live daemon, the picture pipeline of the library, the access-control list and the local administration surface are implemented; the source offer, the plain-language first-run output and the trusted-client profiles are not; **no device test has been performed**, so no milestone exit criterion is met yet |
+| Implementation | **M0 done, M1.1–M1.11 implemented, M2.1, M2.2 and M2.3 implemented, M2.4, M2.5 and M2.6 in part** | The four crates exist with the boundary enforced; the configuration, the platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root, the catalogue over several roots with the memory of their volumes, the live daemon, the picture pipeline of the library, the access-control list and the local administration surface are implemented; the source offer, the plain-language first-run output and the trusted-client profiles are not; **no device test has been performed**, so no milestone exit criterion is met yet |
 | Device evidence | **None** | Every device row reads `NOT TESTED` |
 | Release | **Not releasable** | `RELEASE-BLOCKERS.md` |
 

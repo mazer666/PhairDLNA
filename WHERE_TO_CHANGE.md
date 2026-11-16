@@ -77,7 +77,24 @@
 | `crates/phairdlna-admin/src/server.rs` | The server of the surface — the listeners and the shutdown | F-14 |
 | `crates/phairdlna-admin/tests/admin_surface.rs` | The acceptance criteria of F-14 — the answers and the refusals | F-14 |
 | `crates/phairdlna-cli/tests/admin.rs` | The administration surface of a running daemon | F-14 |
-| `crates/phairdlna-mac/src/main.rs` | The optional macOS application — a banner so far | F-15 |
+| `crates/phairdlna-mac/src/main.rs` | The optional macOS application — the command line, the texts and the start of the event loop | F-15 |
+| `crates/phairdlna-mac/src/lib.rs` | The crate root of the application and the parts of it | F-15 |
+| `crates/phairdlna-mac/src/model.rs` | The state of the server as the application understands it, and the mode of the view | F-15 |
+| `crates/phairdlna-mac/src/menu.rs` | The entries of the menu — the model of the view | F-15 |
+| `crates/phairdlna-mac/src/app.rs` | The wiring: the state, the texts and the actions of the menu | F-15 |
+| `crates/phairdlna-mac/src/actions.rs` | What the entries of the menu do | F-15 |
+| `crates/phairdlna-mac/src/worker.rs` | The thread that talks to the administration surface | F-15 |
+| `crates/phairdlna-mac/src/preferences.rs` | The preference of the view — the mode of the presentation | F-15 |
+| `crates/phairdlna-mac/src/ipc/mod.rs` | The client of the administration surface — the crate root of the module | F-15 |
+| `crates/phairdlna-mac/src/ipc/client.rs` | The client: the requests, the answers and the snapshots | F-15 |
+| `crates/phairdlna-mac/src/ipc/http.rs` | The bytes: the request, the answer and the transport | F-15 |
+| `crates/phairdlna-mac/src/ipc/json.rs` | The reader of the answers of the surface | F-15 |
+| `crates/phairdlna-mac/src/ipc/json/reader.rs` | The parser of the JSON documents | F-15 |
+| `crates/phairdlna-mac/src/ipc/snapshots.rs` | What the answers of the surface become | F-15 |
+| `crates/phairdlna-mac/src/text/strings.rs` | The texts of the user interface, one resource file per language | F-15 |
+| `crates/phairdlna-mac/src/platform/` | The AppKit adapter: the status item, its menu, the bridge to the runtime, the workspace and the service | F-15 |
+| `crates/phairdlna-mac/resources/` | The resource files of the languages and the metadata of the bundle | F-15 |
+| `crates/phairdlna-mac/tests/` | The acceptance criteria of F-15 — the client, the menu, the application, the worker, the views, the bundle and the network | F-15 |
 | `scripts/` | Repository gates and the requirement-view generator | F-19 |
 | `.github/workflows/` | Manual-only continuous integration | F-19 |
 | `docs/` | The documentation tree | F-19 |
@@ -99,7 +116,8 @@ visible and so that a contributor can see where their change will land.
 | `crates/phairdlna-core/src/lifecycle/` | Server states, sleep/wake and network recovery | F-13 |
 | `crates/phairdlna-core/src/logging/` | Structured logging and redaction | F-13, F-16 |
 | `crates/phairdlna-core/src/error.rs` | The crate error type | — |
-| `crates/phairdlna-mac/` | The optional native macOS application | F-15 |
+| `crates/phairdlna-mac/src/first_run.rs` | The first-run assistant of the application | F-15 |
+| `crates/phairdlna-mac/src/platform/verify.rs` | The verification step that asks whether a client has found the server | F-15 |
 
 ### The scripts
 
@@ -107,7 +125,7 @@ visible and so that a contributor can see where their change will land.
 | --- | --- | --- | --- |
 | `scripts/check-file-size.sh` | QG-13 | **exists and runs** | Enforces the file-length budget |
 | `scripts/check-doc-links.sh` | QG-11 | **exists and runs** | Resolves every relative documentation link |
-| `scripts/check-no-unsafe.sh` | QG-03 | **exists and runs** | Finds `unsafe` outside of comments |
+| `scripts/check-no-unsafe.sh` | QG-03 | **exists and runs** | Finds `unsafe` outside of comments; a file that carries the marker `gate: unsafe-exempt ADR-0013` is exempt, and only when the record exists |
 | `scripts/generate_requirement_views.py` | CI step "Requirement views are current" | **exists and runs** | Generates the requirement index and the traceability matrix |
 | `scripts/check-crate-boundaries.sh` | QG-28 | **exists and runs** | Fails when a crate depends "downwards" (ADR-0001, amended by ADR-0012) |
 | `scripts/soak.sh` | QG-22 | planned | Runs the seven-day soak and samples the signals |
