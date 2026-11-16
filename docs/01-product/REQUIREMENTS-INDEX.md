@@ -67,21 +67,21 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-012` | Extract duration, dimensions, bitrate and codec information for media files where it can do so… | SHOULD | `F-09` | M1 | Automated test | Baseline |
 | `FUN-013` | Extract embedded artwork from audio files and use a sidecar image when one exists. | SHOULD | `F-10` | M2 | Automated test | Implemented |
 | `FUN-014` | Generate thumbnails for image files and video posters on demand and cache them in a disposable… | SHOULD | `F-10` | M2 | Automated test | Implemented |
-| `FUN-015` | Support playlists in M3U, M3U8 and PLS format, resolving entries relative to the playlist file. | SHOULD | `F-11` | M2 | Automated test | Baseline |
-| `FUN-016` | Expose a subtitle sidecar file (`.srt`, `.vtt`, `.sub`, `.ass`) as an additional `res` element… | SHOULD | `F-11` | M2 | Automated test | Baseline |
+| `FUN-015` | Support playlists in M3U, M3U8 and PLS format, resolving entries relative to the playlist file. | SHOULD | `F-11` | M2 | Automated test | Verified |
+| `FUN-016` | Expose a subtitle sidecar file (`.srt`, `.vtt`, `.sub`, `.ass`) as an additional `res` element… | SHOULD | `F-11` | M2 | Automated test | Verified |
 | `FUN-017` | Support media stored on removable volumes and network shares | MUST | `F-08` | M2 | Automated test | Implemented |
 | `FUN-018` | Never write to, rename or delete a file inside a media root, with the single exception of its… | MUST | `F-08` | M2 | Automated test | Implemented |
 | `FUN-019` | Keep the raw path exactly as the operating system reported it for every file operation | MUST | `F-08` | M2 | Automated test | Verified |
-| `FUN-020` | Compute a separate identity key for indexing and de-duplication by applying Unicode NFC and a… | MUST | `F-11` | M2 | Automated test | Baseline |
-| `FUN-021` | Provide a way to exclude subdirectories of a root. | SHOULD | `F-11` | M2 | Protocol conformance + device test | Baseline |
-| `FUN-022` | Support multiple roots that point to the same underlying volume without producing duplicate… | SHOULD | `F-11` | M2 | Protocol conformance + device test | Baseline |
+| `FUN-020` | Compute a separate identity key for indexing and de-duplication by applying Unicode NFC and a… | MUST | `F-11` | M2 | Automated test | Verified |
+| `FUN-021` | Provide a way to exclude subdirectories of a root. | SHOULD | `F-11` | M2 | Protocol conformance + device test | Implemented |
+| `FUN-022` | Support multiple roots that point to the same underlying volume without producing duplicate… | SHOULD | `F-11` | M2 | Protocol conformance + device test | Implemented |
 | `FUN-023` | Expose the free space of a root through the ContentDirectory service when the file system… | COULD | `F-08` | M2 | Automated test | Baseline |
 | `FUN-024` | Allow the user to configure a scan schedule (interval | SHOULD | `F-08` | M2 | Automated test | Baseline |
 | `FUN-025` | Make a newly added file visible in the catalogue within 30 seconds on a file system that… | SHOULD | `F-09` | M1 | Automated test | Baseline |
-| `FUN-026` | Offer a subtitle sidecar as an additional resource with the MIME type that matches its format | MUST | `F-11` | M2 | Automated test | Baseline |
-| `FUN-027` | Deliver a subtitle file in a character set the client can read | MUST | `F-11` | M2 | Automated test | Baseline |
+| `FUN-026` | Offer a subtitle sidecar as an additional resource with the MIME type that matches its format | MUST | `F-11` | M2 | Automated test | Verified |
+| `FUN-027` | Deliver a subtitle file in a character set the client can read | MUST | `F-11` | M2 | Automated test | Implemented |
 | `FUN-028` | Serve a file larger than 4 GiB with correct byte offsets across the 4 GiB boundary and at the… | MUST | `F-06` | M1 | Automated test | Baseline |
-| `FUN-029` | Expose each additional audio or subtitle track of a media item as its own resource | MUST | `F-11` | M2 | Automated test | Baseline |
+| `FUN-029` | Expose each additional audio or subtitle track of a media item as its own resource | MUST | `F-11` | M2 | Automated test | Implemented |
 | `FUN-040` | Serve media by byte range from the original file without transcoding whenever the client… | MUST | `F-06` | M1 | Automated test | Verified |
 | `FUN-041` | Report the container and codec of a file in a way a client can use to decide whether it can… | MUST | `F-06` | M1 | Automated test | Implemented |
 | `FUN-042` | Support multiple simultaneous direct-play streams | MUST | `F-06` | M1 | Automated test | Baseline |
@@ -202,7 +202,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-102` | Record every device-test result — device model | MUST | `F-07` | M4 | Protocol conformance + device test | Baseline |
 | `INT-103` | Provide a diagnostics command that replays a stored `M-SEARCH` request and prints the response… | SHOULD | `F-07` | M4 | Protocol conformance + device test | Baseline |
 | `INT-104` | Allow the user to disable a quirk workaround globally without editing source code. | SHOULD | `F-07` | M4 | Protocol conformance test | Baseline |
-| `INT-105` | Give each additional resource of an item a `protocolInfo` that names its own MIME type | MUST | `F-11` | M2 | Protocol conformance test | Baseline |
+| `INT-105` | Give each additional resource of an item a `protocolInfo` that names its own MIME type | MUST | `F-11` | M2 | Protocol conformance test | Verified |
 
 ## SEC — Security and privacy
 

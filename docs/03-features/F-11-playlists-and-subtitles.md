@@ -221,7 +221,8 @@ never a panic (UX-005).
 
 ## 10. Acceptance criteria and traceability
 
-All criteria below are *planned*; no test file exists yet.
+The criteria below are *implemented*; the test file that proves each of them is named
+with it. The state of every requirement is in `../01-product/REQUIREMENTS-INDEX.md`.
 
 **AC-01** — *Given* an M3U playlist whose entries are relative paths, *when* the catalogue is
   browsed, *then* the playlist appears as a container of class `object.container.playlistContainer`
@@ -328,35 +329,52 @@ scheme.
 
 1. **[OPEN] The playlist format grammars were not verified against a primary specification.** This project's
    research covers the DLNA and UPnP standards and the security landscape; it did not retrieve the M3U, M3U8 or
-   PLS format definitions. The descriptions in §3 are therefore marked as design decisions. *Closes when:* the
-   format definitions are read from a primary source and the parser is checked against a fixture corpus built
-   from real-world playlists.
-2. **[OPEN] How a subtitle is offered.** The baseline says "as an additional `res` element" (FUN-016); the
+   PLS format definitions. The descriptions in §3 are therefore marked as design decisions, and the parser of
+   M2.3 was written against them. *Closes when:* the format definitions are read from a primary source and the
+   parser is checked against a fixture corpus built from real-world playlists.
+2. **[PARTLY DECIDED] How a subtitle is offered.** The baseline says "as an additional `res` element" (FUN-016); the
    DLNA and vendor vocabulary observed in the field offers `sec:CaptionInfo` / `sec:CaptionInfoEx` and
    `dlna:ifoFileURI` instead (standards §4.1, §6.5), and the MIME type of `.srt`, `.sub` and `.ass` has no
-   registered media type, which INT-051 and INT-064 require to be honest. *Closes when:* a device round shows
-   which mechanism the target television families actually accept, and the type table is fixed with the
-   candidate values named.
-3. **[OPEN] "Where the client profile supports it" has no default.** The profile store is empty at the baseline
-   (F-07, INT-100), so a literal reading means no subtitle is ever offered. *Proposed decision:* the profile
-   store carries a capability flag with a documented default value, and the default is decided after the first
-   device round; until then the feature is inert rather than wrong. *Closes when:* the owner fixes the default
-   or the first profiles exist.
-4. **[OPEN] Which sidecar wins when several match.** The rules in §4 pick the highest-priority extension, but a
-   naming convention that carries the language (`film.en.srt`, `film.de.srt`) is not part of the baseline and
-   cannot be assumed. *Closes when:* the owner decides whether the baseline supports one sidecar per media file
-   or several with a language attribute.
-5. **[OPEN] The identity key and the object identifier disagree about the scope.** FUN-020 scopes the identity
-   key by the **volume**, while ADR-0007 derives the object id from the volume identity and the path **relative
-   to the root**, so the same file reached through two roots on one volume has two identifiers under ADR-0007
-   and one identity key under FUN-020. *Proposed decision:* the identity key stays volume-scoped, the object id
-   is derived from it, and the catalogue resolves a second sighting of a file to the existing object — which
-   means the identifier changes when a root is added or removed. *Closes when:* the owner confirms this or
-   amends ADR-0007.
-6. **[OPEN] Which overlapping root owns a shared file.** FUN-022 forbids duplicates but does not say whether the
-   file is listed under the first root only, under every root that reaches it, or under a synthetic root. *Closes
-   when:* the owner decides; the first-root-wins rule is used in the meantime.
+   registered media type, which INT-051 and INT-064 require to be honest. M2.3 writes the additional `res`
+   element and names the type of the file in its own `protocolInfo` (DEC-052); the `sec:` mechanism stays out of
+   scope. *Closes when:* a device round shows which mechanism the target television families actually accept, and
+   the type table is fixed with the candidate values named.
+3. **[DECIDED, 2026-11-16] "Where the client profile supports it" has a default.** The profile store is empty at the
+   baseline (F-07, INT-100), so a literal reading means no subtitle is ever offered. The lead decided that the
+   capability is **on by default** (DEC-052), because the additional `res` element is additive: a client that
+   does not understand it still plays the film, and a feature that is off until a profile exists would never be
+   seen. The policy of the document carries the flag, so the profile store of F-07 can turn it off per client
+   when it exists. *Still open for the owner:* the default may be changed to *off* if the first device round shows
+   that a client is confused by the second element.
+4. **[DECIDED, 2026-11-16] Which sidecar wins when several match.** The rules in §4 pick the highest-priority
+   extension, and M2.3 implements that rule: WebVTT, then SubRip, then ASS, then MicroDVD (DEC-053). A naming
+   convention that carries the language (`film.en.srt`, `film.de.srt`) is not part of the baseline and is not
+   assumed; the file that has the base name of the media file is the sidecar, whatever the case of its extension.
+   *Closes when:* the owner decides whether the baseline supports one sidecar per media file or several with a
+   language attribute.
+5. **[DECIDED, 2026-11-16] The identity key and the object identifier disagree about the scope.** FUN-020 scopes
+   the identity key by the **volume**, while ADR-0007 derives the object id from the volume identity and the path
+   **relative to the root**. M2.3 keeps both: the identity key is the volume-scoped key of the path of the file,
+   and the uniqueness of a file comes from the stable file identity the platform gives — not from the path
+   (DEC-054). A second sighting of a file resolves to the entry that is already there, so the identifier of the
+   object does not change when a root is added or removed. *Closes when:* the owner confirms this or amends
+   ADR-0007.
+6. **[DECIDED, 2026-11-16] Which overlapping root owns a shared file.** FUN-022 forbids duplicates but does not say
+   whether the file is listed under the first root only, under every root that reaches it, or under a synthetic
+   root. The **first root wins**: the file is listed once, under the root that was read first (DEC-055).
+   *Closes when:* the owner decides otherwise.
 7. **[OPEN] Publishing a playlist as `text/xml`.** The DLNA `DIDL_V` and `DIDL_S` collection profiles constrain
    what a published collection may contain and the research could not resolve them (standards §9 Q12).
    *Closes when:* the DLNA Part 2 profile text is obtained; publishing playlists that way stays out of scope
    until then.
+
+## 13. Decisions of the milestone
+
+| ID | Decision |
+| --- | --- |
+| D-01 | A playlist is a container of the class `object.container.playlistContainer`; its children keep the order of the playlist (DEC-048). |
+| D-02 | The entries of a playlist are resolved against the folder of the playlist and must stay inside the root that holds the playlist; a network address is refused outright (DEC-049). |
+| D-03 | A missing entry stays in the playlist as a child without a resource; a refused entry is not offered and is reported (DEC-050). |
+| D-04 | The containment of a reference lives in `security::containment` (DEC-051). |
+| D-05 | The answer of a subtitle names its character set; a Latin-1 file is delivered as it is and is not transcoded (DEC-056). |
+| D-06 | A file that shares its identity with another file of the same folder keeps the identity the platform gives it, so that the two files keep two object identifiers (DEC-057). |

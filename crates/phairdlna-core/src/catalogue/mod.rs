@@ -14,12 +14,15 @@ use std::time::Duration;
 
 mod builder;
 pub mod identifier;
+pub mod identity;
 pub mod library;
 pub mod media;
 pub mod mime;
+pub mod playlist;
 pub mod roots;
 pub mod scanner;
 pub mod sniff;
+pub mod subtitle;
 pub mod tree;
 mod update_id;
 pub mod volumes;
@@ -51,8 +54,35 @@ pub enum MediaKind {
     /// children of a folder as items, so the catalogue has to be able to say
     /// "this one is a folder" (`INT-042`).
     Folder,
+    /// A playlist of the library.
+    ///
+    /// A playlist is a container, not a file: the client opens it and sees the
+    /// tracks it names, in the order the playlist writes them (`FUN-015`).
+    Playlist,
+    /// A subtitle sidecar of a media file.
+    ///
+    /// A sidecar is not browsed on its own: it is an additional resource of the
+    /// media file it belongs to (`FUN-016`).
+    Subtitle,
     /// A file of a kind the server does not describe further.
     Other,
+}
+
+/// A subtitle that lies next to a media file.
+///
+/// The sidecar is an **additional resource** of the media object, not an item
+/// of its own: the client that plays the film asks for the subtitle by the
+/// identifier that is written here (`FUN-016`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SubtitleResource {
+    /// The opaque identifier of the subtitle file.
+    pub id: String,
+    /// The MIME type the server sends for the file.
+    pub mime_type: String,
+    /// The character set the file is written in.
+    pub charset: String,
+    /// The size of the file in bytes.
+    pub size: Option<u64>,
 }
 
 /// The metadata of a media file.
@@ -100,6 +130,16 @@ pub struct MediaMetadata {
     /// (`INT-079`); until the conformance rules exist, the catalogue leaves
     /// this empty and the server stays in the plain mode.
     pub dlna_profile: Option<String>,
+    /// The subtitle that lies next to the file, when there is one.
+    ///
+    /// The pairing happens while the root is scanned, so that a browse opens no
+    /// additional file and reads no additional folder (`FUN-016`, `PERF-008`).
+    pub subtitle: Option<SubtitleResource>,
+    /// The character set the file is written in, when the file is a text.
+    ///
+    /// The answer states it, so that a client reads the bytes the way they are
+    /// written (`FUN-027`).
+    pub charset: Option<String>,
 }
 
 /// One item of the catalogue.
@@ -156,6 +196,34 @@ impl ContentItem {
             child_count: Some(child_count),
         }
     }
+
+    /// Builds an item that is a playlist.
+    ///
+    /// A playlist is a container like a folder, but it keeps the order of its
+    /// entries instead of sorting them (`FUN-015`).
+    pub fn playlist(
+        id: impl Into<String>,
+        parent_id: impl Into<String>,
+        title: impl Into<String>,
+        child_count: u32,
+    ) -> Self {
+        Self {
+            id: id.into(),
+            parent_id: parent_id.into(),
+            title: title.into(),
+            kind: MediaKind::Playlist,
+            metadata: MediaMetadata::default(),
+            child_count: Some(child_count),
+        }
+    }
+
+    /// Whether the item is a container the client opens.
+    ///
+    /// A folder and a playlist are both containers; the protocol layer splits
+    /// the children of a container from the items with this answer (`INT-042`).
+    pub fn is_container(&self) -> bool {
+        matches!(self.kind, MediaKind::Folder | MediaKind::Playlist)
+    }
 }
 
 /// A container of the catalogue.
@@ -167,6 +235,11 @@ pub struct ContentContainer {
     pub parent_id: String,
     /// The name the client shows.
     pub title: String,
+    /// What kind of container this is.
+    ///
+    /// A playlist is a container like a folder, and the document tells the two
+    /// apart by their class (`FUN-015`).
+    pub kind: MediaKind,
     /// The identifier that changes when the content of the container changes.
     pub update_id: u32,
     /// The children of the container, in the order the catalogue returns them.

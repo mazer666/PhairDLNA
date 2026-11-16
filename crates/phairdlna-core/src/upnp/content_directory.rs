@@ -168,11 +168,11 @@ fn children_answer(
 ///
 /// A folder of the library is a container and not an item: the schema says
 /// that a client opens a folder by its identifier, and the folder carries the
-/// number of children it holds (`INT-042`).
+/// number of children it holds (`INT-042`). A playlist is a container as well
+/// (`FUN-015`).
 fn document_of(page: &[ContentItem], base_url: &str, policy: &ProtocolPolicy) -> DidlDocument {
-    let (folders, files): (Vec<&ContentItem>, Vec<&ContentItem>) = page
-        .iter()
-        .partition(|item| item.kind == crate::catalogue::MediaKind::Folder);
+    let (folders, files): (Vec<&ContentItem>, Vec<&ContentItem>) =
+        page.iter().partition(|item| item.is_container());
     DidlDocument {
         containers: folders.into_iter().map(folder_from_catalogue).collect(),
         items: files

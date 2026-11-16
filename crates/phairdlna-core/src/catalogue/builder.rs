@@ -22,16 +22,17 @@
 //! volume are three different things, and each of them is reported
 //! (`FUN-007`, `FUN-017`, `PLT-011`).
 
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use crate::config::{MediaRoot, SymlinkPolicy};
-use crate::platform::{FileSystem, VolumeId};
+use crate::platform::{FileId, FileSystem, VolumeId};
 
 use super::identifier::object_id;
 use super::library::{Catalogue, CONTENT_DIRECTORY_OBJECT_ID};
 use super::roots::{diagnostic_for, excluded_roots, RootSummary};
-use super::scanner::{scan, RootSpec, ScanOptions, ScanOutcome};
-use super::tree::{add_container, add_standard_containers, RootContext};
+use super::scanner::{scan, RootSpec, ScanEntry, ScanOptions, ScanOutcome};
+use super::tree::{add_container, add_standard_containers, fill_playlists, RootContext};
 use super::update_id::{update_id_for, CatalogueFingerprint};
 use super::volumes::{RootChange, VolumeChange, VolumeRegistry, VolumeReport};
 use super::ContentItem;
@@ -76,6 +77,8 @@ pub fn build_with(
         filesystem,
         registry,
         report: VolumeReport::default(),
+        seen_files: HashMap::new(),
+        seen_keys: HashMap::new(),
     };
     builder.add_roots(roots, symlink_policy);
     builder.finish()
@@ -87,6 +90,18 @@ struct Builder<'a> {
     filesystem: &'a dyn FileSystem,
     registry: &'a mut VolumeRegistry,
     report: VolumeReport,
+    /// The files that are already indexed, by the identity the platform gives
+    /// them.
+    ///
+    /// Two roots that reach one file must not list it twice: the second
+    /// sighting resolves to the entry that is already there (`FUN-020`,
+    /// `FUN-022`).
+    seen_files: HashMap<FileId, String>,
+    /// The files that are already indexed, by their identity key.
+    ///
+    /// The key is scoped by the volume, so the same file reached through two
+    /// roots of one volume has one key (`FUN-020`).
+    seen_keys: HashMap<String, String>,
 }
 
 impl Builder<'_> {
@@ -121,11 +136,13 @@ impl Builder<'_> {
         );
         self.report_change(&root.name, change);
         let id = object_id(&volume, &root_key, "");
+        let entries = self.without_duplicates(outcome.entries);
         let context = RootContext {
-            entries: &outcome.entries,
+            entries: &entries,
             volume: &volume,
             root_key: &root_key,
         };
+        let mut pending = Vec::new();
         let children = add_container(
             &mut self.catalogue,
             &id,
@@ -133,7 +150,9 @@ impl Builder<'_> {
             &root.name,
             &context,
             "",
+            &mut pending,
         );
+        fill_playlists(&mut self.catalogue, &context, pending);
         let count = children.len() as u32;
         self.catalogue
             .diagnostics
@@ -143,9 +162,44 @@ impl Builder<'_> {
             path,
             id: id.clone(),
             present: outcome.root_present,
-            entries: outcome.entries.len(),
+            entries: entries.len(),
         });
         ContentItem::folder(id, CONTENT_DIRECTORY_OBJECT_ID, &root.name, count)
+    }
+
+    /// Removes the files that are already indexed under another root.
+    ///
+    /// A file is one file, whatever the roots are that reach it: the second
+    /// sighting resolves to the entry that is already there, and the catalogue
+    /// lists the file once (`FUN-020`, `FUN-022`).
+    ///
+    /// Two keys say that a file was seen: the identity the platform gives it —
+    /// the device and the inode — and the identity key, which is scoped by the
+    /// volume. The first says "the same file", the second says "the same path
+    /// on the same volume".
+    fn without_duplicates(&mut self, entries: Vec<ScanEntry>) -> Vec<ScanEntry> {
+        let mut kept = Vec::with_capacity(entries.len());
+        for entry in entries {
+            if entry.is_folder {
+                kept.push(entry);
+                continue;
+            }
+            let known = entry
+                .file_identity
+                .as_ref()
+                .filter(|file| is_telling(file))
+                .is_some_and(|file| self.seen_files.contains_key(file));
+            if known || self.seen_keys.contains_key(&entry.identity_key) {
+                continue;
+            }
+            if let Some(file) = entry.file_identity.as_ref().filter(|file| is_telling(file)) {
+                self.seen_files.insert(file.clone(), entry.identity.clone());
+            }
+            self.seen_keys
+                .insert(entry.identity_key.clone(), entry.identity.clone());
+            kept.push(entry);
+        }
+        kept
     }
 
     /// Writes down what happened to the volume of a root.
@@ -236,4 +290,13 @@ impl Builder<'_> {
             .collect::<Vec<_>>()
             .join("|")
     }
+}
+
+/// Whether the identity of a file says something about it.
+///
+/// A platform that gives no device and no inode gives every file the same
+/// identity. Such an identity cannot tell two files apart, and using it would
+/// merge the whole library into one entry (`PLT-003`).
+fn is_telling(file: &FileId) -> bool {
+    file.device != 0 || file.inode != 0
 }

@@ -31,6 +31,7 @@ pub struct ProtocolPolicy {
     mode: ProtocolMode,
     byte_range_seek: bool,
     flags: DlnaFlags,
+    subtitles: bool,
 }
 
 impl ProtocolPolicy {
@@ -40,6 +41,7 @@ impl ProtocolPolicy {
             mode: ProtocolMode::Plain,
             byte_range_seek: false,
             flags: DlnaFlags::NONE,
+            subtitles: true,
         }
     }
 
@@ -52,7 +54,27 @@ impl ProtocolPolicy {
             mode: ProtocolMode::Dlna,
             byte_range_seek,
             flags,
+            subtitles: true,
         }
+    }
+
+    /// Whether the server offers a subtitle as an additional resource.
+    ///
+    /// The element is additive: an item with a subtitle carries one more `res`,
+    /// and every other attribute of the item stays the same, so a client that
+    /// does not understand it still plays the film (`FUN-016`).
+    ///
+    /// The default is on. The profile store of the client profiles is empty
+    /// today (F-07), and a feature that is off until a profile exists would
+    /// never be seen (`F-11` § 12).
+    pub fn with_subtitles(mut self, enabled: bool) -> Self {
+        self.subtitles = enabled;
+        self
+    }
+
+    /// Whether the server offers a subtitle as an additional resource.
+    pub fn subtitles(&self) -> bool {
+        self.subtitles
     }
 
     /// The mode of the policy.

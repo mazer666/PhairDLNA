@@ -603,6 +603,91 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " derived value",
         "Verified",
     ),
+    "FUN-015": (
+        "`crates/phairdlna-core/tests/playlists.rs::a_playlist_is_a_container_with_its_tracks`,"
+        " `::the_children_keep_the_order_of_the_playlist`,"
+        " `::the_three_formats_are_read`,"
+        " `::an_entry_outside_the_root_is_refused`,"
+        " `::a_network_address_is_refused`,"
+        " `::a_missing_entry_stays_in_the_playlist`,"
+        " `::a_broken_playlist_does_not_take_the_root_down`,"
+        " `::a_file_named_twice_is_one_object`,"
+        " `crates/phairdlna-core/src/catalogue/playlist.rs::tests`"
+        " — the M3U, M3U8 and PLS formats are parsed within their bounds, the entries are resolved against"
+        " the folder of the playlist, an entry that walks out of the root and a network address are refused,"
+        " and the playlist is a container whose children keep the order of the playlist",
+        "Verified",
+    ),
+    "FUN-016": (
+        "`crates/phairdlna-core/tests/subtitles.rs::a_sidecar_is_paired_with_its_film`,"
+        " `::a_film_carries_the_subtitle_as_a_second_resource`,"
+        " `::a_policy_without_the_capability_carries_one_resource`,"
+        " `::another_file_is_not_a_subtitle`,"
+        " `::the_subtitle_is_reachable_by_its_identifier`,"
+        " `::the_sidecar_with_the_highest_priority_wins`,"
+        " `::a_browse_of_a_subtitle_reads_nothing_from_the_disk`,"
+        " `crates/phairdlna-cli/tests/subtitles.rs::a_client_finds_the_subtitle_and_downloads_it`"
+        " — the sidecar is paired with its film while the root is read, it is offered as an additional res"
+        " with its own type, and a client finds it in the document and downloads it",
+        "Verified",
+    ),
+    "FUN-020": (
+        "`crates/phairdlna-core/tests/catalogue_identity.rs::the_identity_key_of_a_file_is_the_same_for_every_root`,"
+        " `::two_volumes_keep_two_identity_keys`,"
+        " `::two_normalisation_forms_are_two_files_on_a_volume_that_keeps_the_bytes`,"
+        " `::two_case_variants_are_one_file_on_a_case_insensitive_volume`,"
+        " `crates/phairdlna-core/tests/catalogue_identifiers.rs::a_hard_link_is_not_a_second_object`,"
+        " `crates/phairdlna-core/src/catalogue/identity.rs::tests`"
+        " — the identity key is scoped by the volume and built from the path of the file, and the"
+        " uniqueness of a file comes from the stable identity the platform gives; the two tests that"
+        " need a volume that keeps the bytes read the volume they run on and assert what is true there",
+        "Verified",
+    ),
+    "FUN-021": (
+        "`crates/phairdlna-core/tests/catalogue_identity.rs::an_excluded_file_is_not_served`,"
+        " `crates/phairdlna-core/tests/media_roots.rs::an_excluded_folder_is_not_indexed`"
+        " — an excluded folder is not indexed and the identifier of a file it held names nothing, so a"
+        " client that still holds the identifier gets nothing back; the exclusion takes effect on the"
+        " next scan",
+        "Implemented",
+    ),
+    "FUN-022": (
+        "`crates/phairdlna-core/tests/catalogue_identity.rs::two_roots_that_reach_one_file_list_it_once`,"
+        " `::a_root_inside_another_root_lists_the_file_once`"
+        " — a file that two roots reach is one catalogue entry, and the first root wins; the device round"
+        " that shows it on a television is still missing",
+        "Implemented",
+    ),
+    "FUN-026": (
+        "`crates/phairdlna-core/tests/subtitles.rs::a_film_carries_the_subtitle_as_a_second_resource`,"
+        " `::a_smil_sidecar_is_offered_with_its_own_type`,"
+        " `crates/phairdlna-cli/tests/subtitles.rs::a_client_finds_the_subtitle_and_downloads_it`,"
+        " `crates/phairdlna-core/src/catalogue/subtitle.rs::tests`"
+        " — the resource of a subtitle names the type of the file, and the answer of the media endpoint"
+        " carries the same type; the formats are SRT, WebVTT, ASS, Sub and SMIL",
+        "Verified",
+    ),
+    "FUN-027": (
+        "`crates/phairdlna-core/tests/subtitles.rs::a_latin_1_subtitle_states_its_character_set`,"
+        " `::a_utf_8_subtitle_states_utf_8`,"
+        " `crates/phairdlna-cli/tests/subtitles.rs::a_latin_1_subtitle_states_its_character_set`"
+        " — the answer of a subtitle names the character set it is written in, and the file is delivered"
+        " in that character set; a Latin-1 file is not transcoded to UTF-8 on the way out, so the"
+        " transcoding of the design of F-11 § 4 is not implemented (F-11 D-05)",
+        "Implemented",
+    ),
+    "FUN-029": (
+        "`crates/phairdlna-core/tests/subtitles.rs::the_sidecar_with_the_highest_priority_wins`"
+        " — the additional subtitle of a media item is exposed as its own resource; a media item with"
+        " several additional audio or subtitle tracks is not supported, because the baseline pairs one"
+        " sidecar per media file (DEC-053)",
+        "Implemented",
+    ),
+    "INT-105": (
+        "`crates/phairdlna-core/tests/subtitles.rs::a_film_carries_the_subtitle_as_a_second_resource`"
+        " — the additional resource of an item has a protocolInfo that names its own MIME type",
+        "Verified",
+    ),
     "FUN-013": (
         "`crates/phairdlna-core/tests/artwork.rs::an_embedded_cover_is_found`,"
         " `::an_embedded_cover_of_a_m4a_is_found`,"

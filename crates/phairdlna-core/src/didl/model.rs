@@ -25,6 +25,13 @@ pub enum ObjectClass {
     Photo,
     /// A folder of the catalogue.
     StorageFolder,
+    /// A playlist of the catalogue.
+    ///
+    /// The class exists for exactly this purpose: a playlist is a container
+    /// whose children are the tracks it names (`FUN-015`).
+    PlaylistContainer,
+    /// An item that belongs to a playlist.
+    PlaylistItem,
 }
 
 impl ObjectClass {
@@ -37,6 +44,8 @@ impl ObjectClass {
             ObjectClass::VideoBroadcast => "object.item.videoItem.videoBroadcast",
             ObjectClass::Photo => "object.item.imageItem.photo",
             ObjectClass::StorageFolder => "object.container.storageFolder",
+            ObjectClass::PlaylistContainer => "object.container.playlistContainer",
+            ObjectClass::PlaylistItem => "object.item.playlistItem",
         }
     }
 }

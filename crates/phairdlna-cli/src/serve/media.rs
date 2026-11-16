@@ -79,11 +79,25 @@ fn media_object(item: &ContentItem) -> MediaObject {
     let mut object = MediaObject::new(
         item.id.clone(),
         item.metadata.size.unwrap_or(0),
-        item.metadata.mime_type.clone().unwrap_or_default(),
+        content_type_of(item),
         content_kind(item.kind),
     );
     object.validator = item.metadata.date.clone();
     object
+}
+
+/// The type the answer carries.
+///
+/// A subtitle is a text file, and the answer names the character set it is
+/// written in: a client that reads the bytes has to know how to read them
+/// (`FUN-027`).
+fn content_type_of(item: &ContentItem) -> String {
+    let mime_type = item.metadata.mime_type.clone().unwrap_or_default();
+    if item.kind != MediaKind::Subtitle {
+        return mime_type;
+    }
+    let charset = item.metadata.charset.as_deref().unwrap_or("utf-8");
+    format!("{mime_type}; charset={charset}")
 }
 
 /// The kind of the delivery layer that fits the kind of the catalogue.
@@ -92,7 +106,9 @@ fn content_kind(kind: MediaKind) -> ContentKind {
         MediaKind::MusicTrack => ContentKind::Audio,
         MediaKind::Movie | MediaKind::VideoBroadcast => ContentKind::Video,
         MediaKind::Photo => ContentKind::Image,
-        MediaKind::Folder | MediaKind::Other => ContentKind::Other,
+        MediaKind::Folder | MediaKind::Playlist | MediaKind::Subtitle | MediaKind::Other => {
+            ContentKind::Other
+        }
     }
 }
 

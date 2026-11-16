@@ -18,11 +18,13 @@
 //! assert!(!policy.accepts(Some("attacker.example")));
 //! ```
 
+pub mod containment;
 pub mod framing;
 pub mod host;
 pub mod limits;
 pub mod redaction;
 
+pub use containment::{is_inside_roots, resolve_reference, ContainmentError};
 pub use framing::{check, values_of, FramingError, HeaderPairs};
 pub use host::HostPolicy;
 pub use limits::{header_block_size, Limits};

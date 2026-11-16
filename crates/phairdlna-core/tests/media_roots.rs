@@ -220,7 +220,11 @@ fn the_scanner_never_writes_to_the_library() {
     assert_eq!(catalogue.diagnostics().len(), 0);
 }
 
-/// A playlist is indexed, although the server cannot deliver it.
+/// A playlist is a container of the catalogue, not a file it delivers.
+///
+/// The M2.2 baseline indexed a playlist as an ordinary file, because the
+/// server could not read one. Since M2.3 the server reads the playlist and
+/// shows it as the container of the tracks it names (`FUN-015`).
 #[test]
 fn a_playlist_is_indexed() {
     let directory = tempdir().expect("a temporary directory");
@@ -236,8 +240,12 @@ fn a_playlist_is_indexed() {
         .cloned()
         .expect("the root has a child");
 
-    assert_eq!(file.metadata.mime_type.as_deref(), Some("audio/x-mpegurl"));
-    assert_eq!(file.kind, MediaKind::Other);
+    assert_eq!(file.kind, MediaKind::Playlist);
+    assert!(file.metadata.mime_type.is_none());
+    assert!(
+        catalogue.path_of(&file.id).is_none(),
+        "a playlist is not a file the server delivers"
+    );
 }
 
 /// A tree that is deeper than the limit is cut off, and the cut is reported.

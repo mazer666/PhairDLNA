@@ -13,8 +13,14 @@ use crate::config::SymlinkPolicy;
 use crate::platform::identity_of_with;
 use crate::platform::{FileId, FileSystem};
 
+use super::super::identity::{disambiguated_identity, identity_key};
 use super::super::media::{is_indexable, mime_of_extension};
+use super::super::playlist::PlaylistFormat;
 use super::super::sniff::{sniff, HEAD_LENGTH};
+use super::super::subtitle;
+use super::encoding::charset_of;
+use super::folder::Folder;
+use super::playlist::{self as playlists, PlaylistContext};
 use super::{RootSpec, ScanEntry, ScanOptions, ScanOutcome};
 
 /// The state of one walk.
@@ -56,6 +62,10 @@ impl<'a> Walk<'a> {
     }
 
     /// Reads one folder and visits what is in it.
+    ///
+    /// The names of the files of the folder are read once: a subtitle is
+    /// recognised by the name that lies next to the film, and the folder is
+    /// the only place that knows it (`FUN-016`).
     pub(super) fn walk(&mut self, directory: &Path, relative: &Path, depth: usize) {
         let entries = match std::fs::read_dir(directory) {
             Ok(entries) => entries,
@@ -67,19 +77,24 @@ impl<'a> Walk<'a> {
                 return;
             }
         };
+        let mut readable = Vec::new();
         for entry in entries {
             match entry {
-                Ok(entry) => self.visit(&entry.path(), relative, depth),
+                Ok(entry) => readable.push(entry),
                 Err(error) => self.diagnose(format!(
                     "an entry of the folder \"{}\" cannot be read: {error}",
                     display_relative(relative)
                 )),
             }
         }
+        let folder = Folder::of(&readable, relative, self.root.case_sensitivity);
+        for entry in readable {
+            self.visit(&entry.path(), relative, depth, &folder);
+        }
     }
 
     /// Visits one entry of a folder.
-    fn visit(&mut self, path: &Path, relative: &Path, depth: usize) {
+    fn visit(&mut self, path: &Path, relative: &Path, depth: usize, folder: &Folder) {
         let Some(name) = path
             .file_name()
             .map(|name| name.to_string_lossy().into_owned())
@@ -102,7 +117,7 @@ impl<'a> Walk<'a> {
                 if target.is_dir() {
                     self.visit_folder(path, &child, &name, depth);
                 } else {
-                    self.visit_file(path, &child, &name, &target);
+                    self.visit_file(path, &child, &name, &target, folder);
                 }
             }
         }
@@ -121,12 +136,16 @@ impl<'a> Walk<'a> {
         self.outcome.entries.push(ScanEntry {
             path: path.to_path_buf(),
             identity: self.identity(child),
+            identity_key: self.identity_key(child),
             parent_identity: self.identity(child.parent().unwrap_or(Path::new(""))),
             title: name.to_owned(),
             is_folder: true,
             mime_type: None,
             size: None,
             modified: None,
+            file_identity: None,
+            subtitle: None,
+            playlist: None,
         });
         if depth < self.options.max_depth {
             self.walk(path, child, depth + 1);
@@ -144,14 +163,32 @@ impl<'a> Walk<'a> {
     /// The `entry` is the name the owner gave the file; the `target` is the
     /// file on disk that is read. For a link that is indexed as its own entry
     /// the two differ.
-    fn visit_file(&mut self, entry: &Path, child: &Path, name: &str, target: &Path) {
+    ///
+    /// A playlist is read here, and a subtitle is paired with its film here:
+    /// both are facts about the disk, and a browse must not have to look for
+    /// them again (`FUN-015`, `FUN-016`, `PERF-008`).
+    fn visit_file(
+        &mut self,
+        entry: &Path,
+        child: &Path,
+        name: &str,
+        target: &Path,
+        folder: &Folder,
+    ) {
         let Some(mime_type) = self.mime_of(entry, target) else {
             return;
         };
         if !is_indexable(&mime_type) {
             return;
         }
-        if entry == target && self.is_second_name(target) {
+        let file_identity = if entry == target {
+            self.filesystem.file_identity(target).ok()
+        } else {
+            // A link that is indexed as its own entry is an object of its own;
+            // the identity of the file it points at belongs to that file.
+            None
+        };
+        if entry == target && self.is_second_name(target, file_identity.as_ref()) {
             self.diagnose(format!(
                 "the file \"{}\" is another name for a file that is already indexed",
                 display_relative(child)
@@ -159,16 +196,143 @@ impl<'a> Walk<'a> {
             return;
         }
         let metadata = std::fs::metadata(target).ok();
+        let (playlist, subtitle) = self.extras_of(entry, child, name, target, folder);
+        let identity = self.identity_of_file(child, name, folder, file_identity.as_ref());
+        let identity_key = self.identity_key_of_file(child, name, folder, file_identity.as_ref());
         self.outcome.entries.push(ScanEntry {
             path: target.to_path_buf(),
-            identity: self.identity(child),
+            identity,
+            identity_key,
             parent_identity: self.identity(child.parent().unwrap_or(Path::new(""))),
             title: name.to_owned(),
             is_folder: false,
             mime_type: Some(mime_type),
             size: metadata.as_ref().map(std::fs::Metadata::len),
             modified: metadata.as_ref().and_then(|meta| meta.modified().ok()),
+            file_identity,
+            subtitle,
+            playlist,
         });
+    }
+
+    /// The identity of a file.
+    ///
+    /// The identity of the path is the identity of the file, unless another
+    /// file of the folder claims it: two names that differ only in the Unicode
+    /// normalisation form are two files on a volume that keeps the bytes, and
+    /// such a file keeps the identity the platform gives it (`FUN-020`,
+    /// `PLT-005`).
+    fn identity_of_file(
+        &self,
+        child: &Path,
+        name: &str,
+        folder: &Folder,
+        file: Option<&FileId>,
+    ) -> String {
+        let identity = self.identity(child);
+        if !folder.collides(name) {
+            return identity;
+        }
+        match file {
+            Some(file) => disambiguated_identity(&identity, file),
+            None => identity,
+        }
+    }
+
+    /// The identity key of a path below the root.
+    ///
+    /// The key is scoped by the volume and built from the path the owner gave,
+    /// so that the same file reached through two roots of one volume has one
+    /// key (`FUN-020`).
+    fn identity_key(&self, child: &Path) -> String {
+        identity_key(
+            &self.root.volume,
+            &self.root.path.join(child),
+            self.root.case_sensitivity,
+        )
+    }
+
+    /// The identity key of a file.
+    ///
+    /// A file that shares its path with another file keeps the identity the
+    /// platform gives it, so that the two files have two keys and two object
+    /// identifiers (`FUN-020`, `PLT-005`).
+    fn identity_key_of_file(
+        &self,
+        child: &Path,
+        name: &str,
+        folder: &Folder,
+        file: Option<&FileId>,
+    ) -> String {
+        let key = self.identity_key(child);
+        if !folder.collides(name) {
+            return key;
+        }
+        match file {
+            Some(file) => disambiguated_identity(&key, file),
+            None => key,
+        }
+    }
+
+    /// The facts about the disk that a file carries: its playlist and its
+    /// subtitle.
+    ///
+    /// A file that is a playlist is read and resolved; a file that has a
+    /// subtitle next to it is paired with it. Every other file carries nothing
+    /// and costs nothing.
+    fn extras_of(
+        &mut self,
+        entry: &Path,
+        child: &Path,
+        name: &str,
+        target: &Path,
+        folder: &Folder,
+    ) -> (Option<super::PlaylistPlan>, Option<super::SubtitleEntry>) {
+        if let Some(format) = playlist_format_of(entry) {
+            let label = display_relative(child);
+            let base = target.parent().unwrap_or(&self.root.path).to_path_buf();
+            let context = PlaylistContext {
+                root: &self.root.path,
+                canonical_root: &self.canonical_root,
+                case_sensitivity: self.root.case_sensitivity,
+                bounds: self.options.playlist_bounds,
+            };
+            let (plan, sentences) = playlists::read(target, format, &base, &label, &context);
+            for sentence in sentences {
+                self.diagnose(sentence);
+            }
+            return (Some(plan), None);
+        }
+        (None, self.subtitle_of(entry, child, name, folder))
+    }
+
+    /// The subtitle that lies next to a media file.
+    ///
+    /// The sidecar is the file that carries the same base name with one of the
+    /// subtitle extensions. When several match, the one with the highest
+    /// priority extension wins (`FUN-016`).
+    fn subtitle_of(
+        &self,
+        entry: &Path,
+        child: &Path,
+        name: &str,
+        folder: &Folder,
+    ) -> Option<super::SubtitleEntry> {
+        let stem = Path::new(name).file_stem()?.to_string_lossy().into_owned();
+        let sidecar = subtitle::sidecar_of(&stem, &folder.names)?;
+        let folder = entry.parent().unwrap_or(Path::new(""));
+        let path = folder.join(&sidecar.name);
+        let relative = child.parent().unwrap_or(Path::new("")).join(&sidecar.name);
+        let size = std::fs::metadata(&path).ok().map(|metadata| metadata.len());
+        let charset = charset_of(&path);
+        Some(super::SubtitleEntry {
+            name: sidecar.name,
+            identity: self.identity(&relative),
+            path,
+            mime_type: sidecar.mime_type,
+            charset,
+            size,
+        })
     }
 
     /// The format of a file: by its name first, by its content second.
@@ -192,14 +356,14 @@ impl<'a> Walk<'a> {
     /// Two names of one file — a hard link — are one object, not two
     /// (`FUN-011`). A file system that gives no identity to its files is not
     /// asked to answer.
-    fn is_second_name(&mut self, target: &Path) -> bool {
-        let Ok(identity) = self.filesystem.file_identity(target) else {
+    fn is_second_name(&mut self, _target: &Path, identity: Option<&FileId>) -> bool {
+        let Some(identity) = identity else {
             return false;
         };
         if identity.device == 0 && identity.inode == 0 {
             return false;
         }
-        !self.seen_files.insert(identity)
+        !self.seen_files.insert(identity.clone())
     }
 
     /// Resolves a symbolic link according to the policy.
@@ -278,6 +442,15 @@ fn display_relative(relative: &Path) -> String {
     } else {
         text
     }
+}
+
+/// The format of a playlist, judged by the name of the file.
+///
+/// A file whose name says nothing about a playlist is not one, whatever it
+/// contains: the catalogue never guesses the format of a file (`FUN-019`).
+fn playlist_format_of(entry: &Path) -> Option<PlaylistFormat> {
+    let extension = entry.extension()?.to_str()?;
+    PlaylistFormat::of_extension(extension)
 }
 
 /// Reads the first bytes of a file.

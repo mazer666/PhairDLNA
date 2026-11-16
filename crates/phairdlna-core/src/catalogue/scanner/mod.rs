@@ -25,14 +25,18 @@
 //!   name of the root and the path below it, never the path of the disk
 //!   (`SEC-094`, `UX-011`).
 
+mod encoding;
+mod folder;
+mod playlist;
 mod walk;
 
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
 use crate::config::SymlinkPolicy;
-use crate::platform::{CaseSensitivity, FileSystem, VolumeId};
+use crate::platform::{CaseSensitivity, FileId, FileSystem, VolumeId};
 
+use super::playlist::PlaylistBounds;
 use walk::Walk;
 
 /// The deepest tree the scanner walks.
@@ -63,6 +67,8 @@ pub struct ScanOptions {
     pub excludes: Vec<String>,
     /// The deepest tree the scanner walks.
     pub max_depth: usize,
+    /// The bounds the playlist parser keeps inside.
+    pub playlist_bounds: PlaylistBounds,
 }
 
 impl Default for ScanOptions {
@@ -71,6 +77,7 @@ impl Default for ScanOptions {
             symlink_policy: SymlinkPolicy::default(),
             excludes: Vec::new(),
             max_depth: DEFAULT_MAX_DEPTH,
+            playlist_bounds: PlaylistBounds::default(),
         }
     }
 }
@@ -117,6 +124,99 @@ pub struct ScanEntry {
     pub size: Option<u64>,
     /// When the file was last changed.
     pub modified: Option<SystemTime>,
+    /// The identity the platform gives the file, when it gives one.
+    ///
+    /// The identity is what says that two sightings are one file, whatever
+    /// they are called and wherever they were reached (`FUN-020`, `FUN-022`).
+    pub file_identity: Option<FileId>,
+    /// The identity key of the file: the value that says "the same path, seen
+    /// again".
+    ///
+    /// The key is scoped by the volume and built from the path the owner gave,
+    /// so that the same file reached through two roots of one volume has one
+    /// key (`FUN-020`).
+    pub identity_key: String,
+    /// The subtitle that lies next to the file, when there is one.
+    ///
+    /// The pairing happens while the root is read, so that a browse opens no
+    /// additional file (`FUN-016`, `PERF-008`).
+    pub subtitle: Option<SubtitleEntry>,
+    /// What the playlist names, when the file is a playlist.
+    pub playlist: Option<PlaylistPlan>,
+}
+
+/// The subtitle that lies next to a media file.
+///
+/// A sidecar belongs to a media file when it lies in the same folder and
+/// carries the same base name with one of the subtitle extensions
+/// (`FUN-016`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SubtitleEntry {
+    /// The name of the sidecar file, as the owner wrote it.
+    pub name: String,
+    /// The identity of the sidecar, relative to the root.
+    pub identity: String,
+    /// The path of the sidecar on the disk.
+    pub path: PathBuf,
+    /// The MIME type the server sends for the file.
+    pub mime_type: String,
+    /// The character set the file is written in.
+    pub charset: &'static str,
+    /// The size of the file in bytes.
+    pub size: Option<u64>,
+}
+
+/// What a playlist names.
+///
+/// The targets are in the order the playlist writes them: a playlist is a list,
+/// and a list that is sorted is a different list (`FUN-015`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PlaylistPlan {
+    /// The entries of the playlist, in the order the playlist writes them.
+    pub targets: Vec<PlaylistTarget>,
+}
+
+impl PlaylistPlan {
+    /// The number of entries the client is offered.
+    ///
+    /// A refused entry is not offered: the user is told about it in the
+    /// diagnostics, and the playlist shows the tracks that can be played.
+    pub fn offered(&self) -> usize {
+        self.targets
+            .iter()
+            .filter(|target| !matches!(target.state, TargetState::Refused(_)))
+            .count()
+    }
+}
+
+/// One entry of a playlist, after it was resolved.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PlaylistTarget {
+    /// The identity of the file the entry names, relative to the root.
+    pub identity: String,
+    /// The name of the file the entry names, for an entry that cannot be played.
+    pub name: String,
+    /// The title the playlist gives the entry, when it gives one.
+    pub title: Option<String>,
+    /// What became of the entry.
+    pub state: TargetState,
+}
+
+/// What became of an entry of a playlist.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TargetState {
+    /// The entry names a file of the root.
+    Resolved,
+    /// The entry names a file that is not there.
+    ///
+    /// The entry stays in the playlist, so that the user learns where the
+    /// track went instead of wondering about it (`UX-004`).
+    Missing(String),
+    /// The entry was refused and is not offered.
+    ///
+    /// A network address and a path outside the root are refused; the user is
+    /// told about it in the diagnostics (`SEC-068`).
+    Refused(String),
 }
 
 /// What the scanner found, and what it could not read.

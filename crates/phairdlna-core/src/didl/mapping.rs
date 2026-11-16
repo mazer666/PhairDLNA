@@ -12,7 +12,7 @@
 //! Example: `item_from_catalogue` builds the item of a file with its
 //!       resource.
 
-use crate::catalogue::mime::is_served;
+use crate::catalogue::mime::{is_served, is_subtitle_served};
 use crate::catalogue::{ContentContainer, ContentItem, MediaKind};
 use crate::didl::model::{Container, Item, ObjectClass, Resource};
 use crate::didl::policy::ProtocolPolicy;
@@ -22,7 +22,8 @@ use crate::didl::value::{format_duration, format_resolution, is_iso_date};
 /// The class of a catalogue item (`INT-061`).
 ///
 /// A file the catalogue cannot describe further gets the generic class of the
-/// schema; the five named classes are the ones of the requirement.
+/// schema; the five named classes are the ones of the requirement. A playlist
+/// is a container, and the schema has a class for exactly that (`FUN-015`).
 pub fn class_of(kind: MediaKind) -> ObjectClass {
     match kind {
         MediaKind::MusicTrack => ObjectClass::MusicTrack,
@@ -30,7 +31,8 @@ pub fn class_of(kind: MediaKind) -> ObjectClass {
         MediaKind::VideoBroadcast => ObjectClass::VideoBroadcast,
         MediaKind::Photo => ObjectClass::Photo,
         MediaKind::Folder => ObjectClass::StorageFolder,
-        MediaKind::Other => ObjectClass::Item,
+        MediaKind::Playlist => ObjectClass::PlaylistContainer,
+        MediaKind::Subtitle | MediaKind::Other => ObjectClass::Item,
     }
 }
 
@@ -61,7 +63,37 @@ pub fn item_from_catalogue(item: &ContentItem, base_url: &str, policy: &Protocol
     if let Some(resource) = resource_from_catalogue(item, base_url, policy) {
         mapped.resources.push(resource);
     }
+    if let Some(resource) = subtitle_from_catalogue(item, base_url, policy) {
+        mapped.resources.push(resource);
+    }
     mapped
+}
+
+/// Builds the resource of the subtitle that lies next to a media file.
+///
+/// The subtitle is an **additional** resource of the same object: the element
+/// is additive, and every other attribute of the object stays the same, so a
+/// client that does not understand it still plays the film (`FUN-016`).
+///
+/// The resource is written only when the policy allows it — the capability
+/// comes from the profile of the client — and only when the server really
+/// serves the format of the file (`FUN-026`, `INT-105`).
+fn subtitle_from_catalogue(
+    item: &ContentItem,
+    base_url: &str,
+    policy: &ProtocolPolicy,
+) -> Option<Resource> {
+    if !policy.subtitles() {
+        return None;
+    }
+    let subtitle = item.metadata.subtitle.as_ref()?;
+    if !is_subtitle_served(&subtitle.mime_type) {
+        return None;
+    }
+    let protocol_info = policy.protocol_info(&subtitle.mime_type, None)?;
+    let mut resource = Resource::new(media_uri(base_url, &subtitle.id), protocol_info);
+    resource.size = subtitle.size;
+    Some(resource)
 }
 
 /// Builds the container of a catalogue container.
@@ -71,7 +103,7 @@ pub fn container_from_catalogue(container: &ContentContainer) -> Container {
         parent_id: container.parent_id.clone(),
         restricted: true,
         searchable: true,
-        class: ObjectClass::StorageFolder,
+        class: class_of(container.kind),
         title: container.title.clone(),
         child_count: container.total.unwrap_or(container.children.len() as u32),
         creator: None,
@@ -84,13 +116,16 @@ pub fn container_from_catalogue(container: &ContentContainer) -> Container {
 /// A folder is listed as a container and not as an item: a client opens a
 /// folder by its identifier, and the schema says that a folder is a
 /// `container` element (`INT-042`).
+///
+/// A playlist is a container too, and the schema has a class for it
+/// (`FUN-015`).
 pub fn folder_from_catalogue(item: &ContentItem) -> Container {
     Container {
         id: item.id.clone(),
         parent_id: item.parent_id.clone(),
         restricted: true,
         searchable: true,
-        class: ObjectClass::StorageFolder,
+        class: class_of(item.kind),
         title: item.title.clone(),
         child_count: item.child_count.unwrap_or(0),
         creator: None,
@@ -259,6 +294,7 @@ mod tests {
             id: "1".to_owned(),
             parent_id: "0".to_owned(),
             title: "Music".to_owned(),
+            kind: MediaKind::Folder,
             update_id: 3,
             children: Vec::new(),
             total: Some(12),
@@ -276,6 +312,7 @@ mod tests {
             id: "1".to_owned(),
             parent_id: "0".to_owned(),
             title: "Music".to_owned(),
+            kind: MediaKind::Folder,
             update_id: 3,
             children: vec![ContentItem::new("2", "1", "One", MediaKind::Photo)],
             total: None,

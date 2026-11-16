@@ -13,6 +13,8 @@
 //! Example: `is_served("audio/mpeg")` answers whether the server can deliver
 //!       that format at all.
 
+use super::subtitle::SubtitleFormat;
+
 /// The transport protocol the server delivers media with.
 pub const HTTP_GET: &str = "http-get";
 
@@ -34,6 +36,26 @@ pub const SUPPORTED_MIME_TYPES: [&str; 6] = [
 pub fn is_served(mime_type: &str) -> bool {
     SUPPORTED_MIME_TYPES.contains(&mime_type)
 }
+
+/// Whether the server can deliver the given subtitle format.
+///
+/// The subtitle of a media file is an additional resource, and the server
+/// really serves it — with the type of the file, so that the client knows
+/// what it downloads (`FUN-026`, `INT-105`).
+pub fn is_subtitle_served(mime_type: &str) -> bool {
+    SUBTITLE_FORMATS
+        .iter()
+        .any(|format| format.mime_type() == mime_type)
+}
+
+/// The subtitle formats the server serves.
+const SUBTITLE_FORMATS: [SubtitleFormat; 5] = [
+    SubtitleFormat::Vtt,
+    SubtitleFormat::Srt,
+    SubtitleFormat::Ass,
+    SubtitleFormat::Sub,
+    SubtitleFormat::Smil,
+];
 
 #[cfg(test)]
 mod tests {

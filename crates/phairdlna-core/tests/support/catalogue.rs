@@ -47,6 +47,7 @@ impl TestCatalogue {
             id: "1".to_owned(),
             parent_id: "0".to_owned(),
             title: "Content Directory".to_owned(),
+            kind: MediaKind::Folder,
             update_id: 42,
             children,
             total: Some(CHILD_COUNT as u32),
@@ -65,6 +66,7 @@ impl ContentSource for TestCatalogue {
                 id: "0".to_owned(),
                 parent_id: "-1".to_owned(),
                 title: "Root".to_owned(),
+                kind: MediaKind::Folder,
                 update_id: 42,
                 children: Vec::new(),
                 total: Some(0),
@@ -96,6 +98,7 @@ impl ContentSource for UncountableCatalogue {
             id: "1".to_owned(),
             parent_id: "0".to_owned(),
             title: "Content Directory".to_owned(),
+            kind: MediaKind::Folder,
             update_id: 1,
             children: vec![ContentItem::new("1", "1", "Only item", MediaKind::Movie)],
             total: None,
@@ -123,6 +126,7 @@ impl ContentSource for EmptyUncountableCatalogue {
             id: "1".to_owned(),
             parent_id: "0".to_owned(),
             title: "Content Directory".to_owned(),
+            kind: MediaKind::Folder,
             update_id: 1,
             children: Vec::new(),
             total: None,
@@ -180,6 +184,8 @@ pub fn music_track() -> ContentItem {
         date: Some("2024-05-28T02:28:47".to_owned()),
         album_art_id: Some("art-a3f1".to_owned()),
         dlna_profile: None,
+        subtitle: None,
+        charset: None,
     };
     item
 }
@@ -245,6 +251,7 @@ impl ContentSource for MediaCatalogue {
             id: "1".to_owned(),
             parent_id: "0".to_owned(),
             title: "Media".to_owned(),
+            kind: MediaKind::Folder,
             update_id: 7,
             children: vec![music_track(), movie(), photo(), hostile_item()],
             total: Some(4),

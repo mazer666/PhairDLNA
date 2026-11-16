@@ -76,7 +76,7 @@ pub fn browse(path: &Path, object_id: &str) -> Outcome {
     let (folders, files): (Vec<&ContentItem>, Vec<&ContentItem>) = container
         .children
         .iter()
-        .partition(|item| item.kind == phairdlna_core::catalogue::MediaKind::Folder);
+        .partition(|item| item.is_container());
     let document = DidlDocument {
         containers: folders.into_iter().map(folder_from_catalogue).collect(),
         items: files
@@ -149,7 +149,7 @@ fn tree_of(catalogue: &Catalogue, container_id: &str, depth: usize) -> String {
     for (index, child) in container.children.iter().enumerate() {
         let last = index + 1 == container.children.len();
         report.push_str(&line(child, depth, last));
-        if child.kind == phairdlna_core::catalogue::MediaKind::Folder {
+        if child.is_container() {
             report.push_str(&tree_of(catalogue, &child.id, depth + 1));
         }
     }

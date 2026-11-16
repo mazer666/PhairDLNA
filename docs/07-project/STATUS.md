@@ -1,6 +1,6 @@
 # Project status — PhairDLNA
 
-Status: **Baseline approved (2026-11-15) · M1.11 implemented · M2.1 implemented · M2.2 implemented** · Compiled: 2026-11-16
+Status: **Baseline approved (2026-11-15) · M1.11 implemented · M2.1 implemented · M2.2 implemented · M2.3 implemented** · Compiled: 2026-11-16
 Owner role: Lead / Project Manager
 
 ---
@@ -63,6 +63,36 @@ of this server, with no path of the disk and no `dlna:profileID`. A file that is
 gives no picture and no error: the library stays browsable and the daemon keeps serving. The
 evidence is `crates/phairdlna-core/tests/artwork.rs` and `crates/phairdlna-cli/tests/artwork.rs`.
 
+**The third step of M2 is closed: M2.3 — playlists, subtitles and organisation.** The library now
+understands the lists the owner wrote by hand. A **playlist** — M3U, M3U8 or PLS — is read within
+bounds (a mebibyte, ten thousand entries, a line of four kibibytes), and every entry is resolved
+against the folder of the playlist itself. An entry that names a **network address** is refused
+outright: the server makes no request for it. An entry that walks **out of the root** is refused
+and reported. An entry that names a file that is not there stays in the playlist as a child that
+carries no resource, so that the user learns where the track went instead of wondering. The
+playlist is a **container** of the class `object.container.playlistContainer`, and its children keep
+the **order** of the playlist — a list that is sorted is a different list. A broken playlist never
+takes a scan down: it produces a diagnostic and the rest of the library is indexed.
+
+A **subtitle** that lies next to a film is paired with it while the root is read, not while a
+client browses. The pairing is an **additional `res`** of the media object, with its own
+`protocolInfo` that names the type of the file (`text/vtt`, `application/x-subrip`, `text/x-ssa`,
+`text/x-microdvd`), and the file is served from the media endpoint with that type and the
+character set it is written in. The element is additive: a client that does not understand it still
+plays the film. When several sidecars match one base name, the one with the highest priority
+extension wins — WebVTT first, because it is the format a browser-based client reads without a
+conversion.
+
+The **organisation** is decided as well. The catalogue computes an **identity key** for every
+file — the path, per component, with Unicode NFC and the case fold of the volume, scoped by the
+identity of the volume — and it takes the **uniqueness** of a file from the stable file identity
+the platform gives, not from the path. A file that two roots reach is therefore **one** catalogue
+entry: the first root wins, the second sighting resolves to the entry that is already there, and
+the identifier of the object does not change. The evidence is
+`crates/phairdlna-core/tests/playlists.rs`, `crates/phairdlna-core/tests/subtitles.rs` and
+`crates/phairdlna-cli/tests/subtitles.rs`; the decisions are DEC-048 to DEC-057 of
+`../00-governance/DECISION-LOG.md`.
+
 **One deviation is on the record.** The picture pipeline of M2.2 parses **in the server
 process**, not in the sandboxed child that ADR-0008 prescribes, because that child does not
 exist yet — it is the work of M-06. Every read and every allocation of the pipeline is
@@ -102,7 +132,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | Requirements | **Complete** | 346 requirements with IDs, priorities, features, milestones and verification methods — `../01-product/REQUIREMENTS-INDEX.md` |
 | Traceability | **Complete** | Generated matrix requirement → feature → milestone → module → verification → evidence — `TRACEABILITY-MATRIX.md` |
 | Architecture | **Complete** | Module boundaries, data flows, runtime model — `../02-architecture/ARCHITECTURE.md` |
-| Decisions | **Complete** | The ADRs in `../02-architecture/adr/` plus 47 entries in the decision log — `../00-governance/DECISION-LOG.md` |
+| Decisions | **Complete** | The ADRs in `../02-architecture/adr/` plus 57 entries in the decision log — `../00-governance/DECISION-LOG.md` |
 | Security model | **Complete** | Eight mitigations, 28 threats, each with its verification — `../04-security/SECURITY-MODEL.md` |
 | Privacy model | **Complete** | Data inventory, network posture, source offer — `../04-security/PRIVACY.md` |
 | Dependency review | **Complete** | Licence data for every candidate crate, retrieved 2026-11-14 — `../04-security/DEPENDENCY-LICENSE-REVIEW.md` |
@@ -115,7 +145,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | Open decisions | **12 awaiting the owner** — OD-05 (minimum macOS version) was decided on 2026-11-15 | `OPEN-DECISIONS.md` |
 | Glossary | **Complete** | The protocol, product, platform, security and project vocabulary — `../01-product/GLOSSARY.md` |
 | Research inputs | **Complete** | The briefs the specifications cite — `../09-research/` |
-| Implementation | **M0 done, M1.1–M1.11 implemented, M2.1 and M2.2 implemented** | The four crates exist with the boundary enforced; the configuration, the eight platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root, the catalogue over several roots with the memory of their volumes, the live daemon, and the picture pipeline of the library are implemented; **no device test has been performed**, so no milestone exit criterion is met yet |
+| Implementation | **M0 done, M1.1–M1.11 implemented, M2.1, M2.2 and M2.3 implemented** | The four crates exist with the boundary enforced; the configuration, the eight platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root, the catalogue over several roots with the memory of their volumes, the live daemon, and the picture pipeline of the library are implemented; **no device test has been performed**, so no milestone exit criterion is met yet |
 | Device evidence | **None** | Every device row reads `NOT TESTED` |
 | Release | **Not releasable** | `RELEASE-BLOCKERS.md` |
 

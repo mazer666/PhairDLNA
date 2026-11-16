@@ -42,10 +42,10 @@
 | `crates/phairdlna-core/src/platform/` | The eight capability traits, the path model, the portable filesystem adapter and the default implementation | F-08, F-13, F-15 |
 | `crates/phairdlna-core/src/ssdp/` | The discovery protocol: parsing a search, matching the targets, building the bytes (the **socket** is in `crates/phairdlna-cli/src/serve/ssdp.rs`) | F-01 |
 | `crates/phairdlna-core/src/identity.rs` | The persistent device identity | F-01, F-02 |
-| `crates/phairdlna-core/src/catalogue/` | The catalogue — the model of the items and containers, the scanner of a root, the opaque identifiers, the memory of the volumes of the roots, the assembly of the tree, the sniffer of a file and the registry of the formats the server serves | F-05, F-08, F-09 |
+| `crates/phairdlna-core/src/catalogue/` | The catalogue — the model of the items and containers, the scanner of a root, the opaque identifiers, the identity key of a file, the playlists (`playlist.rs`), the subtitle sidecars (`subtitle.rs`), the memory of the volumes of the roots, the assembly of the tree, the sniffer of a file and the registry of the formats the server serves | F-05, F-08, F-09, F-11 |
 | `crates/phairdlna-core/src/media/` | The pictures of the library — the discovery of the artwork of a media file (`artwork/`), the pictures that are embedded in it (`id3/`, `mp4/`), the images that lie next to it (`sidecar.rs`), the thumbnail of a photo (`thumbnail.rs`) and the disposable cache of the pictures that were produced (`cache.rs`) | F-10 |
-| `crates/phairdlna-core/src/didl/` | The DIDL-Lite document — the object model, the `protocolInfo`, the value rules and the writer | F-05 |
-| `crates/phairdlna-core/src/http/` | The delivery of media over HTTP — the `Range` header, the headers of a media answer, the containment of a media URL and the evaluator of a request | F-06 |
+| `crates/phairdlna-core/src/didl/` | The DIDL-Lite document — the object model, the `protocolInfo`, the value rules, the policy of the document and the writer | F-05, F-11 |
+| `crates/phairdlna-core/src/http/` | The delivery of media over HTTP — the `Range` header, the headers of a media answer, the containment of a media URL and the evaluator of a request | F-06, F-11 |
 | `crates/phairdlna-core/src/upnp/` | The device description, the service descriptions (SCPD), the SOAP dispatcher and the ContentDirectory and ConnectionManager actions | F-02, F-03, F-04 |
 | `crates/phairdlna-core/src/config/` | The typed, validated, versioned configuration | F-12 |
 | `crates/phairdlna-cli/src/lib.rs` | The commands, as pure functions over their arguments | F-13 |
@@ -55,9 +55,13 @@
 | `crates/phairdlna-core/tests/media_roots.rs` | The acceptance criteria of F-08 for one root | F-08 |
 | `crates/phairdlna-core/tests/media_roots_multiple.rs` | The acceptance criteria of F-08 for more than one root | F-08 |
 | `crates/phairdlna-core/tests/support/` | The fixtures of the tests of the core — the scripted platform of the volumes, the checker of a document and the catalogue of the protocol tests | F-08 |
+| `crates/phairdlna-core/tests/playlists.rs` | The acceptance criteria of F-11 for the playlists — the formats, the order, the containment and the broken playlist | F-11 |
+| `crates/phairdlna-core/tests/subtitles.rs` | The acceptance criteria of F-11 for the subtitle sidecars — the pairing, the additional resource and the reachability of the file | F-11 |
+| `crates/phairdlna-core/tests/catalogue_identity.rs` | The acceptance criteria of F-11 for the organisation — the identity key, the de-duplication of two roots and the exclusion of a folder | F-11 |
 | `crates/phairdlna-core/tests/volume_events.rs` | The acceptance criteria of F-08 for the volumes of a root — a drive that goes, comes back and comes back under another identity | F-08 |
 | `crates/phairdlna-core/tests/volume_platform_events.rs` | The acceptance criteria of F-08 for the events the platform reports — a volume that was unmounted and one that was mounted again | F-08 |
 | `crates/phairdlna-cli/tests/serve.rs` | The daemon that answers a client — the description, the service descriptions, the SOAP control, the media and the artwork | F-02, F-03, F-04, F-06 |
+| `crates/phairdlna-cli/tests/subtitles.rs` | The daemon that serves a subtitle — the document that names it and the answer that carries it | F-11 |
 | `crates/phairdlna-core/tests/artwork.rs` | The acceptance criteria of F-10 — the embedded cover, the sidecar, the thumbnail and the files that are broken | F-10 |
 | `crates/phairdlna-cli/tests/artwork.rs` | The artwork of the daemon — the route that answers a request for a picture | F-10 |
 | `crates/phairdlna-cli/tests/discovery.rs` | The discovery of the daemon — the advertisements, the answer of a search and the withdrawal | F-01 |
@@ -81,7 +85,7 @@ visible and so that a contributor can see where their change will land.
 | --- | --- | --- |
 | `crates/phairdlna-core/src/ssdp/interfaces.rs` | The selection of the sending interface and the rate limiter of the answers | F-01 |
 | `crates/phairdlna-core/src/catalogue/index.rs` | The index of the catalogue on disk, the rebuild and the event-driven scan | F-09 |
-| `crates/phairdlna-core/src/security/` | Path containment, redaction, limits | F-16 |
+| `crates/phairdlna-core/src/security/` | Path containment (`containment.rs`), redaction, limits | F-11, F-16 |
 | `crates/phairdlna-core/src/platform/` | Platform traits and per-OS implementations | F-08, F-13, F-15 |
 | `crates/phairdlna-core/src/scheduler/` | Priority classes, bounded pools, backpressure | F-18 |
 | `crates/phairdlna-core/src/lifecycle/` | Server states, sleep/wake and network recovery | F-13 |

@@ -61,6 +61,8 @@ pub(super) struct ContainerNode {
     pub(super) id: String,
     pub(super) parent_id: String,
     pub(super) title: String,
+    /// What kind of container this is.
+    pub(super) kind: MediaKind,
     pub(super) children: Vec<ContentItem>,
     pub(super) update_id: u32,
 }
@@ -233,6 +235,7 @@ impl ContentSource for Catalogue {
             id: node.id.clone(),
             parent_id: node.parent_id.clone(),
             title: node.title.clone(),
+            kind: node.kind,
             update_id: node.update_id,
             children: node.children.clone(),
             total: Some(node.children.len() as u32),
@@ -258,10 +261,14 @@ impl ContentSource for Catalogue {
 }
 
 /// Orders the children of a container: the folders first, then the files.
+///
+/// A playlist is a container like a folder and is listed with them. The
+/// children of a playlist are not sorted: they keep the order of the playlist
+/// (`FUN-015`).
 pub(super) fn sort_children(children: &mut [ContentItem]) {
     children.sort_by(|left, right| {
         let rank = |item: &ContentItem| match item.kind {
-            MediaKind::Folder => 0,
+            MediaKind::Folder | MediaKind::Playlist => 0,
             _ => 1,
         };
         rank(left)

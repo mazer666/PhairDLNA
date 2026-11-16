@@ -11,7 +11,7 @@
 //! Example: `MediaId::from_target` reads `/media/a3f1` into the identifier
 //!       `a3f1` and refuses `/media/../etc/passwd`.
 
-use std::path::{Component, Path, PathBuf};
+use std::path::{Path, PathBuf};
 
 /// The path prefix of the media URLs.
 ///
@@ -93,24 +93,11 @@ fn is_opaque(value: &str) -> bool {
 ///
 /// A segment that carries an encoding the server cannot read is malformed;
 /// the answer is `400`, because the request line itself is broken (INT-094).
+///
+/// The decoder lives in `security::containment`, where the same decoding is
+/// needed for the references that a playlist carries (`SEC-007`).
 fn percent_decode(value: &str) -> Option<String> {
-    let bytes = value.as_bytes();
-    let mut decoded = Vec::with_capacity(bytes.len());
-    let mut index = 0;
-    while index < bytes.len() {
-        match bytes[index] {
-            b'%' => {
-                let hex = value.get(index + 1..index + 3)?;
-                decoded.push(u8::from_str_radix(hex, 16).ok()?);
-                index += 3;
-            }
-            byte => {
-                decoded.push(byte);
-                index += 1;
-            }
-        }
-    }
-    String::from_utf8(decoded).ok()
+    crate::security::containment::percent_decode(value)
 }
 
 /// Whether a path is inside one of the roots.
@@ -119,54 +106,11 @@ fn percent_decode(value: &str) -> Option<String> {
 /// candidate that walks out of a root with `..` does not pass. The caller
 /// repeats the check with the canonical path of the file, after the symbolic
 /// links have been resolved (INT-098, SEC-003).
-pub fn is_inside_roots(candidate: &Path, roots: &[PathBuf]) -> bool {
-    roots.iter().any(|root| is_inside(candidate, root))
-}
-
-/// Whether a path is strictly inside a root.
-fn is_inside(candidate: &Path, root: &Path) -> bool {
-    let candidate = normalise(candidate);
-    let root = normalise(root);
-    candidate != root && candidate.starts_with(&root)
-}
-
-/// Normalises a path without touching the disk.
 ///
-/// The `.` and the `..` are resolved lexically, as the file system would do
-/// for a path that has no symbolic link; a path that walks above its start
-/// keeps the `..`, so that it cannot be made to look inside a root.
-fn normalise(path: &Path) -> PathBuf {
-    let mut parts: Vec<String> = Vec::new();
-    let mut absolute = false;
-    for component in path.components() {
-        match component {
-            Component::RootDir => {
-                absolute = true;
-                parts.clear();
-            }
-            Component::Prefix(_) => {}
-            Component::CurDir => {}
-            Component::ParentDir => match parts.last() {
-                Some(last) if last != ".." => {
-                    parts.pop();
-                }
-                _ => {
-                    if !absolute {
-                        parts.push("..".to_owned());
-                    }
-                }
-            },
-            Component::Normal(part) => parts.push(part.to_string_lossy().into_owned()),
-        }
-    }
-    let mut result = PathBuf::new();
-    if absolute {
-        result.push("/");
-    }
-    for part in parts {
-        result.push(part);
-    }
-    result
+/// The rule itself lives in `security::containment`, so that the catalogue, the
+/// artwork finder and the media layer judge a path the same way (`SEC-001`).
+pub fn is_inside_roots(candidate: &Path, roots: &[PathBuf]) -> bool {
+    crate::security::containment::is_inside_roots(candidate, roots)
 }
 
 #[cfg(test)]
