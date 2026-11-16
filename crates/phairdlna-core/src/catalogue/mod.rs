@@ -17,13 +17,18 @@ pub mod identifier;
 pub mod library;
 pub mod media;
 pub mod mime;
+pub mod roots;
 pub mod scanner;
 pub mod sniff;
+pub mod tree;
 mod update_id;
+pub mod volumes;
 
+pub use builder::BuildOutcome;
 pub use identifier::{is_object_id, object_id, IDENTIFIER_LENGTH};
 pub use library::{Catalogue, RootSummary, CONTENT_DIRECTORY_OBJECT_ID, ROOT_OBJECT_ID};
 pub use scanner::{scan, RootSpec, ScanEntry, ScanOptions, ScanOutcome, DEFAULT_MAX_DEPTH};
+pub use volumes::{RootChange, RootVolume, VolumeChange, VolumeRegistry, VolumeReport};
 
 /// What kind of thing an item is.
 ///

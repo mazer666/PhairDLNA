@@ -71,7 +71,59 @@ fn validate_library(roots: &[MediaRoot]) -> Result<(), ConfigError> {
     for (index, root) in roots.iter().enumerate() {
         validate_root(index, root)?;
     }
+    validate_distinct_roots(roots)
+}
+
+/// Two roots may not share a name and may not share a path.
+///
+/// A name is how a person and a client tell the roots apart, and a path says
+/// which folder is published. Two roots with one name would be two folders
+/// with one label, and two roots with one path would publish the same files
+/// twice under two identifiers (`FUN-017`, `CFG-002`).
+fn validate_distinct_roots(roots: &[MediaRoot]) -> Result<(), ConfigError> {
+    let mut names: Vec<&str> = Vec::new();
+    let mut paths: Vec<&str> = Vec::new();
+    for (index, root) in roots.iter().enumerate() {
+        let field = format!("library.roots[{index}]");
+        let name = root.name.trim();
+        let path = root.path.trim();
+        if names.contains(&name) {
+            return Err(ConfigError::field(
+                format!("{field}.name"),
+                format!(
+                    "field \"{field}.name\" is \"{name}\"; expected a name that no other root uses, \
+                     because a client tells the roots apart by their name"
+                ),
+            ));
+        }
+        if paths.iter().any(|known| same_folder(known, path)) {
+            return Err(ConfigError::field(
+                format!("{field}.path"),
+                format!(
+                    "field \"{field}.path\" is \"{path}\"; expected a path that no other root uses, \
+                     because the same folder published twice is the same file twice"
+                ),
+            ));
+        }
+        names.push(name);
+        paths.push(path);
+    }
     Ok(())
+}
+
+/// Whether two paths name the same folder.
+///
+/// The written paths are compared first; a folder that exists is compared by
+/// the folder it resolves to, because `/Media/Films` and `/Media/Films/` are
+/// one folder, and so are a folder and a link that points at it.
+fn same_folder(left: &str, right: &str) -> bool {
+    if left == right {
+        return true;
+    }
+    match (std::fs::canonicalize(left), std::fs::canonicalize(right)) {
+        (Ok(left), Ok(right)) => left == right,
+        _ => false,
+    }
 }
 
 /// One shared folder.

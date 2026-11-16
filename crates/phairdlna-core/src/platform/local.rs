@@ -27,10 +27,17 @@
 //!   "sensitive", which is the safe direction: folding names that the volume
 //!   keeps apart would merge two files into one, while keeping names apart
 //!   that the volume treats as one only splits a file in two (`PLT-005`).
+//!
+//! **The third answer of this adapter** is the fingerprint of a path: the
+//! device the path lives on. It is not a volume identity and it does not
+//! pretend to be one — it says only that *something* at that path is the same
+//! as it was, or that it is not.
 
 use std::path::Path;
 
-use super::path::{display_name, identity_of_with, CaseSensitivity, FileId, MediaPath, VolumeId};
+use super::path::{
+    display_name, identity_of_with, CaseSensitivity, FileId, MediaPath, VolumeFingerprint, VolumeId,
+};
 use super::traits::{FileSystem, PlatformError, PlatformResult};
 
 /// The volume identity the portable adapter reports.
@@ -85,6 +92,34 @@ impl FileSystem for LocalFileSystem {
             device: device_of(&metadata),
             inode: inode_of(&metadata),
         })
+    }
+
+    /// The device the path lives on.
+    ///
+    /// The fingerprint is what tells the catalogue that the drive behind a root
+    /// is no longer the drive it saw last time: when a volume is unmounted,
+    /// its place on the disk is taken by a folder of the system volume, and the
+    /// device of the path changes (`FUN-007`, `FUN-017`).
+    ///
+    /// The consequence is written down here: a drive that is plugged in again
+    /// may report another device number, and the catalogue then reads the root
+    /// again and says so. Whether it is the same volume is a question only a
+    /// platform with a real volume identity can answer (`PLT-005`, `F-13`).
+    fn volume_fingerprint(&self, path: &Path) -> PlatformResult<VolumeFingerprint> {
+        #[cfg(unix)]
+        {
+            let metadata = std::fs::metadata(path)
+                .map_err(|source| PlatformError::io("stat a path", source))?;
+            Ok(VolumeFingerprint::new(format!(
+                "dev:{}",
+                device_of(&metadata)
+            )))
+        }
+        #[cfg(not(unix))]
+        {
+            let _ = path;
+            Err(PlatformError::unsupported("the volume of a path"))
+        }
     }
 }
 

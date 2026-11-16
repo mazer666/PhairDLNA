@@ -175,3 +175,39 @@ fn a_rendered_configuration_parses_again() {
 fn the_default_log_level_is_info() {
     assert_eq!(Config::default().logging.level, LogLevel::Info);
 }
+
+/// The negative case: two roots with one name are refused, with the field named.
+#[test]
+fn two_roots_with_one_name_are_refused() {
+    let text = r#"
+schema_version = 1
+
+[[library.roots]]
+name = "Films"
+path = "/Users/me/Movies"
+
+[[library.roots]]
+name = "Films"
+path = "/Users/me/Archive"
+"#;
+    let error = Config::from_str(text, "test").expect_err("the configuration should be refused");
+    assert_eq!(error.field_name(), Some("library.roots[1].name"));
+}
+
+/// The negative case: two roots with one path are refused, with the field named.
+#[test]
+fn two_roots_with_one_path_are_refused() {
+    let text = r#"
+schema_version = 1
+
+[[library.roots]]
+name = "Films"
+path = "/Users/me/Movies"
+
+[[library.roots]]
+name = "Archive"
+path = "/Users/me/Movies"
+"#;
+    let error = Config::from_str(text, "test").expect_err("the configuration should be refused");
+    assert_eq!(error.field_name(), Some("library.roots[1].path"));
+}

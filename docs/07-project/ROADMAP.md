@@ -113,17 +113,17 @@ multiple roots, artwork, playlists.
 
 **Goal:** the product becomes pleasant to live with.
 
-| Step | Content | Requirements |
-| --- | --- | --- |
-| M2.1 | Multiple roots, external volumes, network shares | `FUN-017` … `FUN-019`, `PLT-011` |
-| M2.2 | Metadata extraction, artwork, thumbnails | `FUN-013`, `FUN-014` |
-| M2.3 | Playlists, subtitles, organisation | `FUN-015`, `FUN-016`, `FUN-020` … `FUN-022` |
-| M2.4 | Full configuration, access control, resource limits | `CFG-007` … `CFG-015` |
-| M2.5 | Local administration surface and diagnostics | `OPS-020` … `OPS-027`, `OPS-016`, `OPS-017`, `UX-011`, `UX-012` |
-| M2.6 | The macOS menu bar application | `UX-001` … `UX-010`, `UX-013` … `UX-020`, `MB-001` … `MB-009` |
-| M2.7 | Service installation and lifecycle | `LIFE-001` … `LIFE-011`, `PLT-013` |
-| M2.8 | Adaptive resource management | `RES-001` … `RES-009` |
-| M2.9 | The catalogue index on disk: the SQLite index, its rebuild and its recovery | `FUN-008`, `FUN-009`, `FUN-010` |
+| Step | Content | Requirements | State |
+| --- | --- | --- | --- |
+| M2.1 | Multiple roots, external volumes, network shares | `FUN-017` … `FUN-019`, `PLT-011` | **done (2026-11-16)** — the roots keep their own identifiers and boundaries, the catalogue remembers the volume of every root, and the daemon reads the catalogue again when a drive comes or goes (`F-08` D-15 … D-20) |
+| M2.2 | Metadata extraction, artwork, thumbnails | `FUN-013`, `FUN-014` | next |
+| M2.3 | Playlists, subtitles, organisation | `FUN-015`, `FUN-016`, `FUN-020` … `FUN-022` | — |
+| M2.4 | Full configuration, access control, resource limits | `CFG-007` … `CFG-015` | — |
+| M2.5 | Local administration surface and diagnostics | `OPS-020` … `OPS-027`, `OPS-016`, `OPS-017`, `UX-011`, `UX-012` | — |
+| M2.6 | The macOS menu bar application | `UX-001` … `UX-010`, `UX-013` … `UX-020`, `MB-001` … `MB-009` | — |
+| M2.7 | Service installation and lifecycle | `LIFE-001` … `LIFE-011`, `PLT-013` | — |
+| M2.8 | Adaptive resource management | `RES-001` … `RES-009` | — |
+| M2.9 | The catalogue index on disk: the SQLite index, its rebuild and its recovery | `FUN-008`, `FUN-009`, `FUN-010` | — |
 
 **Exit criteria**
 

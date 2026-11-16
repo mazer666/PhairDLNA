@@ -13,7 +13,9 @@
 use std::net::Ipv4Addr;
 use std::path::{Path, PathBuf};
 
-use super::path::{CaseSensitivity, FileId, MediaPath, VolumeId};
+use super::path::{
+    is_readable_folder, CaseSensitivity, FileId, MediaPath, VolumeFingerprint, VolumeId,
+};
 
 /// The result of a platform operation.
 pub type PlatformResult<T> = Result<T, PlatformError>;
@@ -111,6 +113,20 @@ pub trait FileSystem {
     /// The stable identity of a file.
     fn file_identity(&self, path: &Path) -> PlatformResult<FileId>;
 
+    /// Whether the path is a folder that the catalogue can read.
+    ///
+    /// The question is asked about a root of the library: a path that cannot be
+    /// resolved, or that is not a folder, is a root that is not there
+    /// (`FUN-007`).
+    ///
+    /// The default asks the operating system through the portable adapter. A
+    /// platform that knows something more about its own folders — a mount
+    /// point, a network share, a volume that is being mounted right now —
+    /// answers in its own terms (`PLT-003`).
+    fn is_readable_folder(&self, path: &Path) -> bool {
+        is_readable_folder(path)
+    }
+
     /// Whether the platform considers the path hidden.
     ///
     /// The default is the convention every platform understands: a name that
@@ -124,6 +140,19 @@ pub trait FileSystem {
         path.file_name()
             .and_then(|name| name.to_str())
             .is_some_and(|name| name.starts_with('.'))
+    }
+
+    /// What the platform observes at a path right now.
+    ///
+    /// The answer tells the catalogue whether the drive behind a root is still
+    /// the drive it saw last time, or whether it was unplugged, was plugged in
+    /// again or was replaced by another one (`FUN-007`, `FUN-017`, `PLT-011`).
+    ///
+    /// The default says "not supported": a platform that cannot see the volume
+    /// of a path must not pretend that it can (`PLT-003`). The catalogue then
+    /// knows the path only as far as it can read it.
+    fn volume_fingerprint(&self, _path: &Path) -> PlatformResult<VolumeFingerprint> {
+        Err(PlatformError::unsupported("the volume of a path"))
     }
 }
 

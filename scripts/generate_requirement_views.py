@@ -579,6 +579,39 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — the codec is part of the type and of the DLNA profile token",
         "Implemented",
     ),
+    "FUN-017": (
+        "`crates/phairdlna-core/tests/volume_events.rs::a_drive_that_is_unplugged_takes_its_files_with_it`,"
+        " `::a_drive_that_comes_back_keeps_its_identifiers`,"
+        " `crates/phairdlna-core/tests/volume_platform_events.rs::a_volume_that_was_unmounted_takes_its_files_with_it`,"
+        " `crates/phairdlna-cli/src/serve/watch.rs::tests::the_watch_reads_the_catalogue_again`"
+        " — a drive that is unplugged takes its files with it, a drive that comes back is published again,"
+        " and the running daemon notices both; the physical drive itself remains a manual device check",
+        "Implemented",
+    ),
+    "FUN-018": (
+        "`crates/phairdlna-core/tests/media_roots.rs::the_scanner_never_writes_to_the_library`"
+        " — the walk opens directories and files to read them and writes nothing; the cache directory"
+        " is not configured yet, so the exception of the requirement does not apply",
+        "Implemented",
+    ),
+    "FUN-019": (
+        "`crates/phairdlna-core/tests/media_roots_multiple.rs::the_path_of_a_file_is_the_path_of_the_disk`"
+        " — the path of the catalogue is the path of the disk, byte for byte; the identity is a separate,"
+        " derived value",
+        "Verified",
+    ),
+    "PLT-011": (
+        "`crates/phairdlna-core/tests/volume_platform_events.rs::a_volume_that_was_unmounted_takes_its_files_with_it`,"
+        " `::a_volume_that_was_mounted_again_is_published_again`,"
+        " `crates/phairdlna-core/tests/volume_events.rs::a_drive_that_comes_back_under_another_identity_is_given_new_identifiers`"
+        " — a mount, an unmount and a remount are first-class events, and the entries of a volume that"
+        " comes back under another identity are given new identifiers; the core honours the events of the"
+        " platform through `Catalogue::apply_volume_event`, and the daemon derives the same outcome from"
+        " the observations of the roots, because the portable adapter has no native events — the native"
+        " watcher (DiskArbitration) and the check on the build matrix are the work of the platform adapter"
+        " (F-13)",
+        "Implemented",
+    ),
 }
 
 
@@ -665,6 +698,7 @@ MILESTONE_OVERRIDES = [
     ("MB", "001", "009", "M2", "the macOS application is M2"),
     ("RES", "001", "009", "M2", "adaptive resource management is M2"),
     ("REL", "001", "006", "M4", "the reliability targets are proven in the hardening milestone"),
+    ("PLT", "011", "011", "M2", "the volume events and the re-keying of the entries are the work of M2.1"),
     ("PLT", "011", "018", "M3", "the per-platform behaviour is delivered with Linux and Windows"),
     ("PLT", "013", "013", "M2", "the launchd daemon model belongs to the macOS application"),
     ("PLT", "001", "009", "M0", "portability and the build matrix are foundation work"),

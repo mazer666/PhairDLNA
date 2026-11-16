@@ -11,7 +11,6 @@ use std::net::Ipv4Addr;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use phairdlna_core::catalogue::Catalogue;
 use phairdlna_core::config::Config;
 use phairdlna_core::identity;
 use phairdlna_core::platform::LocalFileSystem;
@@ -26,10 +25,12 @@ use tokio::task::JoinHandle;
 use super::address;
 use super::guard::Guard;
 use super::http;
+use super::library::Library;
 use super::limit::CappedListener;
 use super::log::{Level, Logger};
 use super::media;
 use super::ssdp;
+use super::watch;
 use super::Daemon;
 use super::ServeOptions;
 
@@ -60,23 +61,25 @@ pub fn load_identity(
         .map_err(|error| format!("the device identity cannot be read: {error}"))
 }
 
-/// Builds the catalogue of the library.
+/// Builds the library of the daemon.
 ///
 /// A file the scanner could not read is a warning, not a reason to refuse the
 /// start: the rest of the library is still worth serving (`F-08`).
-pub fn build_catalogue(config: &Config, logger: &Logger) -> Catalogue {
-    let catalogue = Catalogue::build(
+pub fn build_library(config: &Config, logger: &Logger) -> Library {
+    let library = Library::build(
         &config.library.roots,
         config.server.symlink_policy,
         &LocalFileSystem,
     );
-    for diagnostic in catalogue.diagnostics() {
-        logger.warn(
-            "the catalogue could not read everything",
-            &[("reason", diagnostic)],
-        );
-    }
-    catalogue
+    library.with_catalogue(|catalogue| {
+        for diagnostic in catalogue.diagnostics() {
+            logger.warn(
+                "the catalogue could not read everything",
+                &[("reason", diagnostic)],
+            );
+        }
+    });
+    library
 }
 
 /// The identity strings of the device description.
@@ -205,7 +208,7 @@ pub async fn start(options: ServeOptions) -> Result<super::Daemon, String> {
     )
     .redacting(config.logging.redact);
     let identity = load_identity(&config, options.identity_path.as_deref())?;
-    let catalogue = build_catalogue(&config, &logger);
+    let library = build_library(&config, &logger);
     let (host, port) = address_and_port(&options, &config);
     let listener = TcpListener::bind((Ipv4Addr::UNSPECIFIED, port))
         .await
@@ -219,8 +222,14 @@ pub async fn start(options: ServeOptions) -> Result<super::Daemon, String> {
     // (`INT-022`, `INT-006`).
     let base_url = BaseUrl::new(&format!("http://{host}:{}", address.port()))
         .map_err(|error| format!("the base URL is not usable: {error}"))?;
-    let (context, limits) =
-        build_server_context(&config, &identity, base_url, catalogue, &logger, redactor)?;
+    let (context, limits) = build_server_context(
+        &config,
+        &identity,
+        base_url,
+        library.clone(),
+        &logger,
+        redactor,
+    )?;
     // The listener keeps the connections inside the bounds and gives every
     // connection a deadline (`SEC-012`, `SEC-016`).
     let listener = CappedListener::new(
@@ -232,6 +241,11 @@ pub async fn start(options: ServeOptions) -> Result<super::Daemon, String> {
     let server = start_http(listener, context.clone());
     let (ssdp, stop_ssdp, ssdp_task) =
         start_ssdp(&options, &identity, &config, host, address.port(), &logger).await;
+    // The watch keeps the catalogue in step with the drives of the library: a
+    // removable drive that is unplugged, and a network share that comes back,
+    // are seen by the running server and not only by the next start
+    // (`FUN-017`, `PLT-011`).
+    let (stop_watch, watch_task) = watch::spawn(library, logger.clone());
     logger.info(
         "the server is listening",
         &[
@@ -247,6 +261,8 @@ pub async fn start(options: ServeOptions) -> Result<super::Daemon, String> {
         server: Some(server),
         stop_ssdp,
         ssdp_task,
+        stop_watch: Some(stop_watch),
+        watch_task: Some(watch_task),
     })
 }
 
@@ -255,7 +271,7 @@ fn build_server_context(
     config: &Config,
     identity: &identity::InstalledIdentity,
     base_url: BaseUrl,
-    catalogue: Catalogue,
+    library: Library,
     logger: &Logger,
     redactor: Arc<Redactor>,
 ) -> Result<(Arc<http::ServerContext>, Limits), String> {
@@ -265,14 +281,13 @@ fn build_server_context(
         device_info(config),
     )
     .map_err(|error| format!("the device description is not usable: {error}"))?;
-    let catalogue = Arc::new(catalogue);
-    let library = media::MediaLibrary::new(Arc::clone(&catalogue), roots_of(config));
+    let media = media::MediaLibrary::new(library.clone(), roots_of(config));
     let limits = Limits::from_section(&config.limits);
     let hosts = HostPolicy::new(config.security.allowed_host_names.clone());
     let guard = Arc::new(Guard::new(limits, hosts, redactor));
     let context = Arc::new(http::ServerContext {
-        catalogue,
         library,
+        media,
         description,
         base_url: base_url.origin().to_owned(),
         logger: logger.clone(),

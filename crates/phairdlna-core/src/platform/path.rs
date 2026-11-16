@@ -11,6 +11,9 @@
 
 use std::path::{Path, PathBuf};
 
+#[cfg(test)]
+mod tests;
+
 use unicase::UniCase;
 use unicode_normalization::UnicodeNormalization;
 
@@ -35,6 +38,38 @@ impl VolumeId {
 }
 
 impl std::fmt::Display for VolumeId {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(formatter, "{}", self.0)
+    }
+}
+
+/// What the platform observes at a path right now.
+///
+/// The fingerprint is **not** the identity of the volume. The identity must
+/// survive a remount, so that an object identifier stays the same
+/// (`INT-062`); the fingerprint describes what is mounted at the path at this
+/// moment, so that the server can notice that a drive was unplugged, was
+/// plugged in again or was replaced by another one (`FUN-007`, `FUN-017`).
+///
+/// The portable adapter reports the device the path lives on. A platform that
+/// can tell volumes apart reports a stronger fingerprint — the serial number of
+/// the volume, for instance (`PLT-005`).
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct VolumeFingerprint(String);
+
+impl VolumeFingerprint {
+    /// Wraps a platform-supplied fingerprint.
+    pub fn new(raw: impl Into<String>) -> Self {
+        Self(raw.into())
+    }
+
+    /// The platform fingerprint, as text.
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl std::fmt::Display for VolumeFingerprint {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(formatter, "{}", self.0)
     }
@@ -175,99 +210,21 @@ fn fold_component(component: &str, sensitivity: CaseSensitivity) -> String {
     }
 }
 
+/// Whether a path is a folder that the catalogue can read.
+///
+/// The path is resolved first: a path that cannot be resolved is not a folder,
+/// and a folder that cannot be resolved is not there (`FUN-007`).
+///
+/// The rule is the rule of the scanner: a folder that exists but that the
+/// operating system refuses to open is a folder that is there — the scanner
+/// reports it and asks for consent (`FUN-004`, `PLT-003`).
+pub fn is_readable_folder(path: &Path) -> bool {
+    std::fs::canonicalize(path).is_ok_and(|resolved| resolved.is_dir())
+}
+
 /// The display name of a path: its last component, normalised for reading.
 pub fn display_name(path: &Path) -> String {
     path.file_name()
         .map(|name| name.to_string_lossy().into_owned())
         .unwrap_or_else(|| path.to_string_lossy().into_owned())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{identity_of, CaseSensitivity, FileId, MediaPath, VolumeId};
-
-    /// The identity is the same for two spellings of the same name.
-    #[test]
-    fn the_identity_ignores_case() {
-        assert_eq!(identity_of(std::path::Path::new("Film.mkv")), "film.mkv");
-        assert_eq!(
-            identity_of(std::path::Path::new("FILM.MKV")),
-            identity_of(std::path::Path::new("film.mkv"))
-        );
-    }
-
-    /// The full case folding maps the German sharp s to "ss", which a simple
-    /// lowercase mapping would not do.
-    #[test]
-    fn the_identity_uses_full_case_folding() {
-        assert_eq!(
-            identity_of(std::path::Path::new("Straße.mkv")),
-            "strasse.mkv"
-        );
-        assert_eq!(
-            identity_of(std::path::Path::new("STRASSE.mkv")),
-            identity_of(std::path::Path::new("Straße.mkv"))
-        );
-    }
-
-    /// The identity is normalised, so the two Unicode spellings of "café" agree.
-    #[test]
-    fn the_identity_normalises_unicode() {
-        let composed = std::path::Path::new("caf\u{e9}.mkv");
-        let decomposed = std::path::Path::new("cafe\u{301}.mkv");
-        assert_eq!(identity_of(composed), identity_of(decomposed));
-    }
-
-    /// Two components are folded separately, so a separator inside a name cannot
-    /// imitate a directory boundary.
-    #[test]
-    fn components_are_folded_separately() {
-        assert_eq!(
-            identity_of(std::path::Path::new("a/b")),
-            identity_of(std::path::Path::new("A/b"))
-        );
-        assert_ne!(
-            identity_of(std::path::Path::new("a/b")),
-            identity_of(std::path::Path::new("ab"))
-        );
-    }
-
-    /// The raw path is kept verbatim; it is never replaced by the identity.
-    #[test]
-    fn the_raw_path_is_kept_verbatim() {
-        let raw = std::path::PathBuf::from("cafe\u{301}.mkv");
-        let path = MediaPath::new(raw.clone(), "café.mkv", VolumeId::new("v1"), "café.mkv");
-        assert_eq!(path.raw(), raw.as_path());
-        assert_eq!(path.identity(), "café.mkv");
-    }
-
-    /// The file identity, not the path, says whether two entries are one file.
-    #[test]
-    fn the_file_identity_is_separate_from_the_path() {
-        let first = FileId {
-            volume: VolumeId::new("v1"),
-            device: 1,
-            inode: 42,
-        };
-        let second = FileId {
-            volume: VolumeId::new("v1"),
-            device: 1,
-            inode: 42,
-        };
-        assert_eq!(first, second);
-        assert_ne!(
-            first,
-            FileId {
-                volume: VolumeId::new("v1"),
-                device: 1,
-                inode: 43
-            }
-        );
-    }
-
-    /// The default case sensitivity is the one macOS and Windows use.
-    #[test]
-    fn the_default_case_sensitivity_is_insensitive() {
-        assert_eq!(CaseSensitivity::default(), CaseSensitivity::Insensitive);
-    }
 }

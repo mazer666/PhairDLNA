@@ -9,15 +9,16 @@
 //!       when the path is inside one of the roots.
 
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 
-use phairdlna_core::catalogue::{Catalogue, ContentItem, ContentSource, MediaKind};
+use phairdlna_core::catalogue::{ContentItem, ContentSource, MediaKind};
 use phairdlna_core::http::source::{ContentKind, MediaObject, MediaSource};
+
+use super::library::Library;
 
 /// The media of a catalogue, and the roots they may not leave.
 #[derive(Clone)]
 pub struct MediaLibrary {
-    catalogue: Arc<Catalogue>,
+    library: Library,
     roots: Vec<PathBuf>,
 }
 
@@ -28,12 +29,12 @@ impl MediaLibrary {
     /// `/var/folders/…` is the same folder as `/private/var/folders/…` on
     /// macOS, and a comparison of the two spellings would refuse every file
     /// (`SEC-001`). The resolution happens once, when the daemon starts.
-    pub fn new(catalogue: Arc<Catalogue>, roots: Vec<PathBuf>) -> Self {
+    pub fn new(library: Library, roots: Vec<PathBuf>) -> Self {
         let roots = roots
             .iter()
             .map(|root| std::fs::canonicalize(root).unwrap_or_else(|_| root.clone()))
             .collect();
-        Self { catalogue, roots }
+        Self { library, roots }
     }
 
     /// The path of an object, when it is inside one of the roots.
@@ -42,7 +43,9 @@ impl MediaLibrary {
     /// replaced by a link to somewhere else after the scan must not be read
     /// (`SEC-001`, `INT-098`).
     pub fn path_of(&self, id: &str) -> Option<PathBuf> {
-        let path = self.catalogue.path_of(id)?;
+        let path = self
+            .library
+            .with_catalogue(|catalogue| catalogue.path_of(id).map(Path::to_path_buf))?;
         let resolved = std::fs::canonicalize(path).ok()?;
         if self.roots.iter().any(|root| is_inside(&resolved, root)) {
             Some(resolved)
@@ -60,7 +63,9 @@ impl MediaLibrary {
 impl MediaSource for MediaLibrary {
     /// The metadata of an object of the catalogue.
     fn metadata(&self, id: &str) -> Option<MediaObject> {
-        let item = self.catalogue.as_ref().item_of(id)?;
+        let item = self
+            .library
+            .with_catalogue(|catalogue| catalogue.item_of(id))?;
         Some(media_object(&item))
     }
 }
@@ -103,20 +108,22 @@ fn is_inside(candidate: &Path, root: &Path) -> bool {
 #[cfg(test)]
 mod tests {
     use super::{is_inside, MediaLibrary};
-    use phairdlna_core::catalogue::{Catalogue, ContentSource};
+    use crate::serve::library::Library;
+    use phairdlna_core::catalogue::ContentSource;
     use phairdlna_core::config::{MediaRoot, SymlinkPolicy};
     use phairdlna_core::http::source::MediaSource;
     use phairdlna_core::platform::LocalFileSystem;
     use std::path::PathBuf;
-    use std::sync::Arc;
 
     /// The metadata of a file of the library is answered.
     #[test]
     fn the_metadata_of_a_file_is_answered() {
         let directory = tempfile::tempdir().expect("a temporary directory");
         std::fs::write(directory.path().join("film.mkv"), b"a film").expect("the film is written");
-        let catalogue = catalogue_of(directory.path());
-        let library = MediaLibrary::new(Arc::new(catalogue), vec![directory.path().to_path_buf()]);
+        let library = MediaLibrary::new(
+            library_of(directory.path()),
+            vec![directory.path().to_path_buf()],
+        );
         let id = identifier_of(&library, "film.mkv");
 
         let object = library.metadata(&id).expect("the film is in the catalogue");
@@ -132,8 +139,10 @@ mod tests {
         let outside = tempfile::tempdir().expect("another temporary directory");
         std::fs::write(outside.path().join("secret.mkv"), b"a secret")
             .expect("the file is written");
-        let catalogue = catalogue_of(outside.path());
-        let library = MediaLibrary::new(Arc::new(catalogue), vec![directory.path().to_path_buf()]);
+        let library = MediaLibrary::new(
+            library_of(outside.path()),
+            vec![directory.path().to_path_buf()],
+        );
         let id = identifier_of(&library, "secret.mkv");
 
         assert!(
@@ -161,15 +170,15 @@ mod tests {
         );
     }
 
-    /// Builds the catalogue of a folder.
-    fn catalogue_of(directory: &std::path::Path) -> Catalogue {
+    /// Builds the library of a folder.
+    fn library_of(directory: &std::path::Path) -> Library {
         let root = MediaRoot {
             name: "Films".to_owned(),
             path: directory.to_string_lossy().into_owned(),
             exclude: Vec::new(),
             symlink_policy: None,
         };
-        Catalogue::build(&[root], SymlinkPolicy::Skip, &LocalFileSystem)
+        Library::build(&[root], SymlinkPolicy::Skip, &LocalFileSystem)
     }
 
     /// The identifier of a file of the catalogue.
@@ -178,8 +187,8 @@ mod tests {
     /// shared.
     fn identifier_of(library: &MediaLibrary, title: &str) -> String {
         let container = library
-            .catalogue
-            .container("1")
+            .library
+            .with_catalogue(|catalogue| catalogue.container("1"))
             .expect("the root is in the catalogue");
         for child in &container.children {
             if child.title == title {
@@ -193,7 +202,9 @@ mod tests {
     }
 
     fn find_in_folder(library: &MediaLibrary, folder_id: &str, title: &str) -> Option<String> {
-        let folder = library.catalogue.container(folder_id)?;
+        let folder = library
+            .library
+            .with_catalogue(|catalogue| catalogue.container(folder_id))?;
         for item in &folder.children {
             if item.title == title {
                 return Some(item.id.clone());

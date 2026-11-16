@@ -1,6 +1,6 @@
 # Project status — PhairDLNA
 
-Status: **Baseline approved (2026-11-15) · M1.11 implemented** · Compiled: 2026-11-15
+Status: **Baseline approved (2026-11-15) · M1.11 implemented · M2.1 implemented** · Compiled: 2026-11-16
 Owner role: Lead / Project Manager
 
 ---
@@ -32,6 +32,24 @@ the withdrawal; `crates/phairdlna-cli/tests/serve_command.rs` starts the binary,
 description and ends it with a `SIGTERM`. The rules themselves stay in the core, and the
 core is unchanged by M1.11 — it takes no new dependency.
 
+**The first step of M2 is closed: M2.1 — multiple roots, external volumes and network
+shares.** The catalogue keeps the roots apart: every root has its own key in the
+identifiers, its own place in the tree and its own boundary, so a link from one root
+into another is not followed and a root that lies inside another root is published
+once. The catalogue now **remembers the volume of every root** between two reads, and
+it says what changed: a drive that was unplugged takes its files with it and is
+reported, a drive that comes back under the same identity keeps its identifiers, and a
+drive that comes back under **another** identity is given new identifiers while the
+identifier of the catalogue grows, so that a client browses again (`PLT-011`). The
+daemon watches the roots — a cheap question that reads no file of the library — and
+reads the catalogue again when the answer is "yes"; a file that is added *inside* a
+root is noticed by the next full scan, and the schedule of the scans is the work of
+`FUN-024` (M2.4). The evidence is
+`crates/phairdlna-core/tests/media_roots_multiple.rs`,
+`crates/phairdlna-core/tests/volume_events.rs` and
+`crates/phairdlna-core/tests/volume_platform_events.rs`; the decisions are D-15 to
+D-20 of `../03-features/F-08-media-roots-and-filesystem.md`.
+
 **What is still missing.** The IPv6 discovery, the interface selection of the sending
 socket (the daemon has one address), the rate limiter of the answers, the artwork (F-11
 is M2), the transfer limits and the index on disk. Each of them is named in the
@@ -44,8 +62,10 @@ placeholder catalogue is retired; `phairdlna-cli catalogue scan` prints the tree
 identifiers a client would see, and `phairdlna-cli catalogue browse <id>` prints the
 document a client would receive.
 
-**The configuration takes a list of roots**, and M1.9 verifies one root; the second root
-and the union of two roots are implemented and tested, but the milestone was scoped to one.
+**The configuration takes a list of roots**, and M2.1 is the milestone that makes the
+list mean something: several roots are browsable at the same time, they keep their own
+identifiers and their own boundaries, and a root that comes and goes with its drive is
+handled while the server runs.
 
 **The requirement group of M1.9 that was open is now decided.** The roadmap assigned
 `FUN-008`, `FUN-009` and `FUN-010` — the SQLite index that survives a rescan, that can
@@ -61,7 +81,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | Requirements | **Complete** | 346 requirements with IDs, priorities, features, milestones and verification methods — `../01-product/REQUIREMENTS-INDEX.md` |
 | Traceability | **Complete** | Generated matrix requirement → feature → milestone → module → verification → evidence — `TRACEABILITY-MATRIX.md` |
 | Architecture | **Complete** | Module boundaries, data flows, runtime model — `../02-architecture/ARCHITECTURE.md` |
-| Decisions | **Complete** | The ADRs in `../02-architecture/adr/` plus 38 entries in the decision log — `../00-governance/DECISION-LOG.md` |
+| Decisions | **Complete** | The ADRs in `../02-architecture/adr/` plus 41 entries in the decision log — `../00-governance/DECISION-LOG.md` |
 | Security model | **Complete** | Eight mitigations, 28 threats, each with its verification — `../04-security/SECURITY-MODEL.md` |
 | Privacy model | **Complete** | Data inventory, network posture, source offer — `../04-security/PRIVACY.md` |
 | Dependency review | **Complete** | Licence data for every candidate crate, retrieved 2026-11-14 — `../04-security/DEPENDENCY-LICENSE-REVIEW.md` |
@@ -74,7 +94,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | Open decisions | **12 awaiting the owner** — OD-05 (minimum macOS version) was decided on 2026-11-15 | `OPEN-DECISIONS.md` |
 | Glossary | **Complete** | The protocol, product, platform, security and project vocabulary — `../01-product/GLOSSARY.md` |
 | Research inputs | **Complete** | The briefs the specifications cite — `../09-research/` |
-| Implementation | **M0 done, M1.1–M1.11 implemented** | The four crates exist with the boundary enforced; the configuration, the eight platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root and the live daemon are implemented; 469 tests; **no device test has been performed**, so no milestone exit criterion is met yet |
+| Implementation | **M0 done, M1.1–M1.11 implemented, M2.1 implemented** | The four crates exist with the boundary enforced; the configuration, the eight platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root, the catalogue over several roots with the memory of their volumes, and the live daemon are implemented; **no device test has been performed**, so no milestone exit criterion is met yet |
 | Device evidence | **None** | Every device row reads `NOT TESTED` |
 | Release | **Not releasable** | `RELEASE-BLOCKERS.md` |
 
@@ -84,10 +104,10 @@ accepted baseline, and the requirement index carries the new milestone.
 
 | Command | Result |
 | --- | --- |
-| `./scripts/local-ci.sh` | **all eleven gates green** (2026-11-15): format, clippy, tests, no unsafe, file size, crate boundaries, doc links, licences, bans and sources, advisories, requirement views |
+| `./scripts/local-ci.sh` | **all eleven gates green** (2026-11-16, the run of M2.1): format, clippy, tests, no unsafe, file size, crate boundaries, doc links, licences, bans and sources, advisories, requirement views |
 | `cargo fmt --all -- --check` | clean (it failed before this phase — the CLI entry point was reformatted) |
 | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
-| `cargo test --workspace` | **469 passed, 0 failed, 0 ignored** (10 doctests included) |
+| `cargo test --workspace` | **616 passed, 0 failed, 0 ignored** (2026-11-16, the run of M2.1; 469 before it) |
 | `scripts/check-file-size.sh` | `RESULT: PASS` |
 | `scripts/check-crate-boundaries.sh` | `RESULT: PASS` (3 sibling dependencies across 4 crate manifests) |
 | `cargo deny check licenses` | `licenses ok` (exit 0) |
@@ -99,8 +119,8 @@ accepted baseline, and the requirement index carries the new milestone.
 | GitHub Actions, manual runs | **success** — `43698100636`, `43698591233`, `43699136828`, all 13 gate steps green each time: https://github.com/mazer666/PhairDLNA/actions/runs/43699136828 |
 | `python3 scripts/generate_requirement_views.py` | 346 requirements indexed; index and traceability matrix regenerated |
 
-Toolchain used for the M1.11 run: rustc 1.99.1, cargo 1.99.1, clippy 0.1.99, rustfmt
-1.8.0-stable (Homebrew). `rust-toolchain.toml` pins the channel `stable`, so the toolchain
+Toolchain used for the M2.1 run (and for M1.11 before it): rustc 1.99.1, cargo 1.99.1,
+clippy 0.1.99, rustfmt 1.8.0-stable (Homebrew). `rust-toolchain.toml` pins the channel `stable`, so the toolchain
 is within the support window (`rust-version` is 1.89).
 
 Everything else in this repository is **documented and unmeasured**. In particular:
@@ -126,7 +146,7 @@ Everything else in this repository is **documented and unmeasured**. In particul
 | Threats modelled | 28 (`SEC-TH-01` … `SEC-TH-28`) |
 | Quality gates | 28 (`QG-01` … `QG-28`), of which 13 can run today |
 | Milestone gates | 7 (`G0` … `G6`) |
-| Architecture decisions | The ADRs in `../02-architecture/adr/` + 38 decision-log entries |
+| Architecture decisions | The ADRs in `../02-architecture/adr/` + 41 decision-log entries |
 | Open owner decisions | 13 (`OD-01` … `OD-13`), of which OD-05 is decided |
 | Risks | 13 (`R-01` … `R-13`) |
 | Archived baselines | 2 snapshots, each with a SHA-256 manifest |

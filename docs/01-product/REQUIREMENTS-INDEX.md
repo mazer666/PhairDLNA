@@ -69,9 +69,9 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-014` | Generate thumbnails for image files and video posters on demand and cache them in a disposable… | SHOULD | `F-10` | M2 | Automated test | Baseline |
 | `FUN-015` | Support playlists in M3U, M3U8 and PLS format, resolving entries relative to the playlist file. | SHOULD | `F-11` | M2 | Automated test | Baseline |
 | `FUN-016` | Expose a subtitle sidecar file (`.srt`, `.vtt`, `.sub`, `.ass`) as an additional `res` element… | SHOULD | `F-11` | M2 | Automated test | Baseline |
-| `FUN-017` | Support media stored on removable volumes and network shares | MUST | `F-08` | M2 | Automated test | Baseline |
-| `FUN-018` | Never write to, rename or delete a file inside a media root, with the single exception of its… | MUST | `F-08` | M2 | Automated test | Baseline |
-| `FUN-019` | Keep the raw path exactly as the operating system reported it for every file operation | MUST | `F-08` | M2 | Automated test | Baseline |
+| `FUN-017` | Support media stored on removable volumes and network shares | MUST | `F-08` | M2 | Automated test | Implemented |
+| `FUN-018` | Never write to, rename or delete a file inside a media root, with the single exception of its… | MUST | `F-08` | M2 | Automated test | Implemented |
+| `FUN-019` | Keep the raw path exactly as the operating system reported it for every file operation | MUST | `F-08` | M2 | Automated test | Verified |
 | `FUN-020` | Compute a separate identity key for indexing and de-duplication by applying Unicode NFC and a… | MUST | `F-11` | M2 | Automated test | Baseline |
 | `FUN-021` | Provide a way to exclude subdirectories of a root. | SHOULD | `F-11` | M2 | Protocol conformance + device test | Baseline |
 | `FUN-022` | Support multiple roots that point to the same underlying volume without producing duplicate… | SHOULD | `F-11` | M2 | Protocol conformance + device test | Baseline |
@@ -355,7 +355,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `PLT-008` | Not expose absolute file system paths to clients. | MUST | `F-22` | M0 | Build matrix | Baseline |
 | `PLT-009` | Not require a C toolchain beyond what the platform already provides | SHOULD | `F-22` | M0 | Build matrix | Baseline |
 | `PLT-010` | Behave identically on all platforms with respect to protocol behaviour | MUST | `F-22` | M0 | Build matrix | Baseline |
-| `PLT-011` | Treat the mount, unmount and remount of a volume as a first-class event and shall re-key the… | MUST | `F-22` | M3 | Build matrix | Baseline |
+| `PLT-011` | Treat the mount, unmount and remount of a volume as a first-class event and shall re-key the… | MUST | `F-22` | M2 | Build matrix | Implemented |
 | `PLT-012` | Treat a permission error on a subtree as a quarantined subtree that needs consent | MUST | `F-22` | M3 | Build matrix | Baseline |
 | `PLT-013` | On macOS the always-on server shall run as a system-context launchd daemon and the user… | MUST | `F-22` | M3 | Build matrix | Baseline |
 | `PLT-014` | Be built as a universal binary for Apple Silicon and Intel. | MUST | `F-22` | M3 | Build matrix | Baseline |

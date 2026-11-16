@@ -25,11 +25,12 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use crate::config::{MediaRoot, SymlinkPolicy};
-use crate::platform::FileSystem;
+use crate::platform::{FileSystem, VolumeEvent, VolumeId};
 
+use super::volumes::{VolumeRegistry, VolumeReport};
 use super::{ContentContainer, ContentItem, ContentSource, MediaKind};
 
-pub use super::builder::RootSummary;
+pub use super::roots::RootSummary;
 
 /// The identifier of the root container.
 pub const ROOT_OBJECT_ID: &str = "0";
@@ -72,6 +73,74 @@ impl Catalogue {
         filesystem: &dyn FileSystem,
     ) -> Self {
         super::builder::build(roots, symlink_policy, filesystem)
+    }
+
+    /// Scans the roots again and replaces the catalogue.
+    ///
+    /// The memory of the volumes is kept, so that the catalogue can tell what
+    /// changed at the roots: a drive that was unplugged, a drive that was
+    /// plugged in again, and a drive that was replaced by another volume. The
+    /// entries of a replaced volume are given new identifiers, because the
+    /// identifiers carry the identity of the volume (`PLT-011`, `INT-062`).
+    ///
+    /// The catalogue that was there is replaced as a whole: a root that is not
+    /// there any more takes its entries with it, and the rest of the library
+    /// stays browsable (`FUN-007`).
+    pub fn refresh(
+        &mut self,
+        roots: &[MediaRoot],
+        symlink_policy: SymlinkPolicy,
+        filesystem: &dyn FileSystem,
+        registry: &mut VolumeRegistry,
+    ) -> VolumeReport {
+        let outcome = super::builder::build_with(roots, symlink_policy, filesystem, registry);
+        *self = outcome.catalogue;
+        outcome.report
+    }
+
+    /// Scans the roots and builds the catalogue, and remembers the volumes.
+    pub fn build_with(
+        roots: &[MediaRoot],
+        symlink_policy: SymlinkPolicy,
+        filesystem: &dyn FileSystem,
+        registry: &mut VolumeRegistry,
+    ) -> super::builder::BuildOutcome {
+        super::builder::build_with(roots, symlink_policy, filesystem, registry)
+    }
+
+    /// Applies an event of the platform and reads the catalogue again.
+    ///
+    /// The event is a first-class thing (`PLT-011`): the platform says that a
+    /// volume was mounted, was unmounted or was mounted again, and the
+    /// catalogue believes the platform, reads the roots again and says what
+    /// changed.
+    ///
+    /// A volume that was unmounted takes its files with it, even when its mount
+    /// point is still there as an empty folder. A volume that comes back is
+    /// published again, and a volume that comes back under another identity is
+    /// given new identifiers, so that a client browses again (`INT-062`).
+    pub fn apply_volume_event(
+        &mut self,
+        event: &VolumeEvent,
+        roots: &[MediaRoot],
+        symlink_policy: SymlinkPolicy,
+        filesystem: &dyn FileSystem,
+        registry: &mut VolumeRegistry,
+    ) -> VolumeReport {
+        match event {
+            VolumeEvent::Unmounted(volume) => {
+                for path in roots_of_volume(registry, volume) {
+                    registry.mark_absent(&path);
+                }
+            }
+            VolumeEvent::Mounted(volume) | VolumeEvent::Remounted(volume) => {
+                for path in roots_of_volume(registry, volume) {
+                    registry.mark_mounted(&path);
+                }
+            }
+            VolumeEvent::RescanRequired => {}
+        }
+        self.refresh(roots, symlink_policy, filesystem, registry)
     }
 
     /// What the scanner could not do, in words a person can read.
@@ -139,4 +208,18 @@ pub(super) fn sort_children(children: &mut [ContentItem]) {
             .then_with(|| left.title.to_lowercase().cmp(&right.title.to_lowercase()))
             .then_with(|| left.id.cmp(&right.id))
     });
+}
+
+/// The paths of the roots that live on a volume.
+///
+/// A platform that reports volumes knows which root is on which volume; the
+/// portable adapter does not, and then every root shares the one identity
+/// (`PLT-005`, `PLT-011`).
+fn roots_of_volume(registry: &VolumeRegistry, volume: &VolumeId) -> Vec<PathBuf> {
+    registry
+        .roots()
+        .iter()
+        .filter(|root| &root.identity == volume)
+        .map(|root| root.path.clone())
+        .collect()
 }

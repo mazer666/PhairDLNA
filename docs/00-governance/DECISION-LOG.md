@@ -68,6 +68,9 @@ Architectural decisions with options and trade-offs live as ADRs in
 | DEC-036 | The `serve` command takes a `--port` switch, and the daemon accepts another port for the discovery socket and another path for the identity file, so that a test writes nothing into the configuration directory of the user and competes with no running server | Accepted | 2026-11-15 | Lead (M1.11, F-13 § 12 items 12 and 13) |
 | DEC-037 | `FUN-008`, `FUN-009` and `FUN-010` — the catalogue that survives a rescan, the index on disk and its recovery from corruption — move to M2. The catalogue of M1 is clean, in memory and rebuilt at start-up; the index on disk is the work of M2 | Owner direction | 2026-11-16 | Owner (F-09, ADR-0006) |
 | DEC-038 | The milestones M1.10 and M1.11 are reviewed together, because M1.11 was implemented before M1.10 and the security baseline must be proved against the code that is already written | Accepted | 2026-11-16 | Lead (M1.10, M1.11) |
+| DEC-039 | The catalogue remembers the volume of every root between two reads, and the daemon reads the catalogue again when a drive comes or goes; a volume that comes back under another identity is given new identifiers, a volume that comes back under the same identity keeps them | Accepted | 2026-11-16 | Lead (M2.1, `PLT-011`, F-08 D-15 … D-20) |
+| DEC-040 | The fingerprint of a path — what the platform observes at the path right now — is a fact of its own and not the identity of the volume; the portable adapter answers the device of the path, and the real volume identity still arrives with the platform adapter of F-13 | Accepted | 2026-11-16 | Lead (M2.1, `PLT-005`, `PLT-011`, F-08 D-16) |
+| DEC-041 | Two roots may not share a name and may not share a path, and a root that lies inside another root is published once, under its own identifier | Accepted | 2026-11-16 | Lead (M2.1, `CFG-002`, `FUN-017`, F-08 D-18, D-20) |
 
 ## Reviews and evidence
 

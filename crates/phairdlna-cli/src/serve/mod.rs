@@ -18,13 +18,16 @@
 pub mod address;
 pub mod guard;
 pub mod http;
+pub mod library;
 pub mod limit;
 pub mod log;
 pub mod media;
+pub mod media_route;
 pub mod setup;
 pub mod signal;
 pub mod ssdp;
 pub mod stream;
+pub mod watch;
 
 use std::net::{Ipv4Addr, SocketAddr};
 use std::path::PathBuf;
@@ -113,6 +116,8 @@ pub struct Daemon {
     server: Option<setup::HttpServer>,
     stop_ssdp: Option<tokio::sync::watch::Sender<bool>>,
     ssdp_task: Option<JoinHandle<()>>,
+    stop_watch: Option<tokio::sync::watch::Sender<bool>>,
+    watch_task: Option<JoinHandle<()>>,
 }
 
 impl Daemon {
@@ -183,6 +188,7 @@ impl Daemon {
     async fn stop_sequence(&mut self) -> Result<(), String> {
         self.withdraw_advertisements().await;
         self.stop_discovery().await;
+        self.stop_watch().await;
         self.stop_http().await;
         Ok(())
     }
@@ -206,6 +212,19 @@ impl Daemon {
             let _ = stop.send(true);
         }
         if let Some(task) = self.ssdp_task.take() {
+            let _ = task.await;
+        }
+    }
+
+    /// Stops the task that watches the drives of the library.
+    ///
+    /// The watch stops before the server drains, so that the catalogue is not
+    /// read again while the transfers are ending (`OPS-008`).
+    async fn stop_watch(&mut self) {
+        if let Some(stop) = self.stop_watch.take() {
+            let _ = stop.send(true);
+        }
+        if let Some(task) = self.watch_task.take() {
             let _ = task.await;
         }
     }

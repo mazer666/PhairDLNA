@@ -437,12 +437,15 @@ yet says *planned*.
 | Purpose | Path | State |
 | --- | --- | --- |
 | Root configuration, union catalogue, hidden-file rules | `crates/phairdlna-core/tests/media_roots.rs` | exists |
+| More than one root: two identifiers, independent containment, a root inside a root | `crates/phairdlna-core/tests/media_roots_multiple.rs` | exists |
 | What the scanner reports when it cannot read | `crates/phairdlna-core/tests/media_diagnostics.rs` | exists |
 | Symbolic-link and alias policy | `crates/phairdlna-core/tests/symlink_policy.rs` | exists |
 | Containment: traversal, NUL, encoded separators, re-check after resolution | `crates/phairdlna-core/tests/path_containment.rs` | planned (F-16) |
-| Mount, unmount, remount and re-keying | `crates/phairdlna-core/tests/volume_events.rs` | planned (F-13) |
+| Mount, unmount, remount and re-keying | `crates/phairdlna-core/tests/volume_events.rs` | exists |
+| The events the platform reports | `crates/phairdlna-core/tests/volume_platform_events.rs` | exists |
 | Incremental rescan behaviour | `crates/phairdlna-core/tests/incremental_scan.rs` | planned (M2) |
 | Scanner unit tests | `crates/phairdlna-core/src/catalogue/scanner/mod.rs`, `.../scanner/walk.rs` | exists |
+| The memory of the volumes of the roots | `crates/phairdlna-core/src/catalogue/volumes.rs` | exists |
 | Scan command and schedule | `crates/phairdlna-cli/tests/cli_scan.rs` | planned (M1.11) |
 | Device behaviour on removable volumes and protected folders | `qa/device-matrix.toml` | planned |
 | Platform traits and their default implementations | `crates/phairdlna-core/tests/platform_traits.rs` | planned |
@@ -451,8 +454,9 @@ yet says *planned*.
 
 **Method.** The scanner and the containment rules are exercised against a temporary directory tree created by the
 test itself, which makes symlinks, aliases and permission errors reproducible on every platform. The volume
-events are driven through the `VolumeWatcher` trait with a scripted event source, so the mount and unmount logic
-is tested without a physical drive; the physical drive remains a manual device check. Containment tests are
+events are driven through a scripted platform: the test writes down the volume identity and the fingerprint the
+platform reports for a path (`crates/phairdlna-core/tests/support/volumes.rs`), so the mount and unmount logic is
+tested without a physical drive; the physical drive remains a manual device check. Containment tests are
 negative tests: they assert that no file outside the root was opened, using an instrumented open hook rather
 than by inspecting the response alone.
 The platform traits are exercised through their default implementations, so that a
@@ -499,7 +503,11 @@ volume identity of the platform adapter is still to come (F-13, `PLT-005`).*
 
 **D-04 — The root key is the position of the root in the configuration.** The name of a root is a label for a
 person and is not part of the identifier, so renaming a root does not invalidate the identifiers below it. Two
-roots of the same configuration keep their files apart because their keys differ. *Implemented.*
+roots of the same configuration keep their files apart because their keys differ. The cost of the position is
+written down here: **a root that is inserted at the top of the configuration moves the keys of the roots below
+it**, and the identifiers of their files change with it. A client that cached an identifier sees `701 No Such
+Object` for the moved root. The alternative — the name as the key — would move the identifiers on a rename
+instead, and the rename is the change a person makes more often. *Implemented.*
 
 **D-05 — A folder of the library is a container and not an item (INT-042).** The ContentDirectory service
 lists the children of a container as items, so the catalogue model gained `MediaKind::Folder` and
@@ -559,6 +567,50 @@ content directory and the other roots stay browsable. What the implementation ca
 another volume: that needs a volume identity the portable adapter does not have (D-03). *Implemented with the
 stated limit.*
 
+**D-15 — The catalogue remembers the volume of every root between two reads (`FUN-007`, `FUN-017`, `PLT-011`).**
+The memory lives in `catalogue::volumes::VolumeRegistry` and holds, for every root, the identity of the volume,
+the fingerprint of the path and whether the root could be read. A catalogue that is built once and thrown away
+cannot tell a drive that was unplugged from a drive that was never there; a catalogue that remembers can. The
+memory belongs to the caller of the catalogue — the daemon keeps it while it runs — and the catalogue is read
+again through `Catalogue::refresh`, which returns what changed at the roots. *Implemented.*
+
+**D-16 — The fingerprint of a path is what the platform observes right now, and it is not the identity of the
+volume (`FUN-007`, `PLT-005`).** The `FileSystem` trait gained `volume_fingerprint`, whose default says "not
+supported": a platform that cannot see the volume of a path must not pretend that it can. The portable adapter
+answers the device the path lives on, which changes when a volume is unmounted and its place on the disk is taken
+by a folder of another device. The fingerprint says only that *something* at the path is the same as it was, or
+that it is not; whether it is the same **volume** is a question only a platform with a real volume identity can
+answer, and that identity is still to come (F-13). *Implemented.*
+
+**D-17 — A volume that comes back under another identity is re-keyed (`PLT-011`, `INT-062`).**
+The identifiers of the catalogue carry the identity of the volume (D-02). A volume that comes back under another
+identity therefore gives its files new identifiers by construction, and the identifier of the catalogue grows, so
+that a client that polls it browses again. A volume that comes back under the *same* identity keeps its
+identifiers, and a client that cached them keeps working. *Implemented.*
+
+**D-18 — A root inside another root is published once (`FUN-017`).**
+Two roots that overlap would publish the same file twice, under two identifiers. The outer root therefore leaves
+the inner root alone: the inner root is published under its own key and with its own boundary, and the files
+below it are indexed once. *Implemented.*
+
+**D-19 — The daemon watches the roots and reads the catalogue again when something changed (`FUN-017`).**
+The watch asks a cheap question — "did anything change at the roots?" — and the question is answered without
+reading a single file of the library. Only when the answer is "yes" is the catalogue read again, and the
+catalogue that was there is replaced as a whole, so that a root that is not there any more takes its entries with
+it. The catalogue is held behind a lock, and a request reads it under that lock, so that a drive that comes back
+while a client is browsing cannot tear the tree in half. The work of the watch runs on a thread of its own, so
+that a network share that does not answer cannot block the runtime of the server. Two limits are written down
+here: the watch sees the **roots**, not the files inside them — a file that is added inside a root is noticed by
+the next full scan, and the schedule of the scans is the work of `FUN-024` (M2.4); and the watch asks the
+**observation** of the roots, not the events of the platform, because the portable adapter has no native events.
+The core honours the events of the platform through `Catalogue::apply_volume_event`, and the native watcher
+(DiskArbitration) is the work of the platform adapter (F-13). *Implemented.*
+
+**D-20 — Two roots may not share a name and may not share a path (`CFG-002`, `FUN-017`).**
+A name is how a person and a client tell the roots apart, and a path says which folder is published. Two roots
+with one name would be two folders with one label, and two roots with one path would publish the same files twice
+under two identifiers. The configuration refuses both, and the message names the field. *Implemented.*
+
 **What is verified, and what is not.** Every criterion of § 10 is listed. A criterion
 that is *implemented* has a test that fails when the behaviour breaks; a criterion
 that is *partly implemented* says what is missing; a criterion that is **NOT RUN**
@@ -566,13 +618,13 @@ names the reason, because a skip is never a pass.
 
 | Criterion | Result | Where |
 | --- | --- | --- |
-| AC-01 (two roots, one tree) | implemented | `crates/phairdlna-core/tests/media_roots.rs`, `crates/phairdlna-core/tests/catalogue_identifiers.rs` |
+| AC-01 (two roots, one tree) | implemented | `crates/phairdlna-core/tests/media_roots.rs`, `crates/phairdlna-core/tests/catalogue_identifiers.rs`, `crates/phairdlna-core/tests/media_roots_multiple.rs` |
 | AC-02 (a link out of the root) | implemented | `crates/phairdlna-core/tests/symlink_policy.rs` |
 | AC-03 (hidden files, content sniffing) | implemented | `crates/phairdlna-core/tests/media_roots.rs` |
 | AC-04 (incremental rescan) | **NOT RUN** — M1.9 has no index and no incremental scan; the criterion belongs to the index (F-09, M2) |
-| AC-05 (an unmounted volume) | **NOT RUN** — a root that is missing or unreadable is reported and the library stays browsable (`crates/phairdlna-core/tests/media_roots.rs`), but the *unmounted volume* needs the volume identity of the platform adapter (F-13) |
-| AC-06 (a volume that reappears under a new identity) | **NOT RUN** — needs the volume identity and the volume watcher of the platform adapter (F-13) |
-| AC-07 (nothing is written) | implemented | `crates/phairdlna-core/tests/media_roots.rs::the_scanner_never_writes_to_the_library` |
+| AC-05 (an unmounted volume) | implemented | `crates/phairdlna-core/tests/volume_events.rs::a_drive_that_is_unplugged_takes_its_files_with_it`, `...::the_other_roots_are_not_touched_by_the_loss_of_a_drive`, `crates/phairdlna-core/tests/volume_platform_events.rs::a_volume_that_was_unmounted_takes_its_files_with_it`, `crates/phairdlna-cli/src/serve/watch.rs::tests::the_watch_reads_the_catalogue_again` — the root is reported as absent, its files leave the catalogue, the other roots stay browsable, the identifier of the catalogue grows, and the running daemon notices the drive that is gone |
+| AC-06 (a volume that reappears under a new identity) | implemented | `crates/phairdlna-core/tests/volume_events.rs::a_drive_that_comes_back_under_another_identity_is_given_new_identifiers`, `...::a_volume_that_comes_back_under_another_identity_is_a_replacement`, `...::a_drive_that_comes_back_keeps_its_identifiers`, `crates/phairdlna-core/tests/volume_platform_events.rs::a_volume_that_comes_back_is_found_again` — the entries are re-keyed, the system update id changes, a volume that returns under the same identity keeps its identifiers, and a volume that returns under another identity is reported as a replacement |
+| AC-07 (nothing is written) | implemented | `crates/phairdlna-core/tests/media_roots.rs::the_scanner_never_writes_to_the_library`; the raw path of a file is kept as the operating system reported it (`crates/phairdlna-core/tests/media_roots_multiple.rs::the_path_of_a_file_is_the_path_of_the_disk`) |
 | AC-08 (the free space of a root) | **NOT RUN** — `FUN-023` and the vendor extension of open question 1 below; not part of M1.9 |
 | AC-09 (the scan schedule) | **NOT RUN** — the scheduler is M1.11, and the schedule of a root is not configured yet |
 | AC-10 (a media URL that walks out) | **NOT RUN** — the containment of a client-supplied path is F-16 and is not part of M1.9 |
@@ -615,7 +667,8 @@ Rationale: without it, a user who links to a NAS has no supported way to serve i
 disabling containment — is not acceptable. *Closes when:* the owner accepts or rejects it.
 5. **[OPEN] Volume re-keying and stable object ids.** The object id is derived from the volume identity and the
 relative path (ADR-0007). When a volume reappears under a different identity, the ids of its entries change by
-construction, and a client holding an old id receives `701 No Such Object` (INT-039). *Closes when:* the owner
+construction, and a client holding an old id receives `701 No Such Object` (INT-039). The re-keying itself is
+implemented and tested (D-17); what is still open is the grace period. *Closes when:* the owner
 decides whether a grace-period mapping from the old volume identity to the new one is required.
 6. **[OPEN] Where the Windows installation requirements are documented.** PLT-015
    requires the `LongPathsEnabled` setting to be documented, and the repository has no installation

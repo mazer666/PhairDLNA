@@ -42,15 +42,20 @@
 | `crates/phairdlna-core/src/platform/` | The eight capability traits, the path model, the portable filesystem adapter and the default implementation | F-08, F-13, F-15 |
 | `crates/phairdlna-core/src/ssdp/` | The discovery protocol: parsing a search, matching the targets, building the bytes (the **socket** is in `crates/phairdlna-cli/src/serve/ssdp.rs`) | F-01 |
 | `crates/phairdlna-core/src/identity.rs` | The persistent device identity | F-01, F-02 |
-| `crates/phairdlna-core/src/catalogue/` | The catalogue — the model of the items and containers, the scanner of a root, the opaque identifiers, the sniffer of a file and the registry of the formats the server serves | F-05, F-08, F-09 |
+| `crates/phairdlna-core/src/catalogue/` | The catalogue — the model of the items and containers, the scanner of a root, the opaque identifiers, the memory of the volumes of the roots, the assembly of the tree, the sniffer of a file and the registry of the formats the server serves | F-05, F-08, F-09 |
 | `crates/phairdlna-core/src/didl/` | The DIDL-Lite document — the object model, the `protocolInfo`, the value rules and the writer | F-05 |
 | `crates/phairdlna-core/src/http/` | The delivery of media over HTTP — the `Range` header, the headers of a media answer, the containment of a media URL and the evaluator of a request | F-06 |
 | `crates/phairdlna-core/src/upnp/` | The device description, the service descriptions (SCPD), the SOAP dispatcher and the ContentDirectory and ConnectionManager actions | F-02, F-03, F-04 |
 | `crates/phairdlna-core/src/config/` | The typed, validated, versioned configuration | F-12 |
 | `crates/phairdlna-cli/src/lib.rs` | The commands, as pure functions over their arguments | F-13 |
 | `crates/phairdlna-cli/src/catalogue.rs` | The catalogue commands — the tree of the library and the document a client receives | F-08, F-09, F-13 |
-| `crates/phairdlna-cli/src/serve/` | The daemon — the start of the server, the HTTP routes, the discovery socket, the media of the library, the body of a media answer, the log and the signals | F-01, F-02, F-03, F-04, F-06, F-13 |
+| `crates/phairdlna-cli/src/serve/` | The daemon — the start of the server, the HTTP routes, the discovery socket, the library and the watch of the drives, the media of the library, the body of a media answer, the log and the signals | F-01, F-02, F-03, F-04, F-06, F-08, F-13 |
 | `crates/phairdlna-cli/src/main.rs` | The argument parsing and the exit code | F-13 |
+| `crates/phairdlna-core/tests/media_roots.rs` | The acceptance criteria of F-08 for one root | F-08 |
+| `crates/phairdlna-core/tests/media_roots_multiple.rs` | The acceptance criteria of F-08 for more than one root | F-08 |
+| `crates/phairdlna-core/tests/support/` | The fixtures of the tests of the core — the scripted platform of the volumes, the checker of a document and the catalogue of the protocol tests | F-08 |
+| `crates/phairdlna-core/tests/volume_events.rs` | The acceptance criteria of F-08 for the volumes of a root — a drive that goes, comes back and comes back under another identity | F-08 |
+| `crates/phairdlna-core/tests/volume_platform_events.rs` | The acceptance criteria of F-08 for the events the platform reports — a volume that was unmounted and one that was mounted again | F-08 |
 | `crates/phairdlna-cli/tests/serve.rs` | The daemon that answers a client — the description, the service descriptions, the SOAP control, the media and the artwork | F-02, F-03, F-04, F-06 |
 | `crates/phairdlna-cli/tests/discovery.rs` | The discovery of the daemon — the advertisements, the answer of a search and the withdrawal | F-01 |
 | `crates/phairdlna-cli/tests/serve_command.rs` | The `serve` command of the command line and the graceful shutdown | F-13 |
