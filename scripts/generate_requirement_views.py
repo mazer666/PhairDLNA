@@ -1044,6 +1044,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — native Apple Silicon (aarch64-apple-darwin) execution without Rosetta translation requirement",
         "Verified",
     ),
+    "PLT-014": (
+        "`crates/phairdlna-mac/tests/universal_binary.rs::the_bundle_script_targets_universal_architectures`,"
+        " `scripts/package-macos-app.sh`"
+        " — macOS application is packaged as a universal binary containing both arm64 and x86_64 architectures",
+        "Verified",
+    ),
     "UX-011": (
         "`crates/phairdlna-cli/tests/admin.rs::the_diagnostics_do_not_name_the_files_of_the_user`,"
         " `crates/phairdlna-admin/tests/admin_surface.rs::the_diagnostics_hide_the_paths`"
