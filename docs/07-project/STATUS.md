@@ -5,6 +5,22 @@ Owner role: Lead / Project Manager
 
 ---
 
+> **Current-head addendum (2026-11-17, commit `81a76d1e` before documentation fixes).**
+> The narrative below chiefly records the M2.9 gate run and earlier M2.6 work. More
+> recently, code was committed for interactive **CLI setup** (`1bec4cb7`),
+> CLI diagnostics and exports (`1bec4cb7`), **Simple/Advanced configuration
+> explanations** (`ab4d3645`), an embedded local **settings-inspection web UI**
+> (`be02dff8`) and a **diagnostics-export action in the macOS menu** (`81a76d1e`).
+> Therefore any unqualified statement below that “first-run onboarding”,
+> “plain-language diagnostics”, or “UI diagnostics export” does not exist
+> refers to an **earlier implementation stage** and is superseded for the
+> named features. **Full native GUI onboarding, physical-device usability and
+> accessibility acceptance remain open.** A full quality-gate run for the
+> latest feature commits is **not documented**. The recorded 1,038 passing
+> tests and three successful manual CI runs refer to **earlier revisions**.
+> No real-device tests, performance benchmarks or seven-day soak tests have
+> been recorded. The project remains not release-ready.
+
 ## 1. Where the project stands
 
 The **requirements baseline is approved** (2026-11-15), and the implementation is running:
@@ -231,11 +247,10 @@ compiler. The decision itself is the owner's and was taken in the dependency rev
 consequence is recorded here and in `../04-security/DEPENDENCY-LICENSE-REVIEW.md`, and it
 is the one thing of this step that the owner may want to overrule.
 
-**Two parts of M2.4 and M2.5 are still open, and they are named.** The **source offer**
+**At the M2.9 checkpoint, two parts of M2.4 and M2.5 were still open.** The **source offer**
 (`OPS-016`, `SEC-070`) does not exist: the archive, the route and the build step that produces
 the artefact are not written, and the open question 2 of F-14 asks the owner how the archive is
-to be produced. The **plain-language text** of the first-run output and the command that prints
-the diagnostics as text (F-13, `UX-011`, `UX-014`) belong to the command line. The
+to be produced. The **plain-language first-run and diagnostics CLI** were then open, but the later commit `1bec4cb7` adds `setup` and `diagnostics` commands. Their current full behavior and acceptance must be reviewed against the updated tests. The
 **trusted-client list** (`CFG-010`) waits for the device profiles of F-07. The **address of the
 client** is not known to the routes of the media server yet, so the diagnostics name the client
 and the title but not the address.
@@ -293,7 +308,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | Open decisions | **12 awaiting the owner** — OD-05 (minimum macOS version) was decided on 2026-11-15 | `OPEN-DECISIONS.md` |
 | Glossary | **Complete** | The protocol, product, platform, security and project vocabulary — `../01-product/GLOSSARY.md` |
 | Research inputs | **Complete** | The briefs the specifications cite — `../09-research/` |
-| Implementation | **M0 done, M1.1–M1.11 implemented, M2.1, M2.2, M2.3 and M2.9 implemented, M2.4, M2.5 and M2.6 in part** | The four crates exist with the boundary enforced; the configuration, the platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root, the catalogue over several roots with the memory of their volumes, the live daemon, the picture pipeline of the library, the access-control list, the local administration surface and the catalogue index on disk are implemented; the source offer, the plain-language first-run output and the trusted-client profiles are not; **no device test has been performed**, so no milestone exit criterion is met yet |
+| Implementation | **M0 done, M1.1–M1.11 implemented, M2.1, M2.2, M2.3 and M2.9 implemented, M2.4, M2.5 and M2.6 in part** | The four crates exist with the boundary enforced; the configuration, the platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root, the catalogue over several roots with the memory of their volumes, the live daemon, the picture pipeline of the library, the access-control list, the local administration surface and the catalogue index on disk are implemented; the source offer and trusted-client profiles are not; CLI first-run and diagnostics capabilities have since been added (see current-head addendum); **no device test has been performed**, so no milestone exit criterion is met yet |
 | Device evidence | **None** | Every device row reads `NOT TESTED` |
 | Release | **Not releasable** | `RELEASE-BLOCKERS.md` |
 
@@ -306,7 +321,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | `./scripts/local-ci.sh` | **all eleven gates green** (2026-11-17, the run of M2.9): format, clippy, tests, no unsafe, file size, crate boundaries, doc links, licences, bans and sources, advisories, requirement views |
 | `cargo fmt --all -- --check` | clean (it failed before this phase — the CLI entry point was reformatted) |
 | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
-| `cargo test --workspace` | **1038 passed, 0 failed, 0 ignored** (2026-11-17, the run of M2.9; 616 at the run of M2.1) |
+| `cargo test --workspace` | **1038 passed, 0 failed, 0 ignored** in the recorded M2.9 run of 2026-11-17; **not rerun here against the newest UI commits** |
 | `scripts/check-file-size.sh` | `RESULT: PASS` |
 | `scripts/check-crate-boundaries.sh` | `RESULT: PASS` (3 sibling dependencies across 4 crate manifests) |
 | `cargo deny check licenses` | `licenses ok` (exit 0) |
@@ -315,7 +330,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | `scripts/check-doc-links.sh` | `RESULT: PASS` (relative links checked) |
 | `scripts/check-no-unsafe.sh` | `RESULT: PASS` (no unsafe code in the tracked Rust files) |
 | `python3 scripts/generate_requirement_views.py --check` | up to date; 346 requirements indexed |
-| GitHub Actions, manual runs | **success** — `43698100636`, `43698591233`, `43699136828`, all 13 gate steps green each time: https://github.com/mazer666/PhairDLNA/actions/runs/43699136828 |
+| GitHub Actions, manual runs | **success on earlier commit SHAs, not current HEAD** — `43698100636`, `43698591233`, `43699136828`, all 13 gate steps green each time: https://github.com/mazer666/PhairDLNA/actions/runs/43699136828 |
 | `python3 scripts/generate_requirement_views.py` | 346 requirements indexed; index and traceability matrix regenerated |
 
 Toolchain used for the M2.1 run (and for M1.11 before it): rustc 1.99.1, cargo 1.99.1,
