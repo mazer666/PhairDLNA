@@ -1,8 +1,10 @@
 # F-09 — Catalogue index and incremental scanning
 
-Status: Draft
+Status: In progress — the index on disk is implemented (M2.9): the SQLite index, the catalogue
+that stays usable during a rescan and the recovery from a damaged index; the incremental scan and
+the change events of the filesystem are not
 Owner role: Product/Requirements
-Version/date: 0.1 / 2026-11-14
+Version/date: 0.2 / 2026-11-17
 Requirements: FUN-008, FUN-009, FUN-010, FUN-011, FUN-012, FUN-025, PERF-003, PERF-004,
 Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
 Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
@@ -284,7 +286,7 @@ the reference profile of qa-performance §2.
 | Situation | Response | Basis |
 | --- | --- | --- |
 | The index file is missing | a new index is created and a full scan is scheduled | FUN-009 |
-| The index file is corrupted | the file is moved aside, a new one is created, the catalogue is rebuilt and the rebuild is reported in the log and in the status output | FUN-010 |
+| The index file is corrupted, unreadable or of another schema | the file is moved aside under the name `.corrupt.<moment>`, a new one is created, the catalogue is rebuilt and the rebuild is reported in the log and in the status output | FUN-010 |
 | The index cannot be written (read-only directory) | start-up aborts with a message naming the file and the directory; no scan is attempted | UX-004 |
 | A subtree cannot be read (permission error) | the subtree is quarantined, the rest of the root is indexed, the quarantine is reported | platform §6.2 rule 7, PLT-012 |
 | A root is unmounted or replaced | the affected rows are marked unavailable and re-keyed when the volume returns; the catalogue as a whole keeps working | PLT-011, FUN-007 |
@@ -394,11 +396,12 @@ yet says *planned*.
 | Purpose | Path | State |
 | --- | --- | --- |
 | Index behaviour, browse-during-scan, no filesystem access | `crates/phairdlna-core/tests/catalogue_index.rs` | exists |
-| Rebuild, corruption recovery, no-writes-to-media | `crates/phairdlna-core/tests/catalogue_rebuild.rs` | planned (M2) |
+| Rebuild, corruption recovery, no-writes-to-media | `crates/phairdlna-core/tests/catalogue_rebuild.rs` | exists (M2.9) |
+| The index of the running daemon, its restart and a damaged index | `crates/phairdlna-cli/tests/catalogue_index.rs` | exists (M2.9) |
 | Identifier stability, de-duplication by device identity | `crates/phairdlna-core/tests/catalogue_identifiers.rs` | exists |
 | Incremental scan, change detection, visibility bound and its fallback | `crates/phairdlna-core/tests/catalogue_incremental.rs` | planned (M2) |
 | Media probing and quarantine | `crates/phairdlna-core/tests/catalogue_metadata.rs`, `crates/phairdlna-core/tests/media_sandbox.rs` | planned (F-10, F-11) |
-| Scanner and indexer unit tests | `crates/phairdlna-core/src/catalogue/scanner/mod.rs`, `.../scanner/walk.rs`, `.../identifier.rs`, `.../update_id.rs` (inline `#[cfg(test)]` modules) | exists; `.../index.rs` is planned |
+| Scanner and indexer unit tests | `crates/phairdlna-core/src/catalogue/scanner/mod.rs`, `.../scanner/walk.rs`, `.../identifier.rs`, `.../update_id.rs` (inline `#[cfg(test)]` modules) | exists; the index is `.../catalogue/index/` and exists (M2.9) |
 | Throughput and latency benchmarks | `crates/phairdlna-bench/benches/indexing.rs`, `.../browse.rs`, `.../index_scan.rs`, `.../large_catalogue.rs` | planned |
 | Removable-volume behaviour | `qa/device-matrix.toml` | planned |
 
@@ -422,11 +425,13 @@ size and worker limits) and the platform trait for volume identity and volume ev
 These decisions are implemented and covered by a test. The one marked **[owner decision]** changes a
 documented behaviour and is reported to the owner with this work package.
 
-**D-01 — The catalogue of M1.9 lives in memory; the index on disk is not part of it (ADR-0006, FUN-009).**
-The catalogue is built from a scan, kept in memory and answered from there. Nothing is written to a data
-directory, so there is no index to rebuild, no index to corrupt and no index format to keep stable — and the
-criterion of a rebuild (AC-02) has nothing to rebuild yet. The scan is the only way the catalogue is filled,
-and it happens when the owner asks for it (`catalogue scan`) or when the server starts. *Implemented.*
+**D-01 — The catalogue lives in memory; the index on disk is its cache (ADR-0006, FUN-009).**
+The catalogue is built from a scan, kept in memory and answered from there. The index on disk holds a copy
+of that catalogue: it is written after every read of the library and read when the server starts. It is a
+cache and not a source of truth — the files of the user are the truth — so it may be deleted at any time and
+the library is then read again. The scan is the only way the catalogue is filled, and it happens when the
+owner asks for it (`catalogue scan`) or when the server starts. *Implemented in M2.9: the index lives in
+`crates/phairdlna-core/src/catalogue/index/`.*
 
 > **The scope of M1.9 and the requirements it leaves open.** The owner defined the scope of
 > M1.9 as the scanner, the opaque identifiers and the browse over one root; the index on
@@ -437,7 +442,13 @@ and it happens when the owner asks for it (`catalogue scan`) or when the server 
 > The owner decided on 2026-11-16 (**DEC-037**) that they **move to M2**, where the rest of
 > the index work lives (`ROADMAP.md` § M2, step M2.9), together with the SQLite index of
 > ADR-0006. The catalogue of M1 is clean and in memory; that is the accepted baseline of
-> M1. Nothing in this document reports the three requirements as done.
+> M1.
+>
+> **M2.9 closed the three requirements.** The step M2.9 of 2026-11-17 delivered the index on disk:
+> `FUN-008`, `FUN-009` and `FUN-010` are implemented and proven by
+> `crates/phairdlna-core/tests/catalogue_rebuild.rs` and
+> `crates/phairdlna-cli/tests/catalogue_index.rs`. The incremental scan (AC-08) and the change events
+> of the filesystem (AC-17) are still open and are not part of this step.
 
 **D-02 — The identifier of an object is the hash of the volume, the root key and the relative identity
 (INT-062, ADR-0007). [owner decision]** The owner directed blake3; the hash input and the length are
@@ -462,10 +473,11 @@ identifier of its container. *Implemented.*
 The identifier of the whole catalogue is not a hash — a hash is not monotonic — but a counter that is
 raised whenever the catalogue of that library changes. The value therefore never decreases while the server
 runs, and it changes whenever the catalogue changes: a file that was added, a file that was removed and a
-file whose content changed all raise it. **The deviation:** the counter is not written to the disk, so it
-starts again after a restart. `INT-037` asks for a value that is monotonically non-decreasing; the
-persistence that would carry it over a restart belongs to the index (`FUN-009`, `ADR-0006`) and is therefore
-open. *Implemented with the stated deviation.*
+file whose content changed all raise it. **The deviation of M1.9 is closed:** the index writes the
+identifier and the fingerprint of the catalogue down, so the identifier of a catalogue that did not change
+is the same after a restart, and the identifier of a catalogue that changed is higher than every identifier
+that was handed out before. *Implemented
+(`crates/phairdlna-core/tests/catalogue_rebuild.rs::the_identifier_of_the_catalogue_survives_a_restart`).*
 
 **D-06 — A browse reads nothing from the disk (PERF-008, FUN-008).** The browse path goes through the
 `ContentSource` trait, which the in-memory catalogue implements; no file, directory or index is opened while
@@ -499,6 +511,31 @@ the document model and is fixed together with the index (M2).*
 shows; the server cannot deliver it, so the document names no format for it. The rule that a document must
 not name a format the server does not serve is unchanged.
 
+**D-12 — The index has five tables (FUN-009).** The tables `objects`, `containers`, `roots` and
+`update_id` hold the objects of the tree, the structure of the containers, the roots of the library and the
+identifier of the catalogue. The fifth table, `container_children`, holds the membership of a container: a
+file may live in a folder *and* in a playlist, and a playlist gives its entries a title of its own, so the
+membership cannot be read from the parent of the object alone.
+
+**D-13 — The reader of the index has a connection of its own (FUN-008).** The index has a connection that
+writes and a connection that reads, and the journal of the database is the write-ahead log. The whole
+catalogue is written in one transaction, so a reader sees the catalogue of before or the catalogue of now,
+and never a mixture of the two. The connection that reads may not write at all.
+
+**D-14 — SQLite is compiled into the server (ADR-0006, DEPENDENCY-LICENSE-REVIEW § 5.3).** The binding
+`rusqlite` is used with the feature `bundled`: the SQLite of the system is neither used nor needed, and the
+support of extensions is switched off, so the server cannot load code into its own database. The price is a
+C compiler at the time of the build; the consequence for `PLT-009` is recorded in the dependency review.
+
+**D-15 — The file of the index belongs to the user alone (SEC-095).** The file is created with the
+permissions 600 and the directory that holds it with the permissions 700. The index holds the paths and the
+names of the files of the user, and no other account of the machine may read it.
+
+**D-16 — The server takes the catalogue of the index at the start (FUN-008, FUN-009).** When the index
+holds a catalogue, the server serves it at once and reads the library again in the background; when the
+index holds nothing, the library is read before the socket is opened. A client therefore never sees an
+empty server because the index is empty, and a restart does not cost a full scan.
+
 **What is verified, and what is not.** Every criterion of § 10 is listed. A criterion
 that is *implemented* has a test that fails when the behaviour breaks; a criterion
 that is *partly implemented* says what is missing; a criterion that is **NOT RUN**
@@ -506,14 +543,14 @@ names the reason, because a skip is never a pass.
 
 | Criterion | Result | Where |
 | --- | --- | --- |
-| AC-01 (a browse during a scan) | **NOT RUN** — M1.9 scans once and synchronously; there is no scan to run beside a browse. The criterion belongs to the event-driven scanner (M2) |
-| AC-02 (the index is deleted and rebuilt) | **NOT RUN** — M1.9 has no index (D-01) |
-| AC-03 (a corrupted index) | **NOT RUN** — M1.9 has no index (D-01) |
-| AC-04 (the identifiers survive a rebuild) | partly implemented — the identifiers are the same after a second scan and after the library has been moved (`crates/phairdlna-core/tests/catalogue_identifiers.rs`); the *rebuild* of an index is M2 (D-01) |
+| AC-01 (a browse during a scan) | implemented | `crates/phairdlna-core/tests/catalogue_rebuild.rs::a_browse_during_a_rescan_sees_the_previous_catalogue` — the reader has a connection of its own and the writer writes the whole catalogue in one transaction, so a browse during a rescan sees the catalogue of before or the catalogue of now, and never a mixture |
+| AC-02 (the index is deleted and rebuilt) | implemented | `crates/phairdlna-core/tests/catalogue_rebuild.rs::a_deleted_index_is_built_again` — a deleted index is created again and the library is read again; the media of the user is never touched |
+| AC-03 (a corrupted index) | implemented | `crates/phairdlna-core/tests/catalogue_rebuild.rs::a_damaged_index_is_moved_aside_and_rebuilt`, `::an_index_of_another_schema_is_moved_aside`, `crates/phairdlna-cli/tests/catalogue_index.rs::a_damaged_index_does_not_stop_the_daemon` — the damaged file is moved aside, a new index takes its place, the library is read again, and the daemon says so in the log and in the status |
+| AC-04 (the identifiers survive a rebuild) | implemented | `crates/phairdlna-core/tests/catalogue_identifiers.rs`, `crates/phairdlna-core/tests/catalogue_rebuild.rs::the_catalogue_survives_a_restart_of_the_server` — the identifiers are the same after a second scan, after the library has been moved and after the catalogue was written into the index and read back |
 | AC-05 (a hard link is one file) | implemented | `crates/phairdlna-core/tests/catalogue_identifiers.rs::a_hard_link_is_not_a_second_object` |
 | AC-06 (the metadata of the file) | **NOT RUN** — no media parser exists yet; the catalogue reads the format, the size and the moment of the change, and nothing else (F-10, F-11) |
 | AC-07 (a file no parser can read) | **NOT RUN** — no media parser exists yet (F-10, F-11) |
-| AC-08 (the incremental rescan) | **NOT RUN** — M1.9 has no index and no incremental scan (M2) |
+| AC-08 (the incremental rescan) | partly implemented — the catalogue is written into the index and read back (`crates/phairdlna-core/tests/catalogue_rebuild.rs`), but the index is not yet used to skip the files that did not change; the incremental scan itself is the rest of M2 |
 | AC-09 (100 000 files indexed) | **NOT RUN** — a benchmark at the tested envelope; no measurement has been taken (PERF-004) |
 | AC-10 (the first page of a large container) | partly implemented — the paging of a container is implemented and tested (`crates/phairdlna-core/tests/content_directory.rs`); the measurement at 10 000 children is **NOT RUN** (PERF-009) |
 | AC-11 (a browse reads no directory) | implemented | `crates/phairdlna-core/tests/catalogue_index.rs::a_browse_reads_nothing_from_the_disk` |
@@ -521,7 +558,7 @@ names the reason, because a skip is never a pass.
 | AC-13 (the memory envelope) | **NOT RUN** — a measurement at four times the envelope; no measurement has been taken (PERF-012) |
 | AC-14 (a subtree that cannot be read) | partly implemented — the folder is reported in the diagnostics (`crates/phairdlna-core/tests/media_diagnostics.rs`); the list of quarantined subtrees that need consent does not exist yet |
 | AC-15 (a removable volume) | **NOT RUN** — needs the volume identity and the volume watcher of the platform adapter (F-13) |
-| AC-16 (nothing is written) | implemented | `crates/phairdlna-core/tests/media_roots.rs::the_scanner_never_writes_to_the_library` |
+| AC-16 (nothing is written) | implemented | `crates/phairdlna-core/tests/media_roots.rs::the_scanner_never_writes_to_the_library`, `crates/phairdlna-core/tests/catalogue_rebuild.rs::the_media_of_the_library_is_never_written_to`, `crates/phairdlna-cli/tests/catalogue_index.rs::the_daemon_never_writes_to_the_media` |
 | AC-17 (a change event) | **NOT RUN** — the watcher of the platform layer is M2 (FUN-025) |
 
 ### 12.2 Open questions
