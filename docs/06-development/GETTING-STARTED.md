@@ -2,12 +2,16 @@
 
 Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Documentation Reviewer
 
-PhairDLNA is currently a **Rust workspace scaffold, not a working DLNA server**. The
-requirements are written; the implementation has not started. This page helps you
-build the project, run the gates and find your way around the code.
+PhairDLNA is an **actively implemented Rust DLNA MediaServer**, not merely a
+workspace scaffold. The headless daemon already handles real network requests
+in automated socket-level integration tests. The optional local administration
+surface and a macOS menu-bar front end also exist.
 
-If you only want to *use* the product, it does not exist yet — see
-`../07-project/ROADMAP.md` for the plan and `../07-project/STATUS.md` for the state.
+**It is not release-ready**: no real TV/device interoperability test, long-running
+soak test or complete macOS accessibility/usability acceptance is documented.
+See [ROADMAP](../07-project/ROADMAP.md) and [STATUS](../07-project/STATUS.md)
+for the evidence and current limitations. This guide is for developers; there
+is no independently validated end-user installer yet.
 
 ---
 
@@ -34,8 +38,10 @@ cargo --version
 rustc --version
 ```
 
-You do **not** need a C compiler for the scaffold; the crates that need one arrive
-with the implementation.
+The current workspace uses bundled SQLite through `rusqlite`. Building this
+dependency requires a C compiler/toolchain appropriate for the target platform.
+This is a **build-time** requirement; the bundled SQLite runtime does not require
+users to install a separate SQLite library.
 
 ---
 
@@ -69,14 +75,25 @@ More commands, including the licence, advisory, link and size gates, are in
 
 ---
 
-## 4. Run the scaffold
+## 4. Run the current CLI and daemon
 
 ```bash
-cargo run -p phairdlna-cli
+cargo run -p phairdlna-cli -- --help
+cargo run -p phairdlna-cli -- setup
+cargo run -p phairdlna-cli -- config validate
+cargo run -p phairdlna-cli -- serve
 ```
 
-It prints a short status banner and exits. It deliberately does **not** start a
-server: the network listener arrives with the implementation of F-01 and later.
+`setup` asks for the server name, media folders and login-start preference,
+then writes validated configuration. `serve` starts the real foreground DLNA
+server, including HTTP and SSDP listeners, provided the configuration and
+network permissions allow it. The CLI also supports `diagnostics`,
+`config explain`, `service install/start/stop/status/uninstall` and
+catalogue commands. Run `--help` for the exact current command syntax.
+
+The native macOS menu-bar app and local web UI are implemented but are **not**
+yet accepted as complete GUI onboarding experiences. Do not mistake socket
+integration tests for proof on a physical television.
 
 ---
 
