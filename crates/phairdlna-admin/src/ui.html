@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PhairDLNA Administration</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --badge-expert: #a855f7;
+      --badge-standard: #38bdf8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 { font-size: 1.5rem; display: flex; align-items: center; gap: 8px; }
+    .badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-online { background: #14532d; color: #4ade80; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+    .card-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; }
+    .card-value { font-size: 1.35rem; font-weight: 700; }
+    .actions { display: flex; gap: 12px; margin-bottom: 28px; }
+    button {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+    button:hover { background: var(--primary-hover); }
+    button.secondary { background: var(--border); color: var(--text); }
+    button.secondary:hover { background: #475569; }
+    .toggle-group {
+      display: inline-flex;
+      background: #020617;
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .toggle-btn {
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 6px 14px;
+      cursor: pointer;
+    }
+    .toggle-btn.active { background: var(--primary); color: #000; font-weight: 700; }
+    .setting-item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .setting-info { flex: 1; }
+    .setting-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .setting-label { font-weight: 600; font-size: 0.95rem; }
+    .setting-key { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); }
+    .setting-summary { font-size: 0.85rem; color: #cbd5e1; }
+    .setting-tooltip {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      background: #090d16;
+      padding: 6px 10px;
+      border-radius: 4px;
+      border-left: 3px solid var(--primary);
+    }
+    .tier-badge {
+      font-size: 0.7rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .tier-standard { background: #0369a1; color: #bae6fd; }
+    .tier-expert { background: #581c87; color: #e9d5ff; }
+    .setting-val { font-family: monospace; font-size: 0.85rem; color: #38bdf8; min-width: 120px; text-align: right; }
+    #notice { padding: 12px; border-radius: 6px; margin-bottom: 16px; display: none; }
+    .notice-success { background: #14532d; color: #86efac; border: 1px solid #22c55e; }
+    .notice-error { background: #7f1d1d; color: #fca5a5; border: 1px solid #ef4444; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>PhairDLNA <span class="badge badge-online">Active</span></h1>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Local Administration & Settings Inspector</p>
+    </div>
+    <div style="font-size: 0.85rem; text-align: right; color: var(--text-muted);">
+      <div>Loopback Security Active</div>
+      <div id="stat-version">v0.0.0</div>
+    </div>
+  </header>
+
+  <div id="notice"></div>
+
+  <section class="grid">
+    <div class="card">
+      <div class="card-title">Catalogue Objects</div>
+      <div class="card-value" id="stat-objects">-</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Active Media Streams</div>
+      <div class="card-value" id="stat-streams">-</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Uptime</div>
+      <div class="card-value" id="stat-uptime">-</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Shared Roots</div>
+      <div class="card-value" id="stat-roots">-</div>
+    </div>
+  </section>
+
+  <section class="actions">
+    <button id="btn-rescan" onclick="doRescan()">↻ Read Library Again</button>
+    <button class="secondary" onclick="exportDiagnostics()">⬇ Export Diagnostic Report</button>
+  </section>
+
+  <section class="card" style="margin-bottom: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2 style="font-size: 1.15rem;">Configuration & Settings</h2>
+      <div class="toggle-group">
+        <button id="btn-std" class="toggle-btn active" onclick="setTier(false)">Standard Mode</button>
+        <button id="btn-exp" class="toggle-btn" onclick="setTier(true)">Expert Mode ⚙</button>
+      </div>
+    </div>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;" id="tier-desc">
+      Showing standard everyday settings with simple language. Switch to expert mode for performance, TTL, and cache tuning.
+    </p>
+    <div id="settings-list"></div>
+  </section>
+
+  <script>
+    let csrfToken = "";
+    let showExpert = false;
+
+    async function apiFetch(path, options = {}) {
+      const headers = options.headers || {};
+      headers["X-Phair-Admin"] = "1";
+      if (csrfToken && options.method && options.method !== "GET") {
+        headers["X-Phair-Admin-Csrf"] = csrfToken;
+      }
+      const res = await fetch(path, { ...options, headers });
+      const newCsrf = res.headers.get("x-phairdlna-admin-csrf");
+      if (newCsrf) csrfToken = newCsrf;
+      return res;
+    }
+
+    function showNotice(msg, ok = true) {
+      const n = document.getElementById("notice");
+      n.textContent = msg;
+      n.className = ok ? "notice-success" : "notice-error";
+      n.style.display = "block";
+      setTimeout(() => { n.style.display = "none"; }, 5000);
+    }
+
+    async function loadStatus() {
+      try {
+        const res = await apiFetch("/api/status");
+        if (!res.ok) throw new Error("Status failed (" + res.status + ")");
+        const data = await res.json();
+        document.getElementById("stat-version").textContent = "v" + (data.version || "0.0.0");
+        document.getElementById("stat-objects").textContent = data.catalogue_objects ?? 0;
+        document.getElementById("stat-streams").textContent = data.active_streams ?? 0;
+        const uptimeMins = Math.floor((data.uptime_seconds || 0) / 60);
+        document.getElementById("stat-uptime").textContent = uptimeMins + " min";
+        document.getElementById("stat-roots").textContent = (data.roots || []).length;
+      } catch (err) {
+        showNotice("Could not reach PhairDLNA: " + err.message, false);
+      }
+    }
+
+    async function loadSettings() {
+      try {
+        const res = await apiFetch("/api/config/explain?expert=" + (showExpert ? "1" : "0"));
+        if (!res.ok) return;
+        const list = await res.json();
+        renderSettings(list);
+      } catch (e) {
+        console.error("Failed to load settings registry", e);
+      }
+    }
+
+    function renderSettings(items) {
+      const container = document.getElementById("settings-list");
+      container.innerHTML = "";
+      items.forEach(item => {
+        const el = document.createElement("div");
+        el.className = "setting-item";
+        const isExp = item.tier === "expert";
+        el.innerHTML = `
+          <div class="setting-info">
+            <div class="setting-header">
+              <span class="setting-label">${item.label}</span>
+              <span class="tier-badge ${isExp ? 'tier-expert' : 'tier-standard'}">${item.tier}</span>
+              <span class="setting-key">${item.key}</span>
+            </div>
+            <div class="setting-summary">${item.summary}</div>
+            <div class="setting-tooltip">💡 <strong>Help & Tip:</strong> ${item.tooltip}</div>
+          </div>
+          <div class="setting-val">${item.default_value}</div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    function setTier(expert) {
+      showExpert = expert;
+      document.getElementById("btn-std").className = "toggle-btn" + (!showExpert ? " active" : "");
+      document.getElementById("btn-exp").className = "toggle-btn" + (showExpert ? " active" : "");
+      document.getElementById("tier-desc").textContent = showExpert 
+        ? "Expert mode active: displaying internal socket TTL, queue limits, symlink traversal rules and database tuning."
+        : "Standard mode active: displaying clean everyday media and server options with plain-language explanations.";
+      loadSettings();
+    }
+
+    async function doRescan() {
+      try {
+        const res = await apiFetch("/api/catalogue/rescan", { method: "POST" });
+        if (!res.ok) throw new Error("Server responded with code " + res.status);
+        const data = await res.json();
+        showNotice("Library rescanned successfully! Found " + data.objects + " objects.");
+        loadStatus();
+      } catch (err) {
+        showNotice("Rescan failed: " + err.message, false);
+      }
+    }
+
+    async function exportDiagnostics() {
+      try {
+        const res = await apiFetch("/api/diagnostics");
+        if (!res.ok) throw new Error("Diagnostics failed (" + res.status + ")");
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "phairdlna-diagnostics.json";
+        a.click();
+        window.URL.revokeObjectURL(url);
+        showNotice("Diagnostic report exported (anonymized for support).");
+      } catch (err) {
+        showNotice("Diagnostics export failed: " + err.message, false);
+      }
+    }
+
+    loadStatus();
+    loadSettings();
+    setInterval(loadStatus, 5000);
+  </script>
+</body>
+</html>

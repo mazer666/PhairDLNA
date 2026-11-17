@@ -24,6 +24,9 @@ use crate::json::Json;
 /// The largest body the surface reads. The surface has no body to read.
 const BODY_BYTES: usize = 4096;
 
+/// The embedded single-page web administration UI.
+const UI_HTML: &str = include_str!("ui.html");
+
 /// What the handlers of the surface share.
 pub struct AdminState {
     /// The server the surface asks for its answers.
@@ -57,9 +60,12 @@ impl AdminState {
 /// (`SEC-071`, `OPS-020`).
 pub fn router(state: Arc<AdminState>) -> Router {
     Router::new()
+        .route("/", get(ui_index))
+        .route("/index.html", get(ui_index))
         .route("/api/status", get(status))
         .route("/api/catalogue/rescan", post(rescan))
         .route("/api/diagnostics", get(diagnostics))
+        .route("/api/config/explain", get(config_explain))
         .fallback(not_found)
         .layer(DefaultBodyLimit::max(BODY_BYTES))
         .layer(axum::middleware::from_fn_with_state(
@@ -67,6 +73,50 @@ pub fn router(state: Arc<AdminState>) -> Router {
             guard::enforce,
         ))
         .with_state(state)
+}
+
+/// Serves the embedded web administration interface.
+async fn ui_index(State(state): State<Arc<AdminState>>) -> Response {
+    let mut response = UI_HTML.into_response();
+    response.headers_mut().insert(
+        axum::http::header::CONTENT_TYPE,
+        axum::http::HeaderValue::from_static("text/html; charset=\"utf-8\""),
+    );
+    if let Ok(value) = HeaderValue::from_str(&state.guard.csrf_token()) {
+        response.headers_mut().insert(
+            axum::http::HeaderName::from_static("x-phairdlna-admin-csrf"),
+            value,
+        );
+    }
+    response
+}
+
+/// Answers the explanation and documentation of settings.
+async fn config_explain(
+    State(state): State<Arc<AdminState>>,
+    request: axum::extract::Request,
+) -> Response {
+    let expert = request
+        .uri()
+        .query()
+        .map(|q| q.contains("expert=1") || q.contains("expert=true"))
+        .unwrap_or(false);
+    let settings = phairdlna_core::config::schema::registry();
+    let filtered: Vec<Json> = settings
+        .into_iter()
+        .filter(|s| expert || s.tier == phairdlna_core::config::schema::SettingTier::Standard)
+        .map(|s| {
+            Json::map(vec![
+                ("key".to_owned(), Json::text(s.key)),
+                ("label".to_owned(), Json::text(s.label)),
+                ("tier".to_owned(), Json::text(s.tier.as_str())),
+                ("summary".to_owned(), Json::text(s.summary)),
+                ("tooltip".to_owned(), Json::text(s.tooltip)),
+                ("default_value".to_owned(), Json::text(s.default_value)),
+            ])
+        })
+        .collect();
+    json_response(Json::list(filtered), &state.guard)
 }
 
 /// Answers the state of the server.
