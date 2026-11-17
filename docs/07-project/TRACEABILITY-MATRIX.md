@@ -246,13 +246,13 @@ that was actually observed; an empty cell means *not implemented*, not *passed*.
 | `PERF-013` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
 | `PERF-014` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
 | `PERF-015` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
-| `PLT-001` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
+| `PLT-001` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | `scripts/check-crate-boundaries.sh` — core crate contains no OS-specific dependencies and dependency direction is strictly one-way (QG-28) | Verified |
 | `PLT-002` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
-| `PLT-003` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
+| `PLT-003` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | `crates/phairdlna-core/src/platform/traits.rs`, `crates/phairdlna-core/src/platform/unsupported.rs` — OS-specific behavior is isolated behind documented traits with explicit Unsupported fallbacks | Verified |
 | `PLT-004` | `F-15` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | `crates/phairdlna-mac/tests/apple_silicon_native.rs::application_target_matches_host_architecture` — native Apple Silicon (aarch64-apple-darwin) execution without Rosetta translation requirement | Verified |
 | `PLT-005` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
 | `PLT-006` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
-| `PLT-007` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
+| `PLT-007` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | `crates/phairdlna-core/tests/path_containment.rs::a_traversal_attempt_names_no_object`, `crates/phairdlna-core/tests/path_containment.rs::a_traversal_attempt_is_never_served`, `crates/phairdlna-cli/tests/windows_manifest.rs` — path traversal attempts using both slash and backslash separators are rejected and long paths supported | Verified |
 | `PLT-008` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
 | `PLT-009` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
 | `PLT-010` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | `crates/phairdlna-core/tests/protocol_parity.rs::device_description_bytes_are_deterministic`, `::scpd_documents_are_identical_across_invocations`, `::soap_envelope_payload_and_ordering_are_deterministic`, `::didl_lite_item_ordering_and_xml_is_deterministic` — protocol behavior, ordering and identifiers are deterministic and byte-identical across platforms | Verified |

@@ -345,13 +345,13 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `PLT-001` | Not depend on any OS-specific crate and shall compile on macOS | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-001` | Not depend on any OS-specific crate and shall compile on macOS | MUST | `F-22` | M0 | Build matrix | Verified |
 | `PLT-002` | Provide a build matrix covering macOS (arm64, x86_64), Linux (x86_64) and Windows (x86_64). | MUST | `F-22` | M0 | Build matrix | Baseline |
-| `PLT-003` | All OS-specific behaviour shall be reachable through a documented trait with a default… | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-003` | All OS-specific behaviour shall be reachable through a documented trait with a default… | MUST | `F-22` | M0 | Build matrix | Verified |
 | `PLT-004` | Support macOS Apple Silicon natively without a Rosetta translation requirement. | MUST | `F-15` | M0 | Build matrix | Verified |
 | `PLT-005` | Detect the case sensitivity, the Unicode normalisation behaviour and the volume identity of… | MUST | `F-22` | M0 | Build matrix | Baseline |
 | `PLT-006` | Run correctly when the user's home directory or a media root contains spaces | MUST | `F-22` | M0 | Build matrix | Baseline |
-| `PLT-007` | Windows path handling shall support long paths and shall reject path traversal attempts using… | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-007` | Windows path handling shall support long paths and shall reject path traversal attempts using… | MUST | `F-22` | M0 | Build matrix | Verified |
 | `PLT-008` | Not expose absolute file system paths to clients. | MUST | `F-22` | M0 | Build matrix | Baseline |
 | `PLT-009` | Not require a C toolchain beyond what the platform already provides | SHOULD | `F-22` | M0 | Build matrix | Baseline |
 | `PLT-010` | Behave identically on all platforms with respect to protocol behaviour | MUST | `F-22` | M0 | Build matrix | Verified |

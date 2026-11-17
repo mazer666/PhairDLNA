@@ -1039,9 +1039,27 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " the macOS application bundle installs no hidden privileged helper or launchd agent silently",
         "Verified",
     ),
+    "PLT-001": (
+        "`scripts/check-crate-boundaries.sh`"
+        " — core crate contains no OS-specific dependencies and dependency direction is strictly one-way (QG-28)",
+        "Verified",
+    ),
+    "PLT-003": (
+        "`crates/phairdlna-core/src/platform/traits.rs`,"
+        " `crates/phairdlna-core/src/platform/unsupported.rs`"
+        " — OS-specific behavior is isolated behind documented traits with explicit Unsupported fallbacks",
+        "Verified",
+    ),
     "PLT-004": (
         "`crates/phairdlna-mac/tests/apple_silicon_native.rs::application_target_matches_host_architecture`"
         " — native Apple Silicon (aarch64-apple-darwin) execution without Rosetta translation requirement",
+        "Verified",
+    ),
+    "PLT-007": (
+        "`crates/phairdlna-core/tests/path_containment.rs::a_traversal_attempt_names_no_object`,"
+        " `crates/phairdlna-core/tests/path_containment.rs::a_traversal_attempt_is_never_served`,"
+        " `crates/phairdlna-cli/tests/windows_manifest.rs`"
+        " — path traversal attempts using both slash and backslash separators are rejected and long paths supported",
         "Verified",
     ),
     "PLT-010": (
