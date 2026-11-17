@@ -20,6 +20,7 @@ pub mod address;
 pub mod admin;
 pub mod guard;
 pub mod http;
+pub mod index;
 pub mod library;
 pub mod limit;
 pub mod log;

@@ -1,6 +1,6 @@
 # Project status — PhairDLNA
 
-Status: **Baseline approved (2026-11-15) · M1.11 implemented · M2.1 implemented · M2.2 implemented · M2.3 implemented · M2.4 implemented (partly) · M2.5 implemented (partly) · M2.6 implemented (partly)** · Compiled: 2026-11-16
+Status: **Baseline approved (2026-11-15) · M1.11 implemented · M2.1 implemented · M2.2 implemented · M2.3 implemented · M2.4 implemented (partly) · M2.5 implemented (partly) · M2.6 implemented (partly) · M2.9 implemented** · Compiled: 2026-11-17
 Owner role: Lead / Project Manager
 
 ---
@@ -195,6 +195,42 @@ rule of the workspace says that no program of the workspace starts another one, 
 over the four crates (SEC-TH-11). The mechanics of the service are the decision of the
 installation of F-13 (M2.7). The menu shows that the server is stopped and stops there.
 
+**The catalogue of the library now lives on disk as well: M2.9 — the index.** The
+catalogue is still built in memory and answered from there, but a copy of it is written
+into a **SQLite database** that belongs to the user alone: the file is created with the
+permissions 600, and the directory that holds it with 700. The path of the file is the
+setting `library.database_path`, and the data directory of the user holds it when the
+setting is missing.
+
+The index has **two connections**: one that writes and one that reads, and the journal
+of the database is the write-ahead log. The whole catalogue is written in **one
+transaction**, so a browse during a rescan sees the catalogue of before or the catalogue
+of now, and never a mixture of the two (`FUN-008`). The server **takes the catalogue of
+the index at its start** and reads the library again in the background, so a restart does
+not cost a full scan and a client never meets an empty server because the index is empty
+(`FUN-009`).
+
+A file that is **damaged** — bytes that are not a database, a database that fails the
+integrity check, or a database of another schema — is moved aside under the name
+`.corrupt.<moment>`, a new index takes its place, the library is read again, and the
+daemon says so **in the log and in the status of the server** (`FUN-010`). The index is a
+cache: deleting it costs a re-scan and nothing else, and the media of the user is never
+written to.
+
+The evidence is `crates/phairdlna-core/tests/catalogue_rebuild.rs` and
+`crates/phairdlna-cli/tests/catalogue_index.rs`; the decisions are D-01, D-05 and
+D-12 to D-16 of `../03-features/F-09-catalogue-index.md`.
+
+**One consequence of the index is on the record.** SQLite is compiled into the server
+(the binding `rusqlite` with the feature `bundled`, as ADR-0006 and the dependency review
+decide), so that the server does not depend on the SQLite of the system and cannot load
+an extension into its own database. The price is a **C compiler at the time of the
+build**, which sits in tension with `PLT-009` ("no C toolchain beyond what the platform
+already provides") and with the claim of the workspace that the core is free of a C
+compiler. The decision itself is the owner's and was taken in the dependency review; the
+consequence is recorded here and in `../04-security/DEPENDENCY-LICENSE-REVIEW.md`, and it
+is the one thing of this step that the owner may want to overrule.
+
 **Two parts of M2.4 and M2.5 are still open, and they are named.** The **source offer**
 (`OPS-016`, `SEC-070`) does not exist: the archive, the route and the build step that produces
 the artefact are not written, and the open question 2 of F-14 asks the owner how the archive is
@@ -214,8 +250,9 @@ with the child.
 **What is still missing.** The IPv6 discovery, the interface selection of the sending
 socket (the daemon has one address), the rate limiter of the answers, the video posters
 (the baseline ships no video decoder), the sandbox child of the picture pipeline (M-06,
-ADR-0011), the transfer limits and the index on disk. Each of them is named in the
-requirement index with the state that is true today.
+ADR-0011), the transfer limits, the incremental scan of the index and the change events of the
+filesystem. Each of them is named in the requirement index with the state that is true
+today.
 
 The milestone before it, **M1.9 — the catalogue over one root**, is unchanged: a scanner
 that reads a configured root, opaque blake3 identifiers that survive a rescan and a move
@@ -256,7 +293,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | Open decisions | **12 awaiting the owner** — OD-05 (minimum macOS version) was decided on 2026-11-15 | `OPEN-DECISIONS.md` |
 | Glossary | **Complete** | The protocol, product, platform, security and project vocabulary — `../01-product/GLOSSARY.md` |
 | Research inputs | **Complete** | The briefs the specifications cite — `../09-research/` |
-| Implementation | **M0 done, M1.1–M1.11 implemented, M2.1, M2.2 and M2.3 implemented, M2.4, M2.5 and M2.6 in part** | The four crates exist with the boundary enforced; the configuration, the platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root, the catalogue over several roots with the memory of their volumes, the live daemon, the picture pipeline of the library, the access-control list and the local administration surface are implemented; the source offer, the plain-language first-run output and the trusted-client profiles are not; **no device test has been performed**, so no milestone exit criterion is met yet |
+| Implementation | **M0 done, M1.1–M1.11 implemented, M2.1, M2.2, M2.3 and M2.9 implemented, M2.4, M2.5 and M2.6 in part** | The four crates exist with the boundary enforced; the configuration, the platform traits, the discovery protocol, the device description and the service descriptions, the SOAP dispatcher with the ContentDirectory and ConnectionManager services, the DIDL-Lite generation, the HTTP media delivery, the catalogue over one root, the catalogue over several roots with the memory of their volumes, the live daemon, the picture pipeline of the library, the access-control list, the local administration surface and the catalogue index on disk are implemented; the source offer, the plain-language first-run output and the trusted-client profiles are not; **no device test has been performed**, so no milestone exit criterion is met yet |
 | Device evidence | **None** | Every device row reads `NOT TESTED` |
 | Release | **Not releasable** | `RELEASE-BLOCKERS.md` |
 
@@ -266,15 +303,15 @@ accepted baseline, and the requirement index carries the new milestone.
 
 | Command | Result |
 | --- | --- |
-| `./scripts/local-ci.sh` | **all eleven gates green** (2026-11-16, the run of M2.1): format, clippy, tests, no unsafe, file size, crate boundaries, doc links, licences, bans and sources, advisories, requirement views |
+| `./scripts/local-ci.sh` | **all eleven gates green** (2026-11-17, the run of M2.9): format, clippy, tests, no unsafe, file size, crate boundaries, doc links, licences, bans and sources, advisories, requirement views |
 | `cargo fmt --all -- --check` | clean (it failed before this phase — the CLI entry point was reformatted) |
 | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
-| `cargo test --workspace` | **616 passed, 0 failed, 0 ignored** (2026-11-16, the run of M2.1; 469 before it) |
+| `cargo test --workspace` | **1036 passed, 0 failed, 0 ignored** (2026-11-17, the run of M2.9; 616 at the run of M2.1) |
 | `scripts/check-file-size.sh` | `RESULT: PASS` |
 | `scripts/check-crate-boundaries.sh` | `RESULT: PASS` (3 sibling dependencies across 4 crate manifests) |
 | `cargo deny check licenses` | `licenses ok` (exit 0) |
 | `cargo deny check bans sources` | `bans ok, sources ok` (exit 0) |
-| `cargo audit` | exit 0 — 1509 advisories loaded, 85 dependencies scanned, no finding |
+| `cargo audit` | exit 0 — 1509 advisories loaded, 124 dependencies scanned, no finding |
 | `scripts/check-doc-links.sh` | `RESULT: PASS` (relative links checked) |
 | `scripts/check-no-unsafe.sh` | `RESULT: PASS` (no unsafe code in the tracked Rust files) |
 | `python3 scripts/generate_requirement_views.py --check` | up to date; 346 requirements indexed |

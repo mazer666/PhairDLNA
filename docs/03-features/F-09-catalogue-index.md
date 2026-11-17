@@ -182,6 +182,12 @@ large.
 - **Transactions.** A scan applies its changes in bounded transactions (ARCHITECTURE
   §7); a crash mid-scan leaves the index consistent, not half-updated. Readers use a
   separate connection and see the last committed state.
+- **The file of the index.** The index lives at `library.database_path`, and in the data
+  directory of the user when that setting is missing. The file is created with the
+  permissions `600` and the directory that holds it with `700`: the index holds the
+  paths and the names of the files of the user, and it belongs to the user alone
+  (SEC-095). The setting is refused when it is empty, and the server never writes to a
+  media root (FUN-018).
 - **Volume events.** Mount, unmount and remount are first-class events (PLT-011); the
   affected rows are re-keyed when a volume reappears under a different identity. The
   platform trait supplies volume identity and change notification (platform §6.2 rules 6
@@ -534,7 +540,9 @@ names of the files of the user, and no other account of the machine may read it.
 **D-16 — The server takes the catalogue of the index at the start (FUN-008, FUN-009).** When the index
 holds a catalogue, the server serves it at once and reads the library again in the background; when the
 index holds nothing, the library is read before the socket is opened. A client therefore never sees an
-empty server because the index is empty, and a restart does not cost a full scan.
+empty server because the index is empty, and a restart does not cost a full scan. The file of the index is
+named by the setting `library.database_path`; the data directory of the user holds it when the setting is
+missing.
 
 **What is verified, and what is not.** Every criterion of § 10 is listed. A criterion
 that is *implemented* has a test that fails when the behaviour breaks; a criterion

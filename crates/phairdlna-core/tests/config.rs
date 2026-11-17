@@ -211,3 +211,52 @@ path = "/Users/me/Movies"
     let error = Config::from_str(text, "test").expect_err("the configuration should be refused");
     assert_eq!(error.field_name(), Some("library.roots[1].path"));
 }
+
+/// The positive case: the file of the index may be named.
+#[test]
+fn the_file_of_the_index_may_be_named() {
+    let text = r#"
+schema_version = 1
+
+[library]
+database_path = "/Users/me/.local/share/phairdlna/catalogue.db"
+
+[[library.roots]]
+name = "Films"
+path = "/Users/me/Movies"
+"#;
+    let config = Config::from_str(text, "test").expect("the configuration should be valid");
+    assert_eq!(
+        config.library.database_file(),
+        std::path::PathBuf::from("/Users/me/.local/share/phairdlna/catalogue.db")
+    );
+}
+
+/// The positive case: without a setting the index lies in the data directory.
+#[test]
+fn the_index_lies_in_the_data_directory_without_a_setting() {
+    let config = Config::from_str(VALID, "test").expect("the configuration should be valid");
+    assert_eq!(config.library.database_path, None);
+    assert!(
+        config.library.database_file().ends_with("catalogue.db"),
+        "the index has a name in the data directory of the user: {:?}",
+        config.library.database_file()
+    );
+}
+
+/// The negative case: an empty setting is refused, with the field named.
+#[test]
+fn an_empty_database_path_is_refused() {
+    let text = r#"
+schema_version = 1
+
+[library]
+database_path = "   "
+
+[[library.roots]]
+name = "Films"
+path = "/Users/me/Movies"
+"#;
+    let error = Config::from_str(text, "test").expect_err("the configuration should be refused");
+    assert_eq!(error.field_name(), Some("library.database_path"));
+}

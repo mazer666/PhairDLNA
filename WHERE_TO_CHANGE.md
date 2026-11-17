@@ -42,7 +42,7 @@
 | `crates/phairdlna-core/src/platform/` | The capability traits, the path model, the portable filesystem adapter, the memory of the process (`memory.rs`) and the default implementation | F-08, F-13, F-14, F-15 |
 | `crates/phairdlna-core/src/ssdp/` | The discovery protocol: parsing a search, matching the targets, building the bytes (the **socket** is in `crates/phairdlna-cli/src/serve/ssdp.rs`) | F-01 |
 | `crates/phairdlna-core/src/identity.rs` | The persistent device identity | F-01, F-02 |
-| `crates/phairdlna-core/src/catalogue/` | The catalogue — the model of the items and containers, the scanner of a root, the opaque identifiers, the identity key of a file, the playlists (`playlist.rs`), the subtitle sidecars (`subtitle.rs`), the memory of the volumes of the roots, the assembly of the tree, the sniffer of a file and the registry of the formats the server serves | F-05, F-08, F-09, F-11 |
+| `crates/phairdlna-core/src/catalogue/` | The catalogue — the model of the items and containers, the scanner of a root, the opaque identifiers, the identity key of a file, the playlists (`playlist.rs`), the subtitle sidecars (`subtitle.rs`), the memory of the volumes of the roots, the assembly of the tree, the sniffer of a file, the registry of the formats the server serves and the index of the catalogue on disk (`index/`) | F-05, F-08, F-09, F-11 |
 | `crates/phairdlna-core/src/media/` | The pictures of the library — the discovery of the artwork of a media file (`artwork/`), the pictures that are embedded in it (`id3/`, `mp4/`), the images that lie next to it (`sidecar.rs`), the thumbnail of a photo (`thumbnail.rs`) and the disposable cache of the pictures that were produced (`cache.rs`) | F-10 |
 | `crates/phairdlna-core/src/didl/` | The DIDL-Lite document — the object model, the `protocolInfo`, the value rules, the policy of the document and the writer | F-05, F-11 |
 | `crates/phairdlna-core/src/http/` | The delivery of media over HTTP — the `Range` header, the headers of a media answer, the containment of a media URL and the evaluator of a request | F-06, F-11 |
@@ -50,10 +50,14 @@
 | `crates/phairdlna-core/src/config/` | The typed, validated, versioned configuration | F-12 |
 | `crates/phairdlna-core/src/scheduler/` | The one scheduler of the server — the priority classes, the bounds of the workers and of the queues, the hysteresis of the pressure and the report of the resources | F-18 |
 | `crates/phairdlna-cli/src/lib.rs` | The commands, as pure functions over their arguments | F-13 |
+| `crates/phairdlna-core/src/catalogue/index/` | The index of the catalogue on disk — the schema of the database, the writing of a catalogue, the reading of it back and the recovery from a damaged file | F-09 |
+| `crates/phairdlna-core/tests/catalogue_rebuild.rs` | The index on disk — the round trip, the catalogue during a rescan, the damaged file and the file that belongs to the user alone | F-09 |
+| `crates/phairdlna-cli/tests/catalogue_index.rs` | The index of the running daemon — the write, the restart and the damaged index | F-09 |
 | `crates/phairdlna-cli/src/catalogue.rs` | The catalogue commands — the tree of the library and the document a client receives | F-08, F-09, F-13 |
 | `crates/phairdlna-cli/src/serve/` | The daemon — the start of the server, the HTTP routes, the discovery socket, the library and the watch of the drives, the media of the library, the body of a media answer, the cache of the pictures, the log, the signals and the transfers that run (`transfers.rs`) | F-01, F-02, F-03, F-04, F-06, F-08, F-10, F-13 |
 | `crates/phairdlna-cli/src/serve/admin.rs` | The wiring of the administration surface — the view of the daemon that the surface asks | F-14 |
 | `crates/phairdlna-cli/src/serve/resources.rs` | The scheduler of the daemon — the classes of the work, the hints about the machine and the place of a transfer | F-18 |
+| `crates/phairdlna-cli/src/serve/index.rs` | The index of the catalogue in the daemon — the opening of the file, the catalogue that is read out of it and the warnings that belong to the server | F-09 |
 | `crates/phairdlna-cli/src/main.rs` | The argument parsing and the exit code | F-13 |
 | `crates/phairdlna-core/tests/media_roots.rs` | The acceptance criteria of F-08 for one root | F-08 |
 | `crates/phairdlna-core/tests/media_roots_multiple.rs` | The acceptance criteria of F-08 for more than one root | F-08 |
@@ -117,7 +121,6 @@ visible and so that a contributor can see where their change will land.
 | Planned path | Responsibility | Feature |
 | --- | --- | --- |
 | `crates/phairdlna-core/src/ssdp/interfaces.rs` | The selection of the sending interface and the rate limiter of the answers | F-01 |
-| `crates/phairdlna-core/src/catalogue/index.rs` | The index of the catalogue on disk, the rebuild and the event-driven scan | F-09 |
 | `crates/phairdlna-core/src/platform/` | Platform traits and per-OS implementations | F-08, F-13, F-15 |
 | `crates/phairdlna-core/src/lifecycle/` | Server states, sleep/wake and network recovery | F-13 |
 | `crates/phairdlna-core/src/logging/` | Structured logging and redaction | F-13, F-16 |

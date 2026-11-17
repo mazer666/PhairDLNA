@@ -13,12 +13,12 @@
 
 use std::sync::{Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
-use phairdlna_core::catalogue::index::CatalogueIndex;
 use phairdlna_core::catalogue::{Catalogue, VolumeRegistry, VolumeReport};
 use phairdlna_core::config::{Config, MediaRoot, SymlinkPolicy};
 use phairdlna_core::media::ArtworkFinder;
 use phairdlna_core::platform::{FileSystem, LocalFileSystem};
 
+use super::index::Index;
 use super::log::Logger;
 use super::pictures;
 
@@ -28,8 +28,7 @@ pub struct Library {
     catalogue: Arc<RwLock<Catalogue>>,
     memory: Arc<Mutex<Memory>>,
     pictures: Option<ArtworkFinder>,
-    index: Option<Arc<CatalogueIndex>>,
-    warnings: Arc<Mutex<Vec<String>>>,
+    index: Index,
 }
 
 /// The state the library keeps between two reads of the catalogue.
@@ -44,13 +43,11 @@ struct Memory {
 /// A file the scanner could not read is a warning, not a reason to refuse the
 /// start: the rest of the library is still worth serving (`F-08`).
 pub fn build_library(config: &Config, logger: &Logger) -> Library {
-    let (index, warnings) = open_index(config, logger);
     let library = Library::build_with_index(
         &config.library.roots,
         config.server.symlink_policy,
         &LocalFileSystem,
-        index,
-        warnings,
+        Index::open(config, logger),
     );
     // The pictures are looked for only when the user wants them: a library
     // with many files may switch them off, and then no file of the library is
@@ -67,48 +64,6 @@ pub fn build_library(config: &Config, logger: &Logger) -> Library {
     library
 }
 
-/// Opens the index of the catalogue and says what was wrong with it.
-///
-/// An index that cannot be opened at all is not a reason to refuse the start:
-/// the daemon reads the library as it always did, and the index is written
-/// again at the next read (`FUN-009`, `FUN-010`).
-fn open_index(config: &Config, logger: &Logger) -> (Option<Arc<CatalogueIndex>>, Vec<String>) {
-    let path = config.library.database_file();
-    match CatalogueIndex::open(&path) {
-        Ok(opened) => {
-            let mut warnings = Vec::new();
-            if let Some(repair) = opened.recovery {
-                logger.warn(
-                    "the index of the catalogue was damaged and was moved aside",
-                    &[
-                        ("reason", &repair.reason),
-                        ("file", &repair.moved_to.display().to_string()),
-                    ],
-                );
-                warnings.push(format!(
-                    "the index of the catalogue was damaged and was rebuilt: {} (the damaged file \
-                     was kept as {})",
-                    repair.reason,
-                    repair.moved_to.display()
-                ));
-            }
-            (Some(Arc::new(opened.index)), warnings)
-        }
-        Err(error) => {
-            logger.warn(
-                "the index of the catalogue cannot be used",
-                &[("reason", &error.to_string())],
-            );
-            (
-                None,
-                vec![format!(
-                    "the index of the catalogue cannot be used: {error}"
-                )],
-            )
-        }
-    }
-}
-
 impl Library {
     /// Builds the library and reads the roots.
     ///
@@ -116,7 +71,7 @@ impl Library {
     /// for the first time, and the second read can tell what changed
     /// (`FUN-007`, `PLT-011`).
     pub fn build(roots: &[MediaRoot], policy: SymlinkPolicy, filesystem: &dyn FileSystem) -> Self {
-        Self::build_with_index(roots, policy, filesystem, None, Vec::new())
+        Self::build_with_index(roots, policy, filesystem, Index::empty())
     }
 
     /// Builds the library, and takes the catalogue from the index when it holds
@@ -131,11 +86,10 @@ impl Library {
         roots: &[MediaRoot],
         policy: SymlinkPolicy,
         filesystem: &dyn FileSystem,
-        index: Option<Arc<CatalogueIndex>>,
-        warnings: Vec<String>,
+        index: Index,
     ) -> Self {
         let mut registry = VolumeRegistry::default();
-        let restored = index.as_ref().and_then(|index| index.load().ok().flatten());
+        let restored = index.restored();
         let (catalogue, read) = match restored {
             Some(catalogue) => (catalogue, false),
             None => (
@@ -152,7 +106,6 @@ impl Library {
             })),
             pictures: None,
             index,
-            warnings: Arc::new(Mutex::new(warnings)),
         };
         if read {
             library.write_to_the_index();
@@ -216,7 +169,7 @@ impl Library {
         let outcome = Catalogue::build_with(&roots, policy, filesystem, &mut memory.registry);
         let report = outcome.report;
         let mut catalogue = outcome.catalogue;
-        self.write_catalogue_to_the_index(&mut catalogue);
+        self.index.store(&mut catalogue);
         let mut current = self.write_catalogue();
         *current = catalogue;
         // The finder belongs to the library and not to the scan: the pictures
@@ -238,41 +191,13 @@ impl Library {
     /// a catalogue: a damaged index, an index that cannot be written. They are
     /// shown in the status of the server (`FUN-010`).
     pub fn warnings(&self) -> Vec<String> {
-        self.warnings
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner())
-            .clone()
+        self.index.warnings()
     }
 
     /// Writes the catalogue of the server into the index.
     fn write_to_the_index(&self) {
         let mut catalogue = self.write_catalogue();
-        self.write_catalogue_to_the_index(&mut catalogue);
-    }
-
-    /// Writes a catalogue into the index, if there is one.
-    ///
-    /// The identifier of the catalogue is settled by the index: a catalogue
-    /// that did not change keeps the identifier it had, and a catalogue that
-    /// changed gets one that is higher than every identifier before it
-    /// (`INT-037`).
-    fn write_catalogue_to_the_index(&self, catalogue: &mut Catalogue) {
-        let Some(index) = &self.index else {
-            return;
-        };
-        if let Err(error) = index.store(catalogue) {
-            self.warn(format!(
-                "the catalogue cannot be written into the index: {error}"
-            ));
-        }
-    }
-
-    /// Keeps a warning for the status of the server.
-    fn warn(&self, warning: String) {
-        self.warnings
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner())
-            .push(warning);
+        self.index.store(&mut catalogue);
     }
 
     /// Reads the memory of the volumes.

@@ -298,6 +298,24 @@ fn the_file_of_the_index_belongs_to_the_user_alone() {
         .permissions()
         .mode();
     assert_eq!(mode & 0o777, 0o600, "only the user may read the index");
+
+    // The write-ahead log belongs to the index as well, and it holds the same
+    // paths: it may not be read by anybody else.
+    for entry in fs::read_dir(path.parent().expect("the folder is there"))
+        .expect("the folder is read")
+        .filter_map(|entry| entry.ok())
+    {
+        let name = entry.file_name().to_string_lossy().into_owned();
+        if !name.starts_with("catalogue.db") {
+            continue;
+        }
+        let mode = entry
+            .metadata()
+            .expect("the file is there")
+            .permissions()
+            .mode();
+        assert_eq!(mode & 0o777, 0o600, "{name} may be read by the user alone");
+    }
 }
 
 /// The media of the library is never written to.

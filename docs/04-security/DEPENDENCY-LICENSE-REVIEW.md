@@ -326,6 +326,26 @@ binary, so the server does not depend on the system's SQLite version) and
 public domain. This avoids the question of a system SQLite with unknown version or
 patch level, and it keeps the Windows and Linux builds free of a system dependency.
 
+**What the decision costs, and who owns it.** The `bundled` feature compiles the SQLite
+amalgamation with a **C compiler**, so the build of the workspace needs one. That is in
+tension with the policy of § 1 rule 6 ("no native toolchain dependencies in v1"), with
+`PLT-009` ("shall not require a C toolchain beyond what the platform already provides")
+and with the description of the workspace that the core is free of a C compiler. The rule
+of § 1 rule 6 says that a native dependency is an **owner decision**, and the decision
+was taken for SQLite in ADR-0006 and in § 5.3 of this document; the rule was therefore
+not broken silently, but it was bent. The dependency was **adopted in M2.9** with the
+version `0.42.0` — the version of the table in § 2, whose MSRV of 1.89 is the MSRV of
+the workspace — and with the features `bundled` and without `loadable_extension`; the
+support of extensions stays switched off, so nothing can load code into the index of the
+server.
+
+The consequences that are still open are named here so that the owner may overrule the
+decision: the build of the workspace needs a C compiler, the binary grows by the size of
+the SQLite amalgamation, and the claim of the workspace that the core is free of a C
+compiler is no longer true. The index of the catalogue is the only user of SQLite in the
+project, and it lives in `phairdlna-core` — the crate that was meant to stay portable
+(`QG-28`).
+
 ---
 
 ## 6. Supply-chain controls
@@ -360,5 +380,6 @@ dependency is read, recorded and reviewed by a named person.
 | `symphonia` MPL-2.0 | **Accepted with conditions** (§3) | Security | 2026-11-14 |
 | FFmpeg exclusion | **Accepted** (§1 rule 7) | Security | 2026-11-14 |
 | `image` (the thumbnail decoder) | **Accepted with conditions** (§ 2.4) | Security | 2026-11-16 |
+| `rusqlite` (the index of the catalogue) | **Adopted** in M2.9 — the decision of § 5.3, the version `0.42.0`, `bundled` without `loadable_extension`; the C compiler that the build needs is an owner decision that is recorded and may be overruled | Security | 2026-11-17 |
 
 Every proposal becomes an ADR before the dependency is added to `Cargo.toml`.

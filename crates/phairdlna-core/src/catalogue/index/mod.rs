@@ -20,6 +20,7 @@ mod connection;
 mod load;
 mod permissions;
 mod recovery;
+mod rows;
 mod schema;
 mod store;
 
