@@ -50,6 +50,10 @@ pub enum DesktopRequest {
     OpenPath(PathBuf),
     /// Open several folders.
     OpenPaths(Vec<PathBuf>),
+    /// Prompt user to choose media folders.
+    PickMediaFolders,
+    /// Open the native preferences dialog.
+    ShowPreferences,
     /// Leave the application; the server keeps running.
     Quit,
 }
@@ -190,6 +194,11 @@ impl App {
         self.strings.text("error.cannot_open").to_owned()
     }
 
+    /// The text of a localized key.
+    pub fn localized_text(&self, key: &str) -> String {
+        self.strings.text(key).to_owned()
+    }
+
     /// The short text of the item in the menu bar.
     pub fn badge(&self) -> String {
         self.strings.text("menu.status.badge").to_owned()
@@ -324,9 +333,8 @@ impl App {
                 }
                 ActionOutcome::Nothing
             }
-            MenuAction::OpenPreferences => {
-                ActionOutcome::Request(DesktopRequest::OpenPath(self.config_path.clone()))
-            }
+            MenuAction::OpenPreferences => ActionOutcome::Request(DesktopRequest::ShowPreferences),
+            MenuAction::AddMediaFolders => ActionOutcome::Request(DesktopRequest::PickMediaFolders),
             MenuAction::ExportDiagnostics => {
                 let diag_url = format!("{}/api/diagnostics", self.address.trim_end_matches('/'));
                 ActionOutcome::Request(DesktopRequest::OpenUrl(diag_url))
@@ -352,7 +360,41 @@ impl App {
         crate::ipc::client::read_token(path).ok()
     }
 
-    /// Switches between the short view and the detailed view.
+    /// Adds new media roots to the configuration and saves atomically.
+    pub fn add_media_roots(&mut self, paths: &[PathBuf]) -> Result<(), String> {
+        let mut config = Config::load(&self.config_path).map_err(|e| e.to_string())?;
+        let mut added = false;
+        for path in paths {
+            let path_str = path.to_string_lossy().to_string();
+            let already_there = config
+                .library
+                .roots
+                .iter()
+                .any(|r| r.path.trim_end_matches('/') == path_str.trim_end_matches('/'));
+            if !already_there {
+                let name = path
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .unwrap_or("Media")
+                    .to_owned();
+                config
+                    .library
+                    .roots
+                    .push(phairdlna_core::config::MediaRoot {
+                        name,
+                        path: path_str,
+                        exclude: Vec::new(),
+                        symlink_policy: None,
+                    });
+                added = true;
+            }
+        }
+        if added {
+            config.save(&self.config_path).map_err(|e| e.to_string())?;
+            self.notice = Some(self.strings.text("notice.folders_updated").to_owned());
+        }
+        Ok(())
+    }
     ///
     /// The switch changes no setting of the server and starts no work: it
     /// writes a preference of the application and nothing else (`UX-015`,
@@ -432,8 +474,13 @@ impl App {
         }
     }
 
+    /// The path of the server configuration file.
+    pub fn config_path(&self) -> &std::path::Path {
+        &self.config_path
+    }
+
     /// The paths of the media folders of the configuration.
-    fn media_roots(&self) -> Result<Vec<PathBuf>, String> {
+    pub fn media_roots(&self) -> Result<Vec<PathBuf>, String> {
         let config = Config::load(&self.config_path).map_err(|error| error.to_string())?;
         Ok(config
             .library

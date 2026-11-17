@@ -54,6 +54,7 @@ const EXPECTED_KEYS: &[&str] = &[
     "menu.action.mode_simple",
     "menu.action.open_admin",
     "menu.action.open_folders",
+    "menu.action.add_folders",
     "menu.action.preferences",
     "menu.action.export_diagnostics",
     "menu.action.quit",
@@ -71,8 +72,20 @@ const EXPECTED_KEYS: &[&str] = &[
     "menu.status.stopped",
     "menu.status.transfer",
     "menu.status.uptime",
+    "notice.folders_updated",
     "notice.rescan_done",
     "notice.rescan_failed",
+    "panel.folders_error",
+    "panel.select_folders",
+    "prefs.button_add",
+    "prefs.button_done",
+    "prefs.button_file",
+    "prefs.summary",
+    "prefs.title",
+    "wizard.button_choose",
+    "wizard.button_later",
+    "wizard.message",
+    "wizard.title",
 ];
 
 /// The tests that read the environment must not run at the same time: the
@@ -207,8 +220,8 @@ fn a_placeholder_without_an_argument_stays_visible() {
 /// A language the application does not ship is refused.
 #[test]
 fn a_language_that_is_not_shipped_is_refused() {
-    let error: StringsError = Strings::load("de-DE").expect_err("the language is not shipped");
-    assert!(error.reason.contains("de-DE"), "{}", error.reason);
+    let error: StringsError = Strings::load("it-IT").expect_err("the language is not shipped");
+    assert!(error.reason.contains("it-IT"), "{}", error.reason);
     assert!(
         !error.to_string().is_empty(),
         "the error must name the reason"
@@ -241,7 +254,7 @@ fn the_first_variable_of_the_environment_wins() {
 #[test]
 fn a_language_that_is_not_shipped_falls_back() {
     with_environment(
-        &[("LC_ALL", "de_DE.UTF-8"), ("LC_MESSAGES", ""), ("LANG", "")],
+        &[("LC_ALL", "it_IT.UTF-8"), ("LC_MESSAGES", ""), ("LANG", "")],
         "en-US",
     );
 }

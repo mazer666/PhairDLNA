@@ -76,6 +76,7 @@ impl Desktop {
             written: Vec::new(),
         };
         desktop.write();
+        desktop.check_first_run_wizard();
         Ok(desktop)
     }
 
@@ -157,6 +158,8 @@ impl Desktop {
                 }
             }
             DesktopRequest::OpenPaths(paths) => self.open_paths(&paths),
+            DesktopRequest::PickMediaFolders => self.pick_folders(),
+            DesktopRequest::ShowPreferences => self.show_preferences(),
             DesktopRequest::Quit => self.quit(),
         }
     }
@@ -173,9 +176,90 @@ impl Desktop {
         }
     }
 
+    /// Prompts the user to pick media folders via native NSOpenPanel.
+    fn pick_folders(&mut self) {
+        let title = self.app.localized_text("panel.select_folders");
+        let selected = super::panels::pick_media_folders(self.marker, &title);
+        if selected.is_empty() {
+            return;
+        }
+        if let Err(reason) = self.app.add_media_roots(&selected) {
+            let error_title = self.app.localized_text("panel.folders_error");
+            super::panels::show_alert(
+                self.marker,
+                &error_title,
+                &reason,
+                objc2_app_kit::NSAlertStyle::Warning,
+            );
+        } else {
+            self.worker.ask(Command::Rescan);
+            self.write();
+        }
+    }
+
+    /// Shows the native preferences manager dialog.
+    fn show_preferences(&mut self) {
+        let title = self.app.localized_text("prefs.title");
+        let summary = self.app.localized_text("prefs.summary");
+        let btn_add = self.app.localized_text("prefs.button_add");
+        let btn_file = self.app.localized_text("prefs.button_file");
+        let btn_done = self.app.localized_text("prefs.button_done");
+
+        let choice = super::config_dialog::show_preferences_dialog(
+            self.marker,
+            &title,
+            &summary,
+            &btn_add,
+            &btn_file,
+            &btn_done,
+        );
+
+        match choice {
+            super::config_dialog::PreferencesChoice::AddFolders => self.pick_folders(),
+            super::config_dialog::PreferencesChoice::OpenConfigFile => {
+                let path = self.app.config_path().to_path_buf();
+                if !workspace::open_path(&path) {
+                    self.app.set_notice(self.app.cannot_open_text());
+                }
+            }
+            super::config_dialog::PreferencesChoice::Done => {}
+        }
+    }
+
     /// Leaves the application; the server keeps running.
     fn quit(&self) {
         NSApplication::sharedApplication(self.marker).terminate(None);
+    }
+
+    /// Runs the first-run setup wizard if no media folders are configured yet.
+    fn check_first_run_wizard(&mut self) {
+        let Ok(roots) = self.app.media_roots() else {
+            return;
+        };
+        if !roots.is_empty() {
+            return;
+        }
+
+        let title = self.app.localized_text("wizard.title");
+        let message = self.app.localized_text("wizard.message");
+        let btn_choose = self.app.localized_text("wizard.button_choose");
+        let btn_later = self.app.localized_text("wizard.button_later");
+        let panel_title = self.app.localized_text("panel.select_folders");
+
+        let result = super::config_dialog::run_wizard_if_needed(
+            self.marker,
+            self.app.config_path(),
+            &title,
+            &message,
+            &btn_choose,
+            &btn_later,
+            &panel_title,
+        );
+
+        if let super::config_dialog::WizardResult::Configured(_) = result {
+            self.worker.ask(Command::Rescan);
+            self.write();
+        }
     }
 
     /// Writes the state of the application into the menu bar.

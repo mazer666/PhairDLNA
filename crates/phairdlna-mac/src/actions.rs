@@ -16,8 +16,10 @@ pub enum MenuAction {
     OpenMediaFolders,
     /// Read the library again.
     RescanLibrary,
-    /// Open the configuration file.
+    /// Open the configuration file or dialog.
     OpenPreferences,
+    /// Add media folders via native folder picker.
+    AddMediaFolders,
     /// Export the diagnostics report for support.
     ExportDiagnostics,
     /// Switch between the short view and the detailed view.
@@ -41,6 +43,7 @@ impl MenuAction {
             Self::Quit => 5,
             Self::TogglePresentation => 6,
             Self::ExportDiagnostics => 7,
+            Self::AddMediaFolders => 8,
         }
     }
 
@@ -58,6 +61,7 @@ impl MenuAction {
             5 => Some(Self::Quit),
             6 => Some(Self::TogglePresentation),
             7 => Some(Self::ExportDiagnostics),
+            8 => Some(Self::AddMediaFolders),
             _ => None,
         }
     }
@@ -75,6 +79,7 @@ mod tests {
             MenuAction::OpenMediaFolders,
             MenuAction::RescanLibrary,
             MenuAction::OpenPreferences,
+            MenuAction::AddMediaFolders,
             MenuAction::Quit,
             MenuAction::TogglePresentation,
             MenuAction::ExportDiagnostics,

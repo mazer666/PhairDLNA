@@ -206,6 +206,12 @@ fn action_entries(
         ),
         action(
             strings,
+            "menu.action.add_folders",
+            MenuAction::AddMediaFolders,
+            true,
+        ),
+        action(
+            strings,
             "menu.action.rescan",
             MenuAction::RescanLibrary,
             serving,

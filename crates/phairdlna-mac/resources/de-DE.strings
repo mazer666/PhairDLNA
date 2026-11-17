@@ -1,0 +1,84 @@
+# The texts of the menu bar application, in German (Deutsch).
+#
+# One entry per line: `key = value`.
+
+# The state of the server, and the title of the first group of the menu.
+menu.status.header = PhairDLNA
+menu.status.badge = DLNA
+menu.status.running = Server läuft — {streams} aktive Streams
+menu.status.scanning = Medienbibliothek wird durchsucht…
+menu.status.stopped = Server angehalten
+menu.status.refused = Server verweigert die Verbindung
+
+# The shared folders and the streams that run.
+menu.status.no_roots = Kein Medienordner freigegeben
+menu.status.root = {name} — {objects} Objekte
+menu.status.root_missing = {name} ist nicht verfügbar
+menu.status.transfer = {client} spielt {title}
+
+# The entries of the menu.
+menu.action.open_admin = Administrationsseite öffnen
+menu.action.open_folders = Medienordner im Finder anzeigen
+menu.action.add_folders = Medienordner hinzufügen…
+menu.action.rescan = Medienbibliothek neu einlesen
+menu.action.preferences = Einstellungen…
+menu.action.export_diagnostics = Diagnosebericht exportieren…
+menu.action.quit = PhairDLNA beenden
+
+# The name the screen reader reads, and the value it reads per state.
+menu.accessibility.label = PhairDLNA Serverstatus
+menu.accessibility.running = Der Server läuft und überträgt {streams} aktive Streams
+menu.accessibility.scanning = Der Server liest die Medienbibliothek ein
+menu.accessibility.stopped = Der Server ist angehalten
+menu.accessibility.refused = Der Server lehnt die Anfragen der Anwendung ab
+
+# The messages after a scan of the library.
+notice.rescan_done = Medienbibliothek aktualisiert — {objects} Objekte gefunden
+notice.rescan_failed = Medienbibliothek konnte nicht eingelesen werden: {reason}
+notice.folders_updated = Medienordner aktualisiert
+panel.select_folders = Medienordner auswählen
+panel.folders_error = Medienordner konnten nicht hinzugefügt werden
+wizard.title = PhairDLNA Einrichtungs-Assistent
+wizard.message = Willkommen bei PhairDLNA! Um Filme, Musik und Fotos auf Smart-TVs und DLNA-Geräte im Heimnetzwerk zu übertragen, wählen Sie bitte Ihre Medienordner aus.
+wizard.button_choose = Medienordner auswählen…
+wizard.button_later = Später einrichten
+prefs.title = PhairDLNA Einstellungen
+prefs.summary = Medienordner und DLNA-Serverkonfiguration verwalten.
+prefs.button_add = Medienordner hinzufügen…
+prefs.button_file = Konfigurationsdatei bearbeiten
+prefs.button_done = Fertig
+
+# The messages of a failure.
+error.surface_unreachable = Der Server ist nicht erreichbar: {reason}. Starte den Server über die Befehlszeile.
+error.surface_unreadable = Der Server kann nicht gelesen werden: {reason}. Bitte gleich noch einmal versuchen.
+error.answer_invalid = Die Antwort des Servers ist ungültig: {reason}.
+error.answer_unexpected = Die Antwort des Servers entspricht nicht den Erwartungen.
+error.token_refused = Das Installationstoken wurde abgewiesen. Bitte Tokendatei prüfen.
+error.request_refused = Der Server hat die Anfrage abgewiesen: {status}.
+error.token_unreadable = Das Installationstoken kann nicht gelesen werden. Bitte Tokendatei prüfen.
+error.server_not_started = Der Server wurde noch nie gestartet. Bitte über das Terminal starten.
+error.busy = Der Server ist ausgelastet; bitte in einem Moment erneut versuchen.
+error.scan_silent = Bibliothek wurde nicht aktualisiert: Der Server antwortete nicht.
+error.cannot_open = Das System konnte das Objekt nicht öffnen.
+error.configuration_unreadable = Die Konfiguration kann nicht gelesen werden: {reason}
+error.worker_not_started = Der Hintergrunddienst konnte nicht gestartet werden: {reason}.
+error.preference_failed = Die Einstellung konnte nicht gespeichert werden: {reason}.
+
+# The detail of the server, in the detailed view.
+menu.status.objects = {objects} Objekte im Katalog
+menu.status.uptime = Server läuft seit {minutes} Minuten
+menu.status.last_scan = Letzter Bibliotheks-Scan: {when}
+menu.action.mode_advanced = Details einblenden
+menu.action.mode_simple = Kompaktansicht anzeigen
+
+# The texts of the command line.
+cli.help.usage = phairdlna-mac [--port <port>] [--token-file <file>]
+cli.help.port = --port <port> : Port der Administrationsoberfläche
+cli.help.token_file = --token-file <file> : Pfad zur Installations-Tokendatei
+cli.help.equivalent = Jede Aktion dieser Anwendung hat einen Befehl in phairdlna-cli
+cli.error.unknown_option = Unbekannte Option: {option}
+cli.error.missing_value = Option {option} erfordert einen Wert
+cli.error.bad_port = Port {value} ist keine gültige Zahl zwischen 1 und 65535
+cli.error.no_menu_bar = Keine macOS-Menüleiste verfügbar: {reason}
+cli.error.not_main_thread = Die Anwendung wurde nicht auf dem Haupt-Thread gestartet
+cli.error.not_macos = Diese Anwendung erfordert macOS

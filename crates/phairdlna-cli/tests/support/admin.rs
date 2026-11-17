@@ -157,9 +157,10 @@ pub fn write_admin_config(directory: &Path, library: &Path) -> PathBuf {
     let path = directory.join("phairdlna.toml");
     let text = format!(
         "schema_version = 1\n\n[server]\ndevice_name = \"Living room\"\n\n\
-         [library]\ncache_directory = \"{}\"\n[[library.roots]]\nname = \"Films\"\npath = \"{}\"\n\n\
+         [library]\ncache_directory = \"{}\"\ndatabase_path = \"{}\"\n[[library.roots]]\nname = \"Films\"\npath = \"{}\"\n\n\
          [security]\nadmin_enabled = true\nadmin_token_file = \"{}\"\n",
         directory.join("cache").display(),
+        directory.join("catalogue.db").display(),
         library.display(),
         directory.join("admin.token").display()
     );

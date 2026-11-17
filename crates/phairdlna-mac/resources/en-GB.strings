@@ -29,6 +29,7 @@ menu.status.transfer = {client} is playing {title}
 # The entries of the menu.
 menu.action.open_admin = Open the administration page
 menu.action.open_folders = Open the media folders
+menu.action.add_folders = Add media folder…
 menu.action.rescan = Read the library again
 menu.action.preferences = Open the configuration file
 menu.action.export_diagnostics = Export diagnostics report…
@@ -44,6 +45,18 @@ menu.accessibility.refused = The server refuses the requests of the application
 # The messages after a scan of the library.
 notice.rescan_done = The library was read again — {objects} objects found
 notice.rescan_failed = The library could not be read again: {reason}
+notice.folders_updated = Media folders updated
+panel.select_folders = Select Media Folders
+panel.folders_error = Could not add media folders
+wizard.title = PhairDLNA Setup Assistant
+wizard.message = Welcome to PhairDLNA! To stream videos, photos, and music to your Smart TV or DLNA devices, please select your media folders.
+wizard.button_choose = Select Media Folders…
+wizard.button_later = Configure Later
+prefs.title = PhairDLNA Preferences
+prefs.summary = Manage your shared media folders and server configuration.
+prefs.button_add = Add Media Folders…
+prefs.button_file = Edit Config File
+prefs.button_done = Done
 
 # The messages of a failure. Every text names what happened, why it happened
 # and what the user can do next (`UX-004`).

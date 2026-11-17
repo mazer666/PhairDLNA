@@ -1,0 +1,84 @@
+# The texts of the menu bar application, in French (Français).
+#
+# One entry per line: `key = value`.
+
+# The state of the server, and the title of the first group of the menu.
+menu.status.header = PhairDLNA
+menu.status.badge = DLNA
+menu.status.running = Serveur actif — {streams} flux en cours
+menu.status.scanning = Analyse de la bibliothèque en cours…
+menu.status.stopped = Serveur arrêté
+menu.status.refused = Connexion au serveur refusée
+
+# The shared folders and the streams that run.
+menu.status.no_roots = Aucun dossier multimédia partagé
+menu.status.root = {name} — {objects} objets
+menu.status.root_missing = {name} n'est pas disponible
+menu.status.transfer = {client} lit {title}
+
+# The entries of the menu.
+menu.action.open_admin = Ouvrir la page d'administration
+menu.action.open_folders = Ouvrir les dossiers dans le Finder
+menu.action.add_folders = Ajouter un dossier multimédia…
+menu.action.rescan = Réanalyser la bibliothèque
+menu.action.preferences = Préférences…
+menu.action.export_diagnostics = Exporter le rapport de diagnostic…
+menu.action.quit = Quitter PhairDLNA
+
+# The name the screen reader reads, and the value it reads per state.
+menu.accessibility.label = État du serveur PhairDLNA
+menu.accessibility.running = Le serveur est en cours d'exécution et diffuse {streams} flux
+menu.accessibility.scanning = Le serveur analyse la bibliothèque multimédia
+menu.accessibility.stopped = Le serveur est arrêté
+menu.accessibility.refused = Le serveur refuse les requêtes de l'application
+
+# The messages after a scan of the library.
+notice.rescan_done = Bibliothèque mise à jour — {objects} objets trouvés
+notice.rescan_failed = Échec de l'analyse de la bibliothèque : {reason}
+notice.folders_updated = Dossiers multimédias mis à jour
+panel.select_folders = Sélectionner des dossiers multimédias
+panel.folders_error = Impossible d'ajouter les dossiers multimédias
+wizard.title = Assistant de configuration PhairDLNA
+wizard.message = Bienvenue dans PhairDLNA ! Pour diffuser vos vidéos, musiques et photos sur votre téléviseur ou vos appareils DLNA, veuillez choisir vos dossiers multimédias.
+wizard.button_choose = Choisir des dossiers…
+wizard.button_later = Configurer plus tard
+prefs.title = Préférences PhairDLNA
+prefs.summary = Gérer vos dossiers multimédias et la configuration du serveur.
+prefs.button_add = Ajouter des dossiers…
+prefs.button_file = Modifier le fichier de configuration
+prefs.button_done = Terminé
+
+# The messages of a failure.
+error.surface_unreachable = Le serveur est inaccessible : {reason}. Démarrez-le via la ligne de commande.
+error.surface_unreadable = Impossible de lire le serveur : {reason}. Veuillez réessayer dans un instant.
+error.answer_invalid = La réponse du serveur n'est pas valide : {reason}.
+error.answer_unexpected = La réponse du serveur est inattendue.
+error.token_refused = Le jeton d'installation a été refusé. Vérifiez le fichier de jeton.
+error.request_refused = Le serveur a refusé la requête : {status}.
+error.token_unreadable = Le jeton d'installation ne peut être lu. Vérifiez le fichier de jeton.
+error.server_not_started = Le serveur n'a jamais été démarré. Lancez-le via le terminal.
+error.busy = Le serveur est occupé. Réessayez dans un instant.
+error.scan_silent = La bibliothèque n'a pas été actualisée : le serveur n'a pas répondu.
+error.cannot_open = Le système n'a pas pu ouvrir l'élément.
+error.configuration_unreadable = La configuration ne peut pas être lue : {reason}
+error.worker_not_started = Impossible de démarrer le service en arrière-plan : {reason}.
+error.preference_failed = Impossible d'enregistrer la préférence : {reason}.
+
+# The detail of the server, in the detailed view.
+menu.status.objects = {objects} objets dans le catalogue
+menu.status.uptime = Le serveur fonctionne depuis {minutes} minutes
+menu.status.last_scan = Dernière analyse de la bibliothèque : {when}
+menu.action.mode_advanced = Afficher les détails du serveur
+menu.action.mode_simple = Afficher la vue compacte
+
+# The texts of the command line.
+cli.help.usage = phairdlna-mac [--port <port>] [--token-file <fichier>]
+cli.help.port = --port <port> : le port de l'interface d'administration
+cli.help.token_file = --token-file <fichier> : le fichier contenant le jeton d'installation
+cli.help.equivalent = Chaque action de cette application possède un équivalent dans phairdlna-cli
+cli.error.unknown_option = Option inconnue : {option}
+cli.error.missing_value = L'option {option} requiert une valeur
+cli.error.bad_port = Le port {value} n'est pas un nombre compris entre 1 et 65535
+cli.error.no_menu_bar = Aucune barre des menus disponible : {reason}
+cli.error.not_main_thread = L'application n'a pas démarré sur le fil principal
+cli.error.not_macos = Cette application nécessite macOS

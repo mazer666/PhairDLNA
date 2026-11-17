@@ -41,10 +41,13 @@ chmod +x "${MACOS}/phairdlna-mac"
 
 # Copy bundle resources
 cp "${REPO_DIR}/crates/phairdlna-mac/resources/Info.plist" "${CONTENTS}/Info.plist"
-cp "${REPO_DIR}/crates/phairdlna-mac/resources/en-US.strings" "${RESOURCES}/en.lproj/Localizable.strings" 2>/dev/null || \
-    (mkdir -p "${RESOURCES}/en.lproj" && cp "${REPO_DIR}/crates/phairdlna-mac/resources/en-US.strings" "${RESOURCES}/en.lproj/Localizable.strings")
-cp "${REPO_DIR}/crates/phairdlna-mac/resources/en-GB.strings" "${RESOURCES}/en-GB.lproj/Localizable.strings" 2>/dev/null || \
-    (mkdir -p "${RESOURCES}/en-GB.lproj" && cp "${REPO_DIR}/crates/phairdlna-mac/resources/en-GB.strings" "${RESOURCES}/en-GB.lproj/Localizable.strings")
+cp "${REPO_DIR}/crates/phairdlna-mac/resources/AppIcon.icns" "${RESOURCES}/AppIcon.icns"
+mkdir -p "${RESOURCES}/en.lproj" "${RESOURCES}/en-GB.lproj" "${RESOURCES}/de.lproj" "${RESOURCES}/fr.lproj" "${RESOURCES}/es.lproj"
+cp "${REPO_DIR}/crates/phairdlna-mac/resources/en-US.strings" "${RESOURCES}/en.lproj/Localizable.strings"
+cp "${REPO_DIR}/crates/phairdlna-mac/resources/en-GB.strings" "${RESOURCES}/en-GB.lproj/Localizable.strings"
+cp "${REPO_DIR}/crates/phairdlna-mac/resources/de-DE.strings" "${RESOURCES}/de.lproj/Localizable.strings"
+cp "${REPO_DIR}/crates/phairdlna-mac/resources/fr-FR.strings" "${RESOURCES}/fr.lproj/Localizable.strings"
+cp "${REPO_DIR}/crates/phairdlna-mac/resources/es-ES.strings" "${RESOURCES}/es.lproj/Localizable.strings"
 
 echo "APPL????" > "${CONTENTS}/PkgInfo"
 

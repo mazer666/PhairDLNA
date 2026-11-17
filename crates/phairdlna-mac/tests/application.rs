@@ -195,9 +195,7 @@ fn the_action_that_opens_the_configuration_asks_for_the_file() {
 
     assert_eq!(
         outcome,
-        ActionOutcome::Request(DesktopRequest::OpenPath(PathBuf::from(
-            "/nowhere/config.toml"
-        )))
+        ActionOutcome::Request(DesktopRequest::ShowPreferences)
     );
 }
 

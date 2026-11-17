@@ -26,7 +26,7 @@ use std::collections::BTreeMap;
 use std::fmt;
 
 /// The languages the application ships with.
-pub const SUPPORTED_LOCALES: &[&str] = &["en-US", "en-GB"];
+pub const SUPPORTED_LOCALES: &[&str] = &["en-US", "en-GB", "de-DE", "fr-FR", "es-ES"];
 
 /// The language the application falls back to when the environment names a
 /// language that the application does not ship.
@@ -40,6 +40,9 @@ const FALLBACK_LOCALE: &str = "en-US";
 const RESOURCES: &[(&str, &str)] = &[
     ("en-US", include_str!("../../resources/en-US.strings")),
     ("en-GB", include_str!("../../resources/en-GB.strings")),
+    ("de-DE", include_str!("../../resources/de-DE.strings")),
+    ("fr-FR", include_str!("../../resources/fr-FR.strings")),
+    ("es-ES", include_str!("../../resources/es-ES.strings")),
 ];
 
 /// The texts of one language.
@@ -166,10 +169,22 @@ impl std::error::Error for StringsError {}
 /// a name the environment writes in another case is still found.
 fn resource_of(locale: &str) -> Option<(&'static str, &'static str)> {
     let wanted = normalise_locale(locale);
-    RESOURCES
+    if let Some(found) = RESOURCES
         .iter()
         .find(|(name, _)| name.eq_ignore_ascii_case(&wanted))
         .copied()
+    {
+        return Some(found);
+    }
+    // Prefix fallback: "de" -> "de-DE", "fr" -> "fr-FR", "es" -> "es-ES", "en" -> "en-US"
+    let prefix = wanted.split('-').next().unwrap_or(&wanted);
+    match prefix.to_ascii_lowercase().as_str() {
+        "de" => resource_of("de-DE"),
+        "fr" => resource_of("fr-FR"),
+        "es" => resource_of("es-ES"),
+        "en" => resource_of("en-US"),
+        _ => None,
+    }
 }
 
 /// The name of a language, without the encoding and with a dash.
@@ -316,8 +331,8 @@ mod tests {
     /// A language that is not shipped is refused.
     #[test]
     fn a_language_that_is_not_shipped_is_refused() {
-        let error = Strings::load("de-DE").expect_err("the language is not shipped");
-        assert!(error.reason.contains("de-DE"), "{}", error.reason);
+        let error = Strings::load("it-IT").expect_err("the language is not shipped");
+        assert!(error.reason.contains("it-IT"), "{}", error.reason);
     }
 
     /// The name of a language loses its encoding and its underscores.

@@ -98,6 +98,13 @@ define_class!(
             dispatch(MenuAction::ExportDiagnostics.tag());
         }
 
+        /// The action "Add media folders".
+        #[unsafe(method(phairAddFolders:))]
+        fn phair_add_folders(&self, sender: &AnyObject) {
+            let _ = sender;
+            dispatch(MenuAction::AddMediaFolders.tag());
+        }
+
         /// The action "Quit".
         #[unsafe(method(phairQuit:))]
         fn phair_quit(&self, sender: &AnyObject) {
@@ -174,6 +181,7 @@ pub fn selector_of(action: MenuAction) -> Sel {
         MenuAction::OpenMediaFolders => sel!(phairOpenFolders:),
         MenuAction::RescanLibrary => sel!(phairRescan:),
         MenuAction::OpenPreferences => sel!(phairPreferences:),
+        MenuAction::AddMediaFolders => sel!(phairAddFolders:),
         MenuAction::ExportDiagnostics => sel!(phairExportDiagnostics:),
         MenuAction::Quit => sel!(phairQuit:),
         MenuAction::TogglePresentation => sel!(phairTogglePresentation:),
