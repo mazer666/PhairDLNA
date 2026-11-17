@@ -20,6 +20,7 @@ release gates are cleared. See [project status](STATUS.md) and
       diagnostics and a lightweight settings-inspection web UI are implemented
       at code level; full UX acceptance remains open.
 - [x] Native Apple Silicon support verified on host (`PLT-004`) without Rosetta translation.
+- [x] Universal binary packaging script (`PLT-014`) created, combining arm64 and x86_64 into macOS application bundle.
 - [x] First client/device interoperability test protocol automated against live daemon fixture
       (VLC media player, description, CDS SCPD, Browse root, byte ranges verified).
 
