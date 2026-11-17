@@ -1,8 +1,9 @@
 # F-18 — Performance and reliability budgets
 
-Status: Draft
+Status: In part (the scheduler of M2.8 is built; the measurements wait for the
+        reference hardware of OD-11)
 Owner role: QA / Performance Engineer
-Version/date: 0.1 / 2026-11-14
+Version/date: 0.2 / 2026-11-17
 Requirements: PERF-001 … PERF-015, REL-001 … REL-006, RES-001 … RES-009
 (`PERF-003` … `PERF-005`, `PERF-008`, `PERF-009` and `PERF-012` are owned by F-09;
 `PERF-004` is shared with F-09 and F-10, and the index assigns it to F-09.)
@@ -333,3 +334,87 @@ explained, not a footnote.
 | F18-Q-03 | Which reference hardware defines the release targets? | Owner decision OD-11 |
 | F18-Q-04 | Should the server reduce background work on battery power, and how does it learn the power state? | A platform capability decision; the macOS implementation can read the power source, but the policy is ours |
 | F18-Q-05 | Is the seven-day soak the right duration, or is seven days a floor rather than a target? | Evidence from the first soak: if the leak rate is below the detection threshold, a shorter soak proves nothing |
+
+---
+
+## 13. What is built — the scheduler (M2.8)
+
+The adaptive resource management of this feature is a **single scheduler** in
+the shared core: `crates/phairdlna-core/src/scheduler/`. The daemon owns it
+(`crates/phairdlna-cli/src/serve/resources.rs`) and uses it for every kind of
+work it does.
+
+### The classes
+
+| Class | The work of the class | Bound of the class | The bound of the queue |
+| --- | --- | --- | --- |
+| `streaming` | the transfer of a file to a client | the number of the streams of the configuration | 64 |
+| `control_plane` | the SOAP requests of a client | 4 | 64 |
+| `media` | the reading of the metadata and the production of the covers | the number of the workers of the index | 32 |
+| `background` | the reading of the library and the maintenance of the index | the number of the workers of the index | 16 |
+
+A worker that becomes free takes the task of the **most important** class that
+has a task waiting and that may run one. The order of the classes is the
+order of the variants of `Priority`, so the order of the importance is written
+down in one place.
+
+### The rules
+
+1. **A bound everywhere.** Every class and every queue has a documented
+   bound (`RES-002`). A task that does not fit is refused with an error that
+   names the class and the bound, and the caller turns the refusal into an
+   explanation for the user (`RES-007`).
+2. **The background work yields.** The background class is not admitted while
+   the machine is busy, and a submission of background work is refused with
+   the time it should wait (`RES-003`). The state has a **hysteresis band**
+   and a **quiet period**: the value of a signal must fall below its resuming
+   threshold *and* the machine must stay there for the quiet period before
+   the work starts again. A scanner that flaps is worse for a playback than a
+   scanner that never starts.
+3. **A slow client is not a busy server.** Every class has its own bound on
+   the tasks that run at the same time, so a client that stops reading slows
+   down its own stream and nobody else (`RES-004`).
+4. **The policy is in the core.** The thresholds, the bounds and the order of
+   the classes live in `crates/phairdlna-core/src/scheduler/`. A platform
+   adapter supplies *hints* through the trait `ResourceProbe` and never a
+   decision (`RES-005`).
+5. **The shutdown releases the workers.** The tasks that have not started are
+   dropped, the task that runs finishes, and the workers are joined, so that
+   no thread and no file handle is left behind (`RES-009`).
+6. **The numbers are local.** The report of the resources is asked for, it
+   names no file, no client and no address, and it never leaves the machine
+   (`RES-006`).
+
+### What is not built yet
+
+- The **processor, the memory and the disk** are not measured by a platform
+  adapter. The daemon reports the number of the running transfers and the
+  time the last answer needed; the other signals stay at zero, and a signal
+  that is not measured never crosses a threshold.
+- The **report of the resources** is not shown in the administration surface
+  and is not exported by a command yet. The report itself exists and is
+  free of private data.
+- The **hints of a battery or of a warm machine** (`RES-008`) are not read.
+  The rule they would use — less background work, never less playback — is
+  the rule of the background class.
+- The **sleep and the wake** do not release the workers of the scheduler yet;
+  the lifecycle of the daemon (`F-13`) has to call the shutdown and build the
+  scheduler again.
+- The **thresholds** are the documented defaults of `PressureThresholds`.
+  They are the values the question F18-Q-01 asks for, and a measurement on
+  the reference hardware replaces them.
+
+### The tests
+
+| Test | What it proves |
+| --- | --- |
+| `crates/phairdlna-core/tests/scheduler_priority.rs::a_stream_runs_before_the_scan_that_waits_for_it` | a stream is taken before a scan that waits behind it (`RES-001`) |
+| `crates/phairdlna-core/tests/scheduler_priority.rs::a_control_request_runs_before_the_scan_that_waits_for_it` | a control request is taken before a scan that waits behind it (`RES-001`) |
+| `crates/phairdlna-core/tests/scheduler_priority.rs::a_slow_client_does_not_hold_up_another_stream` | a slow client slows down its own stream only (`RES-004`) |
+| `crates/phairdlna-core/tests/scheduler_hysteresis.rs::the_scan_yields_while_the_machine_is_busy` | the background work yields while the machine is busy (`RES-003`) |
+| `crates/phairdlna-core/tests/scheduler_hysteresis.rs::the_scan_starts_again_when_the_machine_has_been_calm` | the work starts again after the quiet period, with a synthetic clock (`RES-003`, `AC-08`) |
+| `crates/phairdlna-core/tests/scheduler_hysteresis.rs::a_value_inside_the_band_does_not_start_the_scan` | the band of the threshold changes nothing (`RES-003`) |
+| `crates/phairdlna-core/tests/resource_exhaustion.rs::a_full_queue_refuses_the_next_task_with_a_clear_error` | a full queue refuses the task and names the bound (`RES-002`, `RES-007`, `AC-10`) |
+| `crates/phairdlna-core/tests/resource_exhaustion.rs::the_number_of_running_tasks_never_passes_the_bound` | the class runs no more tasks than its bound (`RES-002`) |
+| `crates/phairdlna-cli/tests/resources.rs::the_daemon_answers_a_client_before_it_reads_the_library` | the daemon serves the control plane while the library is read (`RES-001`) |
+| `crates/phairdlna-cli/tests/resources.rs::the_report_of_the_resources_names_no_private_data` | the report names no file and no address (`RES-006`) |

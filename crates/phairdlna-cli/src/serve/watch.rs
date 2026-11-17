@@ -12,6 +12,11 @@
 //! else: the question "did anything change at the roots?" is answered without
 //! reading a single file of the library. Only when the answer is "yes" is the
 //! catalogue read again.
+//!
+//! **The work of the watch is background work.** It is arbitrated by the
+//! scheduler of the daemon, so that the reading of the library waits for the
+//! clients of the server and yields while the machine is busy (`RES-001`,
+//! `RES-003`).
 
 use std::time::Duration;
 
@@ -21,6 +26,7 @@ use tokio::task::JoinHandle;
 
 use super::library::Library;
 use super::log::Logger;
+use super::resources::Resources;
 
 /// How often the watch looks at the roots.
 ///
@@ -32,8 +38,9 @@ pub const WATCH_INTERVAL: Duration = Duration::from_secs(5);
 pub fn spawn(
     library: Library,
     logger: Logger,
+    resources: Resources,
 ) -> (tokio::sync::watch::Sender<bool>, JoinHandle<()>) {
-    spawn_with_interval(library, logger, WATCH_INTERVAL)
+    spawn_with_interval(library, logger, resources, WATCH_INTERVAL)
 }
 
 /// Starts the watch with a given interval and hands back the task and the way
@@ -44,6 +51,7 @@ pub fn spawn(
 pub fn spawn_with_interval(
     library: Library,
     logger: Logger,
+    resources: Resources,
     interval: Duration,
 ) -> (tokio::sync::watch::Sender<bool>, JoinHandle<()>) {
     let (stop, mut stopped) = tokio::sync::watch::channel(false);
@@ -55,16 +63,21 @@ pub fn spawn_with_interval(
                     if *stopped.borrow() {
                         break;
                     }
-                    // The work of the watch reads the disk, and a network share
-                    // that does not answer would block the worker of the
-                    // runtime for as long as it takes. The work therefore runs
-                    // on a thread of its own (`OPS-016`).
+                    // The work of the watch reads the disk, and a network
+                    // share that does not answer would hold a worker of the
+                    // runtime for as long as it takes. The work therefore
+                    // runs in the background class of the scheduler, which
+                    // gives it a worker of its own (`OPS-016`, `RES-003`).
                     let library = library.clone();
                     let logger = logger.clone();
-                    let _ = tokio::task::spawn_blocking(move || {
-                        watch_once(&library, &logger);
-                    })
-                    .await;
+                    let resources = resources.clone();
+                    if let Err(error) =
+                        resources.submit_background(move || watch_once(&library, &logger))
+                    {
+                        // The scan waits: the machine is busy or the queue is
+                        // full. The next tick tries again.
+                        resources.explain(&error);
+                    }
                 }
                 _ = stopped.changed() => break,
             }
@@ -109,6 +122,7 @@ mod tests {
     use super::{sentence_of, spawn_with_interval};
     use crate::serve::library::Library;
     use crate::serve::log::{Level, Logger};
+    use crate::serve::resources::Resources;
     use phairdlna_core::catalogue::VolumeChange;
     use phairdlna_core::config::{MediaRoot, SymlinkPolicy};
     use phairdlna_core::platform::LocalFileSystem;
@@ -150,7 +164,13 @@ mod tests {
         }];
         let library = Library::build(&roots, SymlinkPolicy::Skip, &LocalFileSystem);
         let logger = Logger::with_redactor(Level::Info, "daemon", Arc::new(Redactor::new()));
-        let (stop, task) = spawn_with_interval(library.clone(), logger, Duration::from_millis(20));
+        let resources = Resources::new(&phairdlna_core::config::Config::default(), &logger);
+        let (stop, task) = spawn_with_interval(
+            library.clone(),
+            logger,
+            resources,
+            Duration::from_millis(20),
+        );
 
         // The drive is unplugged while the server runs.
         std::fs::remove_dir_all(folder.path()).expect("the drive is unplugged");

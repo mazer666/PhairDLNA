@@ -410,15 +410,15 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `RES-001` | Arbitrate streaming, discovery, metadata reading, indexing, artwork generation, optional… | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
-| `RES-002` | Every worker pool, queue, cache and connection count shall have a documented bound, a… | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
-| `RES-003` | Indexing shall yield when streaming latency, CPU, disk input/output or memory pressure crosses… | SHOULD | `F-18` | M2 | Resource-pressure test | Baseline |
-| `RES-004` | A slow client shall not be mistaken for server overload | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
-| `RES-005` | Live in the shared core and not in a user interface; platform adapters shall supply… | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
-| `RES-006` | Local resource metrics shall be opt-in to view and export | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
-| `RES-007` | When resources are insufficient the server shall fail gracefully with a meaningful explanation;… | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
+| `RES-001` | Arbitrate streaming, discovery, metadata reading, indexing, artwork generation, optional… | MUST | `F-18` | M2 | Resource-pressure test | Implemented |
+| `RES-002` | Every worker pool, queue, cache and connection count shall have a documented bound, a… | MUST | `F-18` | M2 | Resource-pressure test | Implemented |
+| `RES-003` | Indexing shall yield when streaming latency, CPU, disk input/output or memory pressure crosses… | SHOULD | `F-18` | M2 | Resource-pressure test | Implemented |
+| `RES-004` | A slow client shall not be mistaken for server overload | MUST | `F-18` | M2 | Resource-pressure test | Verified |
+| `RES-005` | Live in the shared core and not in a user interface; platform adapters shall supply… | MUST | `F-18` | M2 | Resource-pressure test | Implemented |
+| `RES-006` | Local resource metrics shall be opt-in to view and export | MUST | `F-18` | M2 | Resource-pressure test | Implemented |
+| `RES-007` | When resources are insufficient the server shall fail gracefully with a meaningful explanation;… | MUST | `F-18` | M2 | Resource-pressure test | Implemented |
 | `RES-008` | On a battery-powered or thermally constrained machine the server may reduce background work | SHOULD | `F-18` | M2 | Resource-pressure test | Baseline |
-| `RES-009` | Start-up, scanning, sleep/wake and shutdown shall release workers and file handles predictably. | MUST | `F-18` | M2 | Resource-pressure test | Baseline |
+| `RES-009` | Start-up, scanning, sleep/wake and shutdown shall release workers and file handles predictably. | MUST | `F-18` | M2 | Resource-pressure test | Implemented |
 
 ## LIFE — Service lifecycle and network recovery
 

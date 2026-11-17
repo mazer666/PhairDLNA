@@ -11,7 +11,10 @@
 //!       library.
 
 use std::path::PathBuf;
+use std::pin::Pin;
 use std::sync::Arc;
+use std::task::{Context, Poll};
+use std::time::Instant;
 
 use axum::body::Body;
 use axum::extract::{Path, State};
@@ -22,10 +25,14 @@ use phairdlna_core::http::headers::{GET_CONTENT_FEATURES, IF_RANGE, RANGE, TRANS
 use phairdlna_core::http::request::{MediaRequest, Method as CoreMethod};
 use phairdlna_core::http::response::Body as CoreBody;
 use phairdlna_core::media::cache_key;
+use phairdlna_core::scheduler::Priority;
 use tokio::sync::OwnedSemaphorePermit;
+
+use futures_core::Stream;
 
 use super::guard;
 use super::http::ServerContext;
+use super::resources::StreamToken;
 use super::stream::{FileStream, PermittedStream};
 use super::transfers::{TrackedStream, TransferHandle};
 
@@ -41,6 +48,7 @@ pub(super) async fn media(
     method: Method,
     headers: AxumHeaders,
 ) -> Response {
+    let started = Instant::now();
     let request = media_request(&id, &method, &headers);
     let answer = phairdlna_core::http::delivery::evaluate(&request, &context.media);
     let is_head = method == Method::HEAD;
@@ -62,7 +70,17 @@ pub(super) async fn media(
     let transfer = context
         .transfers
         .start(&client_of(&headers), &title_of(&context, &id));
-    media_answer(&answer, &context, &id, is_head, permit, transfer).await
+    // The transfer takes a place out of the resources of the daemon, so that
+    // the scheduler knows that a film is playing (`RES-001`).
+    let token = context.resources.stream_started();
+    let response = media_answer(&answer, &context, &id, is_head, permit, transfer, token).await;
+    // The time the server needed to prepare the answer is a hint about the
+    // machine: the scheduler uses it to decide whether the background work
+    // has to yield (`RES-003`).
+    context
+        .resources
+        .note_latency(started.elapsed().as_millis() as u64);
+    response
 }
 
 /// The name of the client that asks for the file.
@@ -100,15 +118,41 @@ pub(super) async fn artwork(
     State(context): State<Arc<ServerContext>>,
     Path(id): Path<String>,
 ) -> Response {
-    let catalogue = context.library.catalogue();
-    let Some(path) = catalogue.path_of(&id) else {
-        return StatusCode::NOT_FOUND.into_response();
+    artwork_body(&context, &id).await
+}
+
+/// The body of the answer for the artwork.
+///
+/// The lock of the catalogue is held only for the short moment in which the
+/// path of the object and the cached picture are looked up. The picture
+/// itself is produced without the lock, because the production reads the file
+/// of the library and may take a while.
+async fn artwork_body(context: &ServerContext, id: &str) -> Response {
+    let (key, cached) = {
+        let catalogue = context.library.catalogue();
+        // The path is copied, so that the lock is not held while the picture
+        // is produced.
+        let Some(path) = catalogue.path_of(id).map(|path| path.to_path_buf()) else {
+            return StatusCode::NOT_FOUND.into_response();
+        };
+        let key = cache_key(id, &path);
+        let cached = context.pictures.cache().get(&key);
+        (key, cached)
     };
-    let key = cache_key(&id, path);
-    if let Some((mime_type, bytes)) = context.pictures.cache().get(&key) {
+    if let Some((mime_type, bytes)) = cached {
         return picture_response(&mime_type, bytes);
     }
-    let Some(picture) = catalogue.picture_of(&id) else {
+    let picture = match produce_picture(context, id).await {
+        Ok(picture) => picture,
+        Err(error) => {
+            context.logger.warn(
+                "a picture could not be produced",
+                &[("reason", &error.to_string())],
+            );
+            return StatusCode::SERVICE_UNAVAILABLE.into_response();
+        }
+    };
+    let Some(picture) = picture else {
         return StatusCode::NOT_FOUND.into_response();
     };
     if let Err(error) = context
@@ -122,6 +166,25 @@ pub(super) async fn artwork(
         );
     }
     picture_response(&picture.mime_type, picture.bytes)
+}
+
+/// Produces the picture of an object.
+///
+/// The production reads the file of the library and encodes a thumbnail, so it
+/// runs in the metadata class of the scheduler: a client waits a moment for a
+/// cover, but not for the scan of the library (`RES-001`).
+async fn produce_picture(
+    context: &ServerContext,
+    id: &str,
+) -> Result<Option<phairdlna_core::media::Artwork>, super::resources::TaskError> {
+    let library = context.library.clone();
+    let target = id.to_owned();
+    context
+        .resources
+        .run(Priority::Media, move || {
+            library.with_catalogue(|catalogue| catalogue.picture_of(&target))
+        })
+        .await
 }
 
 /// Builds the answer that carries a picture.
@@ -161,6 +224,7 @@ async fn media_answer(
     is_head: bool,
     permit: Option<OwnedSemaphorePermit>,
     transfer: TransferHandle,
+    token: StreamToken,
 ) -> Response {
     let mut response = Response::new(Body::empty());
     *response.status_mut() =
@@ -185,6 +249,7 @@ async fn media_answer(
                     id: id.to_owned(),
                     permit,
                     transfer,
+                    token: Some(token),
                 },
                 context,
             )
@@ -200,6 +265,7 @@ async fn media_answer(
                     id: id.to_owned(),
                     permit,
                     transfer,
+                    token: Some(token),
                 },
                 context,
             )
@@ -235,6 +301,8 @@ struct Delivery {
     permit: Option<OwnedSemaphorePermit>,
     /// The transfer that the answer carries.
     transfer: TransferHandle,
+    /// The place of the transfer in the resources of the daemon.
+    token: Option<StreamToken>,
 }
 
 /// Puts the bytes of a file into the answer.
@@ -258,6 +326,7 @@ async fn with_file(
         id,
         permit,
         transfer,
+        token,
     } = delivery;
     let Some(path) = path else {
         return refused(response, context, &id);
@@ -301,9 +370,46 @@ async fn with_file(
     // and the transfer ends with it (`SEC-012`, `UX-012`).
     if let Some(permit) = permit {
         let stream = PermittedStream::new(stream, permit);
-        *response.body_mut() = Body::from_stream(TrackedStream::new(stream, transfer));
+        let tracked = TrackedStream::new(stream, transfer);
+        // The token of the stream ends the place of the transfer when the
+        // answer has been sent (`RES-004`).
+        let counted = match token {
+            Some(token) => CountedStream::new(tracked, token),
+            None => return response,
+        };
+        *response.body_mut() = Body::from_stream(counted);
     }
     response
+}
+
+/// A stream that tells the resources of the daemon when it ends.
+///
+/// The place of the transfer in the resources is given back with the stream,
+/// so that a client that goes away leaves nothing behind (`RES-004`).
+struct CountedStream<S> {
+    /// The bytes of the answer.
+    inner: TrackedStream<S>,
+    /// The place of the transfer.
+    _token: StreamToken,
+}
+
+impl<S> CountedStream<S> {
+    /// Builds a stream that carries the place of the transfer.
+    fn new(inner: TrackedStream<S>, token: StreamToken) -> Self {
+        Self {
+            inner,
+            _token: token,
+        }
+    }
+}
+
+impl<S: Stream + Unpin> Stream for CountedStream<S> {
+    type Item = S::Item;
+
+    /// Reads the next piece of the answer.
+    fn poll_next(self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<Option<S::Item>> {
+        Pin::new(&mut self.get_mut().inner).poll_next(context)
+    }
 }
 
 /// The answer for a file that may not be read.

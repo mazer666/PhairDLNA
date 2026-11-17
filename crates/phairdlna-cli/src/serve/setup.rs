@@ -31,6 +31,7 @@ use super::limit::CappedListener;
 use super::log::{Level, Logger};
 use super::media;
 use super::pictures::Pictures;
+use super::resources::Resources;
 use super::ssdp;
 use super::transfers::Transfers;
 use super::watch;
@@ -188,24 +189,16 @@ pub async fn start_ssdp(
 pub async fn start(options: ServeOptions) -> Result<super::Daemon, String> {
     let config = load_config(&options.config_path)?;
     let prepared = prepare(&config, &options)?;
-    let redactor = prepared.redactor;
-    let logger = prepared.logger;
-    let identity = prepared.identity;
-    let library = prepared.library;
+    let logger = prepared.logger.clone();
+    let identity = prepared.identity.clone();
+    let library = prepared.library.clone();
+    let resources = prepared.resources.clone();
     let (host, port) = address_and_port(&options, &config);
     let (listener, address, base_url) = open_the_socket(host, port).await?;
     // The transfers that are running are shared: the media route registers
     // them, and the administration surface counts them (`UX-012`).
     let transfers = Transfers::new();
-    let (context, limits) = build_server_context(
-        &config,
-        &identity,
-        base_url,
-        library.clone(),
-        transfers.clone(),
-        &logger,
-        redactor.clone(),
-    )?;
+    let (context, limits) = build_server_context(&config, &prepared, base_url, transfers.clone())?;
     // The listener keeps the connections inside the bounds and gives every
     // connection a deadline (`SEC-012`, `SEC-016`).
     let listener = CappedListener::new(
@@ -225,7 +218,7 @@ pub async fn start(options: ServeOptions) -> Result<super::Daemon, String> {
         transfers,
         &context.pictures,
         &logger,
-        &redactor,
+        &prepared.redactor,
         options.admin_port,
     )
     .await?;
@@ -235,7 +228,7 @@ pub async fn start(options: ServeOptions) -> Result<super::Daemon, String> {
     // removable drive that is unplugged, and a network share that comes back,
     // are seen by the running server and not only by the next start
     // (`FUN-017`, `PLT-011`).
-    let (stop_watch, watch_task) = watch::spawn(library, logger.clone());
+    let (stop_watch, watch_task) = watch::spawn(library, logger.clone(), resources);
     announce(&logger, &address, &context.base_url);
     Ok(Daemon {
         context,
@@ -273,6 +266,8 @@ struct Prepared {
     identity: identity::InstalledIdentity,
     /// The library of the daemon.
     library: Library,
+    /// The scheduler of the work of the daemon.
+    resources: Resources,
 }
 
 /// Reads the identity of the installation and builds the library.
@@ -286,11 +281,16 @@ fn prepare(config: &Config, options: &ServeOptions) -> Result<Prepared, String> 
     .redacting(config.logging.redact);
     let identity = load_identity(config, options.identity_path.as_deref())?;
     let library = build_library(config, &logger);
+    // The scheduler of the work of the daemon: the control plane, the covers
+    // and the scan of the library all run in it, and the answer of a client
+    // comes first (`RES-001`).
+    let resources = Resources::new(config, &logger);
     Ok(Prepared {
         redactor,
         logger,
         identity,
         library,
+        resources,
     })
 }
 
@@ -375,20 +375,17 @@ fn explain_the_admin_surface(
 /// Builds the shared HTTP server context and extracts resource limits.
 fn build_server_context(
     config: &Config,
-    identity: &identity::InstalledIdentity,
+    prepared: &Prepared,
     base_url: BaseUrl,
-    library: Library,
     transfers: Transfers,
-    logger: &Logger,
-    redactor: Arc<Redactor>,
 ) -> Result<(Arc<http::ServerContext>, Limits), String> {
     let description = DeviceDescription::new(
         &base_url,
-        &identity.as_device_identity().uuid(),
+        &prepared.identity.as_device_identity().uuid(),
         device_info(config),
     )
     .map_err(|error| format!("the device description is not usable: {error}"))?;
-    let media = media::MediaLibrary::new(library.clone(), roots_of(config));
+    let media = media::MediaLibrary::new(prepared.library.clone(), roots_of(config));
     let pictures = Pictures::new(config);
     let limits = Limits::from_section(&config.limits);
     let hosts = HostPolicy::new(config.security.allowed_host_names.clone());
@@ -397,16 +394,22 @@ fn build_server_context(
     // socket is opened (`CFG-002`, `CFG-009`).
     let access = ClientAccess::new(&config.security.allowed_clients)
         .map_err(|error| format!("the list of the allowed clients is not usable: {error}"))?;
-    let guard = Arc::new(Guard::with_access(limits, hosts, access, redactor));
+    let guard = Arc::new(Guard::with_access(
+        limits,
+        hosts,
+        access,
+        Arc::clone(&prepared.redactor),
+    ));
     let context = Arc::new(http::ServerContext {
-        library,
+        library: prepared.library.clone(),
         media,
         pictures,
         description,
         base_url: base_url.origin().to_owned(),
-        logger: logger.clone(),
+        logger: prepared.logger.clone(),
         guard,
         transfers,
+        resources: prepared.resources.clone(),
     });
     Ok((context, limits))
 }

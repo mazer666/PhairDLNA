@@ -26,6 +26,7 @@ pub mod log;
 pub mod media;
 pub mod media_route;
 pub mod pictures;
+pub mod resources;
 pub mod setup;
 pub mod signal;
 pub mod ssdp;
@@ -217,6 +218,10 @@ impl Daemon {
         #[cfg(feature = "admin")]
         self.stop_admin();
         self.stop_http().await;
+        // The workers of the scheduler are released when the server answers
+        // nobody any more, so that a request that is still on its way is not
+        // refused and no worker and no file handle is left behind (`RES-009`).
+        self.context.resources.shutdown();
         Ok(())
     }
 

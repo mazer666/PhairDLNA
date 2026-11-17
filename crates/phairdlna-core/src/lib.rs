@@ -28,6 +28,7 @@ pub mod identity;
 pub mod lifecycle;
 pub mod media;
 pub mod platform;
+pub mod scheduler;
 pub mod security;
 pub mod ssdp;
 pub mod time;

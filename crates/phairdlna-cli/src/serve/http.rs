@@ -18,6 +18,7 @@ use axum::http::{HeaderMap as AxumHeaders, HeaderValue, StatusCode};
 use axum::response::Response;
 use axum::routing::{any, get, post};
 use axum::Router;
+use phairdlna_core::scheduler::Priority;
 use phairdlna_core::upnp::DeviceDescription;
 use phairdlna_core::upnp::Dispatcher;
 use phairdlna_core::upnp::ServiceSpec;
@@ -28,6 +29,7 @@ use super::log::Logger;
 use super::media::MediaLibrary;
 use super::media_route::{artwork, media};
 use super::pictures::Pictures;
+use super::resources::Resources;
 use super::transfers::Transfers;
 
 /// What the handlers of the daemon share.
@@ -48,6 +50,8 @@ pub struct ServerContext {
     pub guard: Arc<Guard>,
     /// The transfers that are running.
     pub transfers: Transfers,
+    /// The scheduler of the work of the daemon.
+    pub resources: Resources,
 }
 
 /// The content type of an XML answer.
@@ -120,7 +124,7 @@ async fn content_directory_control(
     headers: AxumHeaders,
     body: String,
 ) -> Response {
-    control_response(&context, &headers, &body, ServiceSpec::content_directory())
+    control_response(&context, &headers, &body, ServiceSpec::content_directory()).await
 }
 
 /// Answers a control request of the ConnectionManager service.
@@ -129,7 +133,7 @@ async fn connection_manager_control(
     headers: AxumHeaders,
     body: String,
 ) -> Response {
-    control_response(&context, &headers, &body, ServiceSpec::connection_manager())
+    control_response(&context, &headers, &body, ServiceSpec::connection_manager()).await
 }
 
 /// Answers a control request with the SOAP dispatcher of the core.
@@ -137,7 +141,7 @@ async fn connection_manager_control(
 /// The path decides which service the client thinks it is talking to. A
 /// request for another service is refused here, so that a service never
 /// answers on the address of another one.
-fn control_response(
+async fn control_response(
     context: &ServerContext,
     headers: &AxumHeaders,
     body: &str,
@@ -154,9 +158,32 @@ fn control_response(
         );
         return fault_response(StatusCode::BAD_REQUEST);
     }
-    let catalogue = context.library.catalogue();
-    let dispatcher = Dispatcher::new(&*catalogue, &context.base_url);
-    let answer = dispatcher.dispatch(body, action);
+    // The work of the control plane runs in the control plane class of the
+    // scheduler, so that the answer of a client comes before the work of the
+    // library (`RES-001`).
+    let library = context.library.clone();
+    let base_url = context.base_url.clone();
+    let request_body = body.to_owned();
+    let action = action.map(|value| value.to_owned());
+    let answer = match context
+        .resources
+        .run(Priority::ControlPlane, move || {
+            library.with_catalogue(|catalogue| {
+                let dispatcher = Dispatcher::new(catalogue, &base_url);
+                dispatcher.dispatch(&request_body, action.as_deref())
+            })
+        })
+        .await
+    {
+        Ok(answer) => answer,
+        Err(error) => {
+            context.logger.warn(
+                "a control request could not be answered",
+                &[("reason", &error.to_string())],
+            );
+            return fault_response(StatusCode::SERVICE_UNAVAILABLE);
+        }
+    };
     let status = StatusCode::from_u16(answer.status).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
     let mut response = Response::new(Body::from(answer.body));
     *response.status_mut() = status;

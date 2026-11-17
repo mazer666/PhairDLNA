@@ -48,10 +48,12 @@
 | `crates/phairdlna-core/src/http/` | The delivery of media over HTTP — the `Range` header, the headers of a media answer, the containment of a media URL and the evaluator of a request | F-06, F-11 |
 | `crates/phairdlna-core/src/upnp/` | The device description, the service descriptions (SCPD), the SOAP dispatcher and the ContentDirectory and ConnectionManager actions | F-02, F-03, F-04 |
 | `crates/phairdlna-core/src/config/` | The typed, validated, versioned configuration | F-12 |
+| `crates/phairdlna-core/src/scheduler/` | The one scheduler of the server — the priority classes, the bounds of the workers and of the queues, the hysteresis of the pressure and the report of the resources | F-18 |
 | `crates/phairdlna-cli/src/lib.rs` | The commands, as pure functions over their arguments | F-13 |
 | `crates/phairdlna-cli/src/catalogue.rs` | The catalogue commands — the tree of the library and the document a client receives | F-08, F-09, F-13 |
 | `crates/phairdlna-cli/src/serve/` | The daemon — the start of the server, the HTTP routes, the discovery socket, the library and the watch of the drives, the media of the library, the body of a media answer, the cache of the pictures, the log, the signals and the transfers that run (`transfers.rs`) | F-01, F-02, F-03, F-04, F-06, F-08, F-10, F-13 |
 | `crates/phairdlna-cli/src/serve/admin.rs` | The wiring of the administration surface — the view of the daemon that the surface asks | F-14 |
+| `crates/phairdlna-cli/src/serve/resources.rs` | The scheduler of the daemon — the classes of the work, the hints about the machine and the place of a transfer | F-18 |
 | `crates/phairdlna-cli/src/main.rs` | The argument parsing and the exit code | F-13 |
 | `crates/phairdlna-core/tests/media_roots.rs` | The acceptance criteria of F-08 for one root | F-08 |
 | `crates/phairdlna-core/tests/media_roots_multiple.rs` | The acceptance criteria of F-08 for more than one root | F-08 |
@@ -68,6 +70,10 @@
 | `crates/phairdlna-cli/tests/discovery.rs` | The discovery of the daemon — the advertisements, the answer of a search and the withdrawal | F-01 |
 | `crates/phairdlna-cli/tests/serve_command.rs` | The `serve` command of the command line and the graceful shutdown | F-13 |
 | `crates/phairdlna-cli/tests/support/` | The fixtures of the tests of the daemon — the daemon in a thread and the small HTTP client | F-13 |
+| `crates/phairdlna-core/tests/scheduler_priority.rs` | The acceptance criteria of F-18 — the order of the classes and the isolation of a slow client | F-18 |
+| `crates/phairdlna-core/tests/scheduler_hysteresis.rs` | The acceptance criteria of F-18 — the hysteresis of the background work, with a synthetic clock | F-18 |
+| `crates/phairdlna-core/tests/resource_exhaustion.rs` | The acceptance criteria of F-18 — the bounds of the queues and the refusal with a clear error | F-18 |
+| `crates/phairdlna-cli/tests/resources.rs` | The resources of the daemon — the order of the work, the report and the place of a transfer | F-18 |
 | `crates/phairdlna-admin/src/lib.rs` | The optional administration surface — the crate root and the public API | F-14 |
 | `crates/phairdlna-admin/src/token.rs` | The token of the surface — the file, the permissions and the comparison | F-14 |
 | `crates/phairdlna-admin/src/guard.rs` | The rules every request of the surface must pass — host, framing, origin, token, custom header | F-14 |
@@ -112,7 +118,6 @@ visible and so that a contributor can see where their change will land.
 | --- | --- | --- |
 | `crates/phairdlna-core/src/ssdp/interfaces.rs` | The selection of the sending interface and the rate limiter of the answers | F-01 |
 | `crates/phairdlna-core/src/catalogue/index.rs` | The index of the catalogue on disk, the rebuild and the event-driven scan | F-09 |
-| `crates/phairdlna-core/src/scheduler/` | Priority classes, bounded pools, backpressure | F-18 |
 | `crates/phairdlna-core/src/platform/` | Platform traits and per-OS implementations | F-08, F-13, F-15 |
 | `crates/phairdlna-core/src/lifecycle/` | Server states, sleep/wake and network recovery | F-13 |
 | `crates/phairdlna-core/src/logging/` | Structured logging and redaction | F-13, F-16 |
