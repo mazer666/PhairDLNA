@@ -672,15 +672,18 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " `::the_file_of_the_index_belongs_to_the_user_alone`,"
         " `::a_deleted_index_is_built_again`,"
         " `::the_media_of_the_library_is_never_written_to`,"
+        " `::a_playlist_survives_the_round_trip`,"
+        " `::a_subtitle_survives_the_round_trip`,"
         " `crates/phairdlna-cli/tests/catalogue_index.rs::the_daemon_writes_the_catalogue_into_its_index`,"
         " `::the_daemon_serves_the_library_after_a_restart`"
         " — the catalogue is written into a SQLite database of the user and read back after the"
-        " server stopped; the file belongs to the user alone, the index is a cache that may be"
+        " server stopped; a playlist and a subtitle survive the round trip with their order and"
+        " their names; the file belongs to the user alone, the index is a cache that may be"
         " deleted at any time, and the media of the library is never touched",
         "Verified",
     ),
     "FUN-010": (
-        "`crates/phairdlna-core/tests/catalogue_rebuild.rs::a_damaged_index_is_moved_aside_and_rebuilt`,"
+        "`crates/phairdlna-core/tests/catalogue_recovery.rs::a_damaged_index_is_moved_aside_and_rebuilt`,"
         " `::an_index_of_another_schema_is_moved_aside`,"
         " `crates/phairdlna-cli/tests/catalogue_index.rs::a_damaged_index_does_not_stop_the_daemon`"
         " — a file that is damaged or that carries another schema is moved aside under the name"

@@ -12,66 +12,15 @@
 mod support;
 
 use std::fs;
-use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::thread;
 
 use phairdlna_core::catalogue::index::CatalogueIndex;
-use phairdlna_core::catalogue::{Catalogue, ContentSource};
-use phairdlna_core::config::{MediaRoot, SymlinkPolicy};
-use phairdlna_core::platform::LocalFileSystem;
-use phairdlna_core::upnp::Dispatcher;
-use support::browse_request;
-use tempfile::{tempdir, TempDir};
-
-/// The base URL the dispatcher builds the addresses with.
-const BASE_URL: &str = "http://192.168.1.20:8200";
-
-/// Builds a catalogue over one root.
-fn catalogue_over(path: &Path) -> Catalogue {
-    let root = MediaRoot {
-        name: "Films".to_owned(),
-        path: path.to_string_lossy().into_owned(),
-        exclude: Vec::new(),
-        symlink_policy: None,
-    };
-    Catalogue::build(&[root], SymlinkPolicy::Skip, &LocalFileSystem)
-}
-
-/// A library with the given films in it.
-fn library_with(films: &[&str]) -> TempDir {
-    let directory = tempdir().expect("a temporary directory");
-    for film in films {
-        fs::write(directory.path().join(film), b"a film").expect("the file is written");
-    }
-    directory
-}
-
-/// The file of the index in a temporary folder.
-///
-/// The folder is returned as well: it lives as long as the test does, and the
-/// file of the index must not vanish under it.
-fn index_path() -> (TempDir, PathBuf) {
-    let directory = tempdir().expect("a temporary directory");
-    let path = directory.path().join("catalogue.db");
-    (directory, path)
-}
-
-/// The number of the entries of a catalogue: the folders and the files.
-fn entry_count(catalogue: &Catalogue) -> usize {
-    let mut total = 0;
-    let mut open = vec!["1".to_owned()];
-    while let Some(id) = open.pop() {
-        let Some(container) = catalogue.container(&id) else {
-            continue;
-        };
-        for child in &container.children {
-            total += 1;
-            open.push(child.id.clone());
-        }
-    }
-    total
-}
+use phairdlna_core::catalogue::ContentSource;
+use support::index::{
+    browse_of, catalogue_over, container_titled, entry_count, index_path, item_titled, library_with,
+};
+use tempfile::tempdir;
 
 /// The index is written and read back.
 #[test]
@@ -99,19 +48,6 @@ fn the_index_is_written_and_read_back() {
         browse_of(&catalogue),
         "the catalogue of the index must show the same library to a client"
     );
-}
-
-/// The answer of a browse of the whole tree, as a client sees it.
-fn browse_of(catalogue: &Catalogue) -> String {
-    let dispatcher = Dispatcher::new(catalogue, BASE_URL);
-    let mut answer = String::new();
-    for id in ["0", "1"] {
-        let body = dispatcher
-            .dispatch(&browse_request(id, "BrowseDirectChildren", 0, 0), None)
-            .body;
-        answer.push_str(&body);
-    }
-    answer
 }
 
 /// The catalogue of the last run is read back after the server stopped.
@@ -214,71 +150,6 @@ fn a_browse_during_a_rescan_sees_the_previous_catalogue() {
     );
 }
 
-/// A damaged index is moved aside, and the server goes on.
-#[test]
-fn a_damaged_index_is_moved_aside_and_rebuilt() {
-    let library = library_with(&["King Kong.mkv"]);
-    let (_folder, path) = index_path();
-    fs::write(&path, b"this is not a database at all").expect("the file is damaged");
-
-    let opened = CatalogueIndex::open(&path).expect("the index opens anyway");
-    let repair = opened.recovery.expect("the damage is reported");
-    assert!(
-        repair.moved_to.exists(),
-        "the damaged file must be kept: {}",
-        repair.moved_to.display()
-    );
-    assert!(
-        repair
-            .moved_to
-            .file_name()
-            .expect("the file has a name")
-            .to_string_lossy()
-            .contains(".corrupt."),
-        "the damaged file must carry the mark of the damage: {}",
-        repair.moved_to.display()
-    );
-    assert!(
-        opened.index.load().expect("the index is read").is_none(),
-        "the new index must be empty"
-    );
-
-    let mut catalogue = catalogue_over(library.path());
-    opened
-        .index
-        .store(&mut catalogue)
-        .expect("the catalogue is written into the new index");
-    let rebuilt = opened
-        .index
-        .load()
-        .expect("the catalogue is read")
-        .expect("the index holds a catalogue");
-    assert!(entry_count(&rebuilt) >= 1, "the library is read again");
-}
-
-/// An index of another schema is moved aside as well.
-#[test]
-fn an_index_of_another_schema_is_moved_aside() {
-    let (_folder, path) = index_path();
-    {
-        let connection = rusqlite::Connection::open(&path).expect("the database is created");
-        connection
-            .execute_batch("CREATE TABLE something (id TEXT);")
-            .expect("the table is created");
-        connection
-            .pragma_update(None, "user_version", 99)
-            .expect("the version is written");
-    }
-
-    let opened = CatalogueIndex::open(&path).expect("the index opens anyway");
-    let repair = opened.recovery.expect("the damage is reported");
-    assert!(
-        repair.moved_to.exists(),
-        "the file of the other schema must be kept: {}",
-        repair.moved_to.display()
-    );
-}
-
 /// The file of the index belongs to the user alone.
 #[test]
 #[cfg(unix)]
@@ -369,5 +240,93 @@ fn a_deleted_index_is_built_again() {
     assert!(
         opened.index.load().expect("the index is read").is_some(),
         "the index holds the catalogue again"
+    );
+}
+
+/// A playlist survives the round trip through the index.
+///
+/// The playlist is the hard case: a file lives in a folder *and* in a playlist,
+/// and the playlist gives its entries a title of its own (`FUN-015`).
+#[test]
+fn a_playlist_survives_the_round_trip() {
+    let directory = tempdir().expect("a temporary directory");
+    fs::write(directory.path().join("King Kong.mkv"), b"a film").expect("the file is written");
+    fs::write(directory.path().join("Nightfall.mkv"), b"a film").expect("the file is written");
+    fs::write(
+        directory.path().join("Best of.m3u"),
+        b"King Kong.mkv\nNightfall.mkv\n",
+    )
+    .expect("the playlist is written");
+    let (_folder, path) = index_path();
+
+    let opened = CatalogueIndex::open(&path).expect("the index opens");
+    let mut catalogue = catalogue_over(directory.path());
+    opened
+        .index
+        .store(&mut catalogue)
+        .expect("the catalogue is written");
+
+    let loaded = opened
+        .index
+        .load()
+        .expect("the catalogue is read")
+        .expect("the index holds a catalogue");
+    let playlist = container_titled(&loaded, "Best of.m3u");
+    let children: Vec<String> = loaded
+        .container(&playlist)
+        .expect("the playlist is a container")
+        .children
+        .iter()
+        .map(|child| child.title.clone())
+        .collect();
+    assert_eq!(
+        children,
+        vec!["King Kong.mkv".to_owned(), "Nightfall.mkv".to_owned()],
+        "the playlist keeps its entries and their order"
+    );
+    assert_eq!(
+        browse_of(&loaded),
+        browse_of(&catalogue),
+        "the catalogue of the index must show the same library to a client"
+    );
+}
+
+/// A subtitle survives the round trip through the index.
+///
+/// The sidecar is an additional resource of the film, and the client asks for
+/// it by its identifier; the index must keep both (`FUN-016`).
+#[test]
+fn a_subtitle_survives_the_round_trip() {
+    let directory = tempdir().expect("a temporary directory");
+    fs::write(directory.path().join("Nightfall.mkv"), b"a film").expect("the file is written");
+    fs::write(
+        directory.path().join("Nightfall.vtt"),
+        b"WEBVTT\n\n00:00.000 --> 00:02.000\nA line.\n",
+    )
+    .expect("the subtitle is written");
+    let (_folder, path) = index_path();
+
+    let opened = CatalogueIndex::open(&path).expect("the index opens");
+    let mut catalogue = catalogue_over(directory.path());
+    opened
+        .index
+        .store(&mut catalogue)
+        .expect("the catalogue is written");
+
+    let loaded = opened
+        .index
+        .load()
+        .expect("the catalogue is read")
+        .expect("the index holds a catalogue");
+    let film = item_titled(&loaded, "Nightfall.mkv");
+    let sidecar = film
+        .metadata
+        .subtitle
+        .as_ref()
+        .expect("the film carries its subtitle");
+    assert_eq!(sidecar.mime_type, "text/vtt");
+    assert!(
+        loaded.item_of(&sidecar.id).is_some(),
+        "the sidecar is known"
     );
 }

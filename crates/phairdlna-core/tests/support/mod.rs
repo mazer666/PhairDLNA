@@ -17,6 +17,7 @@
 pub mod artwork;
 pub mod catalogue;
 pub mod didl;
+pub mod index;
 pub mod media;
 pub mod volumes;
 

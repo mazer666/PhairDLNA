@@ -402,7 +402,8 @@ yet says *planned*.
 | Purpose | Path | State |
 | --- | --- | --- |
 | Index behaviour, browse-during-scan, no filesystem access | `crates/phairdlna-core/tests/catalogue_index.rs` | exists |
-| Rebuild, corruption recovery, no-writes-to-media | `crates/phairdlna-core/tests/catalogue_rebuild.rs` | exists (M2.9) |
+| The index on disk — the round trip, the catalogue during a rescan, the restart and the file that belongs to the user alone | `crates/phairdlna-core/tests/catalogue_rebuild.rs` | exists (M2.9) |
+| Corruption recovery — the damaged file, the file of another schema and the rebuild | `crates/phairdlna-core/tests/catalogue_recovery.rs` | exists (M2.9) |
 | The index of the running daemon, its restart and a damaged index | `crates/phairdlna-cli/tests/catalogue_index.rs` | exists (M2.9) |
 | Identifier stability, de-duplication by device identity | `crates/phairdlna-core/tests/catalogue_identifiers.rs` | exists |
 | Incremental scan, change detection, visibility bound and its fallback | `crates/phairdlna-core/tests/catalogue_incremental.rs` | planned (M2) |

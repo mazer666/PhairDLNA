@@ -51,7 +51,8 @@
 | `crates/phairdlna-core/src/scheduler/` | The one scheduler of the server — the priority classes, the bounds of the workers and of the queues, the hysteresis of the pressure and the report of the resources | F-18 |
 | `crates/phairdlna-cli/src/lib.rs` | The commands, as pure functions over their arguments | F-13 |
 | `crates/phairdlna-core/src/catalogue/index/` | The index of the catalogue on disk — the schema of the database, the writing of a catalogue, the reading of it back and the recovery from a damaged file | F-09 |
-| `crates/phairdlna-core/tests/catalogue_rebuild.rs` | The index on disk — the round trip, the catalogue during a rescan, the damaged file and the file that belongs to the user alone | F-09 |
+| `crates/phairdlna-core/tests/catalogue_rebuild.rs` | The index on disk — the round trip, the catalogue during a rescan, the restart and the file that belongs to the user alone | F-09 |
+| `crates/phairdlna-core/tests/catalogue_recovery.rs` | The recovery of the index — the damaged file, the file of another schema and the rebuild | F-09 |
 | `crates/phairdlna-cli/tests/catalogue_index.rs` | The index of the running daemon — the write, the restart and the damaged index | F-09 |
 | `crates/phairdlna-cli/src/catalogue.rs` | The catalogue commands — the tree of the library and the document a client receives | F-08, F-09, F-13 |
 | `crates/phairdlna-cli/src/serve/` | The daemon — the start of the server, the HTTP routes, the discovery socket, the library and the watch of the drives, the media of the library, the body of a media answer, the cache of the pictures, the log, the signals and the transfers that run (`transfers.rs`) | F-01, F-02, F-03, F-04, F-06, F-08, F-10, F-13 |
