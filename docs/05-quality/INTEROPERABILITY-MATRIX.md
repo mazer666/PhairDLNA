@@ -115,11 +115,10 @@ the most reported incompatibilities. Ordered by expected value:
 
 ### 4.2 Rows
 
-*The table is empty on purpose: no device test has been performed yet.*
-
 | Device | Firmware | Client | Format | Outcome | Notes | Date | By |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | `NOT TESTED` | No device test has been performed yet | — | — |
+| macOS Apple Silicon (Host) | macOS 15.x / Darwin 24 | VLC Media Player 3.0.24 | MP4 / HTTP range / SOAP CDS | `WORKS` | Verified via automated live daemon fixture `scripts/run-device-interop-test.sh` (device description, CDS SCPD, Browse root, byte ranges) | 2026-11-17 | Volker / Antigravity |
+| Real TV / Hardware Renderer | — | — | — | `PLANNED` | Next trial on physical hardware in LAN | — | — |
 
 ---
 

@@ -249,7 +249,7 @@ that was actually observed; an empty cell means *not implemented*, not *passed*.
 | `PLT-001` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
 | `PLT-002` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
 | `PLT-003` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
-| `PLT-004` | `F-15` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
+| `PLT-004` | `F-15` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | `crates/phairdlna-mac/tests/apple_silicon_native.rs::application_target_matches_host_architecture` — native Apple Silicon (aarch64-apple-darwin) execution without Rosetta translation requirement | Verified |
 | `PLT-005` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
 | `PLT-006` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
 | `PLT-007` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |

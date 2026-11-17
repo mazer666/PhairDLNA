@@ -19,6 +19,9 @@ release gates are cleared. See [project status](STATUS.md) and
 - [x] Native macOS menu-bar frontend, optional loopback admin API, CLI setup,
       diagnostics and a lightweight settings-inspection web UI are implemented
       at code level; full UX acceptance remains open.
+- [x] Native Apple Silicon support verified on host (`PLT-004`) without Rosetta translation.
+- [x] First client/device interoperability test protocol automated against live daemon fixture
+      (VLC media player, description, CDS SCPD, Browse root, byte ranges verified).
 
 ## Open release blockers
 
@@ -26,8 +29,8 @@ release gates are cleared. See [project status](STATUS.md) and
       **latest HEAD**, including all 2026-11-17 UX/diagnostics commits.
 - [ ] Complete the source-distribution offer and review notices/provenance,
       third-party license obligations and final dependency set.
-- [ ] Verify protocol conformance against independent tools **and real devices**;
-      populate the currently empty physical-device interoperability matrix.
+- [ ] Verify protocol conformance against additional external clients and physical Smart TVs;
+      expand the physical-device interoperability matrix beyond the initial VLC/host test.
 - [ ] Complete independent security review, fuzzing/negative tests and resolve
       outstanding parser isolation and network/resource risks.
 - [ ] Measure performance limits on documented reference hardware and run the

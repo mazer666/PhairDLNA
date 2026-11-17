@@ -1039,6 +1039,11 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " the macOS application bundle installs no hidden privileged helper or launchd agent silently",
         "Verified",
     ),
+    "PLT-004": (
+        "`crates/phairdlna-mac/tests/apple_silicon_native.rs::application_target_matches_host_architecture`"
+        " — native Apple Silicon (aarch64-apple-darwin) execution without Rosetta translation requirement",
+        "Verified",
+    ),
     "UX-011": (
         "`crates/phairdlna-cli/tests/admin.rs::the_diagnostics_do_not_name_the_files_of_the_user`,"
         " `crates/phairdlna-admin/tests/admin_surface.rs::the_diagnostics_hide_the_paths`"
