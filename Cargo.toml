@@ -38,3 +38,8 @@ tempfile = "3.27"
 unicode-normalization = "0.1.26"
 unicase = "2.10"
 uuid = { version = "1.29", features = ["v4"] }
+# The catalogue index on disk (ADR-0006, FUN-009). The `bundled` feature compiles
+# the SQLite amalgamation into the binary, so that the server does not depend on the
+# SQLite version of the system and cannot load an extension of it: the extension
+# support of the binding stays switched off.
+rusqlite = { version = "0.42", default-features = false, features = ["bundled"] }

@@ -279,11 +279,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "INT-037": (
         "`crates/phairdlna-core/tests/catalogue_index.rs::the_update_id_never_goes_backwards`,"
-        " `::the_update_id_changes_when_a_file_changes`"
+        " `::the_update_id_changes_when_a_file_changes`,"
+        " `crates/phairdlna-core/tests/catalogue_rebuild.rs::the_identifier_of_the_catalogue_survives_a_restart`"
         " — the identifier of the real catalogue never decreases and changes when the"
-        " catalogue changes; it starts again after a restart, because the counter that"
-        " keeps it monotonic is not written to the disk (FUN-009)",
-        "Implemented",
+        " catalogue changes; the index writes it down, so that it is the same after a restart"
+        " and higher than every identifier before it when the catalogue changed",
+        "Verified",
     ),
     "INT-038": (
         "`crates/phairdlna-core/tests/content_directory.rs::the_root_and_the_content_directory_root_are_known`,"
@@ -560,7 +561,7 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "`crates/phairdlna-cli/tests/serve_command.rs::the_server_answers_a_client`,"
         " `crates/phairdlna-cli/tests/discovery.rs::the_advertisements_are_withdrawn`"
         " — a `SIGTERM` makes the daemon withdraw its advertisements, stop the discovery, drain the HTTP server and"
-        " exit with the code 0; the flush of the index does not exist, because the index on disk (`FUN-009`) does not exist",
+        " exit with the code 0; every write of the index is committed before the daemon stops, so there is nothing to flush",
         "Implemented",
     ),
     "OPS-012": (
@@ -657,6 +658,35 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — a file that two roots reach is one catalogue entry, and the first root wins; the device round"
         " that shows it on a television is still missing",
         "Implemented",
+    ),
+    "FUN-008": (
+        "`crates/phairdlna-core/tests/catalogue_rebuild.rs::a_browse_during_a_rescan_sees_the_previous_catalogue`"
+        " — the reader of the index has a connection of its own and the writer writes the whole"
+        " catalogue in one transaction, so a browse during a rescan sees the catalogue of before"
+        " or the catalogue of now, and never a mixture of the two",
+        "Verified",
+    ),
+    "FUN-009": (
+        "`crates/phairdlna-core/tests/catalogue_rebuild.rs::the_index_is_written_and_read_back`,"
+        " `::the_catalogue_survives_a_restart_of_the_server`,"
+        " `::the_file_of_the_index_belongs_to_the_user_alone`,"
+        " `::a_deleted_index_is_built_again`,"
+        " `::the_media_of_the_library_is_never_written_to`,"
+        " `crates/phairdlna-cli/tests/catalogue_index.rs::the_daemon_writes_the_catalogue_into_its_index`,"
+        " `::the_daemon_serves_the_library_after_a_restart`"
+        " — the catalogue is written into a SQLite database of the user and read back after the"
+        " server stopped; the file belongs to the user alone, the index is a cache that may be"
+        " deleted at any time, and the media of the library is never touched",
+        "Verified",
+    ),
+    "FUN-010": (
+        "`crates/phairdlna-core/tests/catalogue_rebuild.rs::a_damaged_index_is_moved_aside_and_rebuilt`,"
+        " `::an_index_of_another_schema_is_moved_aside`,"
+        " `crates/phairdlna-cli/tests/catalogue_index.rs::a_damaged_index_does_not_stop_the_daemon`"
+        " — a file that is damaged or that carries another schema is moved aside under the name"
+        " `.corrupt.<moment>`, a new index takes its place, the library is read again, and the"
+        " daemon says so in the log and in the status of the server",
+        "Verified",
     ),
     "FUN-026": (
         "`crates/phairdlna-core/tests/subtitles.rs::a_film_carries_the_subtitle_as_a_second_resource`,"

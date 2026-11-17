@@ -127,9 +127,13 @@ impl AdminBackend for DaemonAdmin {
                 fields: record.fields,
             })
             .collect();
-        let warnings = self
+        let mut warnings = self
             .library
             .with_catalogue(|catalogue| catalogue.diagnostics().to_vec());
+        // The warnings of the library itself are shown as well: a damaged index
+        // is told to the user in the log *and* in the status of the server
+        // (`FUN-010`, `F-09` § 9).
+        warnings.extend(self.library.warnings());
         Diagnostics {
             version: phairdlna_core::PROJECT_VERSION.to_owned(),
             source_revision: phairdlna_core::SOURCE_REVISION.to_owned(),

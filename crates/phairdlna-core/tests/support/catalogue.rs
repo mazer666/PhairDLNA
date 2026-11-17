@@ -171,6 +171,7 @@ pub fn music_track() -> ContentItem {
     item.metadata = MediaMetadata {
         mime_type: Some("audio/mpeg".to_owned()),
         size: Some(7_340_032),
+        modified: Some(1_716_962_927),
         duration: Some(std::time::Duration::from_secs(232)),
         bitrate: Some(31_744),
         resolution: None,

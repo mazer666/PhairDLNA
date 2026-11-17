@@ -15,6 +15,7 @@ use std::time::Duration;
 mod builder;
 pub mod identifier;
 pub mod identity;
+pub mod index;
 pub mod library;
 pub mod media;
 pub mod mime;
@@ -68,6 +69,49 @@ pub enum MediaKind {
     Other,
 }
 
+impl MediaKind {
+    /// Whether the object of this kind is a container a client opens.
+    ///
+    /// A folder and a playlist are containers; a file is not (`INT-042`).
+    pub fn is_container(self) -> bool {
+        matches!(self, MediaKind::Folder | MediaKind::Playlist)
+    }
+
+    /// The key the index stores the kind under.
+    ///
+    /// The key is written down here and not in the index, so that the index
+    /// and the catalogue cannot disagree about it (`FUN-009`).
+    pub(crate) fn storage_key(self) -> &'static str {
+        match self {
+            MediaKind::MusicTrack => "music_track",
+            MediaKind::Movie => "movie",
+            MediaKind::VideoBroadcast => "video_broadcast",
+            MediaKind::Photo => "photo",
+            MediaKind::Folder => "folder",
+            MediaKind::Playlist => "playlist",
+            MediaKind::Subtitle => "subtitle",
+            MediaKind::Other => "other",
+        }
+    }
+
+    /// The kind a stored key names.
+    ///
+    /// A key that this build does not know names a file of an unknown kind: the
+    /// catalogue describes it as what it is, and not as something else.
+    pub(crate) fn from_storage_key(key: &str) -> MediaKind {
+        match key {
+            "music_track" => MediaKind::MusicTrack,
+            "movie" => MediaKind::Movie,
+            "video_broadcast" => MediaKind::VideoBroadcast,
+            "photo" => MediaKind::Photo,
+            "folder" => MediaKind::Folder,
+            "playlist" => MediaKind::Playlist,
+            "subtitle" => MediaKind::Subtitle,
+            _ => MediaKind::Other,
+        }
+    }
+}
+
 /// A subtitle that lies next to a media file.
 ///
 /// The sidecar is an **additional resource** of the media object, not an item
@@ -96,6 +140,11 @@ pub struct MediaMetadata {
     pub mime_type: Option<String>,
     /// The size of the file in bytes.
     pub size: Option<u64>,
+    /// The moment the file was last changed, in seconds since the epoch.
+    ///
+    /// The moment is the one of the filesystem, and it is what the index
+    /// compares to know whether a file changed (`PERF-003`, `FUN-009`).
+    pub modified: Option<u64>,
     /// The running time of the media.
     pub duration: Option<Duration>,
     /// The pixel dimensions of an image.

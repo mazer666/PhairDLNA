@@ -60,9 +60,9 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-005` | Index audio, video, image and playlist files by extension and by sniffed content type. | MUST | `F-08` | M1 | Automated test | Baseline |
 | `FUN-006` | Re-scan a root incrementally and detect added | MUST | `F-08` | M1 | Automated test | Baseline |
 | `FUN-007` | Detect a root that is unmounted, inaccessible or replaced by a different volume, and shall… | MUST | `F-08` | M1 | Automated test | Baseline |
-| `FUN-008` | Keep the catalogue usable while a rescan runs; a browse during a scan shall return the… | MUST | `F-09` | M2 | Automated test | Baseline |
-| `FUN-009` | Store its catalogue in a local SQLite database that can be deleted and rebuilt without data… | MUST | `F-09` | M2 | Automated test | Baseline |
-| `FUN-010` | Recover from a corrupted index database by rebuilding it automatically | MUST | `F-09` | M2 | Automated test | Baseline |
+| `FUN-008` | Keep the catalogue usable while a rescan runs; a browse during a scan shall return the… | MUST | `F-09` | M2 | Automated test | Verified |
+| `FUN-009` | Store its catalogue in a local SQLite database that can be deleted and rebuilt without data… | MUST | `F-09` | M2 | Automated test | Verified |
+| `FUN-010` | Recover from a corrupted index database by rebuilding it automatically | MUST | `F-09` | M2 | Automated test | Verified |
 | `FUN-011` | Assign stable object identifiers that do not change when the catalogue is rebuilt. | MUST | `F-09` | M1 | Automated test | Baseline |
 | `FUN-012` | Extract duration, dimensions, bitrate and codec information for media files where it can do so… | SHOULD | `F-09` | M1 | Automated test | Baseline |
 | `FUN-013` | Extract embedded artwork from audio files and use a sidecar image when one exists. | SHOULD | `F-10` | M2 | Automated test | Implemented |
@@ -134,7 +134,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-034` | Apply the `Filter` argument, shall support the wildcard `*` that clients send constantly, and… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-035` | Implement `GetSearchCapabilities` and `GetSortCapabilities` and shall return only capabilities… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-036` | Implement `Search` for the capability strings it advertises in `GetSearchCapabilities`. | SHOULD | `F-03` | M1 | Protocol conformance test | Verified |
-| `INT-037` | Implement `GetSystemUpdateID` and shall keep the returned value monotonically non-decreasing | MUST | `F-03` | M1 | Protocol conformance test | Implemented |
+| `INT-037` | Implement `GetSystemUpdateID` and shall keep the returned value monotonically non-decreasing | MUST | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-038` | Return the object ID `0` for the root container and the standard ID `1` for the content… | MUST | `F-03` | M1 | Protocol conformance test | Implemented |
 | `INT-039` | Return an UPnP error `701 No Such Object` for an unknown `ObjectID` instead of an empty… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-040` | Not implement write operations (`CreateObject` | MUST | `F-03` | M1 | Protocol conformance test | Verified |

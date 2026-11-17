@@ -46,6 +46,13 @@ pub struct Catalogue {
     pub(super) items: BTreeMap<String, ContentItem>,
     pub(super) files: BTreeMap<String, PathBuf>,
     pub(super) system_update_id: u32,
+    /// The fingerprint of the catalogue: a number that changes when the
+    /// catalogue changes.
+    ///
+    /// The index writes it down, so that the next run may tell an unchanged
+    /// library from a changed one and keep the identifier of the catalogue
+    /// (`INT-037`, `FUN-009`).
+    pub(super) fingerprint: u64,
     pub(super) diagnostics: Vec<String>,
     pub(super) roots: Vec<RootSummary>,
     /// The finder of the pictures of the library, when the server looks for them.
@@ -158,6 +165,16 @@ impl Catalogue {
     /// What the scanner could not do, in words a person can read.
     pub fn diagnostics(&self) -> &[String] {
         &self.diagnostics
+    }
+
+    /// The fingerprint of the catalogue: a number that changes when the
+    /// catalogue changes.
+    ///
+    /// Two catalogues of the same library have the same fingerprint as long as
+    /// nothing changed in them; the index writes it down to recognise the
+    /// library of the last run (`FUN-009`).
+    pub fn fingerprint(&self) -> u64 {
+        self.fingerprint
     }
 
     /// What the catalogue knows about the roots.

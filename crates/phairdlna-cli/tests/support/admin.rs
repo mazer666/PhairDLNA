@@ -58,7 +58,7 @@ impl Server {
         let token = std::fs::read_to_string(directory.path().join("admin.token"))
             .expect("the token is written");
         Self {
-            _directory: directory,
+            _directory: Some(directory),
             address,
             library,
             admin,

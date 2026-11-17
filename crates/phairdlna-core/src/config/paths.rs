@@ -37,3 +37,12 @@ pub fn user_data_dir() -> PathBuf {
         .join("share")
         .join(PROJECT_DIRECTORY)
 }
+
+/// The default file of the catalogue index.
+///
+/// The index is a cache of the catalogue: it lives beside the other data of
+/// the user, it may be deleted at any time, and the library is then read again
+/// (`FUN-009`).
+pub fn default_database_path() -> PathBuf {
+    user_data_dir().join("catalogue.db")
+}

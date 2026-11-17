@@ -221,6 +221,7 @@ fn file_item(
     let mut item = ContentItem::new(id, parent_id, &entry.title, kind);
     item.metadata.mime_type = entry.mime_type.clone();
     item.metadata.size = entry.size;
+    item.metadata.modified = modified_seconds_of(entry);
     if let Some(sidecar) = &entry.subtitle {
         item.metadata.subtitle = register_subtitle(catalogue, sidecar, id, context);
     }
@@ -303,11 +304,15 @@ fn size_of(entry: &ScanEntry) -> u64 {
 
 /// The moment an entry was changed, in seconds since the epoch.
 fn modified_of(entry: &ScanEntry) -> u64 {
+    modified_seconds_of(entry).unwrap_or_default()
+}
+
+/// The moment an entry was changed, when the filesystem knows it.
+fn modified_seconds_of(entry: &ScanEntry) -> Option<u64> {
     entry
         .modified
         .and_then(|time| time.duration_since(UNIX_EPOCH).ok())
         .map(|since| since.as_secs())
-        .unwrap_or_default()
 }
 
 /// The identifier that changes when the content of a container changes.

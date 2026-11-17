@@ -274,6 +274,7 @@ impl Builder<'_> {
             .collect();
         let fingerprint = CatalogueFingerprint::of(&containers);
         let library = self.library_key();
+        self.catalogue.fingerprint = fingerprint.value();
         self.catalogue.system_update_id = update_id_for(&library, fingerprint);
         BuildOutcome {
             catalogue: self.catalogue,

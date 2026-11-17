@@ -15,7 +15,8 @@ pub(super) fn validate_library(library: &LibrarySection) -> Result<(), ConfigErr
         validate_root(index, root)?;
     }
     validate_distinct_roots(&library.roots)?;
-    validate_cache_directory(library)
+    validate_cache_directory(library)?;
+    validate_database_path(library)
 }
 
 /// The cache of the pictures needs a folder of its own.
@@ -32,6 +33,26 @@ fn validate_cache_directory(library: &LibrarySection) -> Result<(), ConfigError>
             "library.cache_directory",
             "field \"library.cache_directory\" is empty; expected a folder, or no setting at all, \
              because the data directory of the user is used when the setting is missing",
+        ));
+    }
+    Ok(())
+}
+
+/// The index of the catalogue needs a file of its own.
+///
+/// An empty setting is refused: the file of the index would be the folder of
+/// the server itself, and the index would be a directory where a file is
+/// expected (`FUN-009`).
+fn validate_database_path(library: &LibrarySection) -> Result<(), ConfigError> {
+    let Some(path) = library.database_path.as_deref() else {
+        return Ok(());
+    };
+    if path.trim().is_empty() {
+        return Err(ConfigError::field(
+            "library.database_path",
+            "field \"library.database_path\" is empty; expected the file of the index, or no \
+             setting at all, because the data directory of the user is used when the setting is \
+             missing",
         ));
     }
     Ok(())

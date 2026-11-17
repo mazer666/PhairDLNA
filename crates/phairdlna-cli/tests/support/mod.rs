@@ -56,7 +56,10 @@ impl Answer {
 /// A daemon that runs in a thread of the test.
 pub struct Server {
     /// The directory of the test, kept alive so that the library stays.
-    _directory: tempfile::TempDir,
+    ///
+    /// A daemon that was started in a folder of the test does not own it: the
+    /// test does, and it may start the daemon again in the same folder.
+    _directory: Option<tempfile::TempDir>,
     address: SocketAddr,
     library: PathBuf,
     /// The address of the administration surface, when it runs.
@@ -114,7 +117,7 @@ impl Server {
             .recv_timeout(Duration::from_secs(10))
             .expect("the daemon announces its address");
         Self {
-            _directory: directory,
+            _directory: Some(directory),
             address,
             library,
             #[cfg(feature = "admin")]
@@ -137,13 +140,33 @@ impl Server {
     /// A test that needs a picture in the library writes the file itself.
     pub fn start_with_files(files: &[(&str, &[u8])]) -> Self {
         let directory = tempfile::tempdir().expect("a temporary directory");
-        let library = directory.path().join("Library");
+        let path = directory.path().to_path_buf();
+        Self::start_in_with(&path, files, Some(directory))
+    }
+
+    /// Starts a daemon in a folder of the test.
+    ///
+    /// The folder stays the property of the caller: a test that starts the
+    /// daemon again in the same folder sees the index of the catalogue of the
+    /// run before (`FUN-009`).
+    pub fn start_in(directory: &Path, files: &[(&str, &[u8])]) -> Self {
+        Self::start_in_with(directory, files, None)
+    }
+
+    /// Starts a daemon in a folder, with the folder of the test when there is
+    /// one.
+    fn start_in_with(
+        directory: &Path,
+        files: &[(&str, &[u8])],
+        owned: Option<tempfile::TempDir>,
+    ) -> Self {
+        let library = directory.join("Library");
         std::fs::create_dir_all(&library).expect("the library is created");
         for (name, bytes) in files {
             std::fs::write(library.join(name), bytes).expect("the file is written");
         }
-        let config = write_config(directory.path(), &library);
-        let identity = directory.path().join("identity");
+        let config = write_config(directory, &library);
+        let identity = directory.join("identity");
         let mut options = ServeOptions::new(config);
         options.http_port = Some(0);
         options.ssdp = false;
@@ -167,7 +190,7 @@ impl Server {
             .recv_timeout(Duration::from_secs(10))
             .expect("the daemon announces its address");
         Self {
-            _directory: directory,
+            _directory: owned,
             address,
             library,
             #[cfg(feature = "admin")]
@@ -359,8 +382,10 @@ pub fn write_config_with(directory: &Path, library: &Path, security: &str) -> Pa
     // run never writes into the data directory of the user.
     let text = format!(
         "schema_version = 1\n\n[server]\ndevice_name = \"Living room\"\n\n\
-         [library]\ncache_directory = \"{}\"\n[[library.roots]]\nname = \"Films\"\npath = \"{}\"\n\n{security}",
+         [library]\ncache_directory = \"{}\"\ndatabase_path = \"{}\"\n\
+         [[library.roots]]\nname = \"Films\"\npath = \"{}\"\n\n{security}",
         directory.join("cache").display(),
+        directory.join("catalogue.db").display(),
         library.display()
     );
     std::fs::write(&path, text).expect("the configuration is written");

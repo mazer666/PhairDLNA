@@ -48,6 +48,14 @@ impl CatalogueFingerprint {
         }
         Self(hash)
     }
+
+    /// The number the fingerprint ended at.
+    ///
+    /// The index writes the number down, so that the next run may tell an
+    /// unchanged library from a changed one (`FUN-009`).
+    pub fn value(&self) -> u64 {
+        self.0
+    }
 }
 
 /// The identifier of the catalogue of a library.

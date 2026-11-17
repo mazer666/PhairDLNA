@@ -5,6 +5,8 @@
 //!      rules can then be written against the types instead of against strings.
 //! Example: `[server] http_port = 8200` becomes `ServerSection { http_port: 8200 }`.
 
+use std::path::PathBuf;
+
 use serde::{Deserialize, Serialize};
 
 /// How a symbolic link inside a media root is treated.
@@ -91,6 +93,27 @@ pub struct LibrarySection {
     /// at any time; it is rebuilt when it is needed again (`FUN-018`).
     #[serde(default)]
     pub cache_directory: Option<String>,
+    /// Where the catalogue index on disk is kept.
+    ///
+    /// `None` means the data directory of the user. The index is a cache of
+    /// the catalogue: it may be deleted at any time, and the library is then
+    /// read again (`FUN-009`).
+    #[serde(default)]
+    pub database_path: Option<String>,
+}
+
+impl LibrarySection {
+    /// The file of the catalogue index.
+    ///
+    /// The setting wins when it is there; the data directory of the user holds
+    /// the file when it is not. The file belongs to the user alone, and the
+    /// server never writes to a media root (`FUN-009`, `SEC-095`).
+    pub fn database_file(&self) -> PathBuf {
+        match self.database_path.as_deref() {
+            Some(path) => PathBuf::from(path),
+            None => super::paths::default_database_path(),
+        }
+    }
 }
 
 impl Default for LibrarySection {
@@ -100,6 +123,7 @@ impl Default for LibrarySection {
             roots: Vec::new(),
             extract_artwork: true,
             cache_directory: None,
+            database_path: None,
         }
     }
 }
