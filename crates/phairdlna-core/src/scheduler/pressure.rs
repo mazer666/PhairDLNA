@@ -33,6 +33,8 @@ pub struct ResourceSignals {
     pub memory_percent: u8,
     /// How busy the disk is, in percent of the time.
     pub disk_busy_percent: u8,
+    /// Whether the machine is battery powered with low battery or thermally constrained (RES-008).
+    pub energy_constrained: bool,
 }
 
 impl ResourceSignals {
@@ -207,7 +209,9 @@ impl PressureMonitor {
 
     /// Whether a signal crosses the threshold at which the work yields.
     fn is_pressured(&self, signals: &ResourceSignals) -> bool {
-        signals.streaming_latency_ms > u64::from(self.thresholds.streaming_latency.yield_above)
+        signals.energy_constrained
+            || signals.streaming_latency_ms
+                > u64::from(self.thresholds.streaming_latency.yield_above)
             || u32::from(signals.cpu_percent) > self.thresholds.cpu.yield_above
             || u32::from(signals.memory_percent) > self.thresholds.memory.yield_above
             || u32::from(signals.disk_busy_percent) > self.thresholds.disk.yield_above
@@ -218,7 +222,9 @@ impl PressureMonitor {
     /// The signals are compared with the *lower* edge of the band, so that the
     /// work starts again only when the machine has really calmed down.
     fn is_still_pressured(&self, signals: &ResourceSignals) -> bool {
-        signals.streaming_latency_ms > u64::from(self.thresholds.streaming_latency.resume_below)
+        signals.energy_constrained
+            || signals.streaming_latency_ms
+                > u64::from(self.thresholds.streaming_latency.resume_below)
             || u32::from(signals.cpu_percent) > self.thresholds.cpu.resume_below
             || u32::from(signals.memory_percent) > self.thresholds.memory.resume_below
             || u32::from(signals.disk_busy_percent) > self.thresholds.disk.resume_below
@@ -386,5 +392,17 @@ mod tests {
     #[test]
     fn a_probe_that_knows_nothing_says_so() {
         assert_eq!(NoProbe.signals(), ResourceSignals::unknown());
+    }
+
+    /// An energy or thermally constrained machine yields background work (RES-008).
+    #[test]
+    fn an_energy_constrained_machine_yields_background_work() {
+        let mut monitor = PressureMonitor::new(PressureThresholds::default());
+        let clock = ManualClock::new();
+        let signals = ResourceSignals {
+            energy_constrained: true,
+            ..ResourceSignals::unknown()
+        };
+        assert_eq!(monitor.observe(&signals, clock.now()), Pressure::Yielding);
     }
 }

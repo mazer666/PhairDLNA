@@ -417,24 +417,24 @@ Requirement method, ID rules and the traceability chain are defined in
 | `RES-005` | Live in the shared core and not in a user interface; platform adapters shall supply… | MUST | `F-18` | M2 | Resource-pressure test | Implemented |
 | `RES-006` | Local resource metrics shall be opt-in to view and export | MUST | `F-18` | M2 | Resource-pressure test | Implemented |
 | `RES-007` | When resources are insufficient the server shall fail gracefully with a meaningful explanation;… | MUST | `F-18` | M2 | Resource-pressure test | Implemented |
-| `RES-008` | On a battery-powered or thermally constrained machine the server may reduce background work | SHOULD | `F-18` | M2 | Resource-pressure test | Baseline |
+| `RES-008` | On a battery-powered or thermally constrained machine the server may reduce background work | SHOULD | `F-18` | M2 | Resource-pressure test | Verified |
 | `RES-009` | Start-up, scanning, sleep/wake and shutdown shall release workers and file handles predictably. | MUST | `F-18` | M2 | Resource-pressure test | Implemented |
 
 ## LIFE — Service lifecycle and network recovery
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `LIFE-001` | Expose the distinct states *Starting*, *Ready*, *Degraded*, *Suspended*, *Recovering*,… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
-| `LIFE-002` | Handle a sleep/wake cycle without spinning, leaking resources or reporting a "ready" state it… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
-| `LIFE-003` | Handle a change of interface, address, subnet or route, and shall never widen its network… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
-| `LIFE-004` | When a configured interface disappears the server shall enter the *Degraded* or *Recovering*… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-001` | Expose the distinct states *Starting*, *Ready*, *Degraded*, *Suspended*, *Recovering*,… | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
+| `LIFE-002` | Handle a sleep/wake cycle without spinning, leaking resources or reporting a "ready" state it… | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
+| `LIFE-003` | Handle a change of interface, address, subnet or route, and shall never widen its network… | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
+| `LIFE-004` | When a configured interface disappears the server shall enter the *Degraded* or *Recovering*… | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
 | `LIFE-005` | Detect the loss and the return of a network or removable volume | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 | `LIFE-006` | A transfer interrupted by a real sleep or a real network loss shall end in a way that is… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
-| `LIFE-007` | Retry discovery and rebinding with a bounded backoff and jitter | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-007` | Retry discovery and rebinding with a bounded backoff and jitter | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
 | `LIFE-008` | Recover from an abnormal termination with an atomic state and either a consistent catalogue or… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 | `LIFE-009` | The administration surface and the user interface shall reflect the effective interface | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 | `LIFE-010` | The installation of the login-item service and the permissions it needs shall be explicit and… | MUST | `F-15` | M2 | Lifecycle and recovery test | Verified |
-| `LIFE-011` | Keep a local, redacted timeline of network changes and recovery events that the user may export… | SHOULD | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-011` | Keep a local, redacted timeline of network changes and recovery events that the user may export… | SHOULD | `F-13` | M2 | Lifecycle and recovery test | Verified |
 
 ## MB — macOS menu bar application
 

@@ -130,9 +130,9 @@ pub fn is_allowed(from: LifecycleState, to: LifecycleState) -> bool {
     match from {
         Starting => matches!(to, Ready | Degraded | Failed | Stopping),
         Ready => matches!(to, Degraded | Suspended | Recovering | Stopping | Failed),
-        Degraded => matches!(to, Recovering | Ready | Stopping | Failed),
+        Degraded => matches!(to, Recovering | Ready | Suspended | Stopping | Failed),
         Suspended => matches!(to, Recovering | Degraded | Stopping | Failed),
-        Recovering => matches!(to, Ready | Degraded | Stopping | Failed),
+        Recovering => matches!(to, Ready | Degraded | Suspended | Stopping | Failed),
         Stopping => matches!(to, Stopped | Failed),
         Stopped => matches!(to, Starting),
         Failed => matches!(to, Starting | Stopped),

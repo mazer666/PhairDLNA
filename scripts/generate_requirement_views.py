@@ -580,6 +580,39 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — the daemon serves on a port above 1024 and needs no privilege",
         "Verified",
     ),
+    "LIFE-001": (
+        "`crates/phairdlna-core/tests/network_recovery.rs::lifecycle_state_transitions_follow_rules`,"
+        " `crates/phairdlna-core/src/lifecycle/state.rs::tests::every_state_has_its_name`"
+        " — the server exposes the 8 distinct states with timestamps, reasons, and user-facing explanations",
+        "Verified",
+    ),
+    "LIFE-002": (
+        "`crates/phairdlna-core/tests/network_recovery.rs::sleep_wake_cycle_updates_state_and_records_timeline`"
+        " — on sleep the server transitions to Suspended and does not report Ready; on wake it recovers and rebinds listeners",
+        "Verified",
+    ),
+    "LIFE-003": (
+        "`crates/phairdlna-core/tests/network_recovery.rs::interface_change_does_not_widen_exposure`"
+        " — interface, address or subnet changes re-evaluate policy and never widen exposure beyond configured interfaces",
+        "Verified",
+    ),
+    "LIFE-004": (
+        "`crates/phairdlna-core/tests/network_recovery.rs::missing_configured_interface_enters_degraded_state`"
+        " — when a configured interface drops the server enters Degraded and never exposes itself on another interface",
+        "Verified",
+    ),
+    "LIFE-007": (
+        "`crates/phairdlna-core/tests/retry_backoff.rs::retry_backoff_is_bounded_and_monotonic`,"
+        " `crates/phairdlna-core/tests/retry_backoff.rs::retry_backoff_custom_bounds`"
+        " — discovery and rebinding retries use bounded exponential backoff with ceiling to avoid tight loops and multicast storms",
+        "Verified",
+    ),
+    "LIFE-011": (
+        "`crates/phairdlna-cli/tests/recovery_timeline.rs::recovery_timeline_records_ordered_events_with_redaction`,"
+        " `crates/phairdlna-core/src/lifecycle/timeline.rs::tests::a_path_in_the_timeline_is_hidden`"
+        " — the server records lifecycle transitions and recovery events in a bounded, redacted local timeline",
+        "Verified",
+    ),
     "FUN-040": (
         "`crates/phairdlna-core/tests/http_media.rs::the_client_receives_the_bytes_of_the_file`"
         " — the bytes come from the file, never from a conversion",
@@ -1090,6 +1123,11 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " of the cover answers 503 with the reason, and a running stream is never dropped and no file of the"
         " library is changed",
         "Implemented",
+    ),
+    "RES-008": (
+        "`crates/phairdlna-core/src/scheduler/pressure.rs::tests::an_energy_constrained_machine_yields_background_work`"
+        " — under battery or thermal constraints background scanner yields while playback streams and exposure are preserved",
+        "Verified",
     ),
     "RES-009": (
         "`crates/phairdlna-core/tests/resource_exhaustion.rs::a_stopping_scheduler_refuses_every_task`,"
