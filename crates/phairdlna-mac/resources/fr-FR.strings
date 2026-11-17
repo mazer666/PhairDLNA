@@ -17,7 +17,7 @@ menu.status.root_missing = {name} n'est pas disponible
 menu.status.transfer = {client} lit {title}
 
 # The entries of the menu.
-menu.action.open_admin = Ouvrir la page d'administration
+menu.action.open_admin = Ouvrir la fenêtre du serveur
 menu.action.open_folders = Ouvrir les dossiers dans le Finder
 menu.action.add_folders = Ajouter un dossier multimédia…
 menu.action.rescan = Réanalyser la bibliothèque
@@ -43,6 +43,15 @@ wizard.message = Bienvenue dans PhairDLNA ! Pour diffuser vos vidéos, musiques 
 wizard.button_choose = Choisir des dossiers…
 wizard.button_later = Configurer plus tard
 prefs.title = Préférences PhairDLNA
+prefs.tab_general = Général
+prefs.tab_expert = Configuration expert
+prefs.server_name = Nom du serveur :
+prefs.http_port = Port HTTP :
+prefs.save = Enregistrer la configuration
+prefs.save_success = Configuration enregistrée avec succès !
+prefs.save_failed = Échec de l'enregistrement de la configuration : {reason}
+prefs.add_folder = Ajouter un dossier multimédia…
+prefs.roots_header = Dossiers partagés :
 prefs.summary = Gérer vos dossiers multimédias et la configuration du serveur.
 prefs.button_add = Ajouter des dossiers…
 prefs.button_file = Modifier le fichier de configuration

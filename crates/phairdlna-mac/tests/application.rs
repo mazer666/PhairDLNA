@@ -171,8 +171,7 @@ fn a_scan_leaves_a_message() {
     );
 }
 
-/// The action that opens the administration page asks for the address of the
-/// surface.
+/// The action that opens the server window opens the native window.
 #[test]
 fn the_action_that_opens_the_page_asks_for_the_address() {
     let mut app = application();
@@ -181,7 +180,7 @@ fn the_action_that_opens_the_page_asks_for_the_address() {
 
     assert_eq!(
         outcome,
-        ActionOutcome::Request(DesktopRequest::OpenUrl("http://127.0.0.1:8210".to_owned()))
+        ActionOutcome::Request(DesktopRequest::ShowPreferences)
     );
 }
 

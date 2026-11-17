@@ -17,7 +17,7 @@ menu.status.root_missing = {name} no está disponible
 menu.status.transfer = {client} está reproduciendo {title}
 
 # The entries of the menu.
-menu.action.open_admin = Abrir página de administración
+menu.action.open_admin = Abrir ventana del servidor
 menu.action.open_folders = Abrir carpetas en el Finder
 menu.action.add_folders = Añadir carpeta multimedia…
 menu.action.rescan = Volver a leer la biblioteca
@@ -43,6 +43,15 @@ wizard.message = ¡Bienvenido a PhairDLNA! Para reproducir sus vídeos, música 
 wizard.button_choose = Seleccionar carpetas…
 wizard.button_later = Configurar más tarde
 prefs.title = Preferencias de PhairDLNA
+prefs.tab_general = General
+prefs.tab_expert = Configuración de experto
+prefs.server_name = Nombre del servidor:
+prefs.http_port = Puerto HTTP:
+prefs.save = Guardar configuración
+prefs.save_success = ¡Configuración guardada correctamente!
+prefs.save_failed = Error al guardar la configuración: {reason}
+prefs.add_folder = Añadir carpeta multimedia…
+prefs.roots_header = Carpetas compartidas:
 prefs.summary = Administre sus carpetas multimedia y la configuración del servidor.
 prefs.button_add = Añadir carpetas multimedia…
 prefs.button_file = Editar archivo de configuración

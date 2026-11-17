@@ -27,11 +27,11 @@ menu.status.root_missing = {name} is not available
 menu.status.transfer = {client} is playing {title}
 
 # The entries of the menu.
-menu.action.open_admin = Open the administration page
+menu.action.open_admin = Open Server Window
 menu.action.open_folders = Open the media folders
 menu.action.add_folders = Add media folder…
 menu.action.rescan = Read the library again
-menu.action.preferences = Open the configuration file
+menu.action.preferences = Preferences…
 menu.action.export_diagnostics = Export diagnostics report…
 menu.action.quit = Quit PhairDLNA
 
@@ -53,6 +53,15 @@ wizard.message = Welcome to PhairDLNA! To stream videos, photos, and music to yo
 wizard.button_choose = Select Media Folders…
 wizard.button_later = Configure Later
 prefs.title = PhairDLNA Preferences
+prefs.tab_general = General
+prefs.tab_expert = Expert Config
+prefs.server_name = Server Name:
+prefs.http_port = HTTP Port:
+prefs.save = Save Configuration
+prefs.save_success = Configuration saved successfully!
+prefs.save_failed = Failed to save configuration: {reason}
+prefs.add_folder = Add Media Folder…
+prefs.roots_header = Shared Folders:
 prefs.summary = Manage your shared media folders and server configuration.
 prefs.button_add = Add Media Folders…
 prefs.button_file = Edit Config File

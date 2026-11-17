@@ -194,6 +194,11 @@ impl App {
         self.strings.text("error.cannot_open").to_owned()
     }
 
+    /// The loaded strings resources.
+    pub fn strings(&self) -> &Strings {
+        &self.strings
+    }
+
     /// The text of a localized key.
     pub fn localized_text(&self, key: &str) -> String {
         self.strings.text(key).to_owned()
@@ -321,7 +326,7 @@ impl App {
     /// Carries out an action of the menu.
     pub fn perform(&mut self, action: MenuAction) -> ActionOutcome {
         match action {
-            MenuAction::OpenAdmin => self.open_admin(),
+            MenuAction::OpenAdmin => ActionOutcome::Request(DesktopRequest::ShowPreferences),
             MenuAction::OpenMediaFolders => self.open_media_folders(),
             MenuAction::RescanLibrary => {
                 if matches!(
@@ -345,17 +350,17 @@ impl App {
     }
 
     /// Computes the administration URL, attaching the token parameter if available.
-    fn open_admin(&self) -> ActionOutcome {
+    pub fn admin_url(&self) -> String {
         let mut url = self.address.clone();
         if let Some(token) = self.token_value() {
             let sep = if url.contains('?') { '&' } else { '?' };
             url.push_str(&format!("{sep}token={token}"));
         }
-        ActionOutcome::Request(DesktopRequest::OpenUrl(url))
+        url
     }
 
     /// Reads the token value if a token file is configured.
-    fn token_value(&self) -> Option<String> {
+    pub fn token_value(&self) -> Option<String> {
         let path = self.token_file.as_deref()?;
         crate::ipc::client::read_token(path).ok()
     }

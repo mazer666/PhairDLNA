@@ -17,7 +17,7 @@ menu.status.root_missing = {name} ist nicht verfügbar
 menu.status.transfer = {client} spielt {title}
 
 # The entries of the menu.
-menu.action.open_admin = Administrationsseite öffnen
+menu.action.open_admin = Server-Fenster öffnen
 menu.action.open_folders = Medienordner im Finder anzeigen
 menu.action.add_folders = Medienordner hinzufügen…
 menu.action.rescan = Medienbibliothek neu einlesen
@@ -43,6 +43,15 @@ wizard.message = Willkommen bei PhairDLNA! Um Filme, Musik und Fotos auf Smart-T
 wizard.button_choose = Medienordner auswählen…
 wizard.button_later = Später einrichten
 prefs.title = PhairDLNA Einstellungen
+prefs.tab_general = Allgemein
+prefs.tab_expert = Experten-Konfiguration
+prefs.server_name = Servername:
+prefs.http_port = HTTP-Port:
+prefs.save = Konfiguration speichern
+prefs.save_success = Konfiguration erfolgreich gespeichert!
+prefs.save_failed = Fehler beim Speichern der Konfiguration: {reason}
+prefs.add_folder = Medienordner hinzufügen…
+prefs.roots_header = Freigegebene Ordner:
 prefs.summary = Medienordner und DLNA-Serverkonfiguration verwalten.
 prefs.button_add = Medienordner hinzufügen…
 prefs.button_file = Konfigurationsdatei bearbeiten

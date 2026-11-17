@@ -54,6 +54,8 @@ pub struct Desktop {
     /// The entries that the menu shows now, so that the menu is built again
     /// only when they change.
     written: Vec<crate::menu::MenuEntry>,
+    /// The preferences window when open.
+    prefs_window: Option<super::preferences_window::PreferencesWindow>,
 }
 
 impl Desktop {
@@ -74,6 +76,7 @@ impl Desktop {
             item,
             _timer: timer,
             written: Vec::new(),
+            prefs_window: None,
         };
         desktop.write();
         desktop.check_first_run_wizard();
@@ -197,32 +200,18 @@ impl Desktop {
         }
     }
 
-    /// Shows the native preferences manager dialog.
+    /// Shows the native preferences and configuration window.
     fn show_preferences(&mut self) {
-        let title = self.app.localized_text("prefs.title");
-        let summary = self.app.localized_text("prefs.summary");
-        let btn_add = self.app.localized_text("prefs.button_add");
-        let btn_file = self.app.localized_text("prefs.button_file");
-        let btn_done = self.app.localized_text("prefs.button_done");
-
-        let choice = super::config_dialog::show_preferences_dialog(
-            self.marker,
-            &title,
-            &summary,
-            &btn_add,
-            &btn_file,
-            &btn_done,
-        );
-
-        match choice {
-            super::config_dialog::PreferencesChoice::AddFolders => self.pick_folders(),
-            super::config_dialog::PreferencesChoice::OpenConfigFile => {
-                let path = self.app.config_path().to_path_buf();
-                if !workspace::open_path(&path) {
-                    self.app.set_notice(self.app.cannot_open_text());
-                }
-            }
-            super::config_dialog::PreferencesChoice::Done => {}
+        if let Some(ref win) = self.prefs_window {
+            win.show();
+        } else {
+            let win = super::preferences_window::PreferencesWindow::new(
+                self.marker,
+                self.app.config_path(),
+                self.app.strings(),
+            );
+            win.show();
+            self.prefs_window = Some(win);
         }
     }
 
