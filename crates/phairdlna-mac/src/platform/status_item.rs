@@ -59,6 +59,22 @@ impl StatusItem {
         })
     }
 
+    /// Builds an NSMenuItem for a menu action with icon and enabled state.
+    fn action_item(
+        &self,
+        mtm: MainThreadMarker,
+        title: &str,
+        action: &crate::actions::MenuAction,
+        enabled: bool,
+    ) -> objc2::rc::Retained<NSMenuItem> {
+        let item = self.target.menu_item(mtm, title, *action);
+        item.setEnabled(enabled);
+        if let Some(icon) = icon::action_image_of(action) {
+            item.setImage(Some(&icon));
+        }
+        item
+    }
+
     /// Writes the entries of the menu.
     ///
     /// The menu is built again from the entries, so that the menu and the
@@ -80,8 +96,7 @@ impl StatusItem {
                     action,
                     enabled,
                 } => {
-                    let item = self.target.menu_item(mtm, title, *action);
-                    item.setEnabled(*enabled);
+                    let item = self.action_item(mtm, title, action, *enabled);
                     self.menu.addItem(&item);
                 }
             }

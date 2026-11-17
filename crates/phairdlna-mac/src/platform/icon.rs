@@ -16,6 +16,7 @@ use objc2::rc::Retained;
 use objc2_app_kit::NSImage;
 use objc2_foundation::NSString;
 
+use crate::actions::MenuAction;
 use crate::model::ServerState;
 
 /// The name of the system symbol of a state.
@@ -31,6 +32,20 @@ fn symbol_of(state: &ServerState) -> &'static str {
     }
 }
 
+/// The name of the system symbol of a menu action.
+fn action_symbol_of(action: &MenuAction) -> &'static str {
+    match action {
+        MenuAction::OpenAdmin => "safari",
+        MenuAction::OpenMediaFolders => "folder",
+        MenuAction::RescanLibrary => "arrow.clockwise",
+        MenuAction::OpenPreferences => "gearshape",
+        MenuAction::AddMediaFolders => "folder.badge.plus",
+        MenuAction::ExportDiagnostics => "square.and.arrow.up",
+        MenuAction::TogglePresentation => "slider.horizontal.3",
+        MenuAction::Quit => "power",
+    }
+}
+
 /// The picture of a state, as a template image.
 ///
 /// The answer is `None` when macOS does not know the symbol; the caller then
@@ -40,6 +55,14 @@ pub fn image_of(state: &ServerState) -> Option<Retained<NSImage>> {
     let name = NSString::from_str(symbol_of(state));
     let image = NSImage::imageWithSystemSymbolName_accessibilityDescription(&name, None)?;
     // A template image follows the appearance of the menu bar.
+    image.setTemplate(true);
+    Some(image)
+}
+
+/// The picture of an action, as a template image.
+pub fn action_image_of(action: &MenuAction) -> Option<Retained<NSImage>> {
+    let name = NSString::from_str(action_symbol_of(action));
+    let image = NSImage::imageWithSystemSymbolName_accessibilityDescription(&name, None)?;
     image.setTemplate(true);
     Some(image)
 }
