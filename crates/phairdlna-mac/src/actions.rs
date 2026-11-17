@@ -18,6 +18,8 @@ pub enum MenuAction {
     RescanLibrary,
     /// Open the configuration file.
     OpenPreferences,
+    /// Export the diagnostics report for support.
+    ExportDiagnostics,
     /// Switch between the short view and the detailed view.
     TogglePresentation,
     /// Leave the application; the server keeps running.
@@ -38,6 +40,7 @@ impl MenuAction {
             Self::OpenPreferences => 4,
             Self::Quit => 5,
             Self::TogglePresentation => 6,
+            Self::ExportDiagnostics => 7,
         }
     }
 
@@ -54,6 +57,7 @@ impl MenuAction {
             4 => Some(Self::OpenPreferences),
             5 => Some(Self::Quit),
             6 => Some(Self::TogglePresentation),
+            7 => Some(Self::ExportDiagnostics),
             _ => None,
         }
     }
@@ -73,6 +77,7 @@ mod tests {
             MenuAction::OpenPreferences,
             MenuAction::Quit,
             MenuAction::TogglePresentation,
+            MenuAction::ExportDiagnostics,
         ];
         let mut tags: Vec<i64> = actions.iter().map(|action| action.tag()).collect();
         tags.sort_unstable();

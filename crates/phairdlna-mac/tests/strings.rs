@@ -55,6 +55,7 @@ const EXPECTED_KEYS: &[&str] = &[
     "menu.action.open_admin",
     "menu.action.open_folders",
     "menu.action.preferences",
+    "menu.action.export_diagnostics",
     "menu.action.quit",
     "menu.action.rescan",
     "menu.status.badge",

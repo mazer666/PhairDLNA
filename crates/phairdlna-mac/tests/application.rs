@@ -201,6 +201,21 @@ fn the_action_that_opens_the_configuration_asks_for_the_file() {
     );
 }
 
+/// The positive case: the action that exports diagnostics asks for the diagnostics url.
+#[test]
+fn the_action_that_exports_diagnostics_asks_for_the_url() {
+    let mut app = application();
+
+    let outcome = app.perform(MenuAction::ExportDiagnostics);
+
+    assert_eq!(
+        outcome,
+        ActionOutcome::Request(DesktopRequest::OpenUrl(
+            "http://127.0.0.1:8210/api/diagnostics".to_owned()
+        ))
+    );
+}
+
 /// The negative case: a configuration that is not there means that there is
 /// no folder to open, and the menu says so.
 #[test]

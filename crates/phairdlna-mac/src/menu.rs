@@ -216,6 +216,12 @@ fn action_entries(
             MenuAction::OpenPreferences,
             true,
         ),
+        action(
+            strings,
+            "menu.action.export_diagnostics",
+            MenuAction::ExportDiagnostics,
+            true,
+        ),
         action(strings, "menu.action.quit", MenuAction::Quit, true),
         action(
             strings,

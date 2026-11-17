@@ -25,6 +25,7 @@ menu.action.open_admin = Open the administration page
 menu.action.open_folders = Open the media folders
 menu.action.rescan = Read the library again
 menu.action.preferences = Open the configuration file
+menu.action.export_diagnostics = Export diagnostics report…
 menu.action.quit = Quit PhairDLNA
 
 # The name the screen reader reads, and the value it reads per state.

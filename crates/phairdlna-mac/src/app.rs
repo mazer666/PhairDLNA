@@ -295,6 +295,10 @@ impl App {
             MenuAction::OpenPreferences => {
                 ActionOutcome::Request(DesktopRequest::OpenPath(self.config_path.clone()))
             }
+            MenuAction::ExportDiagnostics => {
+                let diag_url = format!("{}/api/diagnostics", self.address.trim_end_matches('/'));
+                ActionOutcome::Request(DesktopRequest::OpenUrl(diag_url))
+            }
             MenuAction::TogglePresentation => self.switch_view(),
             MenuAction::Quit => ActionOutcome::Request(DesktopRequest::Quit),
         }

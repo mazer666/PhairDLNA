@@ -91,6 +91,13 @@ define_class!(
             dispatch(MenuAction::OpenPreferences.tag());
         }
 
+        /// The action "Export diagnostics report".
+        #[unsafe(method(phairExportDiagnostics:))]
+        fn phair_export_diagnostics(&self, sender: &AnyObject) {
+            let _ = sender;
+            dispatch(MenuAction::ExportDiagnostics.tag());
+        }
+
         /// The action "Quit".
         #[unsafe(method(phairQuit:))]
         fn phair_quit(&self, sender: &AnyObject) {
@@ -167,6 +174,7 @@ pub fn selector_of(action: MenuAction) -> Sel {
         MenuAction::OpenMediaFolders => sel!(phairOpenFolders:),
         MenuAction::RescanLibrary => sel!(phairRescan:),
         MenuAction::OpenPreferences => sel!(phairPreferences:),
+        MenuAction::ExportDiagnostics => sel!(phairExportDiagnostics:),
         MenuAction::Quit => sel!(phairQuit:),
         MenuAction::TogglePresentation => sel!(phairTogglePresentation:),
     }

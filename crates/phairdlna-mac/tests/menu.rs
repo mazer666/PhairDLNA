@@ -170,6 +170,7 @@ fn the_menu_holds_every_action() {
         MenuAction::OpenMediaFolders,
         MenuAction::RescanLibrary,
         MenuAction::OpenPreferences,
+        MenuAction::ExportDiagnostics,
         MenuAction::Quit,
     ];
 
