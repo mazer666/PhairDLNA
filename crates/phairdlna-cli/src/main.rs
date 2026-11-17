@@ -22,6 +22,7 @@ Commands:
   config show              Print the effective configuration
   config export            Export the effective configuration
   config import <file>     Read a configuration file and print what it would become
+  config explain           Explain the configuration settings and tiers
   ssdp headers             Print the SSDP headers the server would send
   catalogue scan           Print the tree of the library with the client identifiers
   catalogue browse <id>    Print the document a client receives for a container
@@ -42,7 +43,8 @@ Options:
   --system                 Act on the service of the machine, not of the user
   --unredacted             Show the real paths of the machine (diagnostics only)
   --export <file>          Write the report to a file (diagnostics only)
-  --json                   Write the report as JSON (diagnostics only)
+  --json                   Write the report or explain as JSON
+  --expert                 Include expert-level settings (config explain only)
   -h, --help               Print this text
 ";
 
@@ -78,8 +80,10 @@ struct Options {
     unredacted: bool,
     /// The file the report is written to.
     export: Option<PathBuf>,
-    /// Whether the report is written as JSON.
+    /// Whether the report or explanation is written as JSON.
     json: bool,
+    /// Whether expert-level settings are included in explain.
+    expert: bool,
 }
 
 /// Parses the arguments into a command.
@@ -132,6 +136,10 @@ fn parse(arguments: &[String]) -> Result<Command, String> {
                 options.json = true;
                 index += 1;
             }
+            "--expert" => {
+                options.expert = true;
+                index += 1;
+            }
             "-h" | "--help" => return Err("help requested".to_owned()),
             other => {
                 rest.push(other);
@@ -149,7 +157,7 @@ fn command_from(rest: &[&str], options: Options) -> Result<Command, String> {
         Some("version") => Ok(Command::Version),
         Some("config") => {
             check_no_service_options(&options)?;
-            config_command(&rest[1..], options.config)
+            config_command(&rest[1..], &options)
         }
         Some("ssdp") => {
             check_no_service_options(&options)?;
@@ -287,12 +295,17 @@ fn catalogue_command(rest: &[&str], config_path: Option<PathBuf>) -> Result<Comm
 }
 
 /// Builds a `config` subcommand.
-fn config_command(rest: &[&str], config_path: Option<PathBuf>) -> Result<Command, String> {
+fn config_command(rest: &[&str], options: &Options) -> Result<Command, String> {
+    let config_path = options.config.clone();
     match rest.first().copied() {
         Some("path") => Ok(Command::ConfigPath),
         Some("validate") => Ok(Command::ConfigValidate { path: config_path }),
         Some("show") => Ok(Command::ConfigShow { path: config_path }),
         Some("export") => Ok(Command::ConfigExport { path: config_path }),
+        Some("explain") => Ok(Command::ConfigExplain {
+            expert: options.expert,
+            json: options.json,
+        }),
         Some("import") => {
             let file = rest.get(1).copied().ok_or("config import needs a file")?;
             Ok(Command::ConfigImport {
@@ -300,6 +313,8 @@ fn config_command(rest: &[&str], config_path: Option<PathBuf>) -> Result<Command
             })
         }
         Some(other) => Err(format!("unknown config command \"{other}\"")),
-        None => Err("config needs a subcommand: path, validate, show, export or import".to_owned()),
+        None => Err(
+            "config needs a subcommand: path, validate, show, export, import or explain".to_owned(),
+        ),
     }
 }

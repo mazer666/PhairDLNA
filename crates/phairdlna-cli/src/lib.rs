@@ -9,6 +9,7 @@
 
 mod catalogue;
 pub mod diagnostics;
+pub mod explain;
 pub mod serve;
 pub mod service;
 pub mod setup;
@@ -51,6 +52,13 @@ pub enum Command {
     ConfigImport {
         /// The file to read.
         path: PathBuf,
+    },
+    /// Print an explanation of every configuration setting and its tier.
+    ConfigExplain {
+        /// Whether expert-level settings are included.
+        expert: bool,
+        /// Whether the output is formatted as JSON.
+        json: bool,
     },
     /// Print the SSDP headers the server would send.
     SsdpHeaders {
@@ -169,6 +177,7 @@ pub fn run(command: &Command) -> Outcome {
         Command::ConfigShow { path } => config_show(path.as_deref()),
         Command::ConfigExport { path } => config_export(path.as_deref()),
         Command::ConfigImport { path } => config_import(path),
+        Command::ConfigExplain { expert, json } => explain::explain(*expert, *json),
         Command::SsdpHeaders { path } => ssdp_headers(path.as_deref()),
         Command::CatalogueScan { path } => catalogue::scan(&resolve(path.as_deref())),
         Command::CatalogueBrowse { object_id, path } => {

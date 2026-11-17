@@ -19,6 +19,7 @@ mod defaults;
 mod error;
 mod load;
 mod paths;
+pub mod schema;
 mod sections;
 mod validate;
 
