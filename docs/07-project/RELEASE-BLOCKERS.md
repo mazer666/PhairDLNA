@@ -1,14 +1,44 @@
-# Release blockers
-Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Lead / Release Manager · Version/date: 1.0 / 2026-11-15
+# Release blockers — current evidence checklist
 
-- [ ] Full unmodified GNU AGPLv3 license text in LICENSE and license audit.
-- [ ] Functional implementation and repeatable build.
-- [ ] Dependency license and supply-chain audit.
-- [ ] Protocol conformance and real-device compatibility evidence.
-- [ ] Threat model and security tests reviewed.
-- [ ] Benchmarks and resource limits verified on documented hardware.
-- [ ] Installation, upgrades, recovery and uninstall documented.
-- [ ] Distribution artifacts and checksums verified.
-- [ ] Explicit release approval.
+Status: **NOT RELEASE-READY** · Reconciled 2026-11-17 · Original approved baseline retained in Git history.
 
-Current status: **not releasable**.
+This document distinguishes completed groundwork from remaining release acceptance.
+A checked task means the named evidence exists; it does **not** imply that all
+release gates are cleared. See [project status](STATUS.md) and
+[quality gates](../05-quality/QUALITY-GATES.md).
+
+## Groundwork established
+
+- [x] Full official GNU AGPLv3 text is present as `LICENSE`.
+- [x] Functional headless Rust DLNA daemon, SQLite catalogue and socket-based
+      integration tests exist (M1.11 / M2.9).
+- [x] Dependency/license policy tooling (`cargo deny`) and advisory tooling
+      (`cargo audit`) have a documented successful local M2.9 run.
+- [x] Requirements, architecture, security threat model and test plans exist.
+- [x] Earlier manually triggered CI runs completed successfully (not on latest HEAD).
+- [x] Native macOS menu-bar frontend, optional loopback admin API, CLI setup,
+      diagnostics and a lightweight settings-inspection web UI are implemented
+      at code level; full UX acceptance remains open.
+
+## Open release blockers
+
+- [ ] Re-run and archive the **complete** quality/security gate set against the
+      **latest HEAD**, including all 2026-11-17 UX/diagnostics commits.
+- [ ] Complete the source-distribution offer and review notices/provenance,
+      third-party license obligations and final dependency set.
+- [ ] Verify protocol conformance against independent tools **and real devices**;
+      populate the currently empty physical-device interoperability matrix.
+- [ ] Complete independent security review, fuzzing/negative tests and resolve
+      outstanding parser isolation and network/resource risks.
+- [ ] Measure performance limits on documented reference hardware and run the
+      long-duration soak/recovery tests.
+- [ ] Complete native macOS onboarding, accessibility/VoiceOver, service integration
+      and usability acceptance on actual Mac hardware.
+- [ ] Validate the cross-project PhairDLNA ↔ PhairPlay/PhairPlayRust integration
+      with real endpoints; specifications alone do not establish interoperability.
+- [ ] Verify macOS and other supported platform builds, install/upgrade/uninstall,
+      recovery paths and final packaging; record version/commit/checksums.
+- [ ] Obtain explicit owner approval for release and publication.
+
+No item in the open list is closed by the existence of implementation code alone.
+No public release or tag without explicit authorization.
