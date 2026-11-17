@@ -354,13 +354,13 @@ Requirement method, ID rules and the traceability chain are defined in
 | `PLT-007` | Windows path handling shall support long paths and shall reject path traversal attempts using… | MUST | `F-22` | M0 | Build matrix | Baseline |
 | `PLT-008` | Not expose absolute file system paths to clients. | MUST | `F-22` | M0 | Build matrix | Baseline |
 | `PLT-009` | Not require a C toolchain beyond what the platform already provides | SHOULD | `F-22` | M0 | Build matrix | Baseline |
-| `PLT-010` | Behave identically on all platforms with respect to protocol behaviour | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-010` | Behave identically on all platforms with respect to protocol behaviour | MUST | `F-22` | M0 | Build matrix | Verified |
 | `PLT-011` | Treat the mount, unmount and remount of a volume as a first-class event and shall re-key the… | MUST | `F-22` | M2 | Build matrix | Implemented |
 | `PLT-012` | Treat a permission error on a subtree as a quarantined subtree that needs consent | MUST | `F-22` | M3 | Build matrix | Baseline |
 | `PLT-013` | On macOS the always-on server shall run as a system-context launchd daemon and the user… | MUST | `F-22` | M3 | Build matrix | Verified |
 | `PLT-014` | Be built as a universal binary for Apple Silicon and Intel. | MUST | `F-22` | M3 | Build matrix | Verified |
-| `PLT-015` | Declare long-path support in the executable manifest and shall document that the system-wide… | MUST | `F-22` | M3 | Build matrix | Baseline |
-| `PLT-016` | Provide native packages and shall not use a filesystem-sandboxed package format as its primary… | MUST | `F-22` | M3 | Build matrix | Baseline |
+| `PLT-015` | Declare long-path support in the executable manifest and shall document that the system-wide… | MUST | `F-22` | M3 | Build matrix | Verified |
+| `PLT-016` | Provide native packages and shall not use a filesystem-sandboxed package format as its primary… | MUST | `F-22` | M3 | Build matrix | Verified |
 | `PLT-017` | Obtain the user's consent for folders that the operating system protects (macOS privacy prompts | MUST | `F-22` | M3 | Build matrix | Baseline |
 | `PLT-018` | Not require elevated privileges to serve media from the user's own directories. | MUST | `F-22` | M3 | Build matrix | Baseline |
 

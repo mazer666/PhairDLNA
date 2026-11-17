@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  Windows application manifest for PhairDLNA (PLT-015, AC-11).
+  Declares long-path awareness (longPathAware).
+  Note: On Windows, system-wide registry setting 'LongPathsEnabled' (HKLM\SYSTEM\CurrentControlSet\Control\FileSystem)
+  must also be set to 1 for long paths (> 260 characters / MAX_PATH) to take effect.
+-->
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <longPathAware xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">true</longPathAware>
+    </windowsSettings>
+  </application>
+</assembly>

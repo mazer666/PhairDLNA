@@ -1044,10 +1044,31 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — native Apple Silicon (aarch64-apple-darwin) execution without Rosetta translation requirement",
         "Verified",
     ),
+    "PLT-010": (
+        "`crates/phairdlna-core/tests/protocol_parity.rs::device_description_bytes_are_deterministic`,"
+        " `::scpd_documents_are_identical_across_invocations`,"
+        " `::soap_envelope_payload_and_ordering_are_deterministic`,"
+        " `::didl_lite_item_ordering_and_xml_is_deterministic`"
+        " — protocol behavior, ordering and identifiers are deterministic and byte-identical across platforms",
+        "Verified",
+    ),
     "PLT-014": (
         "`crates/phairdlna-mac/tests/universal_binary.rs::the_bundle_script_targets_universal_architectures`,"
         " `scripts/package-macos-app.sh`"
         " — macOS application is packaged as a universal binary containing both arm64 and x86_64 architectures",
+        "Verified",
+    ),
+    "PLT-015": (
+        "`crates/phairdlna-cli/tests/windows_manifest.rs::the_windows_manifest_declares_long_path_awareness`,"
+        " `::the_documentation_declares_windows_long_paths_enabled_requirement`,"
+        " `crates/phairdlna-cli/resources/phairdlna.manifest`"
+        " — Windows executable manifest declares longPathAware and documentation specifies LongPathsEnabled requirement",
+        "Verified",
+    ),
+    "PLT-016": (
+        "`docs/08-releases/RELEASE-POLICY.md`,"
+        " `docs/03-features/F-22-platform-portability.md`"
+        " — primary Linux distribution channels must be native packages (deb/rpm/tarball), not sandboxed formats",
         "Verified",
     ),
     "UX-011": (

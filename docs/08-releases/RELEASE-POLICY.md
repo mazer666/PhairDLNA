@@ -43,6 +43,7 @@ alpha, and only after M1 has produced a recorded device test.
 | A changelog listing what changed, what was fixed and what was **broken** | — |
 | The evidence bundle of the milestone | `../07-project/STATUS.md` |
 | Installation, upgrade, recovery and uninstall instructions | `RELEASE-BLOCKERS.md` |
+| Native Linux distribution packages (e.g. `.deb`, `.rpm`, or unconfined tarball; sandboxed packaging formats like Snap/Flatpak are forbidden as primary channel to ensure unrestricted media root access) | `PLT-016`, `F-22` |
 
 ---
 
