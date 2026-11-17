@@ -190,7 +190,12 @@ fn start(options: &Options, strings: &Strings) -> Result<(), String> {
         let reason = error.reason.clone();
         strings.format("error.worker_not_started", &[("reason", &reason)])
     })?;
-    let app = App::new(strings.clone(), config_path(), address);
+    let app = App::with_token_file(
+        strings.clone(),
+        config_path(),
+        address,
+        options.token_file.clone(),
+    );
     let desktop = desktop::Desktop::new(marker, app, worker)
         .map_err(|reason| strings.format("cli.error.no_menu_bar", &[("reason", &reason)]))?;
     let shared = desktop::shared(desktop);

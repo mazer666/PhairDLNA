@@ -175,9 +175,29 @@
     let csrfToken = "";
     let showExpert = false;
 
+    // Read token from query parameter or sessionStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryToken = urlParams.get("token");
+    if (queryToken) {
+      sessionStorage.setItem("phairdlna_admin_token", queryToken);
+      // Clean query parameter from browser bar without reload
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    let adminToken = sessionStorage.getItem("phairdlna_admin_token") || "";
+
     async function apiFetch(path, options = {}) {
+      if (!adminToken) {
+        const entered = prompt("Enter PhairDLNA Admin Token (found in ~/.config/phairdlna/admin.token):");
+        if (entered) {
+          adminToken = entered.trim();
+          sessionStorage.setItem("phairdlna_admin_token", adminToken);
+        }
+      }
       const headers = options.headers || {};
       headers["X-Phair-Admin"] = "1";
+      if (adminToken) {
+        headers["Authorization"] = "Bearer " + adminToken;
+      }
       if (csrfToken && options.method && options.method !== "GET") {
         headers["X-Phair-Admin-Csrf"] = csrfToken;
       }

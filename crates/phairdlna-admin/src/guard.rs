@@ -108,14 +108,18 @@ pub async fn enforce(
     if let Some(refusal) = refuse_fetch_site(&request) {
         return refusal;
     }
-    if let Some(refusal) = refuse_token(&guard, &request) {
-        return refusal;
-    }
-    if let Some(refusal) = refuse_custom_header(&request) {
-        return refusal;
-    }
-    if let Some(refusal) = refuse_csrf(&guard, &request) {
-        return refusal;
+    // Static HTML UI routes on loopback are served so the user's browser can load the interface.
+    let is_ui_path = matches!(request.uri().path(), "/" | "/index.html");
+    if !is_ui_path {
+        if let Some(refusal) = refuse_token(&guard, &request) {
+            return refusal;
+        }
+        if let Some(refusal) = refuse_custom_header(&request) {
+            return refusal;
+        }
+        if let Some(refusal) = refuse_csrf(&guard, &request) {
+            return refusal;
+        }
     }
     match tokio::time::timeout(guard.limits.read_timeout, next.run(request)).await {
         Ok(response) => response,

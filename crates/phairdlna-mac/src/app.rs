@@ -72,6 +72,8 @@ pub struct App {
     config_path: PathBuf,
     /// The address of the administration surface.
     address: String,
+    /// The path to the token file, when available.
+    token_file: Option<PathBuf>,
     /// The preferences of the application.
     preferences: Preferences,
     /// The mode of the presentation.
@@ -102,7 +104,26 @@ impl App {
     pub fn new(strings: Strings, config_path: PathBuf, address: String) -> Self {
         let preferences = Preferences::of_the_user();
         let mode = preferences.mode();
-        Self::with_preferences(strings, config_path, address, preferences, mode)
+        Self::with_preferences_and_token(strings, config_path, address, None, preferences, mode)
+    }
+
+    /// Builds the application with a known token file.
+    pub fn with_token_file(
+        strings: Strings,
+        config_path: PathBuf,
+        address: String,
+        token_file: PathBuf,
+    ) -> Self {
+        let preferences = Preferences::of_the_user();
+        let mode = preferences.mode();
+        Self::with_preferences_and_token(
+            strings,
+            config_path,
+            address,
+            Some(token_file),
+            preferences,
+            mode,
+        )
     }
 
     /// Builds the application with known preferences.
@@ -113,10 +134,23 @@ impl App {
         preferences: Preferences,
         mode: PresentationMode,
     ) -> Self {
+        Self::with_preferences_and_token(strings, config_path, address, None, preferences, mode)
+    }
+
+    /// Builds the application with known preferences and token file.
+    pub fn with_preferences_and_token(
+        strings: Strings,
+        config_path: PathBuf,
+        address: String,
+        token_file: Option<PathBuf>,
+        preferences: Preferences,
+        mode: PresentationMode,
+    ) -> Self {
         Self {
             strings,
             config_path,
             address,
+            token_file,
             preferences,
             mode,
             snapshot: ServerSnapshot::stopped(),
@@ -278,9 +312,7 @@ impl App {
     /// Carries out an action of the menu.
     pub fn perform(&mut self, action: MenuAction) -> ActionOutcome {
         match action {
-            MenuAction::OpenAdmin => {
-                ActionOutcome::Request(DesktopRequest::OpenUrl(self.address.clone()))
-            }
+            MenuAction::OpenAdmin => self.open_admin(),
             MenuAction::OpenMediaFolders => self.open_media_folders(),
             MenuAction::RescanLibrary => {
                 if matches!(
@@ -302,6 +334,22 @@ impl App {
             MenuAction::TogglePresentation => self.switch_view(),
             MenuAction::Quit => ActionOutcome::Request(DesktopRequest::Quit),
         }
+    }
+
+    /// Computes the administration URL, attaching the token parameter if available.
+    fn open_admin(&self) -> ActionOutcome {
+        let mut url = self.address.clone();
+        if let Some(token) = self.token_value() {
+            let sep = if url.contains('?') { '&' } else { '?' };
+            url.push_str(&format!("{sep}token={token}"));
+        }
+        ActionOutcome::Request(DesktopRequest::OpenUrl(url))
+    }
+
+    /// Reads the token value if a token file is configured.
+    fn token_value(&self) -> Option<String> {
+        let path = self.token_file.as_deref()?;
+        crate::ipc::client::read_token(path).ok()
     }
 
     /// Switches between the short view and the detailed view.
