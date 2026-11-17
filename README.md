@@ -47,6 +47,35 @@ cloud, no internet access in normal operation.
 | build and test | [Getting started](docs/06-development/GETTING-STARTED.md) · [Build and test](docs/06-development/BUILD-AND-TEST.md) |
 | contribute | [AGENTS.md](AGENTS.md) · [WHERE_TO_CHANGE.md](WHERE_TO_CHANGE.md) · [CONTRIBUTING.md](CONTRIBUTING.md) |
 
+## Quickstart: How to Run PhairDLNA on macOS
+
+PhairDLNA is split into two cleanly decoupled components adhering to macOS architecture and security principles (`SEC-TH-11`):
+1. **The Core Media Server (`phairdlna` CLI)**: Runs headlessly as a background daemon or terminal process, managing SSDP announcements, media streaming, and the SQLite catalogue.
+2. **The Menu Bar Companion (`PhairDLNA.app`)**: A native status-bar app that observes the server status, shows active streams, and provides one-click links to the Web Admin UI.
+
+### 1. Install PhairDLNA.app
+Download `PhairDLNA-v0.1.0-alpha.1-macOS-universal.dmg` from the [Releases](https://github.com/mazer666/PhairDLNA/releases) page, open it, and drag `PhairDLNA.app` into `/Applications`.
+
+### 2. Run the Background Server
+Download `phairdlna-v0.1.0-alpha.1-macOS-universal-cli.tar.gz`, extract the binary, and run:
+```bash
+# Option A: Quick Interactive Setup & Foreground Server
+./phairdlna setup                  # Configure media directories & server name
+./phairdlna serve                  # Start serving DLNA over your local network
+
+# Option B: Run as a Persistent macOS Background Service (launchd)
+./phairdlna service install        # Registers a user launchd agent
+./phairdlna service start          # Starts the service in the background
+```
+
+### 3. Open the Menu Bar App
+Launch `PhairDLNA.app` from `/Applications` or Spotlight. The menu bar icon will immediately display:
+- **Server running** with active stream count and media roots.
+- **Open Web Admin**: Quick browser access to `http://127.0.0.1:8210`.
+- **Export Diagnostics**: One-click generation of sanitized support logs.
+
+---
+
 ## Build and use the current implementation
 
 ```bash

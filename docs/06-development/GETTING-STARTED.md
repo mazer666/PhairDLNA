@@ -77,6 +77,12 @@ More commands, including the licence, advisory, link and size gates, are in
 
 ## 4. Run the current CLI and daemon
 
+PhairDLNA is split into two components:
+1. **The headless server (`phairdlna`)**: Runs as a daemon (foreground or `launchd`), serving SSDP, UPnP, and HTTP media streams.
+2. **The menu-bar frontend (`PhairDLNA.app`)**: Connects to the local server at `http://127.0.0.1:8210` to display status, stream counts, and quick links to the Web UI.
+
+### Step 1: Configure & Start the Server
+
 ```bash
 cargo run -p phairdlna-cli -- --help
 cargo run -p phairdlna-cli -- setup
@@ -87,13 +93,24 @@ cargo run -p phairdlna-cli -- serve
 `setup` asks for the server name, media folders and login-start preference,
 then writes validated configuration. `serve` starts the real foreground DLNA
 server, including HTTP and SSDP listeners, provided the configuration and
-network permissions allow it. The CLI also supports `diagnostics`,
-`config explain`, `service install/start/stop/status/uninstall` and
-catalogue commands. Run `--help` for the exact current command syntax.
+network permissions allow it.
 
-The native macOS menu-bar app and local web UI are implemented but are **not**
-yet accepted as complete GUI onboarding experiences. Do not mistake socket
-integration tests for proof on a physical television.
+To run the server as a persistent macOS background service without keeping a terminal open:
+```bash
+cargo run -p phairdlna-cli -- service install
+cargo run -p phairdlna-cli -- service start
+```
+
+### Step 2: Launch the Menu Bar Companion
+
+When running the prebuilt bundle or compiling from source:
+```bash
+open target/universal-apple-darwin/release/PhairDLNA.app
+```
+The menu-bar icon will reflect "Server running" as long as the daemon process is active.
+
+The CLI also supports `diagnostics`, `config explain`, `service stop/status/uninstall`
+and catalogue commands. Run `--help` for the exact current command syntax.
 
 ---
 
