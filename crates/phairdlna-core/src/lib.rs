@@ -21,10 +21,12 @@
 
 pub mod catalogue;
 pub mod config;
+pub mod diagnostics;
 pub mod didl;
 pub mod error;
 pub mod http;
 pub mod identity;
+pub mod json;
 pub mod lifecycle;
 pub mod media;
 pub mod platform;

@@ -8,8 +8,10 @@
 //!      configuration file, or says that it is valid.
 
 mod catalogue;
+pub mod diagnostics;
 pub mod serve;
 pub mod service;
+pub mod setup;
 
 use std::path::PathBuf;
 
@@ -78,6 +80,24 @@ pub enum Command {
     Service {
         /// What the user asked the service to do.
         command: service::ServiceCommand,
+    },
+    /// Write the report a user attaches to a support ticket.
+    Diagnostics {
+        /// The configuration file to read.
+        path: Option<PathBuf>,
+        /// Whether the real paths of the machine may be shown.
+        unredacted: bool,
+        /// The file the report is written to, or `None` for the standard output.
+        export: Option<PathBuf>,
+        /// Whether the report is written as JSON instead of as text.
+        json: bool,
+    },
+    /// Ask the questions of the first run and write the configuration.
+    Setup {
+        /// The configuration file to write.
+        path: Option<PathBuf>,
+        /// Whether a configuration that is already there may be replaced.
+        force: bool,
     },
 }
 
@@ -156,6 +176,18 @@ pub fn run(command: &Command) -> Outcome {
         }
         Command::Serve { path, port } => serve(path.as_deref(), *port),
         Command::Service { command } => service::run(command),
+        Command::Diagnostics {
+            path,
+            unredacted,
+            export,
+            json,
+        } => diagnostics::run(&diagnostics::Options {
+            path: path.clone(),
+            unredacted: *unredacted,
+            export: export.clone(),
+            json: *json,
+        }),
+        Command::Setup { path, force } => setup::run(path.as_deref(), *force),
     }
 }
 
@@ -175,7 +207,7 @@ fn config_path() -> Outcome {
 }
 
 /// The path a command works on: the given one, or the resolved default.
-fn resolve(path: Option<&std::path::Path>) -> PathBuf {
+pub(crate) fn resolve(path: Option<&std::path::Path>) -> PathBuf {
     match path {
         Some(path) => path.to_path_buf(),
         None => resolve_path(None),

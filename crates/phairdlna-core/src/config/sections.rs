@@ -76,6 +76,7 @@ pub struct MediaRoot {
 
 /// The media library.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
 #[serde(deny_unknown_fields)]
 pub struct LibrarySection {
     /// The folders to share.

@@ -31,13 +31,18 @@ Commands:
   service status           Say what the service manager knows about the service
   service start            Start the service
   service stop             Stop the service
+  diagnostics              Write the report for a support ticket
+  setup                    Ask the questions of the first run and write the configuration
 
 Options:
   --config <path>          The configuration file to use
   --port <number>          The port the server listens on (serve only)
-  --force                  Replace or remove a service file that is already there
+  --force                  Replace a file that is already there (service and setup)
   --dry-run                Say what would be done, and do nothing (service install only)
   --system                 Act on the service of the machine, not of the user
+  --unredacted             Show the real paths of the machine (diagnostics only)
+  --export <file>          Write the report to a file (diagnostics only)
+  --json                   Write the report as JSON (diagnostics only)
   -h, --help               Print this text
 ";
 
@@ -69,6 +74,12 @@ struct Options {
     dry_run: bool,
     /// Whether the command acts on the service of the machine.
     system: bool,
+    /// Whether the real paths of the machine may be shown.
+    unredacted: bool,
+    /// The file the report is written to.
+    export: Option<PathBuf>,
+    /// Whether the report is written as JSON.
+    json: bool,
 }
 
 /// Parses the arguments into a command.
@@ -108,6 +119,19 @@ fn parse(arguments: &[String]) -> Result<Command, String> {
                 options.system = true;
                 index += 1;
             }
+            "--unredacted" => {
+                options.unredacted = true;
+                index += 1;
+            }
+            "--export" => {
+                let value = arguments.get(index + 1).ok_or("--export needs a file")?;
+                options.export = Some(PathBuf::from(value));
+                index += 2;
+            }
+            "--json" => {
+                options.json = true;
+                index += 1;
+            }
             "-h" | "--help" => return Err("help requested".to_owned()),
             other => {
                 rest.push(other);
@@ -143,6 +167,22 @@ fn command_from(rest: &[&str], options: Options) -> Result<Command, String> {
             })
         }
         Some("service") => service_command(&rest[1..], options),
+        Some("diagnostics") => {
+            check_no_service_options(&options)?;
+            Ok(Command::Diagnostics {
+                path: options.config,
+                unredacted: options.unredacted,
+                export: options.export,
+                json: options.json,
+            })
+        }
+        Some("setup") => {
+            check_no_diagnostics_options(&options)?;
+            Ok(Command::Setup {
+                path: options.config,
+                force: options.force,
+            })
+        }
         Some(other) => Err(format!("unknown command \"{other}\"")),
     }
 }
@@ -161,6 +201,24 @@ fn check_no_service_options(options: &Options) -> Result<(), String> {
     }
     if options.system {
         return Err("--system belongs to the service commands".to_owned());
+    }
+    Ok(())
+}
+
+/// Refuses the options of the diagnostics in a command that is not one.
+///
+/// The options belong to the diagnostics command; a command that ignores them
+/// would take them silently, and the user would believe that the report was
+/// written somewhere it was not.
+fn check_no_diagnostics_options(options: &Options) -> Result<(), String> {
+    if options.unredacted {
+        return Err("--unredacted belongs to the diagnostics command".to_owned());
+    }
+    if options.export.is_some() {
+        return Err("--export belongs to the diagnostics command".to_owned());
+    }
+    if options.json {
+        return Err("--json belongs to the diagnostics command".to_owned());
     }
     Ok(())
 }
