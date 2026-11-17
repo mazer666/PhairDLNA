@@ -21,7 +21,7 @@ Commands:
   config validate          Check a configuration file and report the first problem
   config show              Print the effective configuration
   config export            Export the effective configuration
-  config import <file>     Read a configuration file and print what it would become
+  config import <file>     Read a configuration file and print what it would become (or --apply)
   config explain           Explain the configuration settings and tiers
   ssdp headers             Print the SSDP headers the server would send
   catalogue scan           Print the tree of the library with the client identifiers
@@ -45,6 +45,7 @@ Options:
   --export <file>          Write the report to a file (diagnostics only)
   --json                   Write the report or explain as JSON
   --expert                 Include expert-level settings (config explain only)
+  --apply                  Write the imported configuration to disk (config import only)
   -h, --help               Print this text
 ";
 
@@ -84,6 +85,8 @@ struct Options {
     json: bool,
     /// Whether expert-level settings are included in explain.
     expert: bool,
+    /// Whether imported configuration is written to disk.
+    apply: bool,
 }
 
 /// Parses the arguments into a command.
@@ -138,6 +141,10 @@ fn parse(arguments: &[String]) -> Result<Command, String> {
             }
             "--expert" => {
                 options.expert = true;
+                index += 1;
+            }
+            "--apply" => {
+                options.apply = true;
                 index += 1;
             }
             "-h" | "--help" => return Err("help requested".to_owned()),
@@ -308,8 +315,19 @@ fn config_command(rest: &[&str], options: &Options) -> Result<Command, String> {
         }),
         Some("import") => {
             let file = rest.get(1).copied().ok_or("config import needs a file")?;
+            let target = if options.apply {
+                Some(
+                    options
+                        .config
+                        .clone()
+                        .unwrap_or_else(|| phairdlna_core::config::resolve_path(None)),
+                )
+            } else {
+                None
+            };
             Ok(Command::ConfigImport {
                 path: PathBuf::from(file),
+                target,
             })
         }
         Some(other) => Err(format!("unknown config command \"{other}\"")),

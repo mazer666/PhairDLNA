@@ -48,10 +48,12 @@ pub enum Command {
         path: Option<PathBuf>,
     },
     /// Read a configuration file and print the effective configuration it
-    /// would become.
+    /// would become, or apply it to a target path.
     ConfigImport {
         /// The file to read.
         path: PathBuf,
+        /// The target path to write the imported configuration to.
+        target: Option<PathBuf>,
     },
     /// Print an explanation of every configuration setting and its tier.
     ConfigExplain {
@@ -176,7 +178,7 @@ pub fn run(command: &Command) -> Outcome {
         Command::ConfigValidate { path } => config_validate(path.as_deref()),
         Command::ConfigShow { path } => config_show(path.as_deref()),
         Command::ConfigExport { path } => config_export(path.as_deref()),
-        Command::ConfigImport { path } => config_import(path),
+        Command::ConfigImport { path, target } => config_import(path, target.as_deref()),
         Command::ConfigExplain { expert, json } => explain::explain(*expert, *json),
         Command::SsdpHeaders { path } => ssdp_headers(path.as_deref()),
         Command::CatalogueScan { path } => catalogue::scan(&resolve(path.as_deref())),
@@ -265,25 +267,47 @@ fn config_export(path: Option<&std::path::Path>) -> Outcome {
     config_show(path)
 }
 
-/// Reads a configuration file and prints the configuration it would become.
+/// Reads a configuration file and prints the configuration it would become,
+/// or writes it atomically to the target path when one is given.
 ///
-/// The command writes nothing: it tells the user what the file would look like
-/// after the import, and the user decides what to do with it (`CFG-012`).
-fn config_import(path: &std::path::Path) -> Outcome {
-    match Config::load(path) {
-        Ok(config) => match config.render() {
+/// When `target` is `None`, the command writes nothing: it tells the user what
+/// the file would look like after the import (`CFG-012`). When `target` is
+/// `Some(dest)`, the imported configuration is saved to `dest` preserving the
+/// schema version (`CFG-012`).
+fn config_import(path: &std::path::Path, target: Option<&std::path::Path>) -> Outcome {
+    let config = match Config::load(path) {
+        Ok(c) => c,
+        Err(error) => {
+            return Outcome::failure(format!(
+                "the configuration \"{}\" is not usable:\n{}\n",
+                path.display(),
+                error.message()
+            ))
+        }
+    };
+    if let Some(target_path) = target {
+        match config.save(target_path) {
+            Ok(()) => Outcome::ok(format!(
+                "the configuration from \"{}\" was written to \"{}\" (schema version {})\n",
+                path.display(),
+                target_path.display(),
+                config.schema_version
+            )),
+            Err(error) => Outcome::failure(format!(
+                "cannot write configuration to \"{}\": {}\n",
+                target_path.display(),
+                error.message()
+            )),
+        }
+    } else {
+        match config.render() {
             Ok(text) => Outcome::ok(format!(
                 "the configuration \"{}\" would become (schema version {}):\n{text}",
                 path.display(),
                 config.schema_version
             )),
             Err(error) => Outcome::failure(format!("cannot render the configuration: {error}\n")),
-        },
-        Err(error) => Outcome::failure(format!(
-            "the configuration \"{}\" is not usable:\n{}\n",
-            path.display(),
-            error.message()
-        )),
+        }
     }
 }
 

@@ -303,7 +303,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `OPS-006` | Write logs with a timestamp, a level, a component and a structured message. | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-007` | Log output shall be redactable: file system paths | MUST | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-008` | Shut down gracefully on `SIGINT` and `SIGTERM` | MUST | `F-13` | M1 | Automated CLI test | Implemented |
-| `OPS-009` | Support running as a background service on macOS (launchd) | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-009` | Support running as a background service on macOS (launchd) | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-010` | Support a configuration file that sets the service identity | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-011` | Provide `--help` and `--version` output that names the version | MUST | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-012` | Expose its version in the `SERVER` header and in the device description. | MUST | `F-13` | M1 | Automated CLI test | Verified |
@@ -336,7 +336,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `CFG-009` | Support an optional access-control list of client addresses allowed to browse or to stream. | SHOULD | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-010` | Support a "trusted client" list whose quirks are handled by a specific device profile. | SHOULD | `F-12` | M2 | Automated configuration test | Baseline |
 | `CFG-011` | Provide a command that validates a configuration file without starting the server. | MUST | `F-12` | M2 | Automated configuration test | Baseline |
-| `CFG-012` | Provide a command that exports the effective configuration and one that imports it | SHOULD | `F-12` | M2 | Automated configuration test | Implemented |
+| `CFG-012` | Provide a command that exports the effective configuration and one that imports it | SHOULD | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-013` | Unknown configuration keys shall be reported as errors rather than ignored | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-014` | Secrets (such as an administration token) shall be readable from a file with owner-only… | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-015` | Never contain a value that is expanded from an environment variable without an explicit opt-in | SHOULD | `F-12` | M2 | Automated configuration test | Baseline |
@@ -357,7 +357,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `PLT-010` | Behave identically on all platforms with respect to protocol behaviour | MUST | `F-22` | M0 | Build matrix | Baseline |
 | `PLT-011` | Treat the mount, unmount and remount of a volume as a first-class event and shall re-key the… | MUST | `F-22` | M2 | Build matrix | Implemented |
 | `PLT-012` | Treat a permission error on a subtree as a quarantined subtree that needs consent | MUST | `F-22` | M3 | Build matrix | Baseline |
-| `PLT-013` | On macOS the always-on server shall run as a system-context launchd daemon and the user… | MUST | `F-22` | M3 | Build matrix | Baseline |
+| `PLT-013` | On macOS the always-on server shall run as a system-context launchd daemon and the user… | MUST | `F-22` | M3 | Build matrix | Verified |
 | `PLT-014` | Be built as a universal binary for Apple Silicon and Intel. | MUST | `F-22` | M3 | Build matrix | Baseline |
 | `PLT-015` | Declare long-path support in the executable manifest and shall document that the system-wide… | MUST | `F-22` | M3 | Build matrix | Baseline |
 | `PLT-016` | Provide native packages and shall not use a filesystem-sandboxed package format as its primary… | MUST | `F-22` | M3 | Build matrix | Baseline |
@@ -433,7 +433,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `LIFE-007` | Retry discovery and rebinding with a bounded backoff and jitter | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 | `LIFE-008` | Recover from an abnormal termination with an atomic state and either a consistent catalogue or… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 | `LIFE-009` | The administration surface and the user interface shall reflect the effective interface | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
-| `LIFE-010` | The installation of the login-item service and the permissions it needs shall be explicit and… | MUST | `F-15` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-010` | The installation of the login-item service and the permissions it needs shall be explicit and… | MUST | `F-15` | M2 | Lifecycle and recovery test | Verified |
 | `LIFE-011` | Keep a local, redacted timeline of network changes and recovery events that the user may export… | SHOULD | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 
 ## MB — macOS menu bar application

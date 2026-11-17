@@ -70,21 +70,45 @@ fn the_effective_configuration_is_exported() {
     );
 }
 
-/// The positive case: a configuration file can be imported.
+/// The positive case: a configuration file can be imported without writing.
 #[test]
 fn a_configuration_file_is_imported() {
     let path = write(VALID);
-    let outcome = run(&Command::ConfigImport { path: path.clone() });
+    let outcome = run(&Command::ConfigImport {
+        path: path.clone(),
+        target: None,
+    });
     assert_eq!(outcome.exit_code, 0, "{}", outcome.stdout);
     assert!(outcome.stdout.contains("would become"));
     assert!(outcome.stdout.contains("Living room"));
+}
+
+/// The positive case: an imported configuration can be written to disk (CFG-012).
+#[test]
+fn an_imported_configuration_is_applied_to_target() {
+    let source_path = write(VALID);
+    let target_dir = tempfile::tempdir().expect("tempdir");
+    let target_path = target_dir.path().join("imported_config.toml");
+
+    let outcome = run(&Command::ConfigImport {
+        path: source_path.clone(),
+        target: Some(target_path.clone()),
+    });
+    assert_eq!(outcome.exit_code, 0, "{}", outcome.stdout);
+    assert!(outcome.stdout.contains("was written to"));
+    assert!(target_path.exists());
+
+    // Verify written file is readable and preserves schema version
+    let loaded = phairdlna_core::config::Config::load(&target_path).expect("loaded target config");
+    assert_eq!(loaded.schema_version, 1);
+    assert_eq!(loaded.server.device_name, "Living room");
 }
 
 /// The negative case: a broken configuration file is not imported.
 #[test]
 fn a_broken_configuration_file_is_not_imported() {
     let path = write("schema_version = 1\n[server]\nhttp_port = 0\n");
-    let outcome = run(&Command::ConfigImport { path });
+    let outcome = run(&Command::ConfigImport { path, target: None });
     assert_eq!(outcome.exit_code, 1);
     assert!(outcome.stdout.contains("not usable"));
 }

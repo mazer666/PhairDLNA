@@ -564,6 +564,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " exit with the code 0; every write of the index is committed before the daemon stops, so there is nothing to flush",
         "Implemented",
     ),
+    "OPS-009": (
+        "`crates/phairdlna-cli/src/service/plist.rs::tests::the_job_file_names_the_program_and_the_arguments`,"
+        " `crates/phairdlna-cli/src/service/plist.rs::tests::the_job_file_restarts_the_server`,"
+        " `crates/phairdlna-cli/src/service/unit.rs::tests::the_unit_file_names_the_program`"
+        " — the server generates launchd property lists (macOS) and systemd unit files (Linux) with auto-restart",
+        "Verified",
+    ),
     "OPS-012": (
         "`crates/phairdlna-core/src/ssdp/request.rs::tests::the_server_header_names_the_platform`",
         "Verified",
@@ -774,6 +781,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " (F-13)",
         "Implemented",
     ),
+    "PLT-013": (
+        "`crates/phairdlna-cli/src/service/plist.rs::tests::the_job_file_names_the_program_and_the_arguments`,"
+        " `crates/phairdlna-cli/src/service/plist.rs::tests::the_job_file_restarts_the_server`,"
+        " `crates/phairdlna-mac/tests/bundle_metadata.rs::the_bundle_is_an_application_of_the_menu_bar`"
+        " — the server runs as a launchd daemon/job with system scope option and the menu bar UI runs as a separate user agent",
+        "Verified",
+    ),
     "CFG-005": (
         "`crates/phairdlna-core/src/config/validate/admin.rs::tests::a_non_loopback_address_is_refused`,"
         " `crates/phairdlna-core/src/config/validate/admin.rs::tests::the_user_may_override_the_refusal`"
@@ -798,11 +812,11 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "CFG-012": (
         "`crates/phairdlna-cli/tests/cli.rs::the_effective_configuration_is_exported`,"
-        " `crates/phairdlna-cli/tests/cli.rs::a_configuration_file_is_imported`"
-        " — the export writes the configuration as the server understands it, with the schema version, and the"
-        " import reads a file and reports the configuration it would become; the import writes nothing, and"
-        " that is the part that is still open",
-        "Implemented",
+        " `crates/phairdlna-cli/tests/cli.rs::a_configuration_file_is_imported`,"
+        " `crates/phairdlna-cli/tests/cli.rs::an_imported_configuration_is_applied_to_target`"
+        " — the export writes the configuration as the server understands it, with the schema version; the"
+        " import reads a file and reports what it would become or atomically writes it to target with --apply",
+        "Verified",
     ),
     "CFG-013": (
         "`crates/phairdlna-core/tests/config.rs::an_unknown_key_is_refused`"
@@ -983,6 +997,14 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " permission of the local network; the bundle itself is built and signed by the"
         " release, which is not done",
         "Implemented",
+    ),
+    "LIFE-010": (
+        "`crates/phairdlna-mac/tests/bundle_metadata.rs::the_bundle_registers_no_helper`,"
+        " `crates/phairdlna-cli/src/service/commands.rs::install`,"
+        " `crates/phairdlna-cli/src/service/commands.rs::uninstall`"
+        " — service installation is explicit and reversible via phairdlna service install/uninstall;"
+        " the macOS application bundle installs no hidden privileged helper or launchd agent silently",
+        "Verified",
     ),
     "UX-011": (
         "`crates/phairdlna-cli/tests/admin.rs::the_diagnostics_do_not_name_the_files_of_the_user`,"
