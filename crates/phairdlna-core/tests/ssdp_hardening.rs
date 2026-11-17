@@ -102,7 +102,7 @@ fn the_answer_names_the_server_that_is_asked_for() {
     let identity = ServerIdentity {
         friendly_name: "Living room".to_owned(),
         product: "PhairDLNA".to_owned(),
-        version: "0.0.0".to_owned(),
+        version: "0.1.0".to_owned(),
     };
     let target = Target {
         nt: "upnp:rootdevice".to_owned(),
@@ -120,7 +120,7 @@ fn the_answer_names_the_server_that_is_asked_for() {
         "the answer names the unique device name of the server: {response}"
     );
     assert!(
-        response.contains("SERVER: ") && response.contains("PhairDLNA/0.0.0"),
+        response.contains("SERVER: ") && response.contains("PhairDLNA/0.1.0"),
         "the answer names the product and the version of the server: {response}"
     );
     assert!(

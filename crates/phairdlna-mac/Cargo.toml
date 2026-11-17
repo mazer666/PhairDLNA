@@ -1,6 +1,6 @@
 [package]
 name = "phairdlna-mac"
-version = "0.0.0"
+version = "0.1.0"
 description = "The optional native macOS menu bar application of PhairDLNA."
 edition.workspace = true
 rust-version.workspace = true

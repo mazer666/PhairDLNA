@@ -1,6 +1,6 @@
 [package]
 name = "phairdlna-cli"
-version = "0.0.0"
+version = "0.1.0"
 description = "The headless daemon and command line of PhairDLNA."
 edition.workspace = true
 rust-version.workspace = true

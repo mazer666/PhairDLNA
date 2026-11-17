@@ -1,6 +1,6 @@
 [package]
 name = "phairdlna-core"
-version = "0.0.0"
+version = "0.1.0"
 description = "The portable domain core of PhairDLNA: configuration, protocols, catalogue and streaming."
 edition.workspace = true
 rust-version.workspace = true
