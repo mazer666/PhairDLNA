@@ -306,7 +306,7 @@ accepted baseline, and the requirement index carries the new milestone.
 | `./scripts/local-ci.sh` | **all eleven gates green** (2026-11-17, the run of M2.9): format, clippy, tests, no unsafe, file size, crate boundaries, doc links, licences, bans and sources, advisories, requirement views |
 | `cargo fmt --all -- --check` | clean (it failed before this phase — the CLI entry point was reformatted) |
 | `cargo clippy --workspace --all-targets -- -D warnings` | exit 0 |
-| `cargo test --workspace` | **1036 passed, 0 failed, 0 ignored** (2026-11-17, the run of M2.9; 616 at the run of M2.1) |
+| `cargo test --workspace` | **1038 passed, 0 failed, 0 ignored** (2026-11-17, the run of M2.9; 616 at the run of M2.1) |
 | `scripts/check-file-size.sh` | `RESULT: PASS` |
 | `scripts/check-crate-boundaries.sh` | `RESULT: PASS` (3 sibling dependencies across 4 crate manifests) |
 | `cargo deny check licenses` | `licenses ok` (exit 0) |
