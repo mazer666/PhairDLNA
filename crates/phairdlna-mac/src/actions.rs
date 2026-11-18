@@ -24,6 +24,10 @@ pub enum MenuAction {
     ExportDiagnostics,
     /// Switch between the short view and the detailed view.
     TogglePresentation,
+    /// Start the background server.
+    StartServer,
+    /// Stop the background server.
+    StopServer,
     /// Leave the application; the server keeps running.
     Quit,
 }
@@ -44,6 +48,8 @@ impl MenuAction {
             Self::TogglePresentation => 6,
             Self::ExportDiagnostics => 7,
             Self::AddMediaFolders => 8,
+            Self::StartServer => 9,
+            Self::StopServer => 10,
         }
     }
 
@@ -62,6 +68,8 @@ impl MenuAction {
             6 => Some(Self::TogglePresentation),
             7 => Some(Self::ExportDiagnostics),
             8 => Some(Self::AddMediaFolders),
+            9 => Some(Self::StartServer),
+            10 => Some(Self::StopServer),
             _ => None,
         }
     }
@@ -80,6 +88,8 @@ mod tests {
             MenuAction::RescanLibrary,
             MenuAction::OpenPreferences,
             MenuAction::AddMediaFolders,
+            MenuAction::StartServer,
+            MenuAction::StopServer,
             MenuAction::Quit,
             MenuAction::TogglePresentation,
             MenuAction::ExportDiagnostics,

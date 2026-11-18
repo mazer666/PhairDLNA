@@ -42,6 +42,8 @@ fn action_symbol_of(action: &MenuAction) -> &'static str {
         MenuAction::AddMediaFolders => "folder.badge.plus",
         MenuAction::ExportDiagnostics => "square.and.arrow.up",
         MenuAction::TogglePresentation => "slider.horizontal.3",
+        MenuAction::StartServer => "play.fill",
+        MenuAction::StopServer => "stop.fill",
         MenuAction::Quit => "power",
     }
 }

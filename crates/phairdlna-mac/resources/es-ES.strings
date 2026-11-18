@@ -18,12 +18,24 @@ menu.status.transfer = {client} está reproduciendo {title}
 
 # The entries of the menu.
 menu.action.open_admin = Abrir ventana del servidor
+menu.action.start_server = Iniciar servidor
+menu.action.stop_server = Detener servidor
 menu.action.open_folders = Abrir carpetas en el Finder
 menu.action.add_folders = Añadir carpeta multimedia…
 menu.action.rescan = Volver a leer la biblioteca
 menu.action.preferences = Preferencias…
 menu.action.export_diagnostics = Exportar informe de diagnóstico…
 menu.action.quit = Salir de PhairDLNA
+
+# Tooltips of menu actions.
+menu.tooltip.start_server = Inicia el servicio en segundo plano de PhairDLNA
+menu.tooltip.stop_server = Detiene el servicio en segundo plano de PhairDLNA
+menu.tooltip.open_folders = Abre las carpetas compartidas en el Finder
+menu.tooltip.add_folders = Abre el explorador para añadir una nueva carpeta
+menu.tooltip.rescan = Escanea las carpetas en busca de archivos nuevos y actualizados
+menu.tooltip.preferences = Abre las preferencias y la configuración de la aplicación
+menu.tooltip.export_diagnostics = Genera un informe de diagnóstico en su navegador
+menu.tooltip.quit = Cierra la aplicación de la barra de menús
 
 # The name the screen reader reads, and the value it reads per state.
 menu.accessibility.label = Estado del servidor PhairDLNA
@@ -44,18 +56,41 @@ wizard.button_choose = Seleccionar carpetas…
 wizard.button_later = Configurar más tarde
 prefs.title = Preferencias de PhairDLNA
 prefs.tab_general = General
+prefs.tab_advanced = Configuración avanzada
+prefs.tab_ultra = Editor sin formato (config.toml)
 prefs.tab_expert = Configuración de experto
 prefs.server_name = Nombre del servidor:
 prefs.http_port = Puerto HTTP:
+prefs.ssdp_port = Puerto SSDP:
+prefs.log_level = Nivel de registro:
+prefs.discovery_enabled = Habilitar detección de dispositivos SSDP en red
+prefs.extract_artwork = Extraer portadas e imágenes de álbumes automáticamente
+prefs.redact_logs = Ocultar rutas privadas y direcciones IP en registros
 prefs.save = Guardar configuración
 prefs.save_success = ¡Configuración guardada correctamente!
 prefs.save_failed = Error al guardar la configuración: {reason}
 prefs.add_folder = Añadir carpeta multimedia…
+prefs.remove_folder = Eliminar carpeta seleccionada
 prefs.roots_header = Carpetas compartidas:
 prefs.summary = Administre sus carpetas multimedia y la configuración del servidor.
 prefs.button_add = Añadir carpetas multimedia…
 prefs.button_file = Editar archivo de configuración
 prefs.button_done = Listo
+notice.server_started = Servidor iniciado con éxito
+notice.server_stopped = Servidor detenido
+notice.server_control_failed = Falló el control del servidor: {reason}
+tooltip.server_name = Nombre que se muestra en televisores Smart TV y reproductores
+tooltip.http_port = Puerto TCP local para la transmisión multimedia (predeterminado: 8200)
+tooltip.ssdp_port = Puerto UDP para búsquedas de detección DLNA (predeterminado: 1900)
+tooltip.log_level = Nivel de detalle de registro (info, debug, warn, error)
+tooltip.discovery = Permite a televisores y reproductores encontrar el servidor en red
+tooltip.artwork = Extrae carátulas de archivos de música y vídeo
+tooltip.redact = Oculta rutas locales e IPs en los registros para mayor privacidad
+tooltip.add_folder = Abre el explorador de archivos para añadir una carpeta multimedia
+tooltip.remove_folder = Elimina la carpeta seleccionada de las comparticiones
+tooltip.roots_list = Lista de carpetas compartidas actualmente en DLNA
+tooltip.editor = Editor directo para el archivo de configuración config.toml (modo ultra-experto)
+tooltip.save = Valida y guarda todos los ajustes en config.toml
 
 # The messages of a failure.
 error.surface_unreachable = No se puede conectar con el servidor: {reason}. Inicie el servidor desde la terminal.
@@ -91,3 +126,13 @@ cli.error.bad_port = El puerto {value} no es un número válido entre 1 y 65535
 cli.error.no_menu_bar = No hay barra de menús disponible: {reason}
 cli.error.not_main_thread = La aplicación no se inició en el hilo principal
 cli.error.not_macos = Esta aplicación requiere macOS
+
+panel.save_diagnostics = Guardar informe de diagnóstico
+prefs.tab_about = Acerca de
+prefs.about_title = PhairDLNA para macOS
+prefs.about_version = Versión: {version}
+prefs.about_license = Licencia: AGPL-3.0-or-later (Código abierto y privacidad)
+prefs.about_desc = Servidor multimedia DLNA/UPnP centrado en la privacidad para macOS y red local.
+prefs.about_repo = Repositorio en GitHub: {url}
+
+prefs.roots_edit_hint = Consejo: Edite rutas directamente, añada o elimine líneas

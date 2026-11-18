@@ -31,6 +31,8 @@ pub enum Command {
     Refresh,
     /// Read the library again.
     Rescan,
+    /// Fetch the full diagnostics JSON report.
+    ExportDiagnostics,
 }
 
 /// What the worker answers.
@@ -40,6 +42,8 @@ pub enum Answer {
     State(ServerSnapshot),
     /// What the scan of the library found.
     Scanned(RescanReport),
+    /// The raw diagnostics JSON report.
+    Diagnostics(String),
     /// The surface could not be reached.
     Failed(ClientError),
 }
@@ -158,6 +162,10 @@ fn answer_of<T: Transport>(client: &mut AdminClient<T>, command: Command) -> Ans
         },
         Command::Rescan => match client.rescan() {
             Ok(report) => Answer::Scanned(report),
+            Err(error) => Answer::Failed(error),
+        },
+        Command::ExportDiagnostics => match client.raw_diagnostics() {
+            Ok(json) => Answer::Diagnostics(json),
             Err(error) => Answer::Failed(error),
         },
     }

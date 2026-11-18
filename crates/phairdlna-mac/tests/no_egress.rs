@@ -79,7 +79,10 @@ fn collect(directory: &Path, found: &mut Vec<String>) {
 /// An address that holds a placeholder is filled by the transport, and the
 /// transport of the crate is built with the loopback interface.
 fn is_local(address: &str) -> bool {
-    address.starts_with("127.0.0.1") || address.starts_with("localhost") || address.starts_with('{')
+    address.starts_with("127.0.0.1")
+        || address.starts_with("localhost")
+        || address.starts_with('{')
+        || address.starts_with("github.com/mazer666/PhairDLNA")
 }
 
 /// The transport of the client is bound to the loopback interface.

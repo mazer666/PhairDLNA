@@ -54,6 +54,8 @@ pub enum DesktopRequest {
     PickMediaFolders,
     /// Open the native preferences dialog.
     ShowPreferences,
+    /// Export the diagnostics report.
+    ExportDiagnostics,
     /// Leave the application; the server keeps running.
     Quit,
 }
@@ -101,10 +103,6 @@ const SCAN_DEADLINE: Duration = Duration::from_secs(180);
 
 impl App {
     /// Builds the application.
-    ///
-    /// The mode of the presentation comes from the preferences of the user,
-    /// so that the application shows the view that the user chose the last
-    /// time (`UX-015`).
     pub fn new(strings: Strings, config_path: PathBuf, address: String) -> Self {
         let preferences = Preferences::of_the_user();
         let mode = preferences.mode();
@@ -339,10 +337,30 @@ impl App {
                 ActionOutcome::Nothing
             }
             MenuAction::OpenPreferences => ActionOutcome::Request(DesktopRequest::ShowPreferences),
+            MenuAction::StartServer => {
+                self.notice = Some(match crate::platform::service_control::start_service() {
+                    Ok(()) => self.strings.text("notice.server_started").to_owned(),
+                    Err(err) => self
+                        .strings
+                        .format("notice.server_control_failed", &[("reason", &err)]),
+                });
+                ActionOutcome::Nothing
+            }
+            MenuAction::StopServer => {
+                self.notice = Some(match crate::platform::service_control::stop_service() {
+                    Ok(()) => {
+                        self.snapshot.state = ServerState::Stopped;
+                        self.strings.text("notice.server_stopped").to_owned()
+                    }
+                    Err(err) => self
+                        .strings
+                        .format("notice.server_control_failed", &[("reason", &err)]),
+                });
+                ActionOutcome::Nothing
+            }
             MenuAction::AddMediaFolders => ActionOutcome::Request(DesktopRequest::PickMediaFolders),
             MenuAction::ExportDiagnostics => {
-                let diag_url = format!("{}/api/diagnostics", self.address.trim_end_matches('/'));
-                ActionOutcome::Request(DesktopRequest::OpenUrl(diag_url))
+                ActionOutcome::Request(DesktopRequest::ExportDiagnostics)
             }
             MenuAction::TogglePresentation => self.switch_view(),
             MenuAction::Quit => ActionOutcome::Request(DesktopRequest::Quit),
@@ -371,12 +389,12 @@ impl App {
         let mut added = false;
         for path in paths {
             let path_str = path.to_string_lossy().to_string();
-            let already_there = config
+            let exists = config
                 .library
                 .roots
                 .iter()
                 .any(|r| r.path.trim_end_matches('/') == path_str.trim_end_matches('/'));
-            if !already_there {
+            if !exists {
                 let name = path
                     .file_name()
                     .and_then(|n| n.to_str())
@@ -400,10 +418,7 @@ impl App {
         }
         Ok(())
     }
-    ///
-    /// The switch changes no setting of the server and starts no work: it
-    /// writes a preference of the application and nothing else (`UX-015`,
-    /// `MB-004`).
+
     fn switch_view(&mut self) -> ActionOutcome {
         self.mode = self.mode.other();
         if let Err(error) = self.preferences.set_mode(self.mode) {
@@ -416,11 +431,6 @@ impl App {
         ActionOutcome::Nothing
     }
 
-    /// The text that tells the user what went wrong.
-    ///
-    /// The text names three things: what happened, why it happened and what
-    /// the user can do next (`UX-004`). Every text comes from the resource
-    /// file of the language of the user (`UX-020`).
     fn message_of(&self, error: &ClientError) -> String {
         match error {
             ClientError::Unreachable { reason } => {
@@ -445,10 +455,6 @@ impl App {
         }
     }
 
-    /// The text of a failure, with the words of the system.
-    ///
-    /// The words of the system are only added when they say something: an
-    /// empty reason would leave a hole in the sentence of the user.
     fn reason_text(&self, key: &str, reason: &str) -> String {
         if reason.is_empty() {
             return self.strings.text(key).to_owned();
@@ -456,11 +462,6 @@ impl App {
         self.strings.format(key, &[("reason", reason)])
     }
 
-    /// Opens the media folders of the configuration.
-    ///
-    /// The configuration of the user is read and not the catalogue of the
-    /// server: the application never reads the database of the server
-    /// (`MB-005`).
     fn open_media_folders(&mut self) -> ActionOutcome {
         match self.media_roots() {
             Ok(paths) if paths.is_empty() => {

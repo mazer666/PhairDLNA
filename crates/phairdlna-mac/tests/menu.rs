@@ -37,6 +37,7 @@ fn action_of(menu: &[MenuEntry], action: MenuAction) -> Option<(String, bool)> {
             title,
             action: chosen,
             enabled,
+            ..
         } if *chosen == action => Some((title.clone(), *enabled)),
         _ => None,
     })
@@ -159,14 +160,31 @@ fn a_message_of_the_platform_is_a_line_of_the_menu() {
 /// ones of the crate.
 #[test]
 fn the_menu_holds_every_action() {
-    let menu = entries(
+    let stopped_menu = entries(
         &ServerSnapshot::stopped(),
         &texts(),
         None,
         PresentationMode::Simple,
     );
+    let running_menu = entries(
+        &ServerSnapshot {
+            state: ServerState::Running,
+            ..ServerSnapshot::default()
+        },
+        &texts(),
+        None,
+        PresentationMode::Simple,
+    );
+
+    let (start_title, _) =
+        action_of(&stopped_menu, MenuAction::StartServer).expect("start action is in stopped menu");
+    assert!(!start_title.is_empty(), "start action must have a text");
+
+    let (stop_title, _) =
+        action_of(&running_menu, MenuAction::StopServer).expect("stop action is in running menu");
+    assert!(!stop_title.is_empty(), "stop action must have a text");
+
     let actions = [
-        MenuAction::OpenAdmin,
         MenuAction::OpenMediaFolders,
         MenuAction::RescanLibrary,
         MenuAction::OpenPreferences,
@@ -175,7 +193,7 @@ fn the_menu_holds_every_action() {
     ];
 
     for action in actions {
-        let (title, _) = action_of(&menu, action).expect("the action is in the menu");
+        let (title, _) = action_of(&running_menu, action).expect("the action is in the menu");
         assert!(!title.is_empty(), "the action must have a text");
     }
 }

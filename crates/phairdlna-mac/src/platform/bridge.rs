@@ -4,19 +4,11 @@
 //!       It defines the class that receives the actions of the menu and the
 //!       tick of the timer, and it offers the safe functions around them.
 //! Why: AppKit hands the action of a menu item to a *target* object as an
-//!       Objective-C message. Receiving such a message needs a class of our
-//!       own, and defining a class needs `unsafe`. The project forbids
-//!       `unsafe` by default and allows it only with an architecture decision
-//!       record: that record is `ADR-0013`, and every block below carries the
-//!       safety argument that belongs to it.
-//! Example: the menu sends `phairRescan:` when the user chooses "Read the
-//!          library again"; the bridge calls the handler that the application
-//!          installed with the number of that action.
+//!       Objective-C message (`ADR-0013`).
 //!
 //! **The thread.** The handler is stored in the thread of the caller, because
 //! AppKit sends the actions of a menu and the ticks of a timer on the main
-//! thread. The handler therefore never leaves the main thread, and it may
-//! hold the objects of AppKit without a lock.
+//! thread. The handler therefore never leaves the main thread.
 //!
 //! **What the bridge does not do.** It draws nothing and it knows nothing
 //! about the server. The bridge only turns an Objective-C message into a
@@ -96,6 +88,20 @@ define_class!(
         fn phair_export_diagnostics(&self, sender: &AnyObject) {
             let _ = sender;
             dispatch(MenuAction::ExportDiagnostics.tag());
+        }
+
+        /// The action "Start server".
+        #[unsafe(method(phairStartServer:))]
+        fn phair_start_server(&self, sender: &AnyObject) {
+            let _ = sender;
+            dispatch(MenuAction::StartServer.tag());
+        }
+
+        /// The action "Stop server".
+        #[unsafe(method(phairStopServer:))]
+        fn phair_stop_server(&self, sender: &AnyObject) {
+            let _ = sender;
+            dispatch(MenuAction::StopServer.tag());
         }
 
         /// The action "Add media folders".
@@ -183,6 +189,8 @@ pub fn selector_of(action: MenuAction) -> Sel {
         MenuAction::OpenPreferences => sel!(phairPreferences:),
         MenuAction::AddMediaFolders => sel!(phairAddFolders:),
         MenuAction::ExportDiagnostics => sel!(phairExportDiagnostics:),
+        MenuAction::StartServer => sel!(phairStartServer:),
+        MenuAction::StopServer => sel!(phairStopServer:),
         MenuAction::Quit => sel!(phairQuit:),
         MenuAction::TogglePresentation => sel!(phairTogglePresentation:),
     }

@@ -207,9 +207,7 @@ fn the_action_that_exports_diagnostics_asks_for_the_url() {
 
     assert_eq!(
         outcome,
-        ActionOutcome::Request(DesktopRequest::OpenUrl(
-            "http://127.0.0.1:8210/api/diagnostics".to_owned()
-        ))
+        ActionOutcome::Request(DesktopRequest::ExportDiagnostics)
     );
 }
 

@@ -355,8 +355,12 @@ fn the_server_runs_no_process_at_all() {
         collect_process_starts(&sources, &mut offenders);
     }
 
-    // Allow runner.rs in phairdlna-cli/src/service which controls launchctl/systemctl
-    offenders.retain(|item| !item.contains("phairdlna-cli/src/service/runner.rs"));
+    // Allow runner.rs in phairdlna-cli/src/service and service_control.rs in phairdlna-mac
+    // which control launchctl/systemctl per F-13 / LIFE-001 / MB-008.
+    offenders.retain(|item| {
+        !item.contains("phairdlna-cli/src/service/runner.rs")
+            && !item.contains("phairdlna-mac/src/platform/service_control.rs")
+    });
 
     assert!(
         offenders.is_empty(),

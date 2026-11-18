@@ -235,6 +235,17 @@ impl<T: Transport> AdminClient<T> {
         })
     }
 
+    /// Fetches the raw JSON string of the diagnostics report.
+    pub fn raw_diagnostics(&mut self) -> Result<String, ClientError> {
+        let response =
+            self.send_with_timeout(METHOD_GET, PATH_DIAGNOSTICS, self.transport.timeout())?;
+        match response.status {
+            200..=299 => Ok(response.body_text()),
+            401 => Err(ClientError::Unauthorised),
+            status => Err(ClientError::Refused { status }),
+        }
+    }
+
     /// Reads the library again.
     ///
     /// The request changes something and therefore carries the token of the

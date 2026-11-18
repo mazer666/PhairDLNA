@@ -28,12 +28,24 @@ menu.status.transfer = {client} is playing {title}
 
 # The entries of the menu.
 menu.action.open_admin = Open Server Window
+menu.action.start_server = Start Server
+menu.action.stop_server = Stop Server
 menu.action.open_folders = Open the media folders
 menu.action.add_folders = Add media folder…
 menu.action.rescan = Read the library again
 menu.action.preferences = Preferences…
 menu.action.export_diagnostics = Export diagnostics report…
 menu.action.quit = Quit PhairDLNA
+
+# Tooltips of menu actions.
+menu.tooltip.start_server = Starts the background PhairDLNA service
+menu.tooltip.stop_server = Stops the background PhairDLNA service
+menu.tooltip.open_folders = Opens the shared media folders in Finder
+menu.tooltip.add_folders = Opens a file picker to add a new media folder
+menu.tooltip.rescan = Scans media folders for new and updated files
+menu.tooltip.preferences = Opens application preferences and settings
+menu.tooltip.export_diagnostics = Generates a diagnostic report in your browser
+menu.tooltip.quit = Quits the menu bar application
 
 # The name the screen reader reads, and the value it reads per state.
 menu.accessibility.label = PhairDLNA server status
@@ -54,18 +66,41 @@ wizard.button_choose = Select Media Folders…
 wizard.button_later = Configure Later
 prefs.title = PhairDLNA Preferences
 prefs.tab_general = General
+prefs.tab_advanced = Advanced Settings
+prefs.tab_ultra = Raw Editor (config.toml)
 prefs.tab_expert = Expert Config
 prefs.server_name = Server Name:
 prefs.http_port = HTTP Port:
+prefs.ssdp_port = SSDP Port:
+prefs.log_level = Log Level:
+prefs.discovery_enabled = Enable SSDP device discovery on network
+prefs.extract_artwork = Extract album covers and video artwork
+prefs.redact_logs = Redact private paths and IP addresses in logs
 prefs.save = Save Configuration
 prefs.save_success = Configuration saved successfully!
 prefs.save_failed = Failed to save configuration: {reason}
 prefs.add_folder = Add Media Folder…
+prefs.remove_folder = Remove Selected Folder
 prefs.roots_header = Shared Folders:
 prefs.summary = Manage your shared media folders and server configuration.
 prefs.button_add = Add Media Folders…
 prefs.button_file = Edit Config File
 prefs.button_done = Done
+notice.server_started = Server started successfully
+notice.server_stopped = Server stopped
+notice.server_control_failed = Server control failed: {reason}
+tooltip.server_name = The name displayed for this DLNA server on Smart TVs and players
+tooltip.http_port = The local TCP port used for media streaming (default: 8200)
+tooltip.ssdp_port = The UDP port used for DLNA discovery searches (default: 1900)
+tooltip.log_level = Detail level of server logging (info, debug, warn, error)
+tooltip.discovery = Allows Smart TVs and network players to discover the server automatically
+tooltip.artwork = Extracts artwork and posters from media files for visual browsing
+tooltip.redact = Obfuscates local paths and IPs in logs for privacy
+tooltip.add_folder = Opens a file browser to add a media directory
+tooltip.remove_folder = Removes the selected directory from media shares
+tooltip.roots_list = List of directories currently shared over DLNA
+tooltip.editor = Direct editor for config.toml configuration file (Ultra-Expert mode)
+tooltip.save = Validates and saves all settings to config.toml
 
 # The messages of a failure. Every text names what happened, why it happened
 # and what the user can do next (`UX-004`).
@@ -102,3 +137,13 @@ cli.error.bad_port = The port {value} is not a number between 1 and 65535
 cli.error.no_menu_bar = The menu bar of the system is not there: {reason}
 cli.error.not_main_thread = The application did not start on the main thread
 cli.error.not_macos = This application needs macOS
+
+panel.save_diagnostics = Save Diagnostics Report
+prefs.tab_about = About
+prefs.about_title = PhairDLNA for macOS
+prefs.about_version = Version: {version}
+prefs.about_license = Licence: AGPL-3.0-or-later (Open Source & Privacy)
+prefs.about_desc = Privacy-first DLNA/UPnP media streaming server for macOS and local networks.
+prefs.about_repo = GitHub Repository: {url}
+
+prefs.roots_edit_hint = Tip: Edit paths directly, add a new line or remove a line

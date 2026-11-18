@@ -33,6 +33,8 @@ pub enum MenuEntry {
         action: crate::actions::MenuAction,
         /// Whether the entry can be chosen.
         enabled: bool,
+        /// Tooltip describing what the action does.
+        tooltip: Option<String>,
     },
 }
 
@@ -191,13 +193,23 @@ fn action_entries(
     mode: PresentationMode,
 ) -> Vec<MenuEntry> {
     let serving = matches!(snapshot.state, ServerState::Running | ServerState::Scanning);
-    vec![
-        action(
+    let mut actions = Vec::new();
+    if serving {
+        actions.push(action(
             strings,
-            "menu.action.open_admin",
-            MenuAction::OpenAdmin,
-            serving,
-        ),
+            "menu.action.stop_server",
+            MenuAction::StopServer,
+            true,
+        ));
+    } else {
+        actions.push(action(
+            strings,
+            "menu.action.start_server",
+            MenuAction::StartServer,
+            true,
+        ));
+    }
+    actions.extend([
         action(
             strings,
             "menu.action.open_folders",
@@ -235,7 +247,8 @@ fn action_entries(
             MenuAction::TogglePresentation,
             true,
         ),
-    ]
+    ]);
+    actions
 }
 
 /// The key of the text of the action that switches the view.
@@ -251,10 +264,23 @@ fn mode_key(mode: PresentationMode) -> &'static str {
 
 /// One action of the menu.
 fn action(strings: &Strings, key: &str, action: MenuAction, enabled: bool) -> MenuEntry {
+    let tooltip_key = match action {
+        MenuAction::StartServer => Some("menu.tooltip.start_server"),
+        MenuAction::StopServer => Some("menu.tooltip.stop_server"),
+        MenuAction::OpenMediaFolders => Some("menu.tooltip.open_folders"),
+        MenuAction::AddMediaFolders => Some("menu.tooltip.add_folders"),
+        MenuAction::RescanLibrary => Some("menu.tooltip.rescan"),
+        MenuAction::OpenPreferences => Some("menu.tooltip.preferences"),
+        MenuAction::ExportDiagnostics => Some("menu.tooltip.export_diagnostics"),
+        MenuAction::Quit => Some("menu.tooltip.quit"),
+        _ => None,
+    };
+    let tooltip = tooltip_key.map(|k| strings.text(k).to_owned());
     MenuEntry::Action {
         title: strings.text(key).to_owned(),
         action,
         enabled,
+        tooltip,
     }
 }
 

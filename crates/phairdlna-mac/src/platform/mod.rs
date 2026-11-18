@@ -14,11 +14,13 @@
 //! written without it. The safety argument of every block is in that file and
 //! in ADR-0013.
 
+pub mod about_tab;
 pub mod bridge;
 pub mod config_dialog;
 pub mod desktop;
 pub mod icon;
 pub mod panels;
 pub mod preferences_window;
+pub mod service_control;
 pub mod status_item;
 pub mod workspace;

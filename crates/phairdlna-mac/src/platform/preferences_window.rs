@@ -25,6 +25,7 @@ pub struct PreferencesWindow {
     config_path: PathBuf,
     name_field: Retained<NSTextField>,
     port_field: Retained<NSTextField>,
+    roots_view: Retained<NSTextView>,
     editor_view: Retained<NSTextView>,
 }
 
@@ -45,11 +46,14 @@ impl PreferencesWindow {
             NSSize::new(640.0, 475.0),
         ));
 
-        let (tab1, name_field, port_field) = build_general_tab(mtm, &config, strings);
+        let (tab1, name_field, port_field, roots_view) = build_general_tab(mtm, &config, strings);
         tab_view.addTabViewItem(&tab1);
 
         let (tab2, editor_view) = build_expert_tab(mtm, &raw_toml, strings);
         tab_view.addTabViewItem(&tab2);
+
+        let tab3 = super::about_tab::build_about_tab(mtm, strings);
+        tab_view.addTabViewItem(&tab3);
 
         content.addSubview(&tab_view);
 
@@ -67,6 +71,7 @@ impl PreferencesWindow {
             config_path: config_path.to_path_buf(),
             name_field,
             port_field,
+            roots_view,
             editor_view,
         }
     }
@@ -77,6 +82,7 @@ impl PreferencesWindow {
             config_path: config_path.to_path_buf(),
             name_field: NSTextField::new(mtm),
             port_field: NSTextField::new(mtm),
+            roots_view: NSTextView::new(mtm),
             editor_view: NSTextView::new(mtm),
         }
     }
@@ -114,6 +120,8 @@ impl PreferencesWindow {
             if let Ok(p) = self.port_field.stringValue().to_string().parse::<u16>() {
                 config.server.http_port = p;
             }
+            let raw_roots = self.roots_view.string().to_string();
+            config.library.roots = parse_roots_from_text(&raw_roots);
             config.save(&self.config_path).map_err(|e| e.to_string())?;
         }
 
@@ -141,33 +149,49 @@ fn create_panel(mtm: MainThreadMarker, strings: &crate::text::Strings) -> Retain
     panel
 }
 
+fn parse_roots_from_text(raw_text: &str) -> Vec<phairdlna_core::config::MediaRoot> {
+    let mut roots = Vec::new();
+    for line in raw_text.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        let path = PathBuf::from(trimmed);
+        let name = path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("Media")
+            .to_owned();
+        roots.push(phairdlna_core::config::MediaRoot {
+            name,
+            path: trimmed.to_owned(),
+            exclude: Vec::new(),
+            symlink_policy: None,
+        });
+    }
+    roots
+}
+
 fn build_roots_view(
     mtm: MainThreadMarker,
     config: &Config,
-    strings: &crate::text::Strings,
-) -> Retained<NSScrollView> {
+    _strings: &crate::text::Strings,
+) -> (Retained<NSScrollView>, Retained<NSTextView>) {
     let roots_scroll = NSScrollView::new(mtm);
     roots_scroll.setFrame(NSRect::new(
         NSPoint::new(20.0, 20.0),
         NSSize::new(595.0, 275.0),
     ));
     let roots_view = NSTextView::new(mtm);
-    roots_view.setEditable(false);
+    roots_view.setEditable(true);
     let mut roots_text = String::new();
     for root in &config.library.roots {
-        roots_text.push('\t');
-        roots_text.push_str(&root.name);
-        roots_text.push(':');
-        roots_text.push(' ');
         roots_text.push_str(&root.path);
         roots_text.push('\n');
     }
-    if roots_text.is_empty() {
-        roots_text = strings.text("menu.status.no_roots").to_owned();
-    }
     roots_view.setString(&NSString::from_str(&roots_text));
     roots_scroll.setDocumentView(Some(&roots_view));
-    roots_scroll
+    (roots_scroll, roots_view)
 }
 
 fn build_general_tab(
@@ -178,6 +202,7 @@ fn build_general_tab(
     Retained<NSTabViewItem>,
     Retained<NSTextField>,
     Retained<NSTextField>,
+    Retained<NSTextView>,
 ) {
     let tab = NSTabViewItem::new();
     let tab_title = NSString::from_str(strings.text("prefs.tab_general"));
@@ -226,16 +251,26 @@ fn build_general_tab(
         mtm,
     );
     roots_lbl.setFrame(NSRect::new(
-        NSPoint::new(20.0, 305.0),
-        NSSize::new(400.0, 24.0),
+        NSPoint::new(20.0, 320.0),
+        NSSize::new(200.0, 24.0),
     ));
     view.addSubview(&roots_lbl);
 
-    let roots_scroll = build_roots_view(mtm, config, strings);
+    let roots_hint = NSTextField::wrappingLabelWithString(
+        &NSString::from_str(strings.text("prefs.roots_edit_hint")),
+        mtm,
+    );
+    roots_hint.setFrame(NSRect::new(
+        NSPoint::new(20.0, 298.0),
+        NSSize::new(595.0, 20.0),
+    ));
+    view.addSubview(&roots_hint);
+
+    let (roots_scroll, roots_view) = build_roots_view(mtm, config, strings);
     view.addSubview(&roots_scroll);
 
     tab.setView(Some(&view));
-    (tab, name_field, port_field)
+    (tab, name_field, port_field, roots_view)
 }
 
 fn build_expert_tab(

@@ -66,9 +66,14 @@ impl StatusItem {
         title: &str,
         action: &crate::actions::MenuAction,
         enabled: bool,
+        tooltip: Option<&str>,
     ) -> objc2::rc::Retained<NSMenuItem> {
         let item = self.target.menu_item(mtm, title, *action);
         item.setEnabled(enabled);
+        if let Some(tip) = tooltip {
+            let tip_ns = NSString::from_str(tip);
+            item.setToolTip(Some(&tip_ns));
+        }
         if let Some(icon) = icon::action_image_of(action) {
             item.setImage(Some(&icon));
         }
@@ -95,8 +100,9 @@ impl StatusItem {
                     title,
                     action,
                     enabled,
+                    tooltip,
                 } => {
-                    let item = self.action_item(mtm, title, action, *enabled);
+                    let item = self.action_item(mtm, title, action, *enabled, tooltip.as_deref());
                     self.menu.addItem(&item);
                 }
             }

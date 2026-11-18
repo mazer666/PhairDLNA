@@ -124,6 +124,9 @@ impl Desktop {
             Answer::Scanned(report) => {
                 self.app.take_rescan(&report);
             }
+            Answer::Diagnostics(json) => {
+                self.save_diagnostics(&json);
+            }
             Answer::Failed(error) => {
                 if self.app.is_scanning() {
                     self.app.take_failed_rescan(&error);
@@ -141,6 +144,8 @@ impl Desktop {
     fn ask_worker(&mut self, action: MenuAction) {
         if action == MenuAction::RescanLibrary {
             self.worker.ask(Command::Rescan);
+        } else if action == MenuAction::ExportDiagnostics {
+            self.worker.ask(Command::ExportDiagnostics);
         }
     }
 
@@ -163,6 +168,9 @@ impl Desktop {
             DesktopRequest::OpenPaths(paths) => self.open_paths(&paths),
             DesktopRequest::PickMediaFolders => self.pick_folders(),
             DesktopRequest::ShowPreferences => self.show_preferences(),
+            DesktopRequest::ExportDiagnostics => {
+                let _ = self.worker.ask(Command::ExportDiagnostics);
+            }
             DesktopRequest::Quit => self.quit(),
         }
     }
@@ -197,6 +205,16 @@ impl Desktop {
         } else {
             self.worker.ask(Command::Rescan);
             self.write();
+        }
+    }
+
+    /// Saves diagnostics report JSON via native NSSavePanel.
+    fn save_diagnostics(&mut self, json_content: &str) {
+        let title = self.app.localized_text("panel.save_diagnostics");
+        if let Some(target_path) =
+            super::panels::pick_save_file(self.marker, &title, "phairdlna-diagnostics.json")
+        {
+            let _ = std::fs::write(target_path, json_content);
         }
     }
 
