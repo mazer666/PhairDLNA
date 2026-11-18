@@ -82,8 +82,11 @@ impl PreferencesWindow {
     }
 
     /// Displays the window and brings it to front.
-    pub fn show(&self) {
+    pub fn show(&self, mtm: MainThreadMarker) {
+        let app = objc2_app_kit::NSApplication::sharedApplication(mtm);
+        let _ = app.setActivationPolicy(objc2_app_kit::NSApplicationActivationPolicy::Regular);
         self.panel.makeKeyAndOrderFront(None);
+        app.activate();
     }
 
     /// Saves settings back to config.toml.

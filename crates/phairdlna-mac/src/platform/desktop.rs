@@ -203,14 +203,14 @@ impl Desktop {
     /// Shows the native preferences and configuration window.
     fn show_preferences(&mut self) {
         if let Some(ref win) = self.prefs_window {
-            win.show();
+            win.show(self.marker);
         } else {
             let win = super::preferences_window::PreferencesWindow::new(
                 self.marker,
                 self.app.config_path(),
                 self.app.strings(),
             );
-            win.show();
+            win.show(self.marker);
             self.prefs_window = Some(win);
         }
     }
