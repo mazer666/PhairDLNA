@@ -4,6 +4,8 @@
 //! Why: action items and status rows have different safety behavior.
 //! Example: the server state is shown as a disabled menu row.
 
+// gate: unsafe-exempt ADR-0013 — menu item initialization uses the Objective-C AppKit bridge.
+
 use objc2::rc::Retained;
 use objc2::{MainThreadMarker, MainThreadOnly};
 use objc2_app_kit::NSMenuItem;
