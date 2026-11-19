@@ -1,6 +1,8 @@
 # User journeys — PhairDLNA
 
-Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Product Owner
+Status: **Approved (v1.1, 2026-11-18)** · Owner role: Product Owner
+Purpose: Describe the user journeys the product must support; not the detailed feature requirements.
+References: `../00-governance/PROJECT-STANDARDS.md`, `../00-governance/REQUIREMENTS-METHOD.md`, `PRODUCT-REQUIREMENTS.md`, `TECHNICAL-REQUIREMENTS.md`, `../00-governance/DECISION-LOG.md`.
 Traceability: each journey maps to the requirements it exercises and the feature
 specifications that deliver them.
 
@@ -11,19 +13,19 @@ what would make them give up.
 
 ---
 
-## J1 — First run: "I want to watch my films on the TV"
+## J1 — First run in the macOS app: "I want to watch my films on the TV"
 
 **Persona:** first-time user, technical but not an expert. Just installed the server.
 
 | Step | The person | The product | Requirement |
 | --- | --- | --- | --- |
-| J1.1 | Installs the server | The installation completes without a compiler, without an account and without a network connection to a vendor | `PRD-003` |
-| J1.2 | Starts it | The server starts, binds the media port on the local network and logs what it did | `OPS-001` |
-| J1.3 | Is asked for a folder | The prompt says "choose a folder with your media" and explains that the folder is only ever read | `UX-002`, `PRD-007` |
-| J1.4 | Selects the folder | The server accepts it, creates the index and starts scanning | `FUN-001`, `FUN-009` |
-| J1.5 | Waits | The output shows progress ("scanning, 1 240 files") and does not look frozen | `UX-013` |
-| J1.6 | Reads the summary | The output names the device, the address it is reachable at, and how to check it from the television | `UX-003` |
-| J1.7 | Opens the DLNA app on the TV | The server appears in the device list within a few seconds | `INT-001` |
+| J1.1 | Installs PhairDLNA and opens its native macOS app | Installation requires no compiler, account or vendor network connection; the app explains that it will guide setup | `PRD-003`, `UX-010` |
+| J1.2 | Sees that setup is needed | The app shows one clear next action: choose a folder with media | `UX-002`, `MB-002` |
+| J1.3 | Chooses a folder | The native folder picker explains that PhairDLNA only reads the chosen files | `UX-002`, `PRD-007`, `PLT-017` |
+| J1.4 | Confirms the folder | The app saves the folder through a validated setup flow and starts the server using the supported service lifecycle | `FUN-001`, `FUN-009`, `MB-008`, `PLT-013` |
+| J1.5 | Waits | The app shows scan progress ("Scanning, 1,240 files") and stays responsive | `UX-013`, `MB-002` |
+| J1.6 | Reads the ready state | The app names the server, shows the network address and gives plain steps for finding it on a television | `UX-003`, `UX-010` |
+| J1.7 | Opens the DLNA app on the TV | The server appears in the device list within a few seconds | `INT-001`, `MB-007` |
 | J1.8 | Browses | The folder structure appears with readable titles | `INT-030`, `INT-066` |
 | J1.9 | Plays a film | The film starts without a long buffering pause | `FUN-040`, `INT-081` |
 | J1.10 | Seeks to the middle | The film continues from the requested position | `INT-081` |
@@ -40,9 +42,9 @@ what would make them give up.
   interface it is advertising on and how to check discovery from another device
   (`OPS-004`, `UX-003`).
 
-**Definition of "the journey works":** a person who has never used a DLNA server
-completes J1 without reading documentation beyond the first-run output, and without
-filing a question.
+**Definition of "the journey works":** a person who has never used a DLNA server completes J1 in
+the native app without reading documentation beyond the in-app guidance, and without filing a
+question. The CLI remains an independent setup path for headless use.
 
 ---
 
@@ -132,6 +134,12 @@ filing a question.
 | J7.6 | Submits | The pull-request template asks for tests, evidence, security impact and documentation |
 
 **Requirements:** `DOC-001` … `DOC-012`, `UX-006`.
+
+## Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 1.1 / 2026-11-18 | Reframes J1 around the native macOS app as the primary graphical first-run path (DEC-075); the CLI remains the headless path. |
 
 ---
 

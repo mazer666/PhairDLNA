@@ -1,8 +1,7 @@
-//! Tests of the web user interface and settings API.
+//! Tests of the native application's administration API.
 //!
-//! What: verifies that the embedded single-page web UI is served as HTML,
-//!       and that the settings documentation API distinguishes standard and
-//!       expert settings correctly.
+//! What: verifies that browser document routes are absent and the settings
+//!       explanation API distinguishes standard and expert settings.
 
 use std::net::SocketAddr;
 use std::path::Path;
@@ -113,22 +112,20 @@ fn parse_answer(raw: &[u8]) -> Answer {
     }
 }
 
-/// The positive case: the web UI is answered with HTML.
+/// The negative case: browser paths are unavailable, even with API credentials.
 #[tokio::test]
-async fn the_web_ui_is_answered_with_html() {
+async fn browser_routes_are_not_exposed() {
     let folder = tempfile::tempdir().expect("a temporary directory");
     let (_server, token, address) = start(&folder.path().join("admin.token")).await;
 
-    let answer = request(address, "GET", "/", &allowed(&token)).await;
-
-    assert_eq!(answer.status, 200);
-    assert_eq!(
-        answer.header("content-type"),
-        Some("text/html; charset=\"utf-8\"")
-    );
-    assert!(answer.body.contains("PhairDLNA Administration"));
-    assert!(answer.body.contains("Standard Mode"));
-    assert!(answer.body.contains("Expert Mode"));
+    for path in ["/", "/index.html"] {
+        let answer = request(address, "GET", path, &allowed(&token)).await;
+        assert_eq!(answer.status, 404);
+        assert!(!answer
+            .header("content-type")
+            .unwrap_or_default()
+            .contains("text/html"));
+    }
 }
 
 /// The positive case: config settings are answered via API.

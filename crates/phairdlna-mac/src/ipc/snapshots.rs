@@ -25,6 +25,12 @@ pub struct RootSnapshot {
 /// The state of the server, as the surface tells it.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct StatusSnapshot {
+    /// The name media clients see during discovery.
+    pub device_name: String,
+    /// The advertised local address, absent when no LAN address is available.
+    pub device_address: Option<String>,
+    /// Whether the daemon currently runs its SSDP discovery task.
+    pub discovery_available: Option<bool>,
     /// How long the server has been running, in seconds.
     pub uptime_seconds: u64,
     /// How many streams are running.

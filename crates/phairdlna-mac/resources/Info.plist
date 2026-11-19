@@ -4,13 +4,11 @@
   The metadata of the bundle of the application.
 
   What: the keys that the system of the operating system needs to run the
-        application as a menu bar application and to ask the user for the
-        permission of the local network.
-  Why: the application is a bundle and not a bare program; without these keys
-        the system shows it in the dock and asks it for the permission of the
-        local network at the wrong moment (`MB-009`, F-15 section 1).
-  Example: `LSUIElement` marks the application as one that has no window and
-          no icon in the dock.
+        application and to ask the user for the permission of the local network.
+  Why: the application is a regular macOS app with a main window and a menu-bar
+       status item (`DEC-076`, `MB-009`).
+  Example: `NSLocalNetworkUsageDescription` explains why PhairDLNA needs local
+          network access.
 
   The helper of the server is not part of this bundle: the server is
   installed as a `launchd` daemon by the command line, and the installation
@@ -33,11 +31,9 @@
     <key>CFBundleVersion</key>
     <string>0.1.0</string>
     <key>CFBundleIconFile</key>
-    <string>AppIcon</string>
+    <string>AppIcon-v2</string>
     <key>LSMinimumSystemVersion</key>
-    <string>13.0</string>
-    <key>LSUIElement</key>
-    <true/>
+    <string>15.0</string>
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSLocalNetworkUsageDescription</key>

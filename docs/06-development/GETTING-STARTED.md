@@ -1,6 +1,7 @@
 # Getting started — for newcomers
 
-Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Documentation Reviewer
+Status: **In Review (v1.1, 2026-11-19)** · Owner role: Documentation Reviewer
+Version/date: 1.1 / 2026-11-19
 
 PhairDLNA is an **actively implemented Rust DLNA MediaServer**, not merely a
 workspace scaffold. The headless daemon already handles real network requests
@@ -77,11 +78,25 @@ More commands, including the licence, advisory, link and size gates, are in
 
 ## 4. Run the current CLI and daemon
 
-PhairDLNA is split into two components:
-1. **The headless server (`phairdlna`)**: Runs as a daemon (foreground or `launchd`), serving SSDP, UPnP, and HTTP media streams.
-2. **The menu-bar frontend (`PhairDLNA.app`)**: Connects to the local server at `http://127.0.0.1:8210` to display status, stream counts, and quick links to the Web UI.
+PhairDLNA has a headless server and a native macOS app. The app is the primary
+graphical interface; it connects to the server through the authenticated loopback API.
+There is no browser administration UI. A public alpha exists, but it predates the
+app-first migration and is not a build of the current source. The current checkout
+does not yet have a release installer.
 
-### Step 1: Configure & Start the Server
+### Step 1: Build the app bundle
+
+```bash
+BUILD_UNIVERSAL=0 ./scripts/package-macos-app.sh
+```
+
+This builds an Apple Silicon developer bundle at `target/bundle/PhairDLNA.app`.
+Set `OUTPUT_DIR` to write it elsewhere, for example a fresh temporary directory
+when checking packaging without replacing an existing bundle.
+
+### Step 2: Configure and start the server
+
+In one terminal, run:
 
 ```bash
 cargo run -p phairdlna-cli -- --help
@@ -90,29 +105,29 @@ cargo run -p phairdlna-cli -- config validate
 cargo run -p phairdlna-cli -- serve
 ```
 
-`setup` asks for the server name, media folders and login-start preference,
-then writes validated configuration. `serve` starts the real foreground DLNA
-server, including HTTP and SSDP listeners, provided the configuration and
-network permissions allow it.
+`setup` writes validated configuration. `serve` runs the DLNA server in the
+foreground, including HTTP and SSDP listeners, while the terminal stays open.
+DEC-079 selects app-managed `SMAppService` registration and a per-user `LaunchAgent` as
+the first security experiment candidate. The service identity and folder-access model
+remain unverified under OD-15; do not recommend `service install` as the normal-user
+path or package app controls until the experiment and independent review pass.
 
-To run the server as a persistent macOS background service without keeping a terminal open:
+### Step 3: Launch the native app
+
+Leave the server running. In Finder or a second terminal, launch the app:
 ```bash
-cargo run -p phairdlna-cli -- service install
-cargo run -p phairdlna-cli -- service start
+open target/bundle/PhairDLNA.app
 ```
-
-### Step 2: Launch the Menu Bar Companion
-
-When running the prebuilt bundle or compiling from source:
-```bash
-open target/universal-apple-darwin/release/PhairDLNA.app
-```
-The menu-bar icon will reflect "Server running" as long as the daemon process is active.
+The native overview opens automatically; the menu-bar item remains available for
+quick access. This bundle is a developer build, not a release-verified installer.
+The app currently shows status and recovery guidance but cannot create a missing
+configuration, add or remove shared folders, or start and stop the server. Use the
+CLI setup and foreground server commands from Step 2 for those actions. The app-first
+setup and service path follow DEC-079 but remain unimplemented until OD-15 establishes
+the safe service identity and folder-access behavior.
 
 The CLI also supports `diagnostics`, `config explain`, `service stop/status/uninstall`
 and catalogue commands. Run `--help` for the exact current command syntax.
-
----
 
 ## 5. Find your way around
 
@@ -191,3 +206,9 @@ python3 scripts/generate_requirement_views.py --check   # fails if out of date
 
 These commands are instructions, not evidence that they have been run. Add
 platform-specific prerequisites as the implementation evolves.
+
+## Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 1.1 / 2026-11-19 | Updates the macOS app instructions to reflect the current read-only state and the unavailable setup and service controls. |

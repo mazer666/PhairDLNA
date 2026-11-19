@@ -1,14 +1,13 @@
 //! The acceptance criteria of the bundle of the application.
 //!
 //! What: the tests that check the metadata of the bundle — that the
-//!       application is a menu bar application and that it says in plain
-//!       words why it asks for the permission of the local network.
+//!       application is a regular app and that it says in plain words why it
+//!       asks for the permission of the local network.
 //! Why: the system of the operating system reads these keys before it shows
 //!      the application to the user; an application without them asks for a
 //!      permission it cannot explain (`MB-009`, `UX-010`).
-//! Example: the bundle carries `LSUIElement`, so that the application has no
-//!          icon in the dock, and `NSLocalNetworkUsageDescription`, so that
-//!          the question of the permission has an answer.
+//! Example: the bundle omits `LSUIElement` so the app appears in the Dock, and
+//!          carries `NSLocalNetworkUsageDescription` to explain its permission.
 
 use std::path::{Path, PathBuf};
 
@@ -34,21 +33,14 @@ fn value_of(key: &str) -> Option<String> {
     Some(rest[open + "<string>".len()..open + close].to_owned())
 }
 
-/// The bundle is an application of the menu bar and not an application with a
-/// window.
+/// The bundle is a regular application with a main window and menu-bar item.
 #[test]
-fn the_bundle_is_an_application_of_the_menu_bar() {
+fn the_bundle_is_a_regular_application() {
     let source = plist_source();
 
     assert!(
-        source.contains("<key>LSUIElement</key>"),
-        "the bundle must be marked as an application of the menu bar"
-    );
-    let after = source.split("<key>LSUIElement</key>").nth(1);
-    let after = after.expect("the key is there");
-    assert!(
-        after.trim_start().starts_with("<true/>"),
-        "the key must be true"
+        !source.contains("<key>LSUIElement</key>"),
+        "the bundle must appear as a regular application in the Dock"
     );
 }
 
@@ -71,6 +63,32 @@ fn the_bundle_names_its_program() {
         Some("phairdlna-mac")
     );
     assert_eq!(value_of("CFBundlePackageType").as_deref(), Some("APPL"));
+    assert_eq!(value_of("LSMinimumSystemVersion").as_deref(), Some("15.0"));
+}
+
+/// The bundle references a complete, high-resolution server icon.
+#[test]
+fn the_bundle_ships_its_high_resolution_icon() {
+    let icon_name = value_of("CFBundleIconFile").expect("the icon is named");
+    let resources = Path::new(env!("CARGO_MANIFEST_DIR")).join("resources");
+    let icon_path = resources.join(format!("{icon_name}.icns"));
+    let icon = std::fs::read(&icon_path).expect("the icon file is shipped");
+    let package_script = std::fs::read_to_string(
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../scripts/package-macos-app.sh"),
+    )
+    .expect("the package script is readable");
+
+    assert_eq!(&icon[..4], b"icns", "the icon uses the macOS icon format");
+    assert_eq!(
+        u32::from_be_bytes(icon[4..8].try_into().expect("the header has a size")) as usize,
+        icon.len(),
+        "the container size matches its contents"
+    );
+    assert!(icon.windows(4).any(|chunk| chunk == b"ic10"));
+    assert!(
+        package_script.contains(&format!("resources/{icon_name}.icns")),
+        "the package script copies the icon named by Info.plist"
+    );
 }
 
 /// The bundle registers no helper of its own.

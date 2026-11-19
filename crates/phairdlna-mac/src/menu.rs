@@ -11,9 +11,11 @@
 //! by a screen reader and by a user whose display cannot show the picture
 //! (`UX-007`, `UX-018`, `MB-006`).
 
-use crate::actions::MenuAction;
 use crate::model::{PresentationMode, ServerSnapshot, ServerState};
 use crate::text::Strings;
+
+mod sections;
+use sections::{action_entries, root_entries, transfer_entries};
 
 /// One entry of the menu.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -62,6 +64,13 @@ pub fn entries(
             title: status_line(snapshot, strings),
         },
     ];
+    if snapshot.state != ServerState::Checking {
+        menu.push(MenuEntry::Status {
+            title: strings
+                .text("menu.status.server_controls_unavailable")
+                .to_owned(),
+        });
+    }
     if let Some(notice) = notice {
         menu.push(MenuEntry::Status {
             title: notice.to_owned(),
@@ -70,7 +79,7 @@ pub fn entries(
     menu.extend(root_entries(snapshot, strings));
     menu.extend(transfer_entries(snapshot, strings));
     menu.extend(warning_entries(snapshot));
-    if mode == PresentationMode::Advanced {
+    if mode == PresentationMode::Advanced && snapshot.state != ServerState::Checking {
         menu.extend(detail_entries(snapshot, strings));
     }
     menu.push(MenuEntry::Separator);
@@ -106,6 +115,7 @@ fn detail_entries(snapshot: &ServerSnapshot, strings: &Strings) -> Vec<MenuEntry
 /// The line of the menu that tells the state of the server.
 pub fn status_line(snapshot: &ServerSnapshot, strings: &Strings) -> String {
     match snapshot.state {
+        ServerState::Checking => strings.text("menu.status.checking").to_owned(),
         ServerState::Running => {
             let streams = snapshot.active_streams.to_string();
             strings.format("menu.status.running", &[("streams", &streams)])
@@ -119,6 +129,7 @@ pub fn status_line(snapshot: &ServerSnapshot, strings: &Strings) -> String {
 /// The value the screen reader reads for the state of the server.
 pub fn accessibility_value(snapshot: &ServerSnapshot, strings: &Strings) -> String {
     match snapshot.state {
+        ServerState::Checking => strings.text("menu.accessibility.checking").to_owned(),
         ServerState::Running => {
             let streams = snapshot.active_streams.to_string();
             strings.format("menu.accessibility.running", &[("streams", &streams)])
@@ -127,47 +138,6 @@ pub fn accessibility_value(snapshot: &ServerSnapshot, strings: &Strings) -> Stri
         ServerState::Stopped => strings.text("menu.accessibility.stopped").to_owned(),
         ServerState::Refused => strings.text("menu.accessibility.refused").to_owned(),
     }
-}
-
-/// The lines of the menu that tell the shared folders.
-fn root_entries(snapshot: &ServerSnapshot, strings: &Strings) -> Vec<MenuEntry> {
-    if snapshot.roots.is_empty() {
-        return vec![MenuEntry::Status {
-            title: strings.text("menu.status.no_roots").to_owned(),
-        }];
-    }
-    snapshot
-        .roots
-        .iter()
-        .map(|root| {
-            let name = root.name.as_str();
-            let title = if root.mounted {
-                let objects = root.objects.to_string();
-                strings.format("menu.status.root", &[("name", name), ("objects", &objects)])
-            } else {
-                strings.format("menu.status.root_missing", &[("name", name)])
-            };
-            MenuEntry::Status { title }
-        })
-        .collect()
-}
-
-/// The lines of the menu that tell what is being played.
-fn transfer_entries(snapshot: &ServerSnapshot, strings: &Strings) -> Vec<MenuEntry> {
-    snapshot
-        .transfers
-        .iter()
-        .map(|transfer| {
-            let client = transfer.client.as_str();
-            let title = transfer.title.as_str();
-            MenuEntry::Status {
-                title: strings.format(
-                    "menu.status.transfer",
-                    &[("client", client), ("title", title)],
-                ),
-            }
-        })
-        .collect()
 }
 
 /// The lines of the menu that tell the warnings of the server.
@@ -183,105 +153,6 @@ fn warning_entries(snapshot: &ServerSnapshot) -> Vec<MenuEntry> {
             title: warning.clone(),
         })
         .collect()
-}
-
-/// The actions of the menu, with the state that says whether they may be
-/// chosen.
-fn action_entries(
-    snapshot: &ServerSnapshot,
-    strings: &Strings,
-    mode: PresentationMode,
-) -> Vec<MenuEntry> {
-    let serving = matches!(snapshot.state, ServerState::Running | ServerState::Scanning);
-    let mut actions = Vec::new();
-    if serving {
-        actions.push(action(
-            strings,
-            "menu.action.stop_server",
-            MenuAction::StopServer,
-            true,
-        ));
-    } else {
-        actions.push(action(
-            strings,
-            "menu.action.start_server",
-            MenuAction::StartServer,
-            true,
-        ));
-    }
-    actions.extend([
-        action(
-            strings,
-            "menu.action.open_folders",
-            MenuAction::OpenMediaFolders,
-            !snapshot.roots.is_empty(),
-        ),
-        action(
-            strings,
-            "menu.action.add_folders",
-            MenuAction::AddMediaFolders,
-            true,
-        ),
-        action(
-            strings,
-            "menu.action.rescan",
-            MenuAction::RescanLibrary,
-            serving,
-        ),
-        action(
-            strings,
-            "menu.action.preferences",
-            MenuAction::OpenPreferences,
-            true,
-        ),
-        action(
-            strings,
-            "menu.action.export_diagnostics",
-            MenuAction::ExportDiagnostics,
-            true,
-        ),
-        action(strings, "menu.action.quit", MenuAction::Quit, true),
-        action(
-            strings,
-            mode_key(mode),
-            MenuAction::TogglePresentation,
-            true,
-        ),
-    ]);
-    actions
-}
-
-/// The key of the text of the action that switches the view.
-///
-/// The text says what the action does and not which mode is on: the user
-/// reads "show the details" and knows what happens.
-fn mode_key(mode: PresentationMode) -> &'static str {
-    match mode {
-        PresentationMode::Simple => "menu.action.mode_advanced",
-        PresentationMode::Advanced => "menu.action.mode_simple",
-    }
-}
-
-/// One action of the menu.
-fn action(strings: &Strings, key: &str, action: MenuAction, enabled: bool) -> MenuEntry {
-    let tooltip_key = match action {
-        MenuAction::StartServer => Some("menu.tooltip.start_server"),
-        MenuAction::StopServer => Some("menu.tooltip.stop_server"),
-        MenuAction::OpenMediaFolders => Some("menu.tooltip.open_folders"),
-        MenuAction::AddMediaFolders => Some("menu.tooltip.add_folders"),
-        MenuAction::RescanLibrary => Some("menu.tooltip.rescan"),
-        MenuAction::OpenPreferences => Some("menu.tooltip.preferences"),
-        MenuAction::ExportDiagnostics => Some("menu.tooltip.export_diagnostics"),
-        MenuAction::Quit => Some("menu.tooltip.quit"),
-        _ => None,
-    };
-    let tooltip = tooltip_key.map(|k| strings.text(k).to_owned());
-    MenuEntry::Action {
-        title: strings.text(key).to_owned(),
-        action,
-        enabled,
-        tooltip,
-    }
 }
 
 #[cfg(test)]

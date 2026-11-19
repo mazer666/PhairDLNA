@@ -1,6 +1,9 @@
 # Requirements elaboration work plan
 
-Status: **Phases R0–R5 complete (2026-11-14/15)** · Owner role: Lead / Product Owner
+Status: **Phases R0–R5 complete; R6 implementation running (2026-11-19)** · Owner role: Lead / Product Owner
+Version/date: 1.1 / 2026-11-19
+Purpose: Record the requirements-elaboration phases and point to current implementation status; not a substitute for the live roadmap or status report.
+References: `../00-governance/PROJECT-STANDARDS.md`, `../00-governance/REQUIREMENTS-METHOD.md`, `ROADMAP.md`, `STATUS.md`, `../99-archive/2026-11-14-preconsolidation-baseline/MANIFEST.md`
 
 This is the phase plan for the requirements cycle that produced the v1.0 baseline.
 Each phase lists what it produced and where the result lives.
@@ -85,16 +88,11 @@ are addressed, and its report is kept at
 *Only after the owner approves the requirements baseline, begin M0/M1 in small
 verified increments.*
 
-**Running.** The baseline was approved on 2026-11-15 (DEC-031) and the implementation
-follows: M0 is complete and the milestones M1.1 to M1.9 and M1.11 are coded. M1.10, the
-security baseline, is in progress — the work is recorded in `docs/07-project/STATUS.md`
-and in `docs/04-security/SECURITY-MODEL.md`.
-
-**Done.** 346 requirements with stable IDs, defined once in
-`docs/01-product/TECHNICAL-REQUIREMENTS.md` and
-`docs/01-product/PRODUCT-REQUIREMENTS.md`, and elaborated by 21 feature
-specifications with 298 acceptance criteria. The index and the traceability matrix
-are generated, so they cannot drift from the definitions.
+**Running.** The owner approved the baseline on 2026-11-15 (DEC-031). M0 and M1.1–M1.11
+are implemented. M2 is in progress: M2.1–M2.3 and M2.9 are recorded complete; M2.4–M2.8
+are partial, with M2.6 (the native macOS application) specifically gated by its remaining
+first-run, service, settings-activation and real-Mac acceptance work. The current evidence,
+open decisions and exact state of each milestone live in `STATUS.md` and `ROADMAP.md`.
 
 ---
 
@@ -108,3 +106,9 @@ are generated, so they cannot drift from the definitions.
   documentation is a target with a method, never a result.
 - A gate that has never failed proves nothing; every gate has a demonstrated negative
   test or is marked as not yet run.
+
+## Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 1.1 / 2026-11-19 | Updates R6 to the current M2 implementation state, removes a stale duplicate of R3, and adds the required document metadata. |

@@ -67,7 +67,7 @@ specification is also explained here; the specification is the detailed version.
 | **TCC** | Transparency, Consent and Control — the macOS system that protects Desktop, Documents, Downloads, network and removable volumes and asks the user for permission |
 | **Full Disk Access** | The macOS permission that lifts the TCC protection for an application. The user grants it; the server never works around a refusal |
 | **launchd** | The macOS service manager. A **launchd agent** runs per user; a **launchd daemon** runs system-wide |
-| **Local network privacy** | The macOS 15+ permission that governs UDP multicast traffic. A daemon is exempt, an agent is not — which is why the server runs as a daemon |
+| **Local network privacy** | The macOS 15+ privacy rule for UDP multicast. Apple treats launchd daemons and per-user agents differently; PhairDLNA's service identity is under review in OD-15 |
 | **APFS** | Apple's default file system: case-insensitive by default, and **normalisation-insensitive** — two spellings of the same name are the same file |
 | **NFC / NFD** | The two Unicode normalisation forms. macOS preserves whichever form a file was written in, and the Finder displays the decomposed one |
 | **AppleDouble (`._*`)** | The sidecar files macOS creates on file systems that cannot store resource forks. The server ignores them |

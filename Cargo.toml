@@ -28,12 +28,17 @@ image = { version = "0.25", default-features = false, features = ["jpeg", "png"]
 # The network serving of the daemon. These live in the CLI crate and not in the
 # core, so that the core stays portable and free of a runtime (ADR-0001).
 axum = { version = "0.8", default-features = false, features = ["http1", "tokio", "original-uri"] }
+# The bounded SOAP/XML parser selected by ADR-0002.
+quick-xml = { version = "0.42.0", default-features = false }
 # The stream of a media answer: the trait every stream implements.
 futures-core = "0.3"
 tokio = { version = "1.54", features = ["rt-multi-thread", "net", "signal", "time", "macros", "io-util", "fs"] }
+# The accepted HTTP handler-future timeout middleware (ADR-0002).
+tower-http = { version = "0.7.1", default-features = false, features = ["timeout"] }
 serde = { version = "1.0", features = ["derive"] }
 toml = "1.2"
 thiserror = "2.0"
+tower = { version = "0.5.3", features = ["util"] }
 tempfile = "3.27"
 unicode-normalization = "0.1.26"
 unicase = "2.10"

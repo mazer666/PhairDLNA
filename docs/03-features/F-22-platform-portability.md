@@ -2,7 +2,9 @@
 
 Status: Draft
 Owner role: Architect
-Version/date: 0.1 / 2026-11-15
+Version/date: 0.4 / 2026-11-18
+Purpose: Specify platform-specific behavior behind the portable core and its build matrix.
+References: `../00-governance/PROJECT-STANDARDS.md`, `../00-governance/REQUIREMENTS-METHOD.md`, `../07-project/OPEN-DECISIONS.md` (OD-15), `F-13`, `F-15`.
 Requirements: PLT-001 … PLT-003, PLT-005 … PLT-018
 
 Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
@@ -163,7 +165,7 @@ under two names is one file with two paths. `FUN-020`, ADR-0007.
 
 | Platform | The always-on server | The user interface |
 | --- | --- | --- |
-| macOS | launchd **daemon** (system context) — `PLT-013` | launchd **agent** (user session) |
+| macOS | Service process model open under OD-15; PLT-013 remains baseline | Regular Dock app with main window and menu-bar item (DEC-076); launch integration open |
 | Linux | a systemd **system** unit, `Type=notify` | the same unit, or a user unit with lingering |
 | Windows | a Windows **Service** (session 0) | a tray application |
 
@@ -261,11 +263,11 @@ All criteria below are *planned*; no test file exists yet.
 | **AC-07** | Given a path longer than the platform limit, when it is opened, then the platform error is reported with the path redacted and the path is not rewritten | `PLT-007`, `PLT-015` | Automated test | `crates/phairdlna-core/tests/long_paths.rs` |
 | **AC-08** | Given a volume that is unmounted and remounted, when the catalogue is consulted, then the entries are re-keyed and no duplicate appears | `PLT-011` | Integration test | `crates/phairdlna-core/tests/volume_remount.rs` |
 | **AC-09** | Given a subtree the operating system refuses, when the root is scanned, then the subtree is quarantined, the rest is indexed and the reason is reported | `PLT-012`, `PLT-017` | Integration test | `crates/phairdlna-core/tests/quarantined_subtree.rs` |
-| **AC-10** | Given the macOS installation, when the server runs as a launchd daemon, then it is exempt from the local-network permission and the user interface as an agent is not | `PLT-013` | Device test on macOS 15 or later | `docs/05-quality/INTEROPERABILITY-MATRIX.md` § 4.2 |
+| **AC-10** | **BLOCKED / NOT RUN.** Verify Local Network behavior for the owner-approved service and app process model after OD-15 resolves the PLT-013/DEC-076 interaction | `PLT-013` | Real-device experiment | `qa/macos-service-access-protocol.md` |
 | **AC-11** | Given the Windows installation, when the manifest is inspected, then `longPathAware` is present, and the documentation states that `LongPathsEnabled` is also required | `PLT-015` | Automated test over the manifest plus a documentation check | `crates/phairdlna-cli/tests/windows_manifest.rs` |
 | **AC-12** | Given the Linux packaging, when the primary distribution channel is inspected, then it is a native package and not a filesystem-sandboxed format | `PLT-016` | Manual review | `docs/08-releases/RELEASE-POLICY.md` |
 | **AC-13** | Given the protocol fixture suite, when it runs on two different platforms, then the produced bytes are identical | `PLT-010` | Automated test | `crates/phairdlna-core/tests/protocol_parity.rs` |
-| **AC-14** | Given a folder the user has no permission for, when the server starts, then it asks through the platform's own consent mechanism and explains a refusal | `PLT-017`, `PLT-018` | Device test | `docs/05-quality/INTEROPERABILITY-MATRIX.md` § 4.2 |
+| **AC-14** | Given a protected folder, when the user selects it, then the service reads it only if the platform grants access to the actual service process; an unselected sibling remains unreadable and revocation removes access | `PLT-017`, `PLT-018` | Real-device security experiment | `qa/macos-service-access-protocol.md` and OD-15 |
 
 ---
 
@@ -302,3 +304,12 @@ the ones that only appear on the platform nobody tests.
 | F22-Q-03 | Is Windows in scope for the first stable release, or only the headless server? | Owner decision; the baseline requires the build to succeed and the service to install, not a graphical application |
 | F22-Q-04 | Should a case-sensitive volume be supported at all on macOS? | A product decision. It is unusual, and the detection machinery handles it either way |
 | F22-Q-05 | What is the exact set of volume events each platform reports? | A platform experiment per operating system; the research covers the API surface, not the delivery guarantees |
+| F22-Q-06 | Which macOS service identity can satisfy PLT-013 while also satisfying OPS-015 and PLT-018, Local Network behavior, and process-scoped selected-folder consent? | OD-15; real-Mac experiment plus independent security review before service lifecycle implementation |
+
+### Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 0.2 / 2026-11-18 | Makes AC-14 verify access in the actual service process and adds the OD-15 question linking PLT-013 with OPS-015/PLT-018. |
+| 0.3 / 2026-11-18 | Adds the experiment-only probe prerequisite and links AC-14 to the OD-15 protocol. |
+| 0.4 / 2026-11-18 | Marks macOS service acceptance blocked until OD-15 reconciles PLT-013 with the regular Dock app in DEC-076. |

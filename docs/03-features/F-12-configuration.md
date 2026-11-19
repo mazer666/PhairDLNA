@@ -2,7 +2,9 @@
 
 Status: Draft
 Owner role: Product/Requirements
-Version/date: 0.1 / 2026-11-14
+Version/date: 0.3 / 2026-11-19
+Purpose: Specify the typed, validated and versioned PhairDLNA configuration.
+References: `../00-governance/PROJECT-STANDARDS.md`, `../00-governance/REQUIREMENTS-METHOD.md`, `../02-architecture/adr/ADR-0004-typed-versioned-configuration.md`, `../07-project/OPEN-DECISIONS.md` (OD-16), `F-14`, `F-15`.
 Requirements: CFG-001, CFG-002, CFG-003, CFG-004, CFG-005, CFG-006, CFG-007, CFG-008,
 Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
 Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
@@ -402,3 +404,15 @@ directory (ARCHITECTURE §12).
    "shall carry a `schema_version`" without fixing its type. *Proposed reading:* a
    positive integer, incremented when a setting changes meaning; the migrations are
    named after the version they produce. *Closes when:* the owner fixes the scheme.
+8. **[DECIDED DIRECTION, DEC-079; implementation gated by OD-15] How the native application bootstraps and activates saved settings.** ADR-0004
+   rejects runtime configuration reload in the baseline. The app creates the initial typed config locally with restrictive ownership/permissions
+   and an atomic write; later settings updates use the authenticated API, validate the complete candidate, persist atomically and require a
+   controlled service restart. The app reports saved and effective state separately. *Implementation closes when:* F-14/F-15 define and verify
+   validation, atomicity, conflicts, restart failure and recovery, and the approved service consumes the saved roots.
+
+### Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 0.3 / 2026-11-19 | Records DEC-079's local first-config bootstrap and authenticated API update/restart direction, gated on OD-15's service evidence. |
+| 0.2 / 2026-11-18 | Links app-driven configuration activation to OD-16 without changing ADR-0004's no-runtime-reload baseline. |

@@ -13,6 +13,7 @@
 //! of the user: the roots are shown with their pseudonyms, and the records of
 //! the log carry the pseudonyms the log has already given them (`SEC-094`).
 
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Instant;
 
@@ -35,6 +36,12 @@ const DIAGNOSTIC_RECORDS: usize = 50;
 
 /// The daemon, seen by the administration surface.
 pub struct DaemonAdmin {
+    /// The friendly name advertised in the UPnP description.
+    device_name: String,
+    /// The network address advertised to media clients, absent in local-only mode.
+    device_address: Option<String>,
+    /// Whether the SSDP listener and its task are running.
+    discovery_available: Arc<AtomicBool>,
     /// The library of the daemon.
     library: Library,
     /// The transfers that are running.
@@ -49,25 +56,32 @@ pub struct DaemonAdmin {
     started: Instant,
 }
 
+/// Inputs for starting the optional local administration API.
+pub struct AdminStartup<'a> {
+    /// Validated server configuration.
+    pub config: &'a Config,
+    /// The catalogue and its roots.
+    pub library: Library,
+    /// Active media transfers.
+    pub transfers: Transfers,
+    /// Cached pictures.
+    pub pictures: Pictures,
+    /// The daemon logger.
+    pub logger: &'a Logger,
+    /// Redaction for private filesystem paths.
+    pub redactor: Arc<Redactor>,
+    /// UPnP device name.
+    pub device_name: String,
+    /// Advertised address, when available.
+    pub device_address: Option<String>,
+    /// Whether discovery is currently available.
+    pub discovery_available: Arc<AtomicBool>,
+    /// Optional port override.
+    pub port: Option<u16>,
+}
+
 impl DaemonAdmin {
     /// Builds the view of the daemon for the surface.
-    pub fn new(
-        library: Library,
-        transfers: Transfers,
-        pictures: Pictures,
-        logger: Logger,
-        redactor: Arc<Redactor>,
-    ) -> Self {
-        Self {
-            library,
-            transfers,
-            pictures,
-            logger,
-            redactor,
-            started: Instant::now(),
-        }
-    }
-
     /// The roots of the library, as the surface shows them.
     fn roots(&self) -> Vec<RootState> {
         self.library.with_catalogue(|catalogue| {
@@ -101,6 +115,9 @@ impl AdminBackend for DaemonAdmin {
     /// The state of the server.
     fn status(&self) -> Status {
         Status {
+            device_name: self.device_name.clone(),
+            device_address: self.device_address.clone(),
+            discovery_available: self.discovery_available.load(Ordering::Acquire),
             uptime_seconds: self.started.elapsed().as_secs(),
             version: phairdlna_core::PROJECT_VERSION.to_owned(),
             source_revision: phairdlna_core::SOURCE_REVISION.to_owned(),
@@ -197,15 +214,19 @@ impl DaemonAdmin {
 /// The surface is started only when the configuration asks for it. A
 /// configuration that does not ask for it leaves the machine with no
 /// administration socket at all (`OPS-020`, `OPS-025`).
-pub async fn start(
-    config: &Config,
-    library: Library,
-    transfers: Transfers,
-    pictures: Pictures,
-    logger: &Logger,
-    redactor: Arc<Redactor>,
-    port: Option<u16>,
-) -> Result<Option<AdminServer>, String> {
+pub async fn start(startup: AdminStartup<'_>) -> Result<Option<AdminServer>, String> {
+    let AdminStartup {
+        config,
+        library,
+        transfers,
+        pictures,
+        logger,
+        redactor,
+        device_name,
+        device_address,
+        discovery_available,
+        port,
+    } = startup;
     if !config.security.admin_enabled {
         return Ok(None);
     }
@@ -215,13 +236,17 @@ pub async fn start(
         token_path: std::path::PathBuf::from(&config.security.admin_token_file),
         limits: phairdlna_core::security::Limits::from_section(&config.limits),
     };
-    let backend = Arc::new(DaemonAdmin::new(
+    let backend = Arc::new(DaemonAdmin {
+        device_name,
+        device_address,
+        discovery_available,
         library,
         transfers,
         pictures,
-        logger.clone(),
+        logger: logger.clone(),
         redactor,
-    ));
+        started: Instant::now(),
+    });
     let server = AdminServer::start(options, backend)
         .await
         .map_err(|error| format!("the administration surface cannot start: {error}"))?;

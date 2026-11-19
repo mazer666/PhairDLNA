@@ -8,6 +8,9 @@
 //! Example: the reader finds the literal of a text of the user and the line
 //!          it stands in.
 
+/// The expected locale keys and non-translatable source literals.
+pub mod locale_contract;
+
 use std::path::Path;
 
 /// The string literals of a source, with the line they stand in.

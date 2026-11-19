@@ -67,6 +67,10 @@ public domain; the binding is MIT.
 
 - The most attacked surface runs on the most battle-tested implementation available in
   the ecosystem, with our policy on top of it rather than a framework's default.
+- The XML event reader is wrapped by the application's `Element` tree, so total
+  application memory is proportional to the parsed document. The byte limit is checked
+  before reader construction and caps the tree input; the adapter does not claim
+  constant-memory streaming behavior.
 - The XML rules are ours, so they are ours to test — but a mistake in the writer
   module would produce malformed DIDL-Lite for every client, so the writer has a
   round-trip property test and the output is validated against the DIDL-Lite XSD

@@ -1,16 +1,17 @@
 //! The optional native macOS application of PhairDLNA.
 //!
-//! What: the menu bar application that controls the headless server.
-//! Why: the server is the product; the application is a front end for it. The
-//!      two are separate crates so that the server can run without any
-//!      graphical process (`PRD-006`).
+//! What: the primary graphical application for setting up and managing the
+//!       headless PhairDLNA server on macOS.
+//! Why: macOS users need a native setup and status surface, while the server
+//!      remains independently usable without a graphical process (`DEC-075`,
+//!      `PRD-006`).
 //! Example: the application asks the administration surface for the state of
-//!          the server and shows it as a line of text in the menu bar.
+//!          the server and shows it in the overview window and menu bar.
 //!
-//! **The application is a front end and nothing else.** It holds no state of
-//! the server of its own, it opens no connection to anything but the
-//! administration surface on the loopback interface, and it never embeds the
-//! server (`MB-001`, `MB-005`).
+//! **The application is the primary graphical client, not the server process.**
+//! It holds no server state of its own, connects only to the authenticated
+//! administration API on loopback, and never embeds the server (`MB-001`,
+//! `MB-005`).
 //!
 //! **The texts are in the resource files.** Every text the user reads — the
 //! help of the command line, the lines of the menu, the messages of a
@@ -36,7 +37,7 @@ const EXIT_USAGE: i32 = 2;
 const EXIT_FAILURE: i32 = 1;
 
 fn main() {
-    let strings = Strings::for_current_locale().unwrap_or_else(|_| Strings::fallback());
+    let strings = strings_for_current_user().unwrap_or_else(|_| Strings::fallback());
     let arguments: Vec<String> = std::env::args().skip(1).collect();
     let options = match Options::parse(&arguments, &strings) {
         Ok(Some(options)) => options,
@@ -50,6 +51,23 @@ fn main() {
         eprintln!("{reason}");
         std::process::exit(EXIT_FAILURE);
     }
+}
+
+/// Reads the language preference of the user who launched the application.
+#[cfg(target_os = "macos")]
+fn strings_for_current_user() -> Result<Strings, phairdlna_mac::text::StringsError> {
+    let preferences = objc2_foundation::NSLocale::preferredLanguages();
+    let preferred_locales: Vec<String> = preferences
+        .iter()
+        .map(|language| language.to_string())
+        .collect();
+    Strings::for_preferred_locales(&preferred_locales)
+}
+
+/// Reads the language from the environment on platforms without Foundation.
+#[cfg(not(target_os = "macos"))]
+fn strings_for_current_user() -> Result<Strings, phairdlna_mac::text::StringsError> {
+    Strings::for_current_locale()
 }
 
 /// The options of the application.
@@ -177,6 +195,9 @@ fn start(options: &Options, strings: &Strings) -> Result<(), String> {
     let Some(marker) = objc2::MainThreadMarker::new() else {
         return Err(strings.text("cli.error.not_main_thread").to_owned());
     };
+    // Initialize the native application before starting work that may fail.
+    let application = objc2_app_kit::NSApplication::sharedApplication(marker);
+    let _ = application.setActivationPolicy(objc2_app_kit::NSApplicationActivationPolicy::Regular);
     // The token of the installation is read out of its file before every
     // request: a server that is started while the application runs is found
     // then, and a server that was never started is a server that is not there
@@ -186,22 +207,13 @@ fn start(options: &Options, strings: &Strings) -> Result<(), String> {
         options.token_file.clone(),
     );
     let address = client.address();
-    let worker = Worker::spawn(client).map_err(|error| {
-        let reason = error.reason.clone();
-        strings.format("error.worker_not_started", &[("reason", &reason)])
-    })?;
-    let app = App::with_token_file(
-        strings.clone(),
-        config_path(),
-        address,
-        options.token_file.clone(),
-    );
+    let worker =
+        Worker::spawn(client).map_err(|_| strings.text("error.worker_not_started").to_owned())?;
+    let app = App::new(strings.clone(), config_path(), address);
     let desktop = desktop::Desktop::new(marker, app, worker)
-        .map_err(|reason| strings.format("cli.error.no_menu_bar", &[("reason", &reason)]))?;
+        .map_err(|_| strings.text("cli.error.no_menu_bar").to_owned())?;
     let shared = desktop::shared(desktop);
     desktop::install_handler(shared);
-    let application = objc2_app_kit::NSApplication::sharedApplication(marker);
-    application.setActivationPolicy(objc2_app_kit::NSApplicationActivationPolicy::Accessory);
     application.run();
     Ok(())
 }

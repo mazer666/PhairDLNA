@@ -19,6 +19,9 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+mod error;
+pub use error::TokenError;
+
 /// The permissions the token file must have: the owner reads and writes, and
 /// nobody else may do anything with it.
 const PRIVATE_FILE: u32 = 0o600;
@@ -269,142 +272,6 @@ fn set_private(path: &Path, mode: u32) -> Result<(), String> {
     Ok(())
 }
 
-/// Why the token of the surface could not be used.
-#[derive(Debug)]
-pub enum TokenError {
-    /// The file that holds the token could not be read.
-    Unreadable {
-        /// The path of the file.
-        path: PathBuf,
-        /// What the file system said.
-        reason: String,
-    },
-    /// The file that holds the token could not be written.
-    Unwritable {
-        /// The path of the file.
-        path: PathBuf,
-        /// What the file system said.
-        reason: String,
-    },
-    /// The file that holds the token is readable by others.
-    NotPrivate {
-        /// The path of the file.
-        path: PathBuf,
-    },
-    /// The text of the file is not a token.
-    Malformed,
-}
-
-impl fmt::Display for TokenError {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Unreadable { path, reason } => {
-                write!(
-                    formatter,
-                    "the token file \"{path:?}\" could not be read: {reason}"
-                )
-            }
-            Self::Unwritable { path, reason } => {
-                write!(
-                    formatter,
-                    "the token file \"{path:?}\" could not be written: {reason}"
-                )
-            }
-            Self::NotPrivate { path } => write!(
-                formatter,
-                "the token file \"{path:?}\" is readable by others; expected the permissions 600"
-            ),
-            Self::Malformed => {
-                write!(formatter, "the text of the token file is not a token")
-            }
-        }
-    }
-}
-
-impl std::error::Error for TokenError {}
-
 #[cfg(test)]
-mod tests {
-    use super::{constant_time_eq, load_or_create, AdminToken};
-
-    /// A token is long enough and made of hexadecimal characters.
-    #[test]
-    fn a_token_is_long_and_hexadecimal() {
-        let token = AdminToken::generate();
-        assert_eq!(token.as_str().len(), 64);
-        assert!(token.as_str().chars().all(|c| c.is_ascii_hexdigit()));
-    }
-
-    /// Two tokens are not the same.
-    #[test]
-    fn two_tokens_are_not_the_same() {
-        assert_ne!(AdminToken::generate(), AdminToken::generate());
-    }
-
-    /// The negative case: a short text is not a token.
-    #[test]
-    fn a_short_text_is_not_a_token() {
-        assert!(AdminToken::parse("abc").is_err());
-    }
-
-    /// The negative case: a text with letters that are not hexadecimal is refused.
-    #[test]
-    fn a_text_that_is_not_hexadecimal_is_refused() {
-        let text = "z".repeat(64);
-        assert!(AdminToken::parse(&text).is_err());
-    }
-
-    /// The token of the "cross-site request forgery" defence is bound to the
-    /// token of the installation.
-    #[test]
-    fn the_csrf_token_belongs_to_the_token() {
-        let token = AdminToken::generate();
-        let other = AdminToken::generate();
-
-        assert_eq!(token.csrf_token(), token.csrf_token());
-        assert_ne!(token.csrf_token(), other.csrf_token());
-    }
-
-    /// The right token is accepted, a wrong one is not.
-    #[test]
-    fn the_right_token_is_accepted() {
-        let token = AdminToken::generate();
-        assert!(token.matches(token.as_str()));
-        assert!(!token.matches("0000000000000000"));
-        assert!(!token.matches(&format!("{}0", token.as_str())));
-    }
-
-    /// Two texts of different length are not equal.
-    #[test]
-    fn texts_of_different_length_are_not_equal() {
-        assert!(!constant_time_eq(b"abc", b"abcd"));
-        assert!(constant_time_eq(b"abc", b"abc"));
-    }
-
-    /// The token file is written, read back and kept private.
-    #[test]
-    fn the_token_file_is_written_and_read_back() {
-        let folder = tempfile::tempdir().expect("a temporary directory");
-        let path = folder.path().join("admin.token");
-
-        let written = load_or_create(&path).expect("the token is written");
-        let read = load_or_create(&path).expect("the token is read back");
-
-        assert_eq!(written, read);
-    }
-
-    /// The negative case: a token file that others may read is refused.
-    #[cfg(unix)]
-    #[test]
-    fn a_token_file_that_others_may_read_is_refused() {
-        use std::os::unix::fs::PermissionsExt;
-
-        let folder = tempfile::tempdir().expect("a temporary directory");
-        let path = folder.path().join("admin.token");
-        load_or_create(&path).expect("the token is written");
-        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o644))
-            .expect("the permissions are set");
-
-        assert!(load_or_create(&path).is_err(), "the file is refused");
-    }
-}
+#[path = "token/tests.rs"]
+mod tests;

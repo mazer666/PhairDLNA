@@ -15,7 +15,10 @@ pub const REPO_URL: &str = "https://github.com/mazer666/PhairDLNA";
 pub fn build_about_tab(
     mtm: MainThreadMarker,
     strings: &crate::text::Strings,
-) -> Retained<NSTabViewItem> {
+) -> (
+    Retained<NSTabViewItem>,
+    Vec<(Retained<NSTextField>, NSRect)>,
+) {
     let tab = NSTabViewItem::new();
     let tab_title = NSString::from_str(strings.text("prefs.tab_about"));
     tab.setLabel(&tab_title);
@@ -26,48 +29,47 @@ pub fn build_about_tab(
         &NSString::from_str(strings.text("prefs.about_title")),
         mtm,
     );
-    title_lbl.setFrame(NSRect::new(
-        NSPoint::new(20.0, 390.0),
-        NSSize::new(560.0, 30.0),
-    ));
+    let title_frame = NSRect::new(NSPoint::new(20.0, 390.0), NSSize::new(560.0, 30.0));
+    title_lbl.setFrame(title_frame);
     view.addSubview(&title_lbl);
 
     let desc_lbl = NSTextField::wrappingLabelWithString(
         &NSString::from_str(strings.text("prefs.about_desc")),
         mtm,
     );
-    desc_lbl.setFrame(NSRect::new(
-        NSPoint::new(20.0, 320.0),
-        NSSize::new(560.0, 60.0),
-    ));
+    let desc_frame = NSRect::new(NSPoint::new(20.0, 320.0), NSSize::new(560.0, 60.0));
+    desc_lbl.setFrame(desc_frame);
     view.addSubview(&desc_lbl);
 
     let ver_str = strings.format("prefs.about_version", &[("version", "0.1.0")]);
     let ver_lbl = NSTextField::wrappingLabelWithString(&NSString::from_str(&ver_str), mtm);
-    ver_lbl.setFrame(NSRect::new(
-        NSPoint::new(20.0, 280.0),
-        NSSize::new(560.0, 24.0),
-    ));
+    let version_frame = NSRect::new(NSPoint::new(20.0, 280.0), NSSize::new(560.0, 24.0));
+    ver_lbl.setFrame(version_frame);
     view.addSubview(&ver_lbl);
 
     let lic_lbl = NSTextField::wrappingLabelWithString(
         &NSString::from_str(strings.text("prefs.about_license")),
         mtm,
     );
-    lic_lbl.setFrame(NSRect::new(
-        NSPoint::new(20.0, 240.0),
-        NSSize::new(560.0, 24.0),
-    ));
+    let license_frame = NSRect::new(NSPoint::new(20.0, 240.0), NSSize::new(560.0, 24.0));
+    lic_lbl.setFrame(license_frame);
     view.addSubview(&lic_lbl);
 
     let repo_str = strings.format("prefs.about_repo", &[("url", REPO_URL)]);
     let repo_lbl = NSTextField::wrappingLabelWithString(&NSString::from_str(&repo_str), mtm);
-    repo_lbl.setFrame(NSRect::new(
-        NSPoint::new(20.0, 180.0),
-        NSSize::new(560.0, 48.0),
-    ));
+    let repository_frame = NSRect::new(NSPoint::new(20.0, 180.0), NSSize::new(560.0, 48.0));
+    repo_lbl.setFrame(repository_frame);
     view.addSubview(&repo_lbl);
 
     tab.setView(Some(&view));
-    tab
+    (
+        tab,
+        vec![
+            (title_lbl, title_frame),
+            (desc_lbl, desc_frame),
+            (ver_lbl, version_frame),
+            (lic_lbl, license_frame),
+            (repo_lbl, repository_frame),
+        ],
+    )
 }

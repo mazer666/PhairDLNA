@@ -1,8 +1,10 @@
 # Product vision — PhairDLNA
 
-Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Product Owner
+Status: **Approved (v1.1, 2026-11-18)** · Owner role: Product Owner
 Scope: the *why* of the product. The *what* is in `PRODUCT-REQUIREMENTS.md`, the
 *how* in `../02-architecture/ARCHITECTURE.md`.
+Purpose: State the product's audience, promise and principles; not its detailed requirements.
+References: `../00-governance/PROJECT-STANDARDS.md`, `PRODUCT-REQUIREMENTS.md`, `../03-features/F-14-local-administration-and-diagnostics.md`, `../03-features/F-15-macos-native-experience.md`, `../00-governance/DECISION-LOG.md`.
 
 ---
 
@@ -88,13 +90,21 @@ Quality in this product is not a slogan; it is a set of properties we can test:
 
 ```
 phairdlna-core      portable Rust core: config, catalogue, protocols, streaming
-phairdlna-cli       headless daemon + command line (the product's core interface)
-phairdlna-mac       optional native macOS menu bar app (later milestone)
-phairdlna-admin     optional local administration surface (loopback only)
+phairdlna-cli       headless daemon + command line (complete non-graphical interface)
+phairdlna-mac       native macOS application (primary graphical interface)
+phairdlna-admin     optional authenticated loopback API used by the native app
 ```
 
-The headless server is the product. The macOS app is a front end for it — never a
-replacement, and never a requirement for the server to work.
+The headless server remains complete without a graphical interface. For people who prefer
+graphical software, the native macOS application is the primary setup and administration
+experience; it talks to the server through the authenticated loopback API. No browser UI is
+provided (DEC-075).
+
+### Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 1.1 / 2026-11-18 | Records the owner direction that the native macOS app is the primary GUI and the loopback service is an API, with no browser UI (DEC-075). |
 
 ---
 

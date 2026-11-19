@@ -1,10 +1,13 @@
 # PhairDLNA — Platform Integration Brief (macOS first; Linux & Windows equivalents)
-Status: **Research input — evidence, not norm** · Owner role: Architect / Platform specialist · Version/date: 1.0 / 2026-11-14
+Status: **Research input — evidence, not norm** · Owner role: Architect / Platform specialist · Version/date: 1.5 / 2026-11-18
 > Committed so that every citation in the feature specifications resolves. Where this document and a requirement disagree, the requirement wins.
+
+Purpose: Record platform evidence and assumptions; this brief does not approve product or security decisions.
+Revision history: 1.5 / 2026-11-18 — links the folder-access evidence requirement to the repeatable OD-15 protocol; 1.4 aligns the platform matrix and D1 with OD-15, removes the assumed root daemon/TCC transfer architecture and updates the primary app target.
 
 **Status:** Requirements-phase decision brief · **Date:** 2026-11-14 · **Author:** Platform Integration Specialist
 **Scope:** macOS (arm64 + x86_64) as the first shipping platform, with Linux and Windows designed in from the start.
-**Product constraints (already fixed by the owner):** macOS first · Linux & Windows designed in from day one · Rust core must stay platform-neutral behind clean adapters · headless server must run with no GUI · native macOS menu bar app later · AGPL-3.0-or-later · free, ad-free, telemetry-free, offline/LAN-only.
+**Product constraints (already fixed by the owner):** macOS first · Linux & Windows designed in from day one · Rust core must stay platform-neutral behind clean adapters · headless server must run with no GUI · native macOS application with a main window and menu-bar status item · AGPL-3.0-or-later · free, ad-free, telemetry-free, offline/LAN-only.
 
 ## Label legend
 
@@ -26,7 +29,7 @@ given in *Sources*; the payload URL is the one actually retrieved.
 1. **The single most consequential macOS fact for PhairDLNA is Local Network Privacy (macOS 15+).** SSDP is a *local network operation*:
    sending UDP multicast **and** receiving incoming UDP multicast both require the Local Network privilege. A per-user `launchd` **agent**
    is *not* exempt; a `launchd` **daemon** and any process running as **root** *are* exempt. **VERIFIED** (TN3179).
-   → The always-on server should be a **LaunchDaemon**; the per-user GUI/agent is where the prompt lives.
+   → PLT-013 currently requires a system-domain `LaunchDaemon`, but OD-15 gates that choice on a process identity and access model that also satisfy OPS-015/PLT-018. A per-user service remains a candidate if the owner revises PLT-013 and its Local Network behavior is verified.
 2. **The Unicode trap is subtler than "macOS stores NFD".** Modern macOS uses **APFS**, which is *normalization-insensitive* (NFC and NFD
    spellings of the same name are **the same file**) but *preserves the on-disk normalization*. HFS+ (still mountable) stores **NFD**.
    Linux filesystems are byte-preserving, so NFC and NFD are **two different files** there; SMB uses **NFC**. **VERIFIED** (Apple APFS
@@ -160,15 +163,16 @@ says almost nothing about *unsigned vs signed* binaries as a category, and says 
 - **OPEN QUESTION:** what macOS does with a headless daemon that tries to bind a listening socket with the firewall on — silently drop
   packets, or queue a prompt for the next GUI session, or auto-allow because the daemon is root/launchd-owned. Apple's docs do not say.
   **This must be tested on a real Mac** before the macOS release; it is the single largest residual macOS risk.
-- **ASSUMPTION (testable):** a **root `launchd` daemon** is far more likely to receive inbound traffic without a prompt than an
+- **ASSUMPTION (historical, not an architecture recommendation):** a **root `launchd` daemon** is far more likely to receive inbound traffic without a prompt than an
   unsigned per-user agent, because (a) it is root (root is exempted from the Local Network gate) and (b) many daemon-class processes are
-  pre-seeded into the socket filter. **Do not rely on this.**
+  pre-seeded into the socket filter. **Do not rely on this or use it to select the service identity; OD-15 governs that choice.**
 
-### 2.4 Mitigation (recommendation, not a fact)
+### 2.4 Mitigation (conditional recommendation, not a fact)
 
-Ship the server as a `LaunchDaemon` **and** document that users may need to add the binary to System Settings > Network > Firewall >
-Options if discovery fails. Provide a one-line diagnostic in the daemon's log that says "firewall may be blocking inbound connections".
-**ASSUMPTION.**
+The earlier recommendation to ship the server as a `LaunchDaemon` is superseded by OD-15 until the service identity, no-elevation constraints and
+selected-folder access are resolved. Whichever service model is approved, document the observed firewall recovery path and provide a diagnostic that
+names firewall blocking as a possibility without claiming it is the cause. **ASSUMPTION:** users may need to add the signed service executable to
+System Settings > Network > Firewall > Options; verify this on a real Mac before publishing the instruction.
 
 ---
 
@@ -266,21 +270,20 @@ macOS 15, 26 and 27.**
 
 ### 4.2 Which fits a media server?
 
-**Recommendation: two units, deliberately split.**
+**Earlier hypothesis — not an approved architecture.** The following process split was
+proposed before checking the selected-folder permission boundary. It is superseded by
+OD-15: no unit or identity is selected here, and the daemon must not be assumed to run
+as root or to inherit folder access from the UI.
 
 | Unit | Runs as | When | Purpose |
 |---|---|---|---|
-| **LaunchDaemon** (`/Library/LaunchDaemons/…plist`) | **root**, system-wide | **from boot, no user logged in** | The actual media server: SSDP responder, HTTP server, indexer. **Root ⇒ Local Network privilege auto-granted** (VERIFIED, TN3179). |
-| **LaunchAgent** (`~/Library/LaunchAgents/…plist`) | the logged-in user | at login, within the user's GUI session | Optional per-user controller / menu-bar companion / "index my folders" helper. **Agents are NOT exempt from Local Network privacy** (VERIFIED, TN3179) — the prompt lands here, attributed to the right app via `AssociatedBundleIdentifiers`. |
+| System-domain `LaunchDaemon` | Effective identity depends on its launchd configuration; root must not be assumed | Can be available outside a user's login session | Candidate for always-on service. Must satisfy OPS-015/PLT-018 and verify Local Network behavior for the actual identity plus selected-folder scope and revocation (OD-15). |
+| Per-user `LaunchAgent` | Logged-in user's identity | User session only | Candidate that naturally uses user file permissions; stops at logout and may require Local Network approval. Requires owner-approved PLT-013 change and runtime verification (OD-15). |
 
-Reasons (all grounded above):
-- A media server must be reachable **when nobody is logged in** (e.g. a headless Mac mini in a closet). A `LaunchAgent` only runs inside a
-  logged-in user's session → it is not sufficient on its own. **VERIFIED** by the `launchd.plist(5)` FILES distinction + `launchd(8)`
-  "per-user daemon/agent manager".
-- Root/daemon status removes the macOS 15 Local Network prompt from the *critical path*. **VERIFIED.**
-- A `LaunchDaemon` also gets `KeepAlive` with the full condition dictionary, and `StandardOutPath`/`StandardErrorPath` for logs.
-- A `LaunchAgent` is where the TCC/permission UX belongs: it runs in the user's session, so `NSOpenPanel` folder selection and TCC prompts
-  behave normally.
+The baseline requirements pull in different directions: PLT-013 requires a system-context daemon; OPS-015 and PLT-018 prohibit elevated privilege
+to serve the user's own directories. Apple documents launchd identity configuration and different local-network behavior, but the supported
+combination for this product is not established. OD-15 therefore requires a real-Mac experiment and owner resolution before service controls are built.
+Neither a folder picker nor a scoped bookmark is evidence that a separate service process has least-privilege access.
 
 **`KeepAlive` semantics (VERIFIED, `launchd.plist(5)`):** use `KeepAlive = true` for the daemon (always-on), and **guard against the
 throttling problem** — "Jobs that exit quickly and frequently when configured to be kept alive will be throttled." So the daemon must not
@@ -292,8 +295,8 @@ crash-loop. Use `SuccessfulExit` / `PathState` if you need smarter semantics (e.
 the Linux side and a small self-rotation loop for macOS).
 
 **Also note (VERIFIED):** `launchd.plist(5)`'s CAVEAT — privacy-protected paths in a launchd plist "may prevent the job from running". Do not
-point a daemon at `~/Desktop`, `~/Documents`, `~/Downloads` or network/removable volumes in the plist; let the *user* grant access through
-the agent or the app instead.
+point a service at protected folders in the plist and infer that the user has authorized access. The process identity and the actual consent path
+must be verified; see §5.4 and OD-15.
 
 ### 4.3 SMAppService — the modern alternative and its restrictions
 
@@ -305,19 +308,22 @@ the agent or the app instead.
 | For `LaunchAgents`, `register()`/`unregister()` are "a replacement for installing property lists in `~/Library/LaunchAgents` or `/Library/LaunchAgents`"; for `LaunchDaemons`, a replacement for installing property lists in `/Library/LaunchDaemons`. | VERIFIED | same |
 | "Registers the service so it can begin launching **subject to user approval**." | VERIFIED | same |
 | **Restriction that matters:** the helper must be **inside an app's main bundle**. | VERIFIED | same |
+| A bundled `LaunchDaemon` does not bootstrap until an administrator approves it in System Settings. `register()` is therefore not equivalent to an already-running daemon. | VERIFIED | Apple Developer, *Updating helper executables from earlier versions of macOS* |
+| `SMAppService.Status` has `notRegistered`, `enabled`, `requiresApproval` and `notFound`. | VERIFIED | Apple Developer, *SMAppService.Status* |
 
 **Consequences (ASSUMPTION, drawn from the above):**
 1. A **pure-CLI, no-GUI install** (the `curl | sh` model) **cannot** use `SMAppService` — there is no bundle. It must write a plist into
    `~/Library/LaunchAgents` (or `/Library/LaunchDaemons`) directly and use `launchctl bootstrap`/`load`. That is the classic path and still
    works; it is just not the "blessed" modern one, and it loses the Login Items UI integration.
-2. Once the **menu bar app exists** (it must be an `.app` bundle), the app becomes the natural owner of the service registration:
-   the app bundle contains the `phairdlna-server` helper executable and the `com.phairdlna.server.plist`, and the app calls
-   `SMAppService.agent(plistName: "com.phairdlna.server")` / `.daemon(plistName:)`.
+2. Once the **macOS app exists** (it is an `.app` bundle), it can register a bundled server executable through
+   `SMAppService.daemon(plistName:)`. The package must carry the helper and its `Contents/Library/LaunchDaemons` property list, and the UI must
+   explain the required administrator approval and link to System Settings when the status is `requiresApproval`.
 3. Because `SMAppService` helpers live in the bundle, the daemon binary then also inherits the **bundle's code signature**, which
    incidentally solves the TN3179 "responsible code" problem for Local Network privacy.
 
-**OPEN QUESTION:** whether `SMAppService.daemon(plistName:)` still requires an administrator password / `SMJobBless` semantics in current
-macOS, and what the exact `Status` values are. The `Status` enum page was not fetched for this brief.
+**OPEN QUESTION:** the Apple documentation establishes administrator approval in System Settings before a bundled `LaunchDaemon` starts, but does not
+settle the exact interaction on the supported macOS versions or prove the runtime path for this project. A real-Mac run must also verify how the daemon
+gets safe access to only the folders the user selected. No `SMAppService` registration or launch behavior has been observed in PhairDLNA.
 
 ---
 
@@ -420,15 +426,14 @@ the *index* must still be able to read from the mount, and the daemon may need T
 | In macOS 13+, these settings live in **System Settings > Privacy & Security > Privacy**. | VERIFIED | same |
 | macOS 10.15+ always draws `NSOpenPanel` in a **separate process**, sandboxed or not; "When the user chooses a file to open, **macOS adds that file to the app's sandbox**." | VERIFIED | Apple Developer, `NSOpenPanel` |
 | `launchd` jobs "are subject to macOS user privacy protections. Specifying privacy sensitive files and folders in a launchd plist **may prevent the job from running**." | VERIFIED | `launchd.plist(5)` CAVEATS |
+| Security-scoped bookmarks and URLs are documented as an **App Sandbox** access mechanism; resolving one yields a scoped URL, and `startAccessingSecurityScopedResource` grants access to the calling process. | VERIFIED | Apple Developer, `NSURL`, `CFURLStartAccessingSecurityScopedResource` |
+| App-scoped bookmarks do not grant access to another sandboxed app; Apple says the receiving sandboxed app must have the same code-signing identity. Apple does not document a bookmark created by the unsandboxed PhairDLNA UI as a permission grant for a separate service process. | VERIFIED for the documented sandbox restriction; OPEN for PhairDLNA's service case | Apple Developer, `CFURLCreateBookmarkData` |
 
-**Consequence (ASSUMPTION):** a `LaunchDaemon` running as root that indexes `~/Movies` will be **denied** by TCC for
-Desktop/Documents/Downloads/network+removable volumes unless the **responsible code** has consent. Root does *not* bypass TCC. The
-practical design is:
-- The **agent/GUI** (running in the user's session) obtains folder access via `NSOpenPanel` (which grants scoped access to the chosen
-  folder) and hands the daemon a **security-scoped bookmark** or an explicit path list.
-- **OPEN QUESTION:** whether a root `LaunchDaemon` can consume a security-scoped bookmark created by a user-session agent — the
-  bookmark's scope is tied to the creating process and its code signature. This needs a device test and possibly a different design
-  (e.g. the daemon runs as the *user* rather than root, or uses a privileged helper).
+**Consequence:** an `NSOpenPanel` selection and serialized bookmark are not evidence that a separate service process can read only the selected folder. A
+path list is configuration, not an authorization grant. Do not claim the folder-consent flow complete or ship the root-daemon path until a real-Mac
+experiment shows that a selected protected folder is readable by the intended server process, an unselected sibling remains unreadable, and revoking
+access takes effect. If this cannot be achieved, the owner must revisit the process model in OD-15.
+The repeatable evidence record is specified in `qa/macos-service-access-protocol.md`; the protocol itself is not test evidence.
 
 ### 5.5 Files with no extension
 
@@ -976,11 +981,11 @@ pub trait VolumeWatcher {
 // ---------------------------------------------------------------- 4. consent / access
 
 pub trait Consent {
-    /// Ask the user for access to a folder (macOS: NSOpenPanel -> scoped bookmark).
-    /// Returns the granted path and a token the daemon can reuse.
+    /// Ask the user to select a folder; selection alone is not a cross-process grant.
+    /// The platform adapter must establish access for the process that will read it.
     fn request_folder_access(&self) -> Result<ConsentGrant, PlatformError>;
 
-    /// Re-check a previously granted token. False => the grant was revoked.
+    /// Re-check an access grant held by the process that will read the folder.
     fn validate_grant(&self, grant: &ConsentGrant) -> bool;
 
     /// Whether this process currently holds "Full Disk Access" / equivalent.
@@ -1121,7 +1126,7 @@ impl Platform {
 
 | Target | Support | Milestone | Known blockers | Owner decision needed |
 |---|---|---|---|---|
-| **macOS arm64 (Apple silicon)** | **First-class / primary** | **M1** (server) → **M4** (menu bar) | (1) Local Network privacy (macOS 15+) blocks SSDP for **per-user agents** — but **root launchd daemons are exempt** (VERIFIED, TN3179). (2) Application firewall prompt for unsigned/ad-hoc binaries (VERIFIED policy; UNVERIFIED exact behaviour). (3) **Mandatory code signature** for arm64 execution (VERIFIED, APS). (4) TCC blocks daemon access to Desktop/Documents/Downloads/network+removable volumes (VERIFIED, APS). (5) `launchd.plist(5)` caveat: privacy-sensitive paths in a plist "may prevent the job from running" (VERIFIED). | **D1**: LaunchDaemon (root, always-on) + LaunchAgent (per-user UI)? **D2**: buy the 99 USD/yr Apple Developer Program membership, or ship unsigned? **D3**: minimum macOS version — 15 (needs Local Network handling) or 13/14 (no prompt)? |
+| **macOS arm64 (Apple silicon)** | **First-class / primary** | **M1** (server) → **M2.6** (native application) | (1) Local Network privacy (macOS 15+) treats per-user agents and system daemons differently; the actual approved service identity and its behavior must be verified (OD-15). (2) Application firewall behavior for the selected service is unverified. (3) **Mandatory code signature** for arm64 execution (VERIFIED, APS). (4) TCC protects selected user folders; access across the UI/service boundary and revocation are unverified (OD-15). (5) `launchd.plist(5)` caveat: privacy-sensitive paths in a plist "may prevent the job from running" (VERIFIED). | **D1 (OD-15):** resolve service identity against PLT-013, OPS-015 and PLT-018; verify Local Network behavior, selected-folder scope and revocation. **D2**: buy the 99 USD/yr Apple Developer Program membership, or ship unsigned? **D3**: minimum macOS version — 15 (needs Local Network handling) or 13/14 (no prompt)? |
 | **macOS x86_64 (Intel)** | Supported, **secondary** (Intel Mac install base is shrinking) | **M1** | (1) No arm64 signature requirement, but ad-hoc signing is still free. (2) Must ship a **universal binary** or a separate x86_64 artifact. (3) `cocoa`'s crates.io platform metadata omits arm64 → use `objc2` (VERIFIED, both archs declared). | **D4**: ship one universal binary or two artifacts? (Universal = one notarization, two arch slices; two artifacts = two notarizations.) |
 | **Linux x64** | Designed in from day one; **supported** | **M2** | (1) inotify watch/queue limits (VERIFIED) → rescan on `IN_Q_OVERFLOW`. (2) polkit needed for privileged mount (VERIFIED). (3) Distribution fragmentation (deb/rpm/Flatpak/AppImage). (4) Flatpak's filesystem sandbox is hostile to arbitrary-folder serving (VERIFIED). | **D5**: system service (recommended) or user service + `loginctl enable-linger`? **D6**: ship deb+rpm only, or also Flatpak/AppImage? |
 | **Linux arm64** | Designed in from day one; **supported** (Raspberry Pi / SBC class) | **M2** | (1) Same as Linux x64 plus ARM build/packaging (aarch64 deb/rpm). (2) `muda`/`tray-icon` are irrelevant here (headless). (3) inotify limits are per-UID and per-instance — tighter on small devices. | **D7**: is a 32-bit/armv7 Raspberry Pi 1/2 target in scope, or arm64 only? (armv7 changes the `notify`/FSEvents-equivalent story and the inotify budget.) |
@@ -1131,7 +1136,7 @@ impl Platform {
 
 | # | Decision | Recommendation | Why it matters |
 |---|---|---|---|
-| **D1** | macOS service shape | **LaunchDaemon (root) for the server + LaunchAgent (per-user) for the UI** | The daemon is auto-exempt from Local Network privacy (VERIFIED, TN3179) and runs with no user logged in. The agent is where the prompt + TCC + UI live. |
+| **D1 (OD-15)** | macOS service shape and identity | **OPEN.** Evaluate the current system-domain daemon requirement and a per-user service against OPS-015, PLT-018, Local Network behavior, selected-folder scope and revocation. | The earlier root LaunchDaemon + LaunchAgent split is an unverified hypothesis, not a recommendation or approved architecture. The system-domain service must not be assumed to run as root or inherit UI consent. |
 | **D2** | Apple Developer Program membership (99 USD/yr) | **Decide at project start; default to "no" (unsigned + `curl`/brew), with the code structured so "yes" costs no code changes** | Membership is a *person's legal identity* + an annual cost; it should be a deliberate, recorded project decision, not a silent default. Signing affects Gatekeeper, the firewall auto-allow, and Local Network identity tracking (all VERIFIED). |
 | **D3** | Minimum macOS version | **macOS 15+** | Local Network privacy exists only on 15+ (VERIFIED). Supporting 13/14 means *not* knowing whether a prompt appeared → worse diagnostics. Supporting 15+ lets you also use `SMAppService` (13+) and modern AppKit. |
 | **D4** | macOS artifact shape | **One universal binary (arm64 + x86_64)** | One notarization, one release asset, one Gatekeeper identity. `objc2`/`objc2-app-kit` declare both arches (VERIFIED). |
@@ -1144,7 +1149,7 @@ impl Platform {
 | **D11** | Menu bar app technology | **`muda` (or raw `objc2-app-kit`) — pure Rust, no Swift, no webview** | VERIFIED: `muda`'s macOS backend is `objc2` + `objc2-app-kit`. Caveats: MSRV 1.90 for `muda` (vs 1.71 for `objc2-app-kit`), main-thread-only, and it must be an `.app` bundle. |
 | **D12** | Index identity policy | **Adopt §6.2: `raw` + NFC-casefolded `identity` + `(VolumeId, FileId)` uniqueness** | This is the Unicode trap (§5.1) and the hardlink trap (§5.7). Getting this wrong produces phantom duplicates and "file not found" after an OS upgrade. |
 | **D13** | Symlink policy default | **Follow symlinks for library roots; do not create symlinks on Windows** | Windows symlink creation needs Developer Mode/elevation (VERIFIED). |
-| **D14** | Consent model | **Folder consent obtained via the per-user agent (macOS `NSOpenPanel` → scoped bookmark; Linux polkit for mount; Windows UAC)** | TCC/polkit/UAC are all "ask a human for scoped privilege". The core should model that once (the `Consent` trait). |
+| **D14** | Consent model | **OPEN (OD-15):** per-user folder selection and platform-specific consent mechanisms are candidates; macOS `NSOpenPanel` → scoped bookmark does not yet prove access for PhairDLNA's separate service process. Linux polkit and Windows UAC need their own platform validation. | Do not model a UI selection as a portable authorization token. The `Consent` trait is a candidate abstraction only; its process semantics and revocation behavior need architecture review. |
 
 ---
 
@@ -1152,9 +1157,9 @@ impl Platform {
 
 | # | Question | Why it cannot be answered from docs |
 |---|---|---|
-| Q1 | Under the macOS application firewall, does a **root `LaunchDaemon`** that opens a listening socket get through silently, get queued for a prompt it can never show, or get dropped? | Apple's firewall docs describe the policy, not daemon-specific behaviour. **Largest residual macOS risk.** |
+| Q1 | Under the macOS application firewall, what happens when the **OD-15-approved service process** opens a listening socket: does it get through silently, get queued for a prompt it cannot show, or get dropped? | Apple's firewall docs describe the policy, not behavior for PhairDLNA's eventual service identity. **Largest residual macOS risk.** |
 | Q2 | Does macOS Local Network privacy prompt for a **`LaunchAgent`** that is installed by a **non-bundle** CLI installer (no `AssociatedBundleIdentifiers`)? What identity is shown? | TN3179 says to set `AssociatedBundleIdentifiers` for non-`SMAppService` agents but does not describe the no-bundle case. |
-| Q3 | Can a **root `LaunchDaemon`** consume a **security-scoped bookmark** created by a user-session agent? | Not documented; determines whether the daemon can read user-granted folders at all. |
+| Q3 | Can the proposed **system `LaunchDaemon`** receive only the user's selected-folder access from the UI process, and can revocation be enforced? | Apple's bookmark docs describe App Sandbox access and per-process activation; they do not document this PhairDLNA process boundary. Test a protected selected folder, an unselected sibling and revocation on a real Mac. |
 | Q4 | Does `SEEK_HOLE`/`SEEK_DATA` work correctly on APFS for sparse-file detection? | Not verified. |
 | Q5 | Is `DiskArbitration`'s callback usable from a **headless daemon with no AppKit run loop**? | The framework doc does not say; NSWorkspace definitely needs AppKit. |
 | Q6 | On Windows, can a **session-0 service** receive `WM_DEVICECHANGE` at all? | The message requires a `WindowProc`; a service has no window. |
@@ -1163,9 +1168,36 @@ impl Platform {
 
 ---
 
+## 13. Text-size accessibility in the native macOS app
+
+**Verified platform limit:** Apple's Human Interface Guidelines state that macOS does
+not support Dynamic Type. `NSFont.preferredFont(forTextStyle:options:)` supplies the
+font associated with a text style and reserves appropriate line metrics for scripts;
+Apple does not document it as a user-adjustable text-size mechanism on macOS. The
+current overview instead assigns fixed point sizes and fixed-height frames, so it does
+not meet the F-15 claim that Dynamic Type makes the text follow a system size setting.
+
+The HIG identifies SF Pro as the macOS system font and recommends system font variants
+for standard controls. Standard fonts and semantic colors preserve the platform look,
+but do not by themselves provide an app-level larger-text control. A product choice is
+therefore needed: add an app-managed text-size preference and reflow the overview, or
+revise the requirement and make the boundary explicit. Truncation must remain visible
+in the manual accessibility and localization protocol.
+
+Sources: Apple HIG [Typography](https://developer.apple.com/design/human-interface-guidelines/typography)
+(macOS Dynamic Type statement and system-font guidance); Apple Developer
+[`NSFont.preferredFontForTextStyle:options:`](https://developer.apple.com/documentation/appkit/nsfont/preferredfont%28fortextstyle%3Aoptions%3A%29);
+Apple Developer [Larger Text evaluation criteria](https://developer.apple.com/help/app-store-connect/manage-app-accessibility/larger-text-evaluation-criteria)
+(general guidance to avoid clipping, truncation and overlap when text is enlarged).
+
 ## Sources
 
 Every URL below was actually fetched during this brief.
+
+### Apple — Accessibility sources added 2026-11-18
+- AppKit `NSFont.preferredFontForTextStyle:options:` — https://developer.apple.com/documentation/appkit/nsfont/preferredfont%28fortextstyle%3Aoptions%3A%29
+- Human Interface Guidelines — Typography — https://developer.apple.com/design/human-interface-guidelines/typography
+- Larger Text evaluation criteria — https://developer.apple.com/help/app-store-connect/manage-app-accessibility/larger-text-evaluation-criteria
 
 ### Apple — Developer Documentation
 1. TN3179 — Understanding local network privacy — https://developer.apple.com/documentation/technotes/tn3179-understanding-local-network-privacy (payload fetched: `https://developer.apple.com/tutorials/data/documentation/technotes/tn3179-understanding-local-network-privacy.json`)
@@ -1197,6 +1229,8 @@ Every URL below was actually fetched during this brief.
 25. Firewall security in macOS (Apple Platform Security) — https://support.apple.com/guide/security/firewall-security-in-macos-seca0e83763f/web
 26. Apple Platform Security guide (PDF) — https://help.apple.com/pdf/security/en_GB/apple-platform-security-guide-b.pdf (used for "Signed system volume security" → "Unsigned x86_64 code", and "Controlling app access to files")
 27. Apple Platform Security — Controlling app access to files — https://support.apple.com/guide/security/protecting-app-access-to-user-data-secbf9e8e3c8/web
+28. Updating helper executables from earlier versions of macOS — https://developer.apple.com/documentation/servicemanagement/updating-helper-executables-from-earlier-versions-of-macos
+29. SMAppService.Status — https://developer.apple.com/documentation/servicemanagement/smappservice/status-swift.enum
 
 ### Apple — Man pages & Tech Notes
 28. `launchd.plist(5)` — https://keith.github.io/xcode-man-pages/launchd.plist.5.html
@@ -1268,3 +1302,6 @@ Every URL below was actually fetched during this brief.
 82. Apple Developer Forums thread 792453 (Local Network permission / stable code signing identity / executable UUID) — https://developer.apple.com/forums/thread/792453 — corroborates TN3179 but is a forum report.
 83. TN2344 "Compressing Mac Files For Transport On Other Platforms" — https://developer.apple.com/library/archive/technotes/tn/tn2344.html — **retired / 404**, so the AppleDouble `._` convention is marked **ASSUMPTION**.
 84. "Signing Mac Software That Runs on Other Users' Computers" — https://developer.apple.com/documentation/security/signing-mac-software-that-runs-on-other-users-computers — returned 404 via the fetch used here; the same facts are carried by TN3127 (source 8) instead.
+85. NSURL — https://developer.apple.com/documentation/foundation/nsurl/
+86. CFURLStartAccessingSecurityScopedResource — https://developer.apple.com/documentation/CoreFoundation/CFURLStartAccessingSecurityScopedResource%28_%3A%29
+87. CFURLCreateBookmarkData — https://developer.apple.com/documentation/CoreFoundation/CFURLCreateBookmarkData%28_%3A_%3A_%3A_%3A_%3A_%3A%29

@@ -59,6 +59,11 @@ impl StatusItem {
         })
     }
 
+    /// Returns a retained target for controls owned by another native window.
+    pub fn menu_target(&self) -> super::bridge::MenuTarget {
+        self.target.clone()
+    }
+
     /// Builds an NSMenuItem for a menu action with icon and enabled state.
     fn action_item(
         &self,
@@ -84,7 +89,8 @@ impl StatusItem {
     ///
     /// The menu is built again from the entries, so that the menu and the
     /// model of the menu can never disagree.
-    pub fn set_entries(&mut self, mtm: MainThreadMarker, entries: &[MenuEntry]) {
+    pub fn set_entries(&mut self, mtm: MainThreadMarker, entries: &[MenuEntry], scale: f64) {
+        self.target.set_menu_text_size(&self.menu, scale);
         self.menu.removeAllItems();
         for entry in entries {
             match entry {

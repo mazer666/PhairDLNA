@@ -4,9 +4,12 @@
 
 Status: **active implementation (not release-ready)**. The requirements baseline was approved on
 2026-11-15. A functioning headless DLNA server, SQLite media catalogue, optional local
-administration service and a macOS menu-bar application have been implemented and
-covered by automated tests. **Real-device interoperability, performance budgets,
-accessibility and long-term reliability remain unverified.** See
+administration service and a native macOS app now designated as the primary graphical
+setup and administration surface have been implemented. It has a main window, Dock
+presence and a menu-bar status item. Automated tests cover server, API and
+application components; they do not prove complete GUI usability or real-device behavior.
+**Real-device interoperability, performance budgets, accessibility and long-term
+reliability remain unverified.** See
 [the status report](docs/07-project/STATUS.md).
 
 ## What PhairDLNA aims to be
@@ -47,32 +50,34 @@ cloud, no internet access in normal operation.
 | build and test | [Getting started](docs/06-development/GETTING-STARTED.md) · [Build and test](docs/06-development/BUILD-AND-TEST.md) |
 | contribute | [AGENTS.md](AGENTS.md) · [WHERE_TO_CHANGE.md](WHERE_TO_CHANGE.md) · [CONTRIBUTING.md](CONTRIBUTING.md) |
 
-## Quickstart: How to Run PhairDLNA on macOS
+## macOS app-first development build
 
-PhairDLNA is split into two cleanly decoupled components adhering to macOS architecture and security principles (`SEC-TH-11`):
-1. **The Core Media Server (`phairdlna` CLI)**: Runs headlessly as a background daemon or terminal process, managing SSDP announcements, media streaming, and the SQLite catalogue.
-2. **The Menu Bar Companion (`PhairDLNA.app`)**: A native status-bar app that observes the server status, shows active streams, and provides one-click links to the Web Admin UI.
+The only published prerelease is [v0.1.0-alpha.1](https://github.com/mazer666/PhairDLNA/releases/tag/v0.1.0-alpha.1), built from tag `66e94c9`. Its release notes describe the earlier Web Admin workflow. Current `main` (`9481e49`) is newer: the macOS app is the primary graphical surface and the browser UI has been removed. **There is no published installer for the current app-first source yet**, and the project is not release-ready.
 
-### 1. Install PhairDLNA.app
-Download `PhairDLNA-v0.1.0-alpha.1-macOS-universal.dmg` from the [Releases](https://github.com/mazer666/PhairDLNA/releases) page, open it, and drag `PhairDLNA.app` into `/Applications`.
+The current app is a developer preview. Prepare and run the server with the CLI steps
+below; the app cannot yet create a missing initial configuration or manage the service
+itself. Those normal-user setup flows remain open under OD-14, OD-15 and OD-16.
 
-### 2. Run the Background Server
-Download `phairdlna-v0.1.0-alpha.1-macOS-universal-cli.tar.gz`, extract the binary, and run:
+For a developer preview on Apple Silicon, first build the app bundle from the current checkout:
+
 ```bash
-# Option A: Quick Interactive Setup & Foreground Server
-./phairdlna setup                  # Configure media directories & server name
-./phairdlna serve                  # Start serving DLNA over your local network
-
-# Option B: Run as a Persistent macOS Background Service (launchd)
-./phairdlna service install        # Registers a user launchd agent
-./phairdlna service start          # Starts the service in the background
+BUILD_UNIVERSAL=0 ./scripts/package-macos-app.sh
 ```
 
-### 3. Open the Menu Bar App
-Launch `PhairDLNA.app` from `/Applications` or Spotlight. The menu bar icon will immediately display:
-- **Server running** with active stream count and media roots.
-- **Open Web Admin**: Quick browser access to `http://127.0.0.1:8210`.
-- **Export Diagnostics**: One-click generation of sanitized support logs.
+Configure and start the server in one terminal; `serve` stays in the foreground:
+
+```bash
+cargo run -p phairdlna-cli -- setup
+cargo run -p phairdlna-cli -- serve
+```
+
+Then open the app from Finder or a second terminal:
+
+```bash
+open target/bundle/PhairDLNA.app
+```
+
+The server command stays in the foreground while the terminal remains open. The app opens its native overview and keeps a menu-bar item for quick access. Until OD-14/OD-15/OD-16 approve service identity, folder access and settings activation, the app does not start or stop the service and does not change server configuration. Use the CLI setup and service commands described below; the disabled app controls explain this limitation.
 
 ---
 
@@ -100,13 +105,21 @@ The complete gate set is in
   Socket-level integration tests exist, but real TVs and third-party receivers have not been tested.
 - Multiple media roots, persistent SQLite catalogue, artwork, playlists and sidecar subtitles
   have implemented paths and automated test coverage.
-- The local administration surface and macOS menu-bar application exist. The newer commits
-  of 2026-11-17 add CLI onboarding, diagnostics export, two-tier settings explanations and
-  a lightweight settings-inspection web UI. This is **not** proof of complete graphical
-  onboarding or of a completed usability/accessibility study.
-- The documented 2026-11-17 M2.9 local gate run reported **1,038 tests passed**. These
-  results predate later 2026-11-17 UI/diagnostics commits; do not treat them as a
-  verified full regression run of current HEAD.
+- The current source has a native macOS main window, menu-bar status item, inline
+  configuration-recovery guidance, read-only server preferences and diagnostics export.
+  It does not yet create a first configuration, add folders or start and stop the server
+  from the app; those paths remain gated by OD-14/OD-15/OD-16. The earlier public alpha
+  predates this app-first migration. A complete in-app setup journey, service lifecycle,
+  or usability/accessibility acceptance is not yet verified.
+- The app offers an app-owned 100% / 150% / 200% text-size preference in its menu and
+  Preferences window. The overview and all Preferences tabs reflow and scroll in code;
+  rendered no-clipping, keyboard and VoiceOver acceptance remain open.
+- `./scripts/local-ci.sh` passed on 2026-11-19 against the current working tree based on
+  `9481e49`. It ran the workspace tests and doctests, Clippy, the build without the
+  optional administration surface, formatting, security and dependency checks,
+  documentation links and generated requirement views. This is local evidence; no new
+  GitHub workflow run is recorded. The earlier 2026-11-17 M2.9 run reported 1,038 tests
+  passed and is historical evidence for that earlier revision.
 - Three GitHub CI runs were successful on earlier commits, not on the latest HEAD.
 - No measured performance comparison, seven-day soak or physical-device compatibility
   evidence is recorded. See the [interoperability matrix](docs/05-quality/INTEROPERABILITY-MATRIX.md).

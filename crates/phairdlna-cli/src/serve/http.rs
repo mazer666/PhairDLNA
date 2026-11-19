@@ -22,6 +22,7 @@ use phairdlna_core::scheduler::Priority;
 use phairdlna_core::upnp::DeviceDescription;
 use phairdlna_core::upnp::Dispatcher;
 use phairdlna_core::upnp::ServiceSpec;
+use tower_http::timeout::TimeoutLayer;
 
 use super::guard::{self, Guard};
 use super::library::Library;
@@ -96,6 +97,10 @@ pub fn router(context: Arc<ServerContext>) -> Router {
         .route("/media/{id}", get(media).head(media))
         .route("/art/{id}", get(artwork))
         .layer(DefaultBodyLimit::max(limits.body_bytes))
+        .layer(TimeoutLayer::with_status_code(
+            StatusCode::REQUEST_TIMEOUT,
+            limits.read_timeout,
+        ))
         .layer(axum::middleware::from_fn_with_state(
             Arc::clone(&context.guard),
             guard::enforce,

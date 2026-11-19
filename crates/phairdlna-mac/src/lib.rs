@@ -4,18 +4,20 @@
 //!       doing and that lets the user steer it — the status item, its menu,
 //!       the client of the administration surface and the texts the user
 //!       reads.
-//! Why: the server is the product; the application is a front end for it.
-//!      The two are separate processes with separate lifetimes, so that the
-//!      server keeps serving when the application is closed (`MB-001`,
-//!      `UX-001`).
+//! Why: the native application is the primary graphical surface on macOS, but
+//!      remains separate from the server process. The server keeps serving
+//!      when the application is closed and remains usable headlessly (`DEC-075`,
+//!      `MB-001`, `UX-001`, `PRD-006`).
 //! Example: the application asks the administration surface for the state of
 //!          the server and shows one line of text — "Server running — 2
 //!          active streams" — in the menu.
 //!
 //! **The parts.** [`model`] holds the state of the server as the application
 //! understands it, [`menu`] turns that state into the entries of the menu,
-//! [`ipc`] talks to the administration surface, [`text`] holds the strings of
-//! the user interface, [`actions`] holds what the entries of the menu do,
+//! [`overview`] formats the primary window, [`onboarding`] classifies the
+//! first-run configuration, [`ipc`] talks to the administration surface,
+//! [`text`] holds the strings of the user interface, [`actions`] holds
+//! what the entries of the menu do,
 //! [`worker`] keeps the network away from the main thread, and [`app`] wires
 //! the parts together.
 //!
@@ -32,6 +34,8 @@ pub mod app;
 pub mod ipc;
 pub mod menu;
 pub mod model;
+pub mod onboarding;
+pub mod overview;
 #[cfg(target_os = "macos")]
 pub mod platform;
 pub mod preferences;

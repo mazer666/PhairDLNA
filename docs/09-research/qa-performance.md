@@ -126,11 +126,11 @@ Operational facts (VERIFIED, `https://insta.rs/docs/settings/`, `https://insta.r
 
 **`criterion` (0.8.2)** — VERIFIED from `https://docs.rs/criterion/latest/criterion/`: it is "a microbenchmarking library which aims to provide strong statistical confidence in detecting and estimating the size of performance improvements and regressions", it "collects detailed statistics", and its `measurement` module offers pluggable measurements (default `WallTime`, plus processor-time / CPU / GPU counters). Its report format is VERIFIED from `https://bheisler.github.io/criterion.rs/book/user_guide/command_line_output.html`: each run prints `slope`, `R^2`, `mean`, `std. dev.`, `median`, `med. abs. dev.`, outlier counts, and a `change:` line with a p-value ("change: [-38.292% -37.342% -36.524%] (p = 0.00 < 0.05) Performance has improved"); the default warm-up is three seconds and the default sample count is 100 ("Collecting 100 samples in estimated 13.354 s"). Criterion is used for hot-path micro-benchmarks (DIDL serialisation, index lookups, path canonicalisation). It is **not** a product-level benchmark: it cannot tell us how many concurrent streams a TV can pull.
 
-**`cargo-deny` (0.20.2) — AGPL + MPL-2.0 configuration**
+**`cargo-deny` (0.20.2) — candidate licence-policy analysis (not the active configuration)**
 
 Config schema VERIFIED from `https://embarkstudios.github.io/cargo-deny/checks/licenses/cfg.html`: `[licenses]` takes `allow` (SPDX v2.1 identifiers), `unused-allowed-license`, `confidence-threshold`; `[licenses.private]` with `ignore = true` and `registries`; `[[licenses.exceptions]]`; `[[licenses.clarify]]` for crates with non-SPDX or ambiguous expressions; `license-files` with a `path` and a `hash`.
 
-Proposed `deny.toml` for PhairDLNA (AGPL-3.0 project; MPL-2.0 tolerated because it is file-level copyleft and does not force the whole work to be relicensed):
+Proposed `deny.toml` sketch from the requirements research (AGPL-3.0 project; MPL-2.0 tolerated because it is file-level copyleft and does not force the whole work to be relicensed):
 
 ```toml
 # deny.toml — PhairDLNA
@@ -138,7 +138,8 @@ Proposed `deny.toml` for PhairDLNA (AGPL-3.0 project; MPL-2.0 tolerated because 
 all-features = true            # license set must hold for every feature combination
 
 [licenses]
-# PhairDLNA itself is AGPL-3.0-only. Dependencies may be permissive, or AGPL, or
+# The complete LICENSE text is AGPLv3; workspace package metadata is AGPL-3.0-or-later.
+# Dependencies may be permissive, or AGPL, or
 # file-level copyleft (MPL-2.0) whose file-level obligations we can satisfy.
 allow = [
   "AGPL-3.0-only",
@@ -189,9 +190,14 @@ allow-registry = ["https://github.com/rust-lang/crates.io-index"]
 ```
 
 Notes:
+* **Current state (2026-11-19):** this sketch is not the checked-in policy. The active
+  file is [`deny.toml`](../../deny.toml), and the current dependency inventory is in
+  [`DEPENDENCY-LICENSE-REVIEW.md`](../04-security/DEPENDENCY-LICENSE-REVIEW.md). The
+  active allow-list excludes licenses not required by the current lock, including
+  MPL-2.0; the `symphonia` target remains unintegrated under ADR-0008 / OD-18.
 * `unused-allowed-license = "warn"` keeps the allow-list honest; a `"deny"` there fails the build whenever an allowed licence is no longer used.
 * `multiple-versions = "warn"` (not `deny`) — banning duplicate versions of common transitive crates is usually unachievable and produces gate noise; escalates to `deny` per-crate via `[[bans]]` where it matters.
-* `MPL-2.0` in the allow-list is a *policy decision*, not a legal opinion: it is safe only if the MPL-covered files are kept separate and modified MPL files are published. **OPEN QUESTION** — confirm with the project's legal reviewer before QG-07 blocks a release.
+* The sample's `MPL-2.0` allowance is not active. Any future MPL dependency needs an updated assessment and allow-list entry; legal review remains open before release.
 
 **`cargo-audit` (0.23.0)** — checks `Cargo.lock` against the RustSec advisory database (`https://github.com/RustSec/advisory-db`, VERIFIED; human-readable at `https://rustsec.org/advisories/`, also exported to OSV). It needs network access to fetch advisories (or a pre-seeded DB) → in a manual-only pipeline, either cache the DB as a workflow artifact or accept the network dependency explicitly; a failed DB fetch must be reported as **NOT RUN / INFRA ERROR**, never as "no advisories found" (§8).
 
@@ -677,7 +683,7 @@ Statuses use the vocabulary of §8. "Manual/automatic" describes the *workflow t
 | QG-05 | Unit tests | `cargo nextest run --workspace --all-features` | Zero failures; `NEXTEST_NO_TESTS=fail` so an empty selection is an error | macOS, Linux | M1, M2, M3, M4 | Manual / automatic | nextest JUnit XML artifact shows the executed count; reviewer confirms the executed count > 0 (no "0 tests run") |
 | QG-06 | Integration tests | `cargo nextest run --test '*'` (separate nextest invocation, own group in `nextest.toml`) | Zero failures | macOS, Linux | M1, M2, M3, M4 | Manual / automatic | Separate JUnit artifact; integration failures cannot be hidden inside the unit group |
 | QG-07 | Doc tests | `cargo test --doc --workspace` | Zero failures; **must run**, since nextest does not support doctests | macOS, Linux | M2, M3, M4 | Manual / automatic | CI shows a non-zero doctest count; a run of 0 doctests is reported as `NOT RUN`, not as a pass |
-| QG-08 | Licence check | `cargo deny check licenses` (with the `deny.toml` of §1.3) | Zero unallowed licences; `unused-allowed-license` = warn | macOS, Linux | M4 | Manual / automatic | CI log lists the licence set of every dependency; reviewer confirms AGPL-3.0-only + MPL-2.0 policy intent |
+| QG-08 | Licence check | `cargo deny check licenses` (with the active root `deny.toml`) | Zero unallowed licences; `unused-allowed-license` = warn | macOS, Linux | M4 | Manual / automatic | CI log lists the licence set of every dependency; reviewer checks the active allow-list against the lock graph |
 | QG-09 | Advisory check | `cargo audit check` | Zero un-ignored advisories; DB fetch failure ⇒ `NOT RUN / INFRA ERROR` (never "clean") | macOS, Linux | M2, M3, M4 | Manual / automatic | CI log shows the RustSec DB revision it used; reviewer checks the DB was actually fetched |
 | QG-10 | Dependency bans & sources | `cargo deny check bans sources` | Zero violations; `wildcards = deny`, unknown registries/git denied | macOS, Linux | M2, M3, M4 | Manual / automatic | CI log lists the banned duplicate versions and any source exception granted |
 | QG-11 | Docs link check | `lychee --no-progress --max-retries 2 '**/*.md'` + a content-type/size assertion for `upnp.org` links (soft-404 check) | Zero broken links; soft-404s detected | macOS, Linux | M4 | Manual / automatic | Reviewer clicks the reported URL list; for upnp.org links the check verifies the response is XML, not HTML |

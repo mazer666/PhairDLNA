@@ -1,8 +1,11 @@
 # Quality gates — PhairDLNA
 
-Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: QA / Performance Engineer
+Status: **In Review (v1.1 proposed, 2026-11-19)** · Owner role: QA / Performance Engineer
+Version/date: 1.1 / 2026-11-19
+Purpose: Define the checks and evidence required to accept project milestones.
 Requirements: `DOC-001` … `DOC-012`, `SUP-001` … `SUP-008`, `PERF-010`, `PERF-011`
 Test method: `TEST-STRATEGY.md` · Interop evidence: `INTEROPERABILITY-MATRIX.md`
+Supersedes the approved v1.0 snapshot in `../99-archive/2026-11-19-quality-gates-v1.0/`.
 
 ---
 
@@ -50,7 +53,7 @@ looser than it was measured, destroys trust in every other number in the project
 | `cargo-fuzz` | 0.13.x | Fuzzing | Requires a **pinned nightly toolchain**; 6 targets with committed seed corpora |
 | `criterion` | 0.8.x | Micro-benchmarks | |
 | `hyperfine` | — | End-to-end CLI timing | |
-| `cargo-deny` | 0.20.x | Licence, advisory, ban and source checks | `AGPL-3.0-only` + `MPL-2.0` allowed; `unused-allowed-license = warn` |
+| `cargo-deny` | 0.20.x | Licence, advisory, ban and source checks | Uses the active allow-list in root `deny.toml`; `unused-allowed-license = warn` |
 | `cargo-audit` | 0.23.x | RustSec advisories | |
 | `cargo-semver-checks` | 0.51.x | Public API compatibility | Release gate only |
 | `typos` | 0.10.x | Spelling in source and docs | |
@@ -78,14 +81,14 @@ recorded, may be accepted with a reason.
 | QG-01 | Formatting | `cargo fmt --all -- --check` | blocker | every milestone | **exists** |  |
 | QG-02 | Lints | `cargo clippy --workspace --all-targets -- -D warnings` | blocker | every milestone | **exists** | No `#[allow]` without a justifying comment |
 | QG-03 | No `unsafe` | `scripts/check-no-unsafe.sh` | blocker | every milestone | **exists** | `SUP-008`; any `unsafe` needs an ADR. **Implemented and running** — one file of the workspace is exempt: the bridge to the Objective-C runtime of the menu bar application, which carries the marker `gate: unsafe-exempt ADR-0013`; the gate fails when the record does not exist |
-| QG-04 | Build | `cargo build --workspace --all-targets` | blocker | every milestone | **exists** | Plus the release profile and the macOS universal binary |
+| QG-04 | Build | `cargo build --workspace --all-targets` | blocker | every milestone | **exists** | Plus the release profile and the macOS universal binary. macOS negative tests show `lipo` rejects a missing slice and strict `codesign` rejects a modified sealed resource; source checks confirm the packager invokes both guards (`phairdlna-mac/tests/universal_binary.rs`). This is not end-to-end fault injection through the packager. |
 | QG-05 | Unit tests | `cargo test --workspace` | blocker | every milestone | **exists** | `cargo-nextest` is the planned switch (it is not installed in the reference environment); `cargo test --workspace` is what the CI runs |
 | QG-06 | Integration tests | `cargo test --workspace --test '*'` | blocker | M1+ | **exists** | **Implemented and running** — 26 integration test targets, all green. `cargo-nextest` is the planned switch |
 | QG-07 | Doctests | `cargo test --workspace --doc` | blocker | every milestone | **exists** | nextest does not cover these |
-| QG-08 | Licences | `cargo deny check licenses` | blocker | M0+ | **exists** | `AGPL-3.0-only` + `MPL-2.0`; `unused-allowed-license = warn` Requires `cargo-deny`. |
+| QG-08 | Licences | `cargo deny check licenses` | blocker | M0+ | **exists** | Project licence `AGPL-3.0-or-later`; third-party allowances are limited to the active `deny.toml` list. `unused-allowed-license = warn` requires `cargo-deny`. |
 | QG-09 | Advisories | `cargo audit` | blocker | M0+ | **exists** | Fail on any un-waived advisory Requires `cargo-audit`. |
 | QG-10 | Bans and sources | `cargo deny check bans sources` | blocker | M0+ | **exists** | Banned crates list in `deny.toml` Requires `cargo-deny`. |
-| QG-11 | Link check | `scripts/check-doc-links.sh` | blocker | every milestone | **exists** | Resolves every relative link in the tracked markdown. **Implemented and running**; `lychee` is the planned replacement for external links |
+| QG-11 | Documentation references | `scripts/check-doc-links.sh` | blocker | every milestone | **exists** | Resolves every relative link in tracked markdown and every current source path in `WHERE_TO_CHANGE.md`; `lychee` is the planned replacement for external links |
 | QG-12 | Spelling | `typos` | warning | every milestone | planned |  |
 | QG-13 | File size | `scripts/check-file-size.sh` | blocker | M1+ | **exists** | ≤ 300 lines target, > 500 hard limit; no maintained Rust tool exists, so the project writes its own. **Implemented and running** |
 | QG-14 | Complexity | `clippy::excessive_nesting` + `clippy::too_many_lines` (blocking) | blocker | M1+ | **exists** | The thresholds are in `clippy.toml`: 60 lines per function, 3 levels of nesting — the hard limits of `PROJECT-STANDARDS.md`. The 40-line target stays a review rule. `rust-code-analysis-cli` is stale (2023) and MPL-2.0 → advisory only, never gating |
@@ -141,8 +144,14 @@ a **negative test**:
 | QG-17 | Emit DIDL-Lite with a missing required attribute → the XSD check fails |
 | QG-18 | Break the escaping function → the property test finds a counterexample |
 | QG-19 | Feed a malformed input → the fuzz target aborts (this one *must* crash) |
-| QG-11 | Add a broken relative link → the link checker fails — **demonstrated on 2026-11-14** (it found six broken links in the README on its first run) |
+| QG-11 | Add a broken relative link or a nonexistent path under "Exists today" in `WHERE_TO_CHANGE.md` → the documentation-reference check fails — links demonstrated on 2026-11-14; source-path negative case demonstrated on 2026-11-19 |
 | QG-28 | Make a core crate depend on the CLI crate → the boundary check fails and names the edge — **demonstrated on 2026-11-16**. Make the administration crate depend on the daemon crate → the check fails and names the edge — **demonstrated on 2026-11-16** (the amendment of ADR-0012 allows the edge the other way and refuses this one) |
+
+## Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 1.1 / 2026-11-19 | Refreshes current licence and bundle-gate evidence and extends QG-11 to reject missing source paths in the beginner index; independent review remains pending. |
 
 ---
 

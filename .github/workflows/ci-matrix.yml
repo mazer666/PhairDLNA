@@ -1,6 +1,8 @@
 # Manual-only build matrix.
 #
 # Policy: docs/07-project/CI-POLICY.md
+# Every matrix entry is routed to a matching self-hosted OS/architecture label.
+# No GitHub-hosted runner labels are used.
 name: Build matrix
 
 on:
@@ -12,38 +14,41 @@ permissions:
 jobs:
   build:
     name: ${{ matrix.name }}
-    runs-on: self-hosted
+    runs-on: [self-hosted, "${{ matrix.os_label }}", "${{ matrix.arch_label }}"]
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: macOS (stable, Apple Silicon)
-            os: macos-latest
+            os_label: macOS
+            arch_label: ARM64
             toolchain: stable
-          # PLT-002 requires macOS on Intel as well. The hosted runner set is
-          # Apple Silicon only, so this entry is reported as
-          # "NOT RUN - no Intel runner available" until one exists; it is never
-          # quietly dropped from the matrix.
           - name: macOS (stable, Intel)
-            os: macos-13
+            os_label: macOS
+            arch_label: x64
             toolchain: stable
+          # PLT-002 requires macOS on Intel as well. This entry waits for a
+          # matching local runner if the repository has none registered.
           - name: Linux (stable)
-            os: ubuntu-latest
+            os_label: linux
+            arch_label: x64
             toolchain: stable
           - name: Windows (stable)
-            os: windows-latest
+            os_label: windows
+            arch_label: x64
             toolchain: stable
           # The minimum supported Rust version, as recorded in Cargo.toml.
           - name: Linux (MSRV 1.89)
-            os: ubuntu-latest
+            os_label: linux
+            arch_label: x64
             toolchain: "1.89.0"
     steps:
       - name: Check out
         uses: actions/checkout@v4.2.2
 
       - name: Install the Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
         with:
           toolchain: ${{ matrix.toolchain }}
           components: clippy, rustfmt

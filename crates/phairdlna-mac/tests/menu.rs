@@ -43,7 +43,7 @@ fn action_of(menu: &[MenuEntry], action: MenuAction) -> Option<(String, bool)> {
     })
 }
 
-/// A running server shows its streams and offers the actions of a server.
+/// A running server shows its streams and explains why service controls are absent.
 #[test]
 fn a_running_server_shows_its_streams() {
     let snapshot = ServerSnapshot {
@@ -69,6 +69,9 @@ fn a_running_server_shows_its_streams() {
     assert!(lines.iter().any(|line| line.contains("2 active streams")));
     assert!(lines.iter().any(|line| line.contains("music")));
     assert!(lines.iter().any(|line| line.contains("the television")));
+    assert!(lines
+        .iter()
+        .any(|line| { line == texts().text("menu.status.server_controls_unavailable") }));
     assert!(action_of(&menu, MenuAction::RescanLibrary).is_some());
     assert!(action_of(&menu, MenuAction::OpenMediaFolders).is_some());
 }
@@ -93,6 +96,38 @@ fn a_stopped_server_says_so_and_offers_less() {
     let (title, enabled) =
         action_of(&menu, MenuAction::OpenMediaFolders).expect("the action is there");
     assert!(!enabled, "there is no folder to open: {title}");
+}
+
+/// The first refresh offers no server control until the app knows the state.
+#[test]
+fn a_checking_server_reports_its_state() {
+    let snapshot = ServerSnapshot::checking();
+
+    assert_eq!(
+        status_line(&snapshot, &texts()),
+        texts().text("menu.status.checking")
+    );
+}
+
+/// A server that refuses the app is running, so the menu must not offer start.
+#[test]
+fn a_refusing_server_shows_recovery_actions_without_service_controls() {
+    let snapshot = ServerSnapshot {
+        state: ServerState::Refused,
+        ..ServerSnapshot::default()
+    };
+    let menu = entries(&snapshot, &texts(), None, PresentationMode::Simple);
+
+    assert_eq!(
+        status_line(&snapshot, &texts()),
+        texts().text("menu.status.refused")
+    );
+    assert!(lines_of(&menu)
+        .iter()
+        .any(|line| line == texts().text("menu.status.server_controls_unavailable")));
+    assert!(action_of(&menu, MenuAction::RescanLibrary).is_some_and(|(_, enabled)| !enabled));
+    assert!(action_of(&menu, MenuAction::AddMediaFolders).is_some());
+    assert!(action_of(&menu, MenuAction::OpenPreferences).is_some());
 }
 
 /// The warning of the server is a line of the menu, in every state.
@@ -159,7 +194,7 @@ fn a_message_of_the_platform_is_a_line_of_the_menu() {
 /// The menu holds every action of the application, and the actions are the
 /// ones of the crate.
 #[test]
-fn the_menu_holds_every_action() {
+fn the_menu_holds_supported_actions_but_no_unapproved_service_controls() {
     let stopped_menu = entries(
         &ServerSnapshot::stopped(),
         &texts(),
@@ -176,13 +211,12 @@ fn the_menu_holds_every_action() {
         PresentationMode::Simple,
     );
 
-    let (start_title, _) =
-        action_of(&stopped_menu, MenuAction::StartServer).expect("start action is in stopped menu");
-    assert!(!start_title.is_empty(), "start action must have a text");
-
-    let (stop_title, _) =
-        action_of(&running_menu, MenuAction::StopServer).expect("stop action is in running menu");
-    assert!(!stop_title.is_empty(), "stop action must have a text");
+    assert!(lines_of(&stopped_menu)
+        .iter()
+        .any(|line| line == texts().text("menu.status.server_controls_unavailable")));
+    assert!(lines_of(&running_menu)
+        .iter()
+        .any(|line| line == texts().text("menu.status.server_controls_unavailable")));
 
     let actions = [
         MenuAction::OpenMediaFolders,

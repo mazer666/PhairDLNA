@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Gate QG-11: every relative link in the documentation must resolve.
+# Gate QG-11: documentation links and current source-map paths must resolve.
 #
 # Only *relative* links are checked: a link to an external site cannot be verified
 # offline, and a link that cannot be verified must not be reported as passing.
@@ -47,6 +47,7 @@ SKIP_SCHEMES = ("http://", "https://", "mailto:", "#", "data:")
 
 broken = []
 checked = 0
+source_paths_checked = 0
 
 for name in sys.argv[1:]:
     path = Path(name)
@@ -68,13 +69,43 @@ for name in sys.argv[1:]:
         if not resolved.exists():
             broken.append(f"{name}: {target}")
 
+# The beginner source map is a navigation contract too: rows under "Exists today"
+# must point at paths that exist. Planned paths are deliberately outside this check.
+source_map = Path("WHERE_TO_CHANGE.md")
+if source_map.exists():
+    source_map_text = source_map.read_text(encoding="utf-8", errors="replace")
+    try:
+        current_paths = source_map_text.split("### Exists today", 1)[1].split(
+            "### Planned layout", 1
+        )[0]
+    except IndexError:
+        broken.append("WHERE_TO_CHANGE.md: missing source-map section boundaries")
+    else:
+        for row_number, line in enumerate(current_paths.splitlines(), start=1):
+            if not line.startswith("| `"):
+                continue
+            first_column = line.split("|", 2)[1]
+            for source_path in re.findall(r"`([^`]+)`", first_column):
+                source_path = source_path.strip().rstrip(",")
+                source_paths_checked += 1
+                if Path(source_path).is_absolute() or not Path(source_path).exists():
+                    broken.append(
+                        f"WHERE_TO_CHANGE.md (Exists today row {row_number}): {source_path}"
+                    )
+
 if broken:
-    print("FAIL - broken relative links:")
+    print("FAIL - broken documentation references:")
     for item in broken:
         print(f"  {item}")
-    print(f"\nRESULT: FAIL ({len(broken)} broken of {checked} checked)")
+    print(
+        f"\nRESULT: FAIL ({len(broken)} broken; {checked} relative links and "
+        f"{source_paths_checked} source paths checked)"
+    )
     sys.exit(1)
 
-print(f"RESULT: PASS ({checked} relative links checked)")
+print(
+    f"RESULT: PASS ({checked} relative links and "
+    f"{source_paths_checked} current source paths checked)"
+)
 PYTHON
 exit $?

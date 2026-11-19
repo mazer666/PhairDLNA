@@ -4,7 +4,7 @@ Status: Draft
 
 Owner role: Product/Requirements
 
-Version/date: 0.1 / 2026-11-14
+Version/date: 0.9 / 2026-11-19
 
 Requirements: INT-057, INT-058, INT-059, SEC-010, SEC-011, SEC-012, SEC-013, SEC-014, SEC-015, SEC-016, SEC-017, SEC-018, SEC-060, SEC-061, SEC-062, SEC-063, SEC-064, SEC-065, SEC-066, SEC-067, SEC-068, SEC-069, SEC-070, SEC-071, SEC-072, SEC-090, SEC-091, SEC-092, SEC-093, SEC-094, SEC-095, SEC-096
 Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
@@ -48,9 +48,10 @@ the privacy *narrative*, which lives in `../04-security/PRIVACY.md`.
 ## 3. Functional requirements
 
 **SEC-010** — The XML parser shall not process a DTD, shall not resolve external entities and shall bound the nesting depth and the total document
-size. [DESIGN] The decision is ours, not the parser's: `quick-xml` *surfaces* `DocType` and `GeneralRef` events, so the server rejects any document
-containing a doctype and any general entity reference (DEPENDENCY-LICENSE-REVIEW §5.2; M-02). The byte limit is enforced **before** the parser sees
-the data, because the parser performs internal allocations first.
+size. [DESIGN] The current source uses `quick-xml` at the boundary in `crates/phairdlna-core/src/upnp/xml_reader.rs`; it rejects DOCTYPE input and
+custom entity references, permits only predefined and numeric references, and bounds bytes before parser construction as well as depth, nodes and
+text while building the application tree. The dependency choice follows DEC-078 / ADR-0002. The code and its tests are evidence of these specific
+behaviors, not by themselves a complete parser security assessment.
 
 **SEC-011** — The server shall bound the size of every accepted HTTP request line, header block and body. [DESIGN] Each bound is a configured value
 with a documented default and a documented failure behaviour (SEC-060); exceeding a bound is a rejection, never a truncation.
@@ -231,7 +232,8 @@ All figures below are **targets** with a measurement method; none is a measured 
 ## 7. Security and privacy
 
 **Threat coverage.** Every row of the threat table in `../04-security/SECURITY-MODEL.md` §5 is mapped below to the requirement that addresses it and
-to the **planned negative test** that proves the mitigation works. No test exists yet; the paths are planned.
+to a negative-test target. The presence of a target file does not establish that it covers
+the mapped threat or that it has been executed; see §11 for the current file state.
 
 | Threat | Mitigation | Requirement | Planned negative test |
 | --- | --- | --- | --- |
@@ -309,15 +311,24 @@ No hostile input may take down the HTTP or SSDP tasks: a bad request produces a 
 
 ## 10. Acceptance criteria and traceability
 
-All criteria below are *planned*; no test file exists yet.
+The criteria below define acceptance targets. The paths are test targets, not proof that
+the named cases are covered or have passed. Section 11 records current evidence per target;
+none of the results alone establishes the feature's overall security.
 
 **AC-01** — *Given* a SOAP body containing an internal DTD subset and one containing an external entity, *when* each is sent, *then* both are
 rejected, no file is opened and no connection is attempted. Requirements: SEC-010, SEC-013 · Verification: negative test · Planned location:
 `crates/phairdlna-core/tests/xml_hardening.rs`
 
-**AC-02** — *Given* a document with nested entity definitions and one with 100 000 nested elements, *when* each is parsed, *then* each fails inside
-the configured byte and time budget, peak memory stays under the cap and no stack overflow occurs. Requirements: SEC-010, SEC-060, SEC-065 ·
-Verification: negative test · Planned location: `crates/phairdlna-core/tests/xml_hardening.rs`
+**AC-02** — *Given* a document containing a DTD or nested entity definitions, an XML document larger than the configured byte limit, and an XML
+document that exceeds the configured nesting limit while staying within the byte limit, *when* each is parsed, *then* the parser rejects each at its
+corresponding boundary without resolving entities or overflowing the stack. Requirements: SEC-010, SEC-060 · Verification: negative tests · Planned
+locations: `crates/phairdlna-core/tests/xml_hardening.rs`, `crates/phairdlna-core/tests/xml_reader.rs`
+
+**AC-27** — *Given* XML truncated or malformed at one of the eleven parser boundaries listed in
+`crates/phairdlna-core/tests/xml_reader/truncation.rs`, *when* it is parsed in an isolated subprocess, *then* each input returns a malformed-request
+error, a valid document parses afterward, and the subprocess completes within a hard 2-second watchdog without panic or a no-progress loop.
+Requirements: SEC-010, SEC-060 · Verification: subprocess negative and recovery test · Location:
+`crates/phairdlna-core/tests/xml_reader.rs`, `crates/phairdlna-core/tests/xml_reader/truncation.rs`
 
 **AC-03** — *Given* 10 000 random `SOAPAction` values, *when* they are sent, *then* each is rejected with an identical status, body length and timing
 class, and no handler other than the allowlisted ones is reached. Requirements: SEC-013, SEC-010 · Verification: negative test · Planned location:
@@ -417,24 +428,27 @@ reports the file as incompatible; it never silently transcodes. Requirements: FU
 
 ## 11. Test strategy and dependencies
 
-**Planned test locations** (none of these files exists yet):
+**Acceptance test locations and current file state** (file presence is not a pass):
 
-| Purpose | Planned path |
-| --- | --- |
-| SSDP hardening: spoofing, flooding, forged `NOTIFY` | `crates/phairdlna-core/tests/ssdp_hardening.rs` |
-| XML/SOAP hardening: DTD, entities, depth, action routing | `crates/phairdlna-core/tests/xml_hardening.rs` |
-| HTTP framing, headers, timeouts, concurrency, ranges | `crates/phairdlna-core/tests/http_framing.rs` |
-| Containment, alias, playlist entries | `crates/phairdlna-core/tests/path_containment.rs` |
-| Sandbox isolation, image bombs, quarantine | `crates/phairdlna-core/tests/sandbox_isolation.rs` |
-| Resource bounds: pages, memory, descriptors, cache | `crates/phairdlna-core/tests/resource_bounds.rs` |
-| No process spawn; IGD refusal | `crates/phairdlna-core/tests/no_process_spawn.rs` |
-| GENA eventing refusal and callback validation | `crates/phairdlna-core/tests/eventing.rs` |
-| Log redaction | `crates/phairdlna-core/tests/redaction.rs` |
-| Administration surface attacks | `crates/phairdlna-admin/tests/admin_api.rs` |
-| Source offer | `crates/phairdlna-cli/tests/source_offer.rs` |
-| Outbound-connection audit | `scripts/outbound-audit.sh` |
-| Licence, advisory, signing gates | `scripts/quality-gates.sh` |
-| Fuzz targets (SOAP, HTTP, range, playlist, media header) | `crates/phairdlna-core/fuzz/` |
+| Purpose | Path | Current state |
+| --- | --- | --- |
+| Daemon connection-cap budget boundaries | `crates/phairdlna-cli/src/serve/limit.rs`, `crates/phairdlna-cli/src/serve/limit/tests.rs` | Two unit tests cover admitting up to the limit and releasing capacity; listener-level refusal and socket-deadline behavior remain separate integration evidence. |
+| Daemon request-guard helper boundaries | `crates/phairdlna-cli/src/serve/guard/tests.rs` | Seven unit tests pass for request-line and body-length measurements, malformed length handling, client-list decision data and transfer permits; socket-level refusal coverage remains in the CLI integration suite |
+| SSDP hardening: spoofing, flooding, forged `NOTIFY` | `crates/phairdlna-core/tests/ssdp_hardening.rs` | File exists; case coverage and execution unverified |
+| XML/SOAP hardening: DTD, entities, byte/depth limits and action routing | `crates/phairdlna-core/tests/xml_hardening.rs`, `crates/phairdlna-core/tests/xml_reader.rs`, `crates/phairdlna-core/tests/xml_reader/truncation.rs` | XML reader suite: 22 passed with `quick-xml` 0.42.0; includes DTD and undefined-entity rejection, predefined and legal numeric references, invalid XML 1.0 character rejection, size/depth/node/text bounds, and eleven watchdog-bounded malformed EOF inputs plus recovery. Broader hostile-input, allocation and full SOAP coverage remain under independent review |
+| HTTP framing, headers, timeouts, concurrency, ranges | `crates/phairdlna-core/tests/http_framing.rs` | File exists; case coverage and execution unverified |
+| Loopback API socket deadlines and handler timeout | `crates/phairdlna-admin/src/listener.rs`, `crates/phairdlna-admin/src/routes/timeout.rs`, `crates/phairdlna-admin/tests/admin_surface/timeout.rs` | Duplex tests prove idle read and blocked write expiry; a loopback test proves an incomplete HTTP header closes at the read deadline; delayed handler returns 408. Independent review and full deadline-boundary coverage remain open |
+| Containment, alias, playlist entries | `crates/phairdlna-core/tests/path_containment.rs` | File exists; case coverage and execution unverified |
+| Sandbox isolation, image bombs, quarantine | `crates/phairdlna-core/tests/sandbox_isolation.rs` | Not built |
+| Resource bounds: pages, memory, descriptors, cache | `crates/phairdlna-core/tests/resource_bounds.rs` | File exists; case coverage and execution unverified |
+| No process spawn; IGD refusal | `crates/phairdlna-core/tests/no_process_spawn.rs` | Not built |
+| GENA eventing refusal and callback validation | `crates/phairdlna-core/tests/eventing.rs` | Not built |
+| Log redaction | `crates/phairdlna-core/tests/redaction.rs` | Not built |
+| Administration surface attacks | `crates/phairdlna-admin/tests/admin_api.rs` | File exists; case coverage and execution unverified |
+| Source offer | `crates/phairdlna-cli/tests/source_offer.rs` | Not built |
+| Outbound-connection audit | `scripts/outbound-audit.sh` | Not built |
+| Licence, advisory, signing gates | `scripts/quality-gates.sh` | Not built |
+| Fuzz targets (SOAP, HTTP, range, playlist, media header) | `crates/phairdlna-core/fuzz/` | Not built |
 
 **Method.** Every requirement here needs a test that *fails without the mitigation* (SECURITY-MODEL §7). The method for each is: perform the attack,
 and assert on a mechanism rather than on the response alone — an open-audit hook for the filesystem, an egress counter for the network, a
@@ -478,3 +492,19 @@ administration surface), F-19 (`SUP-001` … `SUP-009`, the supply-chain gates),
 9. **[OPEN] SEC-019 has no requirement text.** The identifier is assigned to this feature, but the approved baseline defines no `SEC-019` — the
    network-and-parsing block runs `SEC-010` … `SEC-018`. *Proposed reading, used here:* the identifier is left unelaborated rather than filled with an
    invented requirement. *Closes when:* the owner withdraws the identifier or defines a requirement for it in the catalogue.
+10. **[DECIDED, DEC-078; implementation evidence pending]** OD-18 selected the accepted `quick-xml` and `tower-http` targets. The adapter and request
+    timeout layers are implemented; targeted tests pass. *Closes when:* dependency review, parser and timeout security evidence, and independent review
+    are recorded and M-02's remaining gates are satisfied.
+
+## Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 0.9 / 2026-11-19 | Moves connection-budget tests into a focused module, keeps the socket cap and read/write deadline implementation below the 300-line source target, and records which cases the two unit tests do not cover. |
+| 0.8 / 2026-11-19 | Moves the daemon guard's private-helper tests into a focused module, documents their observed seven-test run, and keeps socket-level coverage separate. |
+| 0.7 / 2026-11-19 | Records the `quick-xml` adapter, eleven watchdog EOF cases, the targeted timeout migration and remaining independent security evidence. |
+| 0.6 / 2026-11-19 | Aligns the test-strategy status with the passing XML truncation watchdog while keeping broader hostile-input coverage open. |
+| 0.5 / 2026-11-19 | Verifies the watchdog regression against both truncation points and valid-document recovery; the child requires an exact filter and per-run completion nonce. |
+| 0.4 / 2026-11-19 | Adds an isolated watchdog regression for EOF after an opening tag and inside text, followed by a valid-document recovery check. |
+| 0.3 / 2026-11-19 | Specifies separate byte and depth-boundary coverage and adds a watchdog-bounded truncated-XML acceptance criterion; regression coverage and execution remain unverified. |
+| 0.2 / 2026-11-19 | Describes the current project-owned XML parser accurately, tracks its difference from the accepted `quick-xml` target under OD-18, and distinguishes existing test files from coverage or execution evidence. |

@@ -175,6 +175,9 @@ fn answer_of<T: Transport>(client: &mut AdminClient<T>, command: Command) -> Ans
 fn state_of<T: Transport>(status: &StatusSnapshot, client: &mut AdminClient<T>) -> ServerSnapshot {
     let mut snapshot = ServerSnapshot {
         state: ServerState::Running,
+        device_name: status.device_name.clone(),
+        device_address: status.device_address.clone(),
+        discovery_available: status.discovery_available,
         uptime_seconds: status.uptime_seconds,
         active_streams: status.active_streams,
         catalogue_objects: status.catalogue_objects,

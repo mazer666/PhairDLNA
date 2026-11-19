@@ -20,10 +20,11 @@ application uses them: `NSStatusBar::systemStatusBar`,
 `NSImage::imageWithSystemSymbolName_accessibilityDescription`,
 `NSWorkspace::sharedWorkspace` and the rest are ordinary safe calls.
 
-One thing is not safe to write: **the actions of the menu**. AppKit does not
-tell a program which entry of a menu the user chose. It sends a *message* to a
-*target* object, and the message is one of the selectors that the target
-implements. A program that wants to know which entry was chosen therefore needs
+One thing is not safe to write: **the actions of the menu and native controls**.
+AppKit does not tell a program which entry of a menu the user chose or which
+button was pressed. It sends a *message* to a *target* object, and the message
+is one of the selectors that the target implements. A program that wants to know
+which control was activated therefore needs
 a class of its own, and every binding that creates a class of its own at run
 time — `objc2::define_class!` among them — is `unsafe`, because the runtime
 registers the class in a global table and the methods of the class are called
@@ -46,17 +47,17 @@ project:
 
 1. **One file of the crate uses `unsafe`:** `crates/phairdlna-mac/src/platform/bridge.rs`.
    It holds the class that receives the actions of the menu and the tick of the
-   timer, and nothing else. Every other file of the crate is free of `unsafe`
+   timer and native window buttons, and nothing else. Every other file of the crate is free of `unsafe`
    and is portable, so that the logic of the menu is tested on every platform
    of the build matrix.
 2. **Every `unsafe` block carries its safety argument in a comment.** The
    argument names the invariant that the block upholds: the superclass, the
    instance variables, the thread and the lifetime of the objects that the
    block touches.
-3. **The class is created once, on the main thread, and lives as long as the
-   menu.** The class holds no instance variable and implements no `Drop`; the
-   target of the menu items is the object of this class, and the menu keeps it
-   alive.
+3. **The class is created once, on the main thread, and lives as long as its
+   controls.** The class holds no instance variable and implements no `Drop`;
+   menu items are owned by the status item and the overview window keeps a
+   retained clone of the target for its native button.
 4. **The class is bound to the main thread.** The attribute
    `#[thread_kind = MainThreadOnly]` makes the binding refuse any call that
    does not come from the main thread, which is the thread AppKit sends the

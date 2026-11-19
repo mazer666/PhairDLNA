@@ -15,109 +15,71 @@
 # The state of the server, and the title of the first group of the menu.
 menu.status.header = PhairDLNA
 menu.status.badge = DLNA
+menu.status.checking = Checking server status…
 menu.status.running = Server running — {streams} active streams
 menu.status.scanning = Scanning the library…
 menu.status.stopped = Server stopped
-menu.status.refused = Server refuses the connection
+menu.status.refused = The app cannot access the server
+menu.status.server_controls_unavailable = Ask whoever set up PhairDLNA for help starting or stopping the server.
 
 # The shared folders and the streams that run.
 menu.status.no_roots = No media folder is shared
-menu.status.root = {name} — {objects} objects
+menu.status.roots_checking = Loading shared folders…
+menu.status.root = {name} — {objects} items
 menu.status.root_missing = {name} is not available
 menu.status.transfer = {client} is playing {title}
 
 # The entries of the menu.
-menu.action.open_admin = Open Server Window
-menu.action.start_server = Start Server
-menu.action.stop_server = Stop Server
 menu.action.open_folders = Open the media folders
-menu.action.add_folders = Add media folder…
+menu.action.add_folders = Add media folders…
 menu.action.rescan = Read the library again
 menu.action.preferences = Preferences…
 menu.action.export_diagnostics = Export diagnostics report…
 menu.action.quit = Quit PhairDLNA
 
 # Tooltips of menu actions.
-menu.tooltip.start_server = Starts the background PhairDLNA service
-menu.tooltip.stop_server = Stops the background PhairDLNA service
 menu.tooltip.open_folders = Opens the shared media folders in Finder
-menu.tooltip.add_folders = Opens a file picker to add a new media folder
+menu.tooltip.add_folders = Ask whoever set up PhairDLNA to add media folders.
 menu.tooltip.rescan = Scans media folders for new and updated files
 menu.tooltip.preferences = Opens application preferences and settings
-menu.tooltip.export_diagnostics = Generates a diagnostic report in your browser
+menu.tooltip.export_diagnostics = Saves a redacted diagnostic report
 menu.tooltip.quit = Quits the menu bar application
 
 # The name the screen reader reads, and the value it reads per state.
 menu.accessibility.label = PhairDLNA server status
+menu.accessibility.checking = The application is checking the server status
 menu.accessibility.running = The server is running and serves {streams} active streams
 menu.accessibility.scanning = The server is reading the library
 menu.accessibility.stopped = The server is stopped
-menu.accessibility.refused = The server refuses the requests of the application
+menu.accessibility.refused = The app cannot access the server
 
 # The messages after a scan of the library.
-notice.rescan_done = The library was read again — {objects} objects found
-notice.rescan_failed = The library could not be read again: {reason}
-notice.folders_updated = Media folders updated
-panel.select_folders = Select Media Folders
-panel.folders_error = Could not add media folders
-wizard.title = PhairDLNA Setup Assistant
-wizard.message = Welcome to PhairDLNA! To stream videos, photos, and music to your Smart TV or DLNA devices, please select your media folders.
-wizard.button_choose = Select Media Folders…
-wizard.button_later = Configure Later
+notice.rescan_done = The library was read again — {objects} items found
 prefs.title = PhairDLNA Preferences
 prefs.tab_general = General
-prefs.tab_advanced = Advanced Settings
-prefs.tab_ultra = Raw Editor (config.toml)
 prefs.tab_expert = Expert Config
 prefs.server_name = Server Name:
 prefs.http_port = HTTP Port:
-prefs.ssdp_port = SSDP Port:
-prefs.log_level = Log Level:
-prefs.discovery_enabled = Enable SSDP device discovery on network
-prefs.extract_artwork = Extract album covers and video artwork
-prefs.redact_logs = Redact private paths and IP addresses in logs
-prefs.save = Save Configuration
-prefs.save_success = Configuration saved successfully!
-prefs.save_failed = Failed to save configuration: {reason}
-prefs.add_folder = Add Media Folder…
-prefs.remove_folder = Remove Selected Folder
 prefs.roots_header = Shared Folders:
-prefs.summary = Manage your shared media folders and server configuration.
-prefs.button_add = Add Media Folders…
-prefs.button_file = Edit Config File
-prefs.button_done = Done
-notice.server_started = Server started successfully
-notice.server_stopped = Server stopped
-notice.server_control_failed = Server control failed: {reason}
-tooltip.server_name = The name displayed for this DLNA server on Smart TVs and players
-tooltip.http_port = The local TCP port used for media streaming (default: 8200)
-tooltip.ssdp_port = The UDP port used for DLNA discovery searches (default: 1900)
-tooltip.log_level = Detail level of server logging (info, debug, warn, error)
-tooltip.discovery = Allows Smart TVs and network players to discover the server automatically
-tooltip.artwork = Extracts artwork and posters from media files for visual browsing
-tooltip.redact = Obfuscates local paths and IPs in logs for privacy
-tooltip.add_folder = Opens a file browser to add a media directory
-tooltip.remove_folder = Removes the selected directory from media shares
-tooltip.roots_list = List of directories currently shared over DLNA
-tooltip.editor = Direct editor for config.toml configuration file (Ultra-Expert mode)
-tooltip.save = Validates and saves all settings to config.toml
+notice.folder_changes_unavailable = You can't add folders in the app yet. Ask whoever set up PhairDLNA for help.
 
 # The messages of a failure. Every text names what happened, why it happened
 # and what the user can do next (`UX-004`).
-error.surface_unreachable = The server cannot be reached: {reason}. Start the server with the command line.
-error.surface_unreadable = The server cannot be read: {reason}. Try again in a moment.
-error.answer_invalid = The answer of the server is not valid: {reason}.
-error.answer_unexpected = The answer of the server is not what the application expects.
-error.token_refused = The token of the installation was refused. Check the token file of the server.
-error.request_refused = The server refused the request: {status}.
-error.token_unreadable = The token of the installation cannot be read. Check the token file of the server.
-error.server_not_started = The server was never started. Start it with the command line.
+error.surface_unreachable = PhairDLNA couldn't connect to the server. Check that the server is running, then try again.
+error.surface_unreadable = PhairDLNA couldn't read the server status. Try again in a moment.
+error.answer_invalid = The server returned a response the app couldn't read. Try again; if this continues, check the server setup.
+error.answer_unexpected = PhairDLNA received an unexpected response from the server. Try again. If it keeps happening, check the server setup.
+error.token_refused = PhairDLNA couldn't verify its connection to the server. Check the server setup, then try again.
+error.request_refused = The server couldn't complete this request. Check that it is running, then try again.
+error.token_unreadable = PhairDLNA couldn't read its saved connection details. Restart the server or check its setup.
+error.server_not_started = The server isn't running. Ask whoever set up PhairDLNA how to start it, then try again.
 error.busy = The server is busy; the library was not read again. Try again in a moment.
 error.scan_silent = The library was not read again: the server did not answer. Try again in a moment.
-error.cannot_open = The system did not open it.
-error.configuration_unreadable = The configuration of the server cannot be read: {reason}
-error.worker_not_started = The thread that reads the state of the server cannot be started: {reason}.
-error.preference_failed = The preference cannot be written: {reason}.
+error.cannot_open = PhairDLNA couldn't open that item. Check that it is still available, then try again.
+error.configuration_unreadable = PhairDLNA couldn't read its settings. The file may be missing or invalid. This app can't create its first settings file yet. If the settings file is missing and the command-line tool is available, run “phairdlna-cli setup” in Terminal. If the file already exists, ask whoever set up PhairDLNA to make it readable and valid. Then reopen the app.
+error.worker_not_started = PhairDLNA couldn't start its background connection. Restart the app and try again.
+error.preference_failed = PhairDLNA couldn't save this app setting. The change will be used until the app closes. Check the app's access to its settings, then try again.
+error.diagnostics_save_failed = PhairDLNA couldn't save the diagnostics report to that location. Check that you can write there, choose another location, and try again.
 
 # The detail of the server, in the detailed view.
 menu.status.objects = {objects} objects in the catalogue
@@ -134,11 +96,13 @@ cli.help.equivalent = Every action of this application has a command in phairdln
 cli.error.unknown_option = The option is not known: {option}
 cli.error.missing_value = The option {option} needs a value
 cli.error.bad_port = The port {value} is not a number between 1 and 65535
-cli.error.no_menu_bar = The menu bar of the system is not there: {reason}
+cli.error.no_menu_bar = PhairDLNA couldn't add its menu bar icon. Restart the app; if it continues, check macOS settings.
 cli.error.not_main_thread = The application did not start on the main thread
 cli.error.not_macos = This application needs macOS
 
 panel.save_diagnostics = Save Diagnostics Report
+panel.diagnostics_saved = The diagnostics report was saved.
+panel.diagnostics_error = Could Not Save Diagnostics Report
 prefs.tab_about = About
 prefs.about_title = PhairDLNA for macOS
 prefs.about_version = Version: {version}
@@ -146,4 +110,53 @@ prefs.about_license = Licence: AGPL-3.0-or-later (Open Source & Privacy)
 prefs.about_desc = Privacy-first DLNA/UPnP media streaming server for macOS and local networks.
 prefs.about_repo = GitHub Repository: {url}
 
-prefs.roots_edit_hint = Tip: Edit paths directly, add a new line or remove a line
+overview.title = PhairDLNA
+overview.heading = Your media server
+overview.accessibility.status = Server status
+overview.accessibility.library = Library contents
+overview.accessibility.folders = Shared folders
+overview.accessibility.connection = TV connection help
+overview.accessibility.activity = Current activity
+overview.accessibility.notice = Notice
+overview.state.checking = Checking server status…
+overview.state.running = Server is running
+overview.state.scanning = Reading your library…
+overview.state.stopped = Server is stopped
+overview.state.refused = The app cannot access the server
+overview.library_count = {count} items in your library
+overview.library_checking = Loading your library…
+overview.library_unavailable = Library details will appear when the app reconnects to the server.
+overview.folders = Shared folders
+overview.folders_checking = Loading shared folders…
+overview.folders_unavailable = Folder details will appear when the app reconnects to the server.
+overview.activity_title = Current activity
+overview.activity_checking = Loading activity…
+overview.activity_unavailable = Activity will appear when the app reconnects to the server.
+overview.activity_scanning = Reading your media library…
+overview.activity_empty = Nothing is playing right now.
+overview.activity_transfer = {client} is playing {title}
+overview.activity_more = and {count} more streams…
+overview.activity_stream_count = {count} active streams
+overview.add_folders = Add folders…
+overview.folder_setup_unavailable = Folder setup isn't available in the app yet
+overview.read_only = Your media is read, never changed.
+overview.connection_title = Connect a TV
+overview.connection_checking = Loading connection details…
+overview.connection_help = On your TV, open Media Sources and look for {name}. If it is missing, check the network and discovery setting. Address: {address}
+overview.connection_local_only = On the TV, look for {name} in Media Sources. If it is missing, check the network and discovery setting; the server did not report an address.
+overview.connection_unavailable = The server has not provided its TV name. Check the server setup, then try again.
+overview.connection_discovery_unavailable = {name} is not being announced for TV discovery right now. Network address: {address}
+overview.connection_discovery_unknown = Look for {name} in your TV's Media Sources. If it is missing, check the discovery setting. Network address: {address}
+overview.no_folders = No folders selected yet
+
+menu.text_size = Text size: {size}
+menu.text_size_100 = Text size 100%
+menu.text_size_150 = Text size 150%
+menu.text_size_200 = Text size 200%
+prefs.text_size = Text size
+
+prefs.roots_read_only = Folders and configuration are shown here for reference.
+
+prefs.read_only_notice = Server settings are read-only here for now.
+prefs.config_unavailable = Configuration unavailable. Check the file and its permissions.
+prefs.value_unavailable = Unavailable

@@ -24,12 +24,16 @@
 use std::cell::RefCell;
 
 use objc2::rc::Retained;
-use objc2::runtime::{AnyObject, Sel};
+use objc2::runtime::AnyObject;
 use objc2::{define_class, msg_send, sel, MainThreadMarker, MainThreadOnly};
-use objc2_app_kit::NSMenuItem;
+use objc2_app_kit::{NSButton, NSMenuItem};
 use objc2_foundation::{NSObject, NSString, NSTimer};
 
 use crate::actions::MenuAction;
+
+mod menu_items;
+mod selectors;
+use selectors::selector_of;
 
 /// The number the timer sends when it ticks.
 pub const TICK: i64 = -1;
@@ -90,18 +94,25 @@ define_class!(
             dispatch(MenuAction::ExportDiagnostics.tag());
         }
 
-        /// The action "Start server".
-        #[unsafe(method(phairStartServer:))]
-        fn phair_start_server(&self, sender: &AnyObject) {
+        /// Selects 100% text size with an explicit menu selector.
+        #[unsafe(method(phairTextSize100:))]
+        fn phair_text_size_100(&self, sender: &AnyObject) {
             let _ = sender;
-            dispatch(MenuAction::StartServer.tag());
+            dispatch(MenuAction::TextSize100.tag());
         }
 
-        /// The action "Stop server".
-        #[unsafe(method(phairStopServer:))]
-        fn phair_stop_server(&self, sender: &AnyObject) {
+        /// Selects 150% text size with an explicit menu selector.
+        #[unsafe(method(phairTextSize150:))]
+        fn phair_text_size_150(&self, sender: &AnyObject) {
             let _ = sender;
-            dispatch(MenuAction::StopServer.tag());
+            dispatch(MenuAction::TextSize150.tag());
+        }
+
+        /// Selects 200% text size with an explicit menu selector.
+        #[unsafe(method(phairTextSize200:))]
+        fn phair_text_size_200(&self, sender: &AnyObject) {
+            let _ = sender;
+            dispatch(MenuAction::TextSize200.tag());
         }
 
         /// The action "Add media folders".
@@ -177,26 +188,8 @@ pub fn install_handler(handler: Handler) {
     });
 }
 
-/// The selector of an action.
-///
-/// Every action has its own selector, because AppKit sends the action of a
-/// menu item to the target without telling which entry the user chose.
-pub fn selector_of(action: MenuAction) -> Sel {
-    match action {
-        MenuAction::OpenAdmin => sel!(phairOpenAdmin:),
-        MenuAction::OpenMediaFolders => sel!(phairOpenFolders:),
-        MenuAction::RescanLibrary => sel!(phairRescan:),
-        MenuAction::OpenPreferences => sel!(phairPreferences:),
-        MenuAction::AddMediaFolders => sel!(phairAddFolders:),
-        MenuAction::ExportDiagnostics => sel!(phairExportDiagnostics:),
-        MenuAction::StartServer => sel!(phairStartServer:),
-        MenuAction::StopServer => sel!(phairStopServer:),
-        MenuAction::Quit => sel!(phairQuit:),
-        MenuAction::TogglePresentation => sel!(phairTogglePresentation:),
-    }
-}
-
-/// The target that receives the actions of the menu.
+/// The target for actions from the menu and native controls.
+#[derive(Clone)]
 pub struct MenuTarget {
     /// The Objective-C object that receives the messages.
     target: Retained<Target>,
@@ -245,30 +238,25 @@ impl MenuTarget {
         item
     }
 
-    /// Creates a menu item that cannot be chosen.
-    ///
-    /// The item carries a line of text and no action, so that the user can
-    /// read it and cannot trigger it.
-    ///
-    /// # Safety of the inner call
-    ///
-    /// The initializer of `NSMenuItem` is called on a freshly allocated item
-    /// of this class, and the item keeps no ownership of the target.
-    pub fn status_item(&self, mtm: MainThreadMarker, title: &str) -> Retained<NSMenuItem> {
-        let text = NSString::from_str(title);
-        let empty = NSString::from_str("");
-        // SAFETY: `NSMenuItem` is allocated here and initialized here; the
-        // item has no action and therefore no selector to be wrong about.
-        let item = unsafe {
-            NSMenuItem::initWithTitle_action_keyEquivalent(
-                NSMenuItem::alloc(mtm),
-                &text,
-                None,
-                &empty,
-            )
-        };
-        item.setEnabled(false);
-        item
+    /// Connects a native button to one action implemented by this target.
+    pub fn button_action(&self, button: &NSButton, action: MenuAction) {
+        // SAFETY: this target implements every selector returned by
+        // `selector_of`, and `MenuTarget` retains it for the app lifetime.
+        // AppKit sends the selected action to this retained main-thread target.
+        unsafe {
+            button.setTarget(Some(&*self.target));
+            button.setAction(Some(selector_of(action)));
+        }
+    }
+
+    /// Applies the app-owned text size to an AppKit menu.
+    pub fn set_menu_text_size(&self, menu: &objc2_app_kit::NSMenu, factor: f64) {
+        let font = objc2_app_kit::NSFont::menuFontOfSize(13.0 * factor);
+        // SAFETY: AppKit owns this menu on the main thread, and the font is a
+        // system menu font returned for the same native UI scale preference.
+        unsafe {
+            menu.setFont(Some(&font));
+        }
     }
 
     /// Creates the timer that ticks on the main thread.

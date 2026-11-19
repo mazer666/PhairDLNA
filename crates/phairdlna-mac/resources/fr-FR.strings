@@ -5,108 +5,70 @@
 # The state of the server, and the title of the first group of the menu.
 menu.status.header = PhairDLNA
 menu.status.badge = DLNA
+menu.status.checking = Vérification de l’état du serveur…
 menu.status.running = Serveur actif — {streams} flux en cours
 menu.status.scanning = Analyse de la bibliothèque en cours…
 menu.status.stopped = Serveur arrêté
-menu.status.refused = Connexion au serveur refusée
+menu.status.refused = L’application ne peut pas accéder au serveur
+menu.status.server_controls_unavailable = Demandez à la personne qui a configuré PhairDLNA de vous aider à démarrer ou arrêter le serveur.
 
 # The shared folders and the streams that run.
 menu.status.no_roots = Aucun dossier multimédia partagé
-menu.status.root = {name} — {objects} objets
+menu.status.roots_checking = Chargement des dossiers partagés…
+menu.status.root = {name} — {objects} éléments
 menu.status.root_missing = {name} n'est pas disponible
 menu.status.transfer = {client} lit {title}
 
 # The entries of the menu.
-menu.action.open_admin = Ouvrir la fenêtre du serveur
-menu.action.start_server = Démarrer le serveur
-menu.action.stop_server = Arrêter le serveur
 menu.action.open_folders = Ouvrir les dossiers dans le Finder
-menu.action.add_folders = Ajouter un dossier multimédia…
+menu.action.add_folders = Ajouter des dossiers multimédias…
 menu.action.rescan = Réanalyser la bibliothèque
 menu.action.preferences = Préférences…
 menu.action.export_diagnostics = Exporter le rapport de diagnostic…
 menu.action.quit = Quitter PhairDLNA
 
 # Tooltips of menu actions.
-menu.tooltip.start_server = Démarre le service d'arrière-plan PhairDLNA
-menu.tooltip.stop_server = Arrête le service d'arrière-plan PhairDLNA
 menu.tooltip.open_folders = Ouvre les dossiers multimédias partagés dans le Finder
-menu.tooltip.add_folders = Ouvre le sélecteur pour ajouter un dossier multimédia
+menu.tooltip.add_folders = Demandez à la personne qui a configuré PhairDLNA d’ajouter des dossiers multimédias.
 menu.tooltip.rescan = Analyse les dossiers à la recherche de fichiers multimédias
 menu.tooltip.preferences = Ouvre les préférences et la configuration de l'application
-menu.tooltip.export_diagnostics = Génère un rapport de diagnostic dans votre navigateur
+menu.tooltip.export_diagnostics = Enregistre un rapport de diagnostic anonymisé
 menu.tooltip.quit = Quitte l'application de la barre des menus
 
 # The name the screen reader reads, and the value it reads per state.
 menu.accessibility.label = État du serveur PhairDLNA
+menu.accessibility.checking = L’application vérifie l’état du serveur
 menu.accessibility.running = Le serveur est en cours d'exécution et diffuse {streams} flux
 menu.accessibility.scanning = Le serveur analyse la bibliothèque multimédia
 menu.accessibility.stopped = Le serveur est arrêté
-menu.accessibility.refused = Le serveur refuse les requêtes de l'application
+menu.accessibility.refused = L’application ne peut pas accéder au serveur
 
 # The messages after a scan of the library.
-notice.rescan_done = Bibliothèque mise à jour — {objects} objets trouvés
-notice.rescan_failed = Échec de l'analyse de la bibliothèque : {reason}
-notice.folders_updated = Dossiers multimédias mis à jour
-panel.select_folders = Sélectionner des dossiers multimédias
-panel.folders_error = Impossible d'ajouter les dossiers multimédias
-wizard.title = Assistant de configuration PhairDLNA
-wizard.message = Bienvenue dans PhairDLNA ! Pour diffuser vos vidéos, musiques et photos sur votre téléviseur ou vos appareils DLNA, veuillez choisir vos dossiers multimédias.
-wizard.button_choose = Choisir des dossiers…
-wizard.button_later = Configurer plus tard
+notice.rescan_done = Bibliothèque mise à jour — {objects} éléments trouvés
 prefs.title = Préférences PhairDLNA
 prefs.tab_general = Général
-prefs.tab_advanced = Paramètres avancés
-prefs.tab_ultra = Éditeur brut (config.toml)
 prefs.tab_expert = Configuration expert
 prefs.server_name = Nom du serveur :
 prefs.http_port = Port HTTP :
-prefs.ssdp_port = Port SSDP :
-prefs.log_level = Niveau de journalisation :
-prefs.discovery_enabled = Activer la découverte de périphériques SSDP
-prefs.extract_artwork = Extraire automatiquement les pochettes et images
-prefs.redact_logs = Masquer les chemins privés et les adresses IP dans les journaux
-prefs.save = Enregistrer la configuration
-prefs.save_success = Configuration enregistrée avec succès !
-prefs.save_failed = Échec de l'enregistrement de la configuration : {reason}
-prefs.add_folder = Ajouter un dossier multimédia…
-prefs.remove_folder = Supprimer le dossier sélectionné
 prefs.roots_header = Dossiers partagés :
-prefs.summary = Gérer vos dossiers multimédias et la configuration du serveur.
-prefs.button_add = Ajouter des dossiers…
-prefs.button_file = Modifier le fichier de configuration
-prefs.button_done = Terminé
-notice.server_started = Serveur démarré avec succès
-notice.server_stopped = Serveur arrêté
-notice.server_control_failed = Échec du contrôle du serveur : {reason}
-tooltip.server_name = Nom affiché pour ce serveur DLNA sur les Smart TVs et lecteurs
-tooltip.http_port = Port TCP local utilisé pour la diffusion multimédia (défaut : 8200)
-tooltip.ssdp_port = Port UDP utilisé pour les recherches de découverte DLNA (défaut : 1900)
-tooltip.log_level = Niveau de détail des journaux du serveur (info, debug, warn, error)
-tooltip.discovery = Permet aux Smart TVs de découvrir le serveur automatiquement
-tooltip.artwork = Extrait les pochettes des fichiers audio et vidéo
-tooltip.redact = Masque les chemins locaux et adresses IP dans les journaux
-tooltip.add_folder = Ouvre le sélecteur de fichiers pour ajouter un dossier multimédia
-tooltip.remove_folder = Supprime le dossier sélectionné des partages
-tooltip.roots_list = Liste des répertoires partagés via DLNA
-tooltip.editor = Éditeur direct pour le fichier config.toml (mode ultra-expert)
-tooltip.save = Valide et enregistre tous les paramètres dans config.toml
+notice.folder_changes_unavailable = Vous ne pouvez pas encore ajouter de dossiers dans l’app. Demandez de l’aide à la personne qui a configuré PhairDLNA.
 
 # The messages of a failure.
-error.surface_unreachable = Le serveur est inaccessible : {reason}. Démarrez-le via la ligne de commande.
-error.surface_unreadable = Impossible de lire le serveur : {reason}. Veuillez réessayer dans un instant.
-error.answer_invalid = La réponse du serveur n'est pas valide : {reason}.
-error.answer_unexpected = La réponse du serveur est inattendue.
-error.token_refused = Le jeton d'installation a été refusé. Vérifiez le fichier de jeton.
-error.request_refused = Le serveur a refusé la requête : {status}.
-error.token_unreadable = Le jeton d'installation ne peut être lu. Vérifiez le fichier de jeton.
-error.server_not_started = Le serveur n'a jamais été démarré. Lancez-le via le terminal.
+error.surface_unreachable = PhairDLNA n’a pas pu se connecter au serveur. Vérifiez que le serveur fonctionne, puis réessayez.
+error.surface_unreadable = PhairDLNA n’a pas pu lire l’état du serveur. Réessayez dans un instant.
+error.answer_invalid = Le serveur a envoyé une réponse que l’application ne peut pas lire. Réessayez ; si le problème persiste, vérifiez la configuration du serveur.
+error.answer_unexpected = PhairDLNA a reçu une réponse inattendue du serveur. Réessayez. Si le problème persiste, vérifiez la configuration du serveur.
+error.token_refused = PhairDLNA n’a pas pu vérifier sa connexion au serveur. Vérifiez la configuration du serveur, puis réessayez.
+error.request_refused = Le serveur n’a pas pu terminer cette demande. Vérifiez qu’il fonctionne, puis réessayez.
+error.token_unreadable = PhairDLNA n’a pas pu lire ses informations de connexion enregistrées. Redémarrez le serveur ou vérifiez sa configuration.
+error.server_not_started = Le serveur n’est pas démarré. Demandez à la personne qui a configuré PhairDLNA comment le démarrer, puis réessayez.
 error.busy = Le serveur est occupé. Réessayez dans un instant.
 error.scan_silent = La bibliothèque n'a pas été actualisée : le serveur n'a pas répondu.
-error.cannot_open = Le système n'a pas pu ouvrir l'élément.
-error.configuration_unreadable = La configuration ne peut pas être lue : {reason}
-error.worker_not_started = Impossible de démarrer le service en arrière-plan : {reason}.
-error.preference_failed = Impossible d'enregistrer la préférence : {reason}.
+error.cannot_open = PhairDLNA n’a pas pu ouvrir cet élément. Vérifiez qu’il est toujours disponible, puis réessayez.
+error.configuration_unreadable = PhairDLNA n’a pas pu lire ses réglages. Le fichier est peut-être absent ou invalide. L’app ne peut pas encore créer le premier fichier de réglages. Si le fichier de réglages est absent et que l’outil en ligne de commande est disponible, exécutez « phairdlna-cli setup » dans Terminal. Si le fichier existe déjà, demandez à la personne qui a configuré PhairDLNA de le rendre lisible et valide. Puis relancez l’app.
+error.worker_not_started = PhairDLNA n’a pas pu démarrer sa connexion en arrière-plan. Redémarrez l’application, puis réessayez.
+error.preference_failed = PhairDLNA n’a pas pu enregistrer ce réglage de l’application. La modification reste active jusqu’à la fermeture de l’application. Vérifiez que l’application peut enregistrer ses réglages, puis réessayez.
+error.diagnostics_save_failed = PhairDLNA n’a pas pu enregistrer le rapport de diagnostic à cet emplacement. Vérifiez que vous pouvez y écrire, choisissez un autre emplacement, puis réessayez.
 
 # The detail of the server, in the detailed view.
 menu.status.objects = {objects} objets dans le catalogue
@@ -123,11 +85,13 @@ cli.help.equivalent = Chaque action de cette application possède un équivalent
 cli.error.unknown_option = Option inconnue : {option}
 cli.error.missing_value = L'option {option} requiert une valeur
 cli.error.bad_port = Le port {value} n'est pas un nombre compris entre 1 et 65535
-cli.error.no_menu_bar = Aucune barre des menus disponible : {reason}
+cli.error.no_menu_bar = PhairDLNA n’a pas pu ajouter son icône à la barre des menus. Redémarrez l’application ; si le problème persiste, vérifiez les réglages de macOS.
 cli.error.not_main_thread = L'application n'a pas démarré sur le fil principal
 cli.error.not_macos = Cette application nécessite macOS
 
 panel.save_diagnostics = Enregistrer le rapport de diagnostic
+panel.diagnostics_saved = Le rapport de diagnostic a été enregistré.
+panel.diagnostics_error = Impossible d'enregistrer le rapport de diagnostic
 prefs.tab_about = À propos
 prefs.about_title = PhairDLNA pour macOS
 prefs.about_version = Version : {version}
@@ -135,4 +99,53 @@ prefs.about_license = Licence : AGPL-3.0-or-later (Open source et confidentialit
 prefs.about_desc = Serveur multimédia DLNA/UPnP axé sur la confidentialité pour macOS et réseau local.
 prefs.about_repo = Dépôt GitHub : {url}
 
-prefs.roots_edit_hint = Conseil : Modifiez les chemins directement, ajoutez ou supprimez une ligne
+overview.title = PhairDLNA
+overview.heading = Votre serveur multimédia
+overview.accessibility.status = État du serveur
+overview.accessibility.library = Contenu de la bibliothèque
+overview.accessibility.folders = Dossiers partagés
+overview.accessibility.connection = Aide à la connexion du téléviseur
+overview.accessibility.activity = Activité en cours
+overview.accessibility.notice = Message
+overview.state.checking = Vérification de l’état du serveur…
+overview.state.running = Le serveur est en marche
+overview.state.scanning = Lecture de la bibliothèque…
+overview.state.stopped = Le serveur est arrêté
+overview.state.refused = L’application ne peut pas accéder au serveur
+overview.library_count = {count} éléments dans votre bibliothèque
+overview.library_checking = Chargement de la bibliothèque…
+overview.library_unavailable = La bibliothèque apparaîtra lorsque l’app se reconnectera au serveur.
+overview.folders = Dossiers partagés
+overview.folders_checking = Chargement des dossiers partagés…
+overview.folders_unavailable = Les détails apparaîtront lorsque l’app se reconnectera au serveur.
+overview.activity_title = Activité en cours
+overview.activity_checking = Chargement de l’activité…
+overview.activity_unavailable = L’activité apparaîtra lorsque l’app se reconnectera au serveur.
+overview.activity_scanning = Lecture de votre bibliothèque…
+overview.activity_empty = Aucune lecture en cours.
+overview.activity_transfer = {client} lit {title}
+overview.activity_more = et {count} lectures de plus…
+overview.activity_stream_count = {count} lectures en cours
+overview.add_folders = Ajouter des dossiers…
+overview.folder_setup_unavailable = Configuration des dossiers indisponible dans l’app
+overview.read_only = Vos médias sont lus, jamais modifiés.
+overview.connection_title = Connecter un téléviseur
+overview.connection_checking = Chargement des informations de connexion…
+overview.connection_help = Sur le téléviseur, ouvrez les sources multimédias et cherchez {name}. S'il n'apparaît pas, vérifiez le réseau et la détection. Adresse : {address}
+overview.connection_local_only = Sur le téléviseur, cherchez {name} dans les sources multimédias. S’il est absent, vérifiez le réseau et la détection ; le serveur n’a fourni aucune adresse.
+overview.connection_unavailable = Le serveur n’a pas fourni son nom pour le téléviseur. Vérifiez sa configuration, puis réessayez.
+overview.connection_discovery_unavailable = {name} n'est pas annoncé pour la détection du téléviseur actuellement. Adresse réseau : {address}
+overview.connection_discovery_unknown = Recherchez {name} dans les sources multimédias du téléviseur. S'il n'apparaît pas, vérifiez le réglage de détection. Adresse réseau : {address}
+overview.no_folders = Aucun dossier sélectionné
+
+menu.text_size = Taille du texte : {size}
+menu.text_size_100 = Taille du texte 100 %
+menu.text_size_150 = Taille du texte 150 %
+menu.text_size_200 = Taille du texte 200 %
+prefs.text_size = Taille du texte
+
+prefs.roots_read_only = Les dossiers et la configuration sont affichés à titre informatif.
+
+prefs.read_only_notice = Les réglages du serveur sont en lecture seule pour le moment.
+prefs.config_unavailable = Configuration indisponible. Vérifiez le fichier et ses autorisations.
+prefs.value_unavailable = Indisponible

@@ -88,8 +88,9 @@ fn is_local(address: &str) -> bool {
 /// The transport of the client is bound to the loopback interface.
 #[test]
 fn the_transport_is_bound_to_the_loopback_interface() {
-    let source = std::fs::read_to_string(sources_path().join("ipc").join("http.rs"))
-        .expect("the transport is read");
+    let source =
+        std::fs::read_to_string(sources_path().join("ipc").join("http").join("transport.rs"))
+            .expect("the transport is read");
 
     assert!(
         source.contains("Ipv4Addr::LOCALHOST"),

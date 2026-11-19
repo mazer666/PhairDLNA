@@ -50,12 +50,16 @@
 | `crates/phairdlna-core/src/config/` | The typed, validated, versioned configuration | F-12 |
 | `crates/phairdlna-core/src/scheduler/` | The one scheduler of the server — the priority classes, the bounds of the workers and of the queues, the hysteresis of the pressure and the report of the resources | F-18 |
 | `crates/phairdlna-cli/src/lib.rs` | The commands, as pure functions over their arguments | F-13 |
+| `crates/phairdlna-cli/src/setup.rs`, `crates/phairdlna-cli/src/setup/` | First-run orchestration, prompts, configuration validation and writing, plus user-facing setup guidance | F-13 |
 | `crates/phairdlna-core/src/catalogue/index/` | The index of the catalogue on disk — the schema of the database, the writing of a catalogue, the reading of it back and the recovery from a damaged file | F-09 |
 | `crates/phairdlna-core/tests/catalogue_rebuild.rs` | The index on disk — the round trip, the catalogue during a rescan, the restart and the file that belongs to the user alone | F-09 |
 | `crates/phairdlna-core/tests/catalogue_recovery.rs` | The recovery of the index — the damaged file, the file of another schema and the rebuild | F-09 |
 | `crates/phairdlna-cli/tests/catalogue_index.rs` | The index of the running daemon — the write, the restart and the damaged index | F-09 |
 | `crates/phairdlna-cli/src/catalogue.rs` | The catalogue commands — the tree of the library and the document a client receives | F-08, F-09, F-13 |
 | `crates/phairdlna-cli/src/serve/` | The daemon — the start of the server, the HTTP routes, the discovery socket, the library and the watch of the drives, the media of the library, the body of a media answer, the cache of the pictures, the log, the signals and the transfers that run (`transfers.rs`) | F-01, F-02, F-03, F-04, F-06, F-08, F-10, F-13 |
+| `crates/phairdlna-cli/src/serve/limit.rs`, `crates/phairdlna-cli/src/serve/limit/tests.rs` | Shared connection-cap enforcement and per-read/per-write socket deadlines, with focused connection-budget tests | F-13, F-16 |
+| `crates/phairdlna-cli/src/serve/guard.rs`, `crates/phairdlna-cli/src/serve/guard/tests.rs` | Request admission rules and their private-helper tests: client access, host, framing and bounded transfers | F-13, F-16 |
+| `crates/phairdlna-cli/src/serve/setup.rs`, `crates/phairdlna-cli/src/serve/setup/` | The daemon startup facade and its configuration, HTTP, discovery and ordered-startup modules | F-13, F-14 |
 | `crates/phairdlna-cli/src/serve/admin.rs` | The wiring of the administration surface — the view of the daemon that the surface asks | F-14 |
 | `crates/phairdlna-cli/src/serve/resources.rs` | The scheduler of the daemon — the classes of the work, the hints about the machine and the place of a transfer | F-18 |
 | `crates/phairdlna-cli/src/serve/index.rs` | The index of the catalogue in the daemon — the opening of the file, the catalogue that is read out of it and the warnings that belong to the server | F-09 |
@@ -65,6 +69,8 @@
 | `crates/phairdlna-core/tests/support/` | The fixtures of the tests of the core — the scripted platform of the volumes, the checker of a document and the catalogue of the protocol tests | F-08 |
 | `crates/phairdlna-core/tests/playlists.rs` | The acceptance criteria of F-11 for the playlists — the formats, the order, the containment and the broken playlist | F-11 |
 | `crates/phairdlna-core/tests/subtitles.rs` | The acceptance criteria of F-11 for the subtitle sidecars — the pairing, the additional resource and the reachability of the file | F-11 |
+| `crates/phairdlna-core/src/upnp/xml_reader.rs`, `crates/phairdlna-core/src/upnp/xml_syntax.rs` | The bounded `quick-xml` SOAP parser adapter, entity and namespace policy | F-02, F-16 |
+| `crates/phairdlna-core/tests/xml_reader.rs`, `crates/phairdlna-core/tests/xml_reader/truncation.rs` | Accepted XML semantics, resource limits, hostile references and watchdog-bounded truncation recovery | F-16 |
 | `crates/phairdlna-core/tests/catalogue_identity.rs` | The acceptance criteria of F-11 for the organisation — the identity key, the de-duplication of two roots and the exclusion of a folder | F-11 |
 | `crates/phairdlna-core/tests/volume_events.rs` | The acceptance criteria of F-08 for the volumes of a root — a drive that goes, comes back and comes back under another identity | F-08 |
 | `crates/phairdlna-core/tests/volume_platform_events.rs` | The acceptance criteria of F-08 for the events the platform reports — a volume that was unmounted and one that was mounted again | F-08 |
@@ -80,44 +86,80 @@
 | `crates/phairdlna-core/tests/resource_exhaustion.rs` | The acceptance criteria of F-18 — the bounds of the queues and the refusal with a clear error | F-18 |
 | `crates/phairdlna-cli/tests/resources.rs` | The resources of the daemon — the order of the work, the report and the place of a transfer | F-18 |
 | `crates/phairdlna-admin/src/lib.rs` | The optional administration surface — the crate root and the public API | F-14 |
-| `crates/phairdlna-admin/src/token.rs` | The token of the surface — the file, the permissions and the comparison | F-14 |
+| `crates/phairdlna-admin/src/token.rs`, `crates/phairdlna-admin/src/token/` | Token generation, constant-time comparison, private token-file handling, typed errors and focused tests | F-14 |
 | `crates/phairdlna-admin/src/guard.rs` | The rules every request of the surface must pass — host, framing, origin, token, custom header | F-14 |
-| `crates/phairdlna-admin/src/routes.rs` | The three routes of the surface and the JSON they answer with | F-14 |
+| `crates/phairdlna-admin/src/guard/host.rs` | Host-header parsing and loopback-only validation for the administration surface | F-14 |
+| `crates/phairdlna-admin/src/guard/request_checks.rs` | Request framing, browser-origin, fetch metadata, token, custom-header and CSRF checks | F-14 |
+| `crates/phairdlna-admin/src/routes.rs` | The authenticated local API routes and their JSON answers; no browser UI | F-14 |
+| `crates/phairdlna-admin/src/routes/timeout.rs` | The tower-http handler-future timeout and its delayed-handler regression | F-14, F-16 |
+| `crates/phairdlna-admin/src/routes/status.rs` | The JSON status and shared-folder representation, including advertised device identity | F-14 |
+| `crates/phairdlna-admin/tests/admin_api.rs` | The local API settings explanation and the refusal of browser document routes | F-14 |
 | `crates/phairdlna-admin/src/backend.rs` | What the surface asks the server, and the answers it understands | F-14 |
 | `crates/phairdlna-admin/src/json.rs` | The JSON writer of the surface | F-14 |
-| `crates/phairdlna-admin/src/server.rs` | The server of the surface — the listeners and the shutdown | F-14 |
+| `crates/phairdlna-admin/src/server.rs`, `crates/phairdlna-admin/src/listener.rs` | The local API listeners, shared connection cap, per-read/per-write silence deadlines and shutdown | F-14, F-16 |
 | `crates/phairdlna-admin/tests/admin_surface.rs` | The acceptance criteria of F-14 — the answers and the refusals | F-14 |
+| `crates/phairdlna-admin/tests/admin_surface/security.rs`, `crates/phairdlna-admin/tests/admin_surface/api.rs`, `crates/phairdlna-admin/tests/admin_surface/privacy.rs` | Security refusals, API behavior, diagnostics privacy and token-file permissions for F-14 | F-14 |
+| `crates/phairdlna-admin/tests/admin_surface/timeout.rs` | Loopback proof that an incomplete HTTP header is closed at its configured read deadline | F-14, F-16 |
 | `crates/phairdlna-cli/tests/admin.rs` | The administration surface of a running daemon | F-14 |
-| `crates/phairdlna-mac/src/main.rs` | The optional macOS application — the command line, the texts and the start of the event loop | F-15 |
-| `crates/phairdlna-mac/src/lib.rs` | The crate root of the application and the parts of it | F-15 |
+| `crates/phairdlna-mac/src/main.rs` | The primary graphical macOS app entry point — command-line options, localized startup and the event loop | F-15 |
+| `crates/phairdlna-mac/src/lib.rs` | The native GUI client crate root and its portable app logic; the server remains independently usable headlessly | F-15 |
 | `crates/phairdlna-mac/src/model.rs` | The state of the server as the application understands it, and the mode of the view | F-15 |
-| `crates/phairdlna-mac/src/menu.rs` | The entries of the menu — the model of the view | F-15 |
-| `crates/phairdlna-mac/src/app.rs` | The wiring: the state, the texts and the actions of the menu | F-15 |
+| `crates/phairdlna-mac/src/onboarding.rs` | Pure first-run configuration decisions and recovery-notice selection | F-15 |
+| `crates/phairdlna-mac/src/overview.rs` | Localized state-dependent content for the native server overview | F-15 |
+| `crates/phairdlna-mac/src/menu.rs`, `crates/phairdlna-mac/src/menu/sections.rs` | Menu state and the folder, playback and action groups | F-15 |
+| `crates/phairdlna-mac/src/app.rs`, `crates/phairdlna-mac/src/app/state.rs`, `crates/phairdlna-mac/src/app/actions.rs`, `crates/phairdlna-mac/src/app/folders.rs` | App state and wiring, server-state transitions, menu-action handling, and read-only shared-folder actions | F-15 |
 | `crates/phairdlna-mac/src/actions.rs` | What the entries of the menu do | F-15 |
 | `crates/phairdlna-mac/src/worker.rs` | The thread that talks to the administration surface | F-15 |
-| `crates/phairdlna-mac/src/preferences.rs` | The preference of the view — the mode of the presentation | F-15 |
+| `crates/phairdlna-mac/src/preferences.rs` | App-owned preferences: presentation mode and text size, stored separately from server configuration | F-15 |
 | `crates/phairdlna-mac/src/ipc/mod.rs` | The client of the administration surface — the crate root of the module | F-15 |
-| `crates/phairdlna-mac/src/ipc/client.rs` | The client: the requests, the answers and the snapshots | F-15 |
-| `crates/phairdlna-mac/src/ipc/http.rs` | The bytes: the request, the answer and the transport | F-15 |
-| `crates/phairdlna-mac/src/ipc/json.rs` | The reader of the answers of the surface | F-15 |
-| `crates/phairdlna-mac/src/ipc/json/reader.rs` | The parser of the JSON documents | F-15 |
+| `crates/phairdlna-mac/src/ipc/client.rs`, `crates/phairdlna-mac/src/ipc/client/` | The local API client, error and token handling, and its test cases | F-15 |
+| `crates/phairdlna-mac/src/ipc/http.rs`, `crates/phairdlna-mac/src/ipc/http/transport.rs` | HTTP message parsing and the bounded loopback socket transport | F-15 |
+| `crates/phairdlna-mac/src/ipc/json.rs` | The shared JSON value and error types used to interpret API replies | F-15 |
 | `crates/phairdlna-mac/src/ipc/snapshots.rs` | What the answers of the surface become | F-15 |
 | `crates/phairdlna-mac/src/text/strings.rs` | The texts of the user interface, one resource file per language | F-15 |
-| `crates/phairdlna-mac/src/platform/` | The AppKit adapter: the status item, its menu, the bridge to the runtime, the workspace and the service | F-15 |
-| `crates/phairdlna-mac/resources/` | The resource files of the languages and the metadata of the bundle | F-15 |
+| `crates/phairdlna-mac/src/text/strings/resource.rs` | Embedded translation resources, locale matching and resource parsing | F-15 |
+| `crates/phairdlna-mac/src/text/strings/format.rs` | Named placeholder replacement for translated sentences | F-15 |
+| `crates/phairdlna-mac/src/platform/` | The AppKit adapter: status menu, native overview and preferences windows (`desktop/windows.rs`), runtime bridge and workspace; server lifecycle controls are not integrated while OD-14/OD-15 remain open | F-15 |
+| `crates/phairdlna-mac/src/platform/desktop/windows.rs` | Main and preferences window lifecycle, inline initial-configuration guidance, and diagnostics save-panel flow | F-15 |
+| `crates/phairdlna-mac/src/platform/main_window.rs` | The native overview, with scrollable content for the app-owned 100% / 150% / 200% text setting | F-15 |
+| `crates/phairdlna-mac/src/platform/main_window/layout.rs`, `crates/phairdlna-mac/src/platform/main_window/layout/reflow.rs` | Overview controls, localized accessibility names and responsive vertical reflow for larger text and wrapped content | F-15 |
+| `crates/phairdlna-mac/src/platform/main_window/layout/geometry.rs` | Pure document-height calculation that centers short content and preserves scroll height for long content | F-15 |
+| `crates/phairdlna-mac/src/overview.rs` | Localized state-dependent content for the native server overview | F-15 |
+| `crates/phairdlna-mac/tests/overview.rs` | Acceptance checks for checking, scanning, running, stopped and refused overview content | F-15 |
+| `crates/phairdlna-mac/tests/accessibility_labels.rs` | Source contract for localized accessible names on dynamic overview values; VoiceOver output remains a manual check | F-15 |
+| `crates/phairdlna-mac/tests/folder_actions.rs` | Negative checks that app folder actions remain disabled and cannot alter server configuration | F-15 |
+| `crates/phairdlna-mac/tests/onboarding.rs` | Missing, malformed, empty and already-configured first-run decision coverage | F-15 |
+| `crates/phairdlna-mac/src/platform/preferences_window/general.rs` | General preferences tab with read-only server values and shared folders | F-15 |
+| `crates/phairdlna-mac/src/platform/preferences_window/roots.rs` | Read-only media-root presentation in preferences | F-15 |
+| `crates/phairdlna-mac/src/platform/preferences_window/text_scale.rs` | Text-size controls and selected-state feedback in preferences | F-15 |
+| `crates/phairdlna-mac/src/platform/preferences_window/scaling.rs`, `crates/phairdlna-mac/src/platform/preferences_window/tabs.rs` | Text-size reflow, resizable outer viewport and tab construction for general, expert and About preferences | F-15 |
+| `crates/phairdlna-mac/src/platform/preferences_window.rs`, `crates/phairdlna-mac/src/platform/about_tab.rs` | Preferences window lifecycle, app-wide text scaling and About tab | F-15 |
+| `crates/phairdlna-mac/src/platform/bridge/selectors.rs` | Mapping from application actions to the AppKit selectors implemented by the bridge | F-15 |
+| `crates/phairdlna-mac/src/platform/bridge/menu_items.rs` | Disabled status rows for non-action menu information | F-15 |
+| `crates/phairdlna-mac/resources/` | Localized UI text, bundle metadata, the app-icon source artwork (`AppIcon-v2.png`) and its multi-resolution ICNS resource | F-15 |
 | `crates/phairdlna-mac/tests/` | The acceptance criteria of F-15 — the client, the menu, the application, the worker, the views, the bundle and the network | F-15 |
-| `crates/phairdlna-mac/tests/support/` | The reader of the sources of the crate, which the test of the texts uses | F-15 |
+| `crates/phairdlna-mac/tests/support/mod.rs`, `crates/phairdlna-mac/tests/support/locale_contract.rs` | The reader of application source strings and the canonical locale-key/literal allowlists used by the F-15 locale checks | F-15 |
+| `crates/phairdlna-mac/tests/strings/recovery_copy.rs` | Checks translated first-run and stopped-server recovery text against unavailable installer and app-control claims | F-15 |
+| `qa/macos-usability-protocol.md` | Manual setup, keyboard, VoiceOver, text-size and read-only configuration acceptance protocol | F-15 |
+| `qa/evidence/macos-27.2.1-overview-offline-before-fix.png` | Isolated preview screenshot documenting the offline overview issues observed before their source correction | F-15 |
+| `qa/macos-service-access-protocol.md` | Real-Mac experiment for service identity, selected-folder scope, revocation and Local Network behavior | OD-15, F-22 AC-14 |
 | `scripts/` | Repository gates and the requirement-view generator | F-19 |
+| `scripts/package-macos-app.sh` | Builds the macOS app bundle, validates its eight-byte PkgInfo marker and architecture slices, applies its final ad-hoc signature, and verifies the signature | F-15, F-19 |
 | `.github/workflows/` | Manual-only continuous integration | F-19 |
 | `docs/` | The documentation tree | F-19 |
+| `docs/99-archive/2026-11-19-dependency-license-review/` | Immutable copy and manifest of the prior approved dependency/licence review | F-19 |
+| `docs/99-archive/2026-11-19-roadmap-v1.1/` | Immutable v1.1 roadmap snapshot, superseded by the DEC-075-aligned current plan | Project tracking |
+| `docs/99-archive/2026-11-19-quality-gates-v1.0/` | Immutable approved v1.0 quality-gates baseline, preserved while QG-11 is expanded | F-19 |
+| `docs/99-archive/2026-11-19-ci-policy-v1.0/` | Immutable approved v1.0 CI policy, preserved while current self-hosted runner coverage is recorded | F-19 |
+| `docs/07-project/OPEN-DECISIONS.md` | Material owner decisions, including OD-18 for the ADR-0002 implementation discrepancy | F-19 |
 
 > **A path moves into this table the day it exists.** Until then it belongs in the
 > planned table below.
 
 ### Planned layout
 
-**None of these paths exists yet.** They are listed so that the target structure is
-visible and so that a contributor can see where their change will land.
+The remaining paths below are planned and do not yet exist. They show where future work
+belongs.
 
 | Planned path | Responsibility | Feature |
 | --- | --- | --- |
@@ -126,7 +168,6 @@ visible and so that a contributor can see where their change will land.
 | `crates/phairdlna-core/src/lifecycle/` | Server states, sleep/wake and network recovery | F-13 |
 | `crates/phairdlna-core/src/logging/` | Structured logging and redaction | F-13, F-16 |
 | `crates/phairdlna-core/src/error.rs` | The crate error type | — |
-| `crates/phairdlna-mac/src/first_run.rs` | The first-run assistant of the application | F-15 |
 | `crates/phairdlna-mac/src/platform/verify.rs` | The verification step that asks whether a client has found the server | F-15 |
 
 ### The scripts
@@ -134,7 +175,7 @@ visible and so that a contributor can see where their change will land.
 | Script | Gate | State | What it does |
 | --- | --- | --- | --- |
 | `scripts/check-file-size.sh` | QG-13 | **exists and runs** | Enforces the file-length budget |
-| `scripts/check-doc-links.sh` | QG-11 | **exists and runs** | Resolves every relative documentation link |
+| `scripts/check-doc-links.sh` | QG-11 | **exists and runs** | Resolves relative documentation links and current source paths in this index |
 | `scripts/check-no-unsafe.sh` | QG-03 | **exists and runs** | Finds `unsafe` outside of comments; a file that carries the marker `gate: unsafe-exempt ADR-0013` is exempt, and only when the record exists |
 | `scripts/generate_requirement_views.py` | CI step "Requirement views are current" | **exists and runs** | Generates the requirement index and the traceability matrix |
 | `scripts/check-crate-boundaries.sh` | QG-28 | **exists and runs** | Fails when a crate depends "downwards" (ADR-0001, amended by ADR-0012) |

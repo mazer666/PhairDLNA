@@ -1,0 +1,139 @@
+//! Responsive layout for the native overview.
+//!
+//! What: places overview sections according to the selected text size and text length.
+//! Why: larger text needs additional height and must push later sections down.
+//! Example: at 200%, wrapped folder names get extra rows and the overview scrolls vertically.
+
+use objc2::rc::Retained;
+use objc2::MainThreadMarker;
+use objc2_app_kit::{
+    NSAccessibility, NSAutoresizingMaskOptions, NSBox, NSBoxType, NSButton, NSTextField, NSView,
+};
+use objc2_foundation::NSString;
+
+use super::super::bridge::MenuTarget;
+use crate::actions::MenuAction;
+use crate::text::Strings;
+
+mod geometry;
+mod reflow;
+
+/// The controls that form the scrolling overview document.
+pub(super) struct OverviewViews {
+    pub(super) document: Retained<NSView>,
+    pub(super) heading: Retained<NSTextField>,
+    pub(super) status: Retained<NSTextField>,
+    pub(super) library: Retained<NSTextField>,
+    pub(super) folders_heading: Retained<NSTextField>,
+    pub(super) folders: Retained<NSTextField>,
+    pub(super) folders_rule: Retained<NSBox>,
+    pub(super) connection_heading: Retained<NSTextField>,
+    pub(super) connection: Retained<NSTextField>,
+    pub(super) connection_rule: Retained<NSBox>,
+    pub(super) activity_heading: Retained<NSTextField>,
+    pub(super) activity: Retained<NSTextField>,
+    pub(super) notice: Retained<NSTextField>,
+    pub(super) add_folders: Retained<NSButton>,
+    pub(super) read_only: Retained<NSTextField>,
+}
+
+impl OverviewViews {
+    /// Builds every overview control once; later updates change text and frames.
+    pub(super) fn new(mtm: MainThreadMarker, strings: &Strings, target: &MenuTarget) -> Self {
+        let document = NSView::new(mtm);
+        let heading = label(mtm, strings.text("overview.heading"));
+        let status = label(mtm, "");
+        let library = label(mtm, "");
+        let folders_heading = label(mtm, strings.text("overview.folders"));
+        let folders = label(mtm, "");
+        let folders_rule = separator(mtm);
+        let connection_heading = label(mtm, strings.text("overview.connection_title"));
+        let connection = label(mtm, "");
+        let connection_rule = separator(mtm);
+        let activity_heading = label(mtm, strings.text("overview.activity_title"));
+        let activity = label(mtm, "");
+        let notice = label(mtm, "");
+        notice.setTextColor(Some(&objc2_app_kit::NSColor::secondaryLabelColor()));
+        let add_folders = NSButton::new(mtm);
+        add_folders.setTitle(&NSString::from_str(strings.text("overview.add_folders")));
+        target.button_action(&add_folders, MenuAction::AddMediaFolders);
+        let read_only = label(mtm, strings.text("overview.read_only"));
+        read_only.setTextColor(Some(&objc2_app_kit::NSColor::secondaryLabelColor()));
+
+        set_accessibility_labels(
+            strings,
+            &status,
+            &library,
+            &folders,
+            &connection,
+            &activity,
+            &notice,
+        );
+
+        document.addSubview(&heading);
+        document.addSubview(&status);
+        document.addSubview(&library);
+        document.addSubview(&folders_heading);
+        document.addSubview(&folders);
+        document.addSubview(&folders_rule);
+        document.addSubview(&connection_heading);
+        document.addSubview(&connection);
+        document.addSubview(&connection_rule);
+        document.addSubview(&activity_heading);
+        document.addSubview(&activity);
+        document.addSubview(&notice);
+        document.addSubview(&add_folders);
+        document.addSubview(&read_only);
+        Self {
+            document,
+            heading,
+            status,
+            library,
+            folders_heading,
+            folders,
+            folders_rule,
+            connection_heading,
+            connection,
+            connection_rule,
+            activity_heading,
+            activity,
+            notice,
+            add_folders,
+            read_only,
+        }
+    }
+}
+
+fn set_accessibility_labels(
+    strings: &Strings,
+    status: &NSTextField,
+    library: &NSTextField,
+    folders: &NSTextField,
+    connection: &NSTextField,
+    activity: &NSTextField,
+    notice: &NSTextField,
+) {
+    let labels = [
+        (status, "overview.accessibility.status"),
+        (library, "overview.accessibility.library"),
+        (folders, "overview.accessibility.folders"),
+        (connection, "overview.accessibility.connection"),
+        (activity, "overview.accessibility.activity"),
+        (notice, "overview.accessibility.notice"),
+    ];
+    for (field, key) in labels {
+        field.setAccessibilityLabel(Some(&NSString::from_str(strings.text(key))));
+    }
+}
+
+fn label(mtm: MainThreadMarker, text: &str) -> Retained<NSTextField> {
+    let field = NSTextField::wrappingLabelWithString(&NSString::from_str(text), mtm);
+    field.setAutoresizingMask(NSAutoresizingMaskOptions::ViewWidthSizable);
+    field
+}
+
+fn separator(mtm: MainThreadMarker) -> Retained<NSBox> {
+    let rule = NSBox::new(mtm);
+    rule.setBoxType(NSBoxType::Separator);
+    rule
+}

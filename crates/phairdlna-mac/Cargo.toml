@@ -21,10 +21,10 @@ phairdlna-core = { workspace = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 # The Objective-C runtime bindings and the AppKit bindings. `objc2` is the
-# modern successor of the `cocoa` crate, and `objc2-app-kit` is the binding of
-# `NSStatusItem` and `NSMenu` (F-15 section 4, dependency licence review).
+# modern successor of the `cocoa` crate; AppKit supplies the status menu,
+# preferences panel and primary window (F-15, dependency licence review).
 objc2 = "0.6.5"
-objc2-app-kit = { version = "0.3.2", features = ["NSAlert", "NSOpenPanel", "NSSavePanel", "NSPanel", "NSWindow", "NSImage"] }
+objc2-app-kit = { version = "0.3.2", features = ["NSAlert", "NSOpenPanel", "NSSavePanel", "NSPanel", "NSWindow", "NSViewController", "NSImage", "NSBox", "NSView"] }
 objc2-foundation = "0.3.2"
 
 [dev-dependencies]

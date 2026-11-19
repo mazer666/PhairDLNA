@@ -1,89 +1,88 @@
-//! Native configuration window for macOS.
+//! Native preferences window for macOS.
 //!
-//! What: interactive native settings window featuring general settings,
-//!       media folders list, and an embedded expert TOML editor.
-//! Why: lets users configure the server directly inside the native macOS app
-//!      without requiring a browser or external editor (`UX-004`).
+//! What: shows server settings read-only and provides app-owned presentation preferences.
+//! Why: the safe persistence and service-activation model is still open under OD-16.
+//! Example: users can change text size here while server values remain available to inspect.
 
-use std::path::{Path, PathBuf};
+use std::cell::Cell;
+use std::path::Path;
 
 use objc2::rc::Retained;
 use objc2::MainThreadMarker;
 use objc2_app_kit::{
-    NSAlertStyle, NSButton, NSFont, NSPanel, NSScrollView, NSTabView, NSTabViewItem, NSTextField,
-    NSTextView, NSView, NSWindowStyleMask,
+    NSButton, NSFont, NSPanel, NSScrollView, NSTabView, NSTextField, NSWindowStyleMask,
 };
 use objc2_foundation::{NSPoint, NSRect, NSSize, NSString};
-use phairdlna_core::config::Config;
 
-use super::panels;
+use super::bridge::MenuTarget;
+mod general;
+mod roots;
+mod scaling;
+mod tabs;
+mod text_scale;
+use crate::model::TextScale;
+use scaling::{scale_frame, ScaledTextField, ScaledTextView};
+use tabs::{add_notice, add_tab_scroll, build_tabs, tab_scroll_frame, TAB_HEIGHT};
+use text_scale::{build_controls, select};
 
 /// Holds the open preferences window and its controls.
 pub struct PreferencesWindow {
     /// The window panel itself.
     pub panel: Retained<NSPanel>,
-    config_path: PathBuf,
-    name_field: Retained<NSTextField>,
-    port_field: Retained<NSTextField>,
-    roots_view: Retained<NSTextView>,
-    editor_view: Retained<NSTextView>,
+    text_size_buttons: Vec<Retained<NSButton>>,
+    text_size_label: Retained<NSTextField>,
+    tab_view: Retained<NSTabView>,
+    tab_scroll: Retained<NSScrollView>,
+    roots_scroll: Retained<NSScrollView>,
+    expert_scroll: Retained<NSScrollView>,
+    text_fields: Vec<ScaledTextField>,
+    text_views: Vec<ScaledTextView>,
+    current_scale: Cell<Option<TextScale>>,
 }
 
 impl PreferencesWindow {
     /// Builds the preferences window panel.
-    pub fn new(mtm: MainThreadMarker, config_path: &Path, strings: &crate::text::Strings) -> Self {
+    pub fn new(
+        mtm: MainThreadMarker,
+        config_path: &Path,
+        strings: &crate::text::Strings,
+        target: MenuTarget,
+    ) -> Self {
         let panel = create_panel(mtm, strings);
         let Some(content) = panel.contentView() else {
-            return Self::fallback(mtm, panel, config_path);
+            return Self::fallback(mtm, panel);
         };
-
-        let config = Config::load(config_path).unwrap_or_default();
-        let raw_toml = std::fs::read_to_string(config_path).unwrap_or_default();
-
-        let tab_view = NSTabView::new(mtm);
-        tab_view.setFrame(NSRect::new(
-            NSPoint::new(10.0, 55.0),
-            NSSize::new(640.0, 475.0),
-        ));
-
-        let (tab1, name_field, port_field, roots_view) = build_general_tab(mtm, &config, strings);
-        tab_view.addTabViewItem(&tab1);
-
-        let (tab2, editor_view) = build_expert_tab(mtm, &raw_toml, strings);
-        tab_view.addTabViewItem(&tab2);
-
-        let tab3 = super::about_tab::build_about_tab(mtm, strings);
-        tab_view.addTabViewItem(&tab3);
-
-        content.addSubview(&tab_view);
-
-        let save_btn = NSButton::new(mtm);
-        let save_title = NSString::from_str(strings.text("prefs.save"));
-        save_btn.setTitle(&save_title);
-        save_btn.setFrame(NSRect::new(
-            NSPoint::new(450.0, 12.0),
-            NSSize::new(180.0, 32.0),
-        ));
-        content.addSubview(&save_btn);
-
+        let mut tabs = build_tabs(mtm, config_path, strings);
+        let tab_scroll = add_tab_scroll(mtm, &content, &tabs.tab_view);
+        tabs.text_fields
+            .push(add_notice(mtm, &content, config_path, strings));
+        let (text_size_label, text_size_buttons) = build_controls(mtm, strings, &target, &content);
         Self {
             panel,
-            config_path: config_path.to_path_buf(),
-            name_field,
-            port_field,
-            roots_view,
-            editor_view,
+            text_size_buttons,
+            text_size_label,
+            tab_view: tabs.tab_view,
+            tab_scroll,
+            roots_scroll: tabs.roots_scroll,
+            expert_scroll: tabs.expert_scroll,
+            text_fields: tabs.text_fields,
+            text_views: tabs.text_views,
+            current_scale: Cell::new(None),
         }
     }
 
-    fn fallback(mtm: MainThreadMarker, panel: Retained<NSPanel>, config_path: &Path) -> Self {
+    fn fallback(mtm: MainThreadMarker, panel: Retained<NSPanel>) -> Self {
         Self {
             panel,
-            config_path: config_path.to_path_buf(),
-            name_field: NSTextField::new(mtm),
-            port_field: NSTextField::new(mtm),
-            roots_view: NSTextView::new(mtm),
-            editor_view: NSTextView::new(mtm),
+            text_size_buttons: Vec::new(),
+            text_size_label: NSTextField::new(mtm),
+            tab_view: NSTabView::new(mtm),
+            tab_scroll: NSScrollView::new(mtm),
+            roots_scroll: NSScrollView::new(mtm),
+            expert_scroll: NSScrollView::new(mtm),
+            text_fields: Vec::new(),
+            text_views: Vec::new(),
+            current_scale: Cell::new(None),
         }
     }
 
@@ -95,49 +94,70 @@ impl PreferencesWindow {
         app.activate();
     }
 
-    /// Saves settings back to config.toml.
-    pub fn save(
-        &self,
-        strings: &crate::text::Strings,
-        mtm: MainThreadMarker,
-    ) -> Result<(), String> {
-        let edited_toml = self.editor_view.string().to_string();
-        if !edited_toml.trim().is_empty() {
-            if let Err(e) = Config::from_str(&edited_toml, &self.config_path.to_string_lossy()) {
-                let err_msg = strings.format("prefs.save_failed", &[("reason", e.message())]);
-                panels::show_alert(
-                    mtm,
-                    strings.text("prefs.title"),
-                    &err_msg,
-                    NSAlertStyle::Warning,
-                );
-                return Err(e.message().to_owned());
-            }
-            std::fs::write(&self.config_path, edited_toml).map_err(|e| e.to_string())?;
-        } else {
-            let mut config = Config::load(&self.config_path).unwrap_or_default();
-            config.server.device_name = self.name_field.stringValue().to_string();
-            if let Ok(p) = self.port_field.stringValue().to_string().parse::<u16>() {
-                config.server.http_port = p;
-            }
-            let raw_roots = self.roots_view.string().to_string();
-            config.library.roots = parse_roots_from_text(&raw_roots);
-            config.save(&self.config_path).map_err(|e| e.to_string())?;
+    /// Highlights the currently selected app-owned text size.
+    pub fn update_text_scale(&self, scale: TextScale) {
+        if self.current_scale.get() == Some(scale) {
+            return;
         }
-
-        panels::show_alert(
-            mtm,
-            strings.text("prefs.title"),
-            strings.text("prefs.save_success"),
-            NSAlertStyle::Informational,
-        );
-        Ok(())
+        let factor = scale.factor();
+        let required_height = self
+            .text_fields
+            .iter()
+            .map(|field| field.minimum_document_height(factor))
+            .fold(TAB_HEIGHT * factor, f64::max);
+        select(&self.text_size_buttons, scale);
+        self.text_size_label
+            .setFont(Some(&NSFont::systemFontOfSize(13.0 * factor)));
+        self.text_size_label.setFrame(scale_frame(
+            NSRect::new(NSPoint::new(18.0, 16.0), NSSize::new(118.0, 28.0)),
+            factor,
+        ));
+        for (index, button) in self.text_size_buttons.iter().enumerate() {
+            let x = [140.0, 235.0, 330.0][index];
+            button.setFont(Some(&NSFont::systemFontOfSize(13.0 * factor)));
+            button.setFrame(scale_frame(
+                NSRect::new(NSPoint::new(x, 12.0), NSSize::new(82.0, 32.0)),
+                factor,
+            ));
+        }
+        for field in &self.text_fields {
+            field.apply(factor);
+        }
+        for view in &self.text_views {
+            view.apply(factor);
+        }
+        self.roots_scroll.setFrame(scale_frame(
+            NSRect::new(NSPoint::new(20.0, 20.0), NSSize::new(595.0, 275.0)),
+            factor,
+        ));
+        self.expert_scroll.setFrame(scale_frame(
+            NSRect::new(NSPoint::new(20.0, 20.0), NSSize::new(595.0, 400.0)),
+            factor,
+        ));
+        self.tab_view
+            .setFont(&NSFont::systemFontOfSize(13.0 * factor));
+        let content_size = self
+            .panel
+            .contentView()
+            .map(|view| view.bounds().size)
+            .unwrap_or(NSSize::new(660.0, 590.0));
+        let scroll_frame = tab_scroll_frame(factor, content_size);
+        self.tab_scroll.setFrame(scroll_frame);
+        self.tab_view.setFrame(NSRect::new(
+            NSPoint::new(0.0, 0.0),
+            NSSize::new(
+                scroll_frame.size.width,
+                required_height.max(TAB_HEIGHT * factor),
+            ),
+        ));
+        self.current_scale.set(Some(scale));
     }
 }
 
 fn create_panel(mtm: MainThreadMarker, strings: &crate::text::Strings) -> Retained<NSPanel> {
     let panel = NSPanel::new(mtm);
-    panel.setContentSize(NSSize::new(660.0, 540.0));
+    panel.setContentSize(NSSize::new(660.0, 590.0));
+    panel.setMinSize(NSSize::new(660.0, 590.0));
     panel.setStyleMask(
         NSWindowStyleMask::Titled
             | NSWindowStyleMask::Closable
@@ -147,152 +167,4 @@ fn create_panel(mtm: MainThreadMarker, strings: &crate::text::Strings) -> Retain
     let title_ns = NSString::from_str(strings.text("prefs.title"));
     panel.setTitle(&title_ns);
     panel
-}
-
-fn parse_roots_from_text(raw_text: &str) -> Vec<phairdlna_core::config::MediaRoot> {
-    let mut roots = Vec::new();
-    for line in raw_text.lines() {
-        let trimmed = line.trim();
-        if trimmed.is_empty() {
-            continue;
-        }
-        let path = PathBuf::from(trimmed);
-        let name = path
-            .file_name()
-            .and_then(|n| n.to_str())
-            .unwrap_or("Media")
-            .to_owned();
-        roots.push(phairdlna_core::config::MediaRoot {
-            name,
-            path: trimmed.to_owned(),
-            exclude: Vec::new(),
-            symlink_policy: None,
-        });
-    }
-    roots
-}
-
-fn build_roots_view(
-    mtm: MainThreadMarker,
-    config: &Config,
-    _strings: &crate::text::Strings,
-) -> (Retained<NSScrollView>, Retained<NSTextView>) {
-    let roots_scroll = NSScrollView::new(mtm);
-    roots_scroll.setFrame(NSRect::new(
-        NSPoint::new(20.0, 20.0),
-        NSSize::new(595.0, 275.0),
-    ));
-    let roots_view = NSTextView::new(mtm);
-    roots_view.setEditable(true);
-    let mut roots_text = String::new();
-    for root in &config.library.roots {
-        roots_text.push_str(&root.path);
-        roots_text.push('\n');
-    }
-    roots_view.setString(&NSString::from_str(&roots_text));
-    roots_scroll.setDocumentView(Some(&roots_view));
-    (roots_scroll, roots_view)
-}
-
-fn build_general_tab(
-    mtm: MainThreadMarker,
-    config: &Config,
-    strings: &crate::text::Strings,
-) -> (
-    Retained<NSTabViewItem>,
-    Retained<NSTextField>,
-    Retained<NSTextField>,
-    Retained<NSTextView>,
-) {
-    let tab = NSTabViewItem::new();
-    let tab_title = NSString::from_str(strings.text("prefs.tab_general"));
-    tab.setLabel(&tab_title);
-
-    let view = NSView::new(mtm);
-
-    let name_lbl = NSTextField::wrappingLabelWithString(
-        &NSString::from_str(strings.text("prefs.server_name")),
-        mtm,
-    );
-    name_lbl.setFrame(NSRect::new(
-        NSPoint::new(20.0, 390.0),
-        NSSize::new(180.0, 24.0),
-    ));
-    view.addSubview(&name_lbl);
-
-    let name_field = NSTextField::new(mtm);
-    name_field.setFrame(NSRect::new(
-        NSPoint::new(200.0, 386.0),
-        NSSize::new(300.0, 26.0),
-    ));
-    name_field.setStringValue(&NSString::from_str(&config.server.device_name));
-    view.addSubview(&name_field);
-
-    let port_lbl = NSTextField::wrappingLabelWithString(
-        &NSString::from_str(strings.text("prefs.http_port")),
-        mtm,
-    );
-    port_lbl.setFrame(NSRect::new(
-        NSPoint::new(20.0, 350.0),
-        NSSize::new(180.0, 24.0),
-    ));
-    view.addSubview(&port_lbl);
-
-    let port_field = NSTextField::new(mtm);
-    port_field.setFrame(NSRect::new(
-        NSPoint::new(200.0, 346.0),
-        NSSize::new(120.0, 26.0),
-    ));
-    port_field.setStringValue(&NSString::from_str(&config.server.http_port.to_string()));
-    view.addSubview(&port_field);
-
-    let roots_lbl = NSTextField::wrappingLabelWithString(
-        &NSString::from_str(strings.text("prefs.roots_header")),
-        mtm,
-    );
-    roots_lbl.setFrame(NSRect::new(
-        NSPoint::new(20.0, 320.0),
-        NSSize::new(200.0, 24.0),
-    ));
-    view.addSubview(&roots_lbl);
-
-    let roots_hint = NSTextField::wrappingLabelWithString(
-        &NSString::from_str(strings.text("prefs.roots_edit_hint")),
-        mtm,
-    );
-    roots_hint.setFrame(NSRect::new(
-        NSPoint::new(20.0, 298.0),
-        NSSize::new(595.0, 20.0),
-    ));
-    view.addSubview(&roots_hint);
-
-    let (roots_scroll, roots_view) = build_roots_view(mtm, config, strings);
-    view.addSubview(&roots_scroll);
-
-    tab.setView(Some(&view));
-    (tab, name_field, port_field, roots_view)
-}
-
-fn build_expert_tab(
-    mtm: MainThreadMarker,
-    raw_toml: &str,
-    strings: &crate::text::Strings,
-) -> (Retained<NSTabViewItem>, Retained<NSTextView>) {
-    let tab = NSTabViewItem::new();
-    let tab_title = NSString::from_str(strings.text("prefs.tab_expert"));
-    tab.setLabel(&tab_title);
-
-    let scroll = NSScrollView::new(mtm);
-    scroll.setFrame(NSRect::new(
-        NSPoint::new(20.0, 20.0),
-        NSSize::new(595.0, 400.0),
-    ));
-    let editor_view = NSTextView::new(mtm);
-    let font = NSFont::userFixedPitchFontOfSize(12.0);
-    editor_view.setFont(font.as_deref());
-    editor_view.setString(&NSString::from_str(raw_toml));
-    scroll.setDocumentView(Some(&editor_view));
-    tab.setView(Some(&scroll));
-
-    (tab, editor_view)
 }

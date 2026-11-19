@@ -11,6 +11,9 @@
 use phairdlna_core::upnp::xml_reader::{parse, parse_with_limits, XmlLimits};
 use phairdlna_core::upnp::UpnpError;
 
+#[path = "xml_reader/truncation.rs"]
+mod truncation;
+
 /// A namespace is resolved.
 #[test]
 fn a_namespace_is_resolved() {
@@ -32,6 +35,33 @@ fn the_text_is_decoded() {
 fn a_numeric_character_reference_is_decoded() {
     let root = parse("<a>&#65;&#x42;</a>").expect("a well-formed document");
     assert_eq!(root.text, "AB");
+}
+
+/// Numeric character references in attributes keep the existing semantics.
+#[test]
+fn a_numeric_character_reference_in_an_attribute_is_decoded() {
+    let root = parse("<a name=\"&#65;&#x42;\"/>").expect("a well-formed document");
+    assert_eq!(root.attributes[0].1, "AB");
+}
+
+/// Numeric references must name characters allowed by XML 1.0.
+#[test]
+fn forbidden_xml_characters_are_refused_in_text_and_attributes() {
+    for document in ["<a>&#x1;</a>", "<a name=\"&#x1;\"/>", "<a>&#xFFFE;</a>"] {
+        assert!(matches!(
+            parse(document),
+            Err(UpnpError::UnknownEntity { .. })
+        ));
+    }
+}
+
+/// A custom entity is refused in an attribute just as it is in text.
+#[test]
+fn an_undefined_entity_in_an_attribute_is_refused() {
+    assert!(matches!(
+        parse("<a name=\"&boom;\"/>"),
+        Err(UpnpError::UnknownEntity { .. })
+    ));
 }
 
 /// A document type declaration is refused, because it is the entry point of
@@ -88,6 +118,16 @@ fn a_document_that_is_too_deep_is_refused() {
         parse_with_limits("<a><b><c><d/></c></b></a>", &limits),
         Err(UpnpError::RequestTooDeep { .. })
     ));
+}
+
+/// The configured maximum depth includes the root at depth zero.
+#[test]
+fn the_document_at_the_depth_boundary_is_accepted() {
+    let limits = XmlLimits {
+        max_depth: 2,
+        ..XmlLimits::default()
+    };
+    assert!(parse_with_limits("<a><b><c/></b></a>", &limits).is_ok());
 }
 
 /// A document with too many elements is refused.

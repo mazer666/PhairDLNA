@@ -17,7 +17,6 @@ use std::rc::Rc;
 
 use objc2::rc::Retained;
 use objc2::MainThreadMarker;
-use objc2_app_kit::NSApplication;
 use objc2_foundation::NSTimer;
 
 use crate::actions::MenuAction;
@@ -27,6 +26,8 @@ use crate::worker::{Answer, Command, Worker};
 use super::bridge;
 use super::status_item::StatusItem;
 use super::workspace;
+
+mod windows;
 
 /// How often the timer of the menu bar ticks, in seconds.
 ///
@@ -56,6 +57,8 @@ pub struct Desktop {
     written: Vec<crate::menu::MenuEntry>,
     /// The preferences window when open.
     prefs_window: Option<super::preferences_window::PreferencesWindow>,
+    /// The native server overview when it has been opened.
+    main_window: Option<super::main_window::MainWindow>,
 }
 
 impl Desktop {
@@ -77,9 +80,11 @@ impl Desktop {
             _timer: timer,
             written: Vec::new(),
             prefs_window: None,
+            main_window: None,
         };
         desktop.write();
-        desktop.check_first_run_wizard();
+        desktop.show_initial_configuration_guidance();
+        desktop.show_main_window();
         Ok(desktop)
     }
 
@@ -144,8 +149,6 @@ impl Desktop {
     fn ask_worker(&mut self, action: MenuAction) {
         if action == MenuAction::RescanLibrary {
             self.worker.ask(Command::Rescan);
-        } else if action == MenuAction::ExportDiagnostics {
-            self.worker.ask(Command::ExportDiagnostics);
         }
     }
 
@@ -155,117 +158,18 @@ impl Desktop {
             return;
         };
         match request {
-            DesktopRequest::OpenUrl(address) => {
-                if !workspace::open_url(&address) {
-                    self.app.set_notice(self.app.cannot_open_text());
-                }
-            }
             DesktopRequest::OpenPath(path) => {
                 if !workspace::open_path(&path) {
                     self.app.set_notice(self.app.cannot_open_text());
                 }
             }
             DesktopRequest::OpenPaths(paths) => self.open_paths(&paths),
-            DesktopRequest::PickMediaFolders => self.pick_folders(),
             DesktopRequest::ShowPreferences => self.show_preferences(),
+            DesktopRequest::ShowMainWindow => self.show_main_window(),
             DesktopRequest::ExportDiagnostics => {
                 let _ = self.worker.ask(Command::ExportDiagnostics);
             }
             DesktopRequest::Quit => self.quit(),
-        }
-    }
-
-    /// Opens several folders in the program of the user.
-    ///
-    /// A folder that cannot be opened does not stop the others: the notice
-    /// says that the folder could not be opened, and the rest is tried.
-    fn open_paths(&mut self, paths: &[std::path::PathBuf]) {
-        for path in paths {
-            if !workspace::open_path(path) {
-                self.app.set_notice(self.app.cannot_open_text());
-            }
-        }
-    }
-
-    /// Prompts the user to pick media folders via native NSOpenPanel.
-    fn pick_folders(&mut self) {
-        let title = self.app.localized_text("panel.select_folders");
-        let selected = super::panels::pick_media_folders(self.marker, &title);
-        if selected.is_empty() {
-            return;
-        }
-        if let Err(reason) = self.app.add_media_roots(&selected) {
-            let error_title = self.app.localized_text("panel.folders_error");
-            super::panels::show_alert(
-                self.marker,
-                &error_title,
-                &reason,
-                objc2_app_kit::NSAlertStyle::Warning,
-            );
-        } else {
-            self.worker.ask(Command::Rescan);
-            self.write();
-        }
-    }
-
-    /// Saves diagnostics report JSON via native NSSavePanel.
-    fn save_diagnostics(&mut self, json_content: &str) {
-        let title = self.app.localized_text("panel.save_diagnostics");
-        if let Some(target_path) =
-            super::panels::pick_save_file(self.marker, &title, "phairdlna-diagnostics.json")
-        {
-            let _ = std::fs::write(target_path, json_content);
-        }
-    }
-
-    /// Shows the native preferences and configuration window.
-    fn show_preferences(&mut self) {
-        if let Some(ref win) = self.prefs_window {
-            win.show(self.marker);
-        } else {
-            let win = super::preferences_window::PreferencesWindow::new(
-                self.marker,
-                self.app.config_path(),
-                self.app.strings(),
-            );
-            win.show(self.marker);
-            self.prefs_window = Some(win);
-        }
-    }
-
-    /// Leaves the application; the server keeps running.
-    fn quit(&self) {
-        NSApplication::sharedApplication(self.marker).terminate(None);
-    }
-
-    /// Runs the first-run setup wizard if no media folders are configured yet.
-    fn check_first_run_wizard(&mut self) {
-        let Ok(roots) = self.app.media_roots() else {
-            return;
-        };
-        if !roots.is_empty() {
-            return;
-        }
-
-        let title = self.app.localized_text("wizard.title");
-        let message = self.app.localized_text("wizard.message");
-        let btn_choose = self.app.localized_text("wizard.button_choose");
-        let btn_later = self.app.localized_text("wizard.button_later");
-        let panel_title = self.app.localized_text("panel.select_folders");
-
-        let result = super::config_dialog::run_wizard_if_needed(
-            self.marker,
-            self.app.config_path(),
-            &title,
-            &message,
-            &btn_choose,
-            &btn_later,
-            &panel_title,
-        );
-
-        if let super::config_dialog::WizardResult::Configured(_) = result {
-            self.worker.ask(Command::Rescan);
-            self.write();
         }
     }
 
@@ -275,11 +179,24 @@ impl Desktop {
     /// of the user does not flicker on every tick of the timer.
     fn write(&mut self) {
         let entries = self.app.entries();
+        if let Some(ref window) = self.main_window {
+            window.update(
+                self.app.strings(),
+                self.app.snapshot(),
+                self.app.text_scale(),
+                self.app.notice(),
+                self.app.can_add_media_roots(),
+            );
+        }
+        if let Some(ref window) = self.prefs_window {
+            window.update_text_scale(self.app.text_scale());
+        }
         if entries == self.written {
             return;
         }
         self.written = entries.clone();
-        self.item.set_entries(self.marker, &entries);
+        self.item
+            .set_entries(self.marker, &entries, self.app.text_scale().factor());
         self.item.set_state(&self.app.snapshot().state);
         self.item.set_badge(&self.app.badge());
         let (label, value) = self.app.accessibility();

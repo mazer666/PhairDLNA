@@ -17,7 +17,7 @@
 
 use std::path::{Path, PathBuf};
 
-use crate::model::PresentationMode;
+use crate::model::{PresentationMode, TextScale};
 
 /// The name of the file of the preference of the view.
 const FILE_NAME: &str = "presentation.mode";
@@ -65,16 +65,35 @@ impl Preferences {
     /// the running application changes anyway, and the next start reads the
     /// old mode.
     pub fn set_mode(&self, mode: PresentationMode) -> Result<(), PreferencesError> {
-        if let Some(folder) = self.path.parent() {
+        self.write_value(&self.path, mode.as_str())
+    }
+
+    /// The text size of the native application, stored beside the view mode.
+    pub fn text_scale(&self) -> TextScale {
+        let path = self.path.with_file_name("text.scale");
+        let Ok(text) = std::fs::read_to_string(path) else {
+            return TextScale::default();
+        };
+        TextScale::of(&text)
+    }
+
+    /// Writes the app-owned text size without changing server configuration.
+    pub fn set_text_scale(&self, scale: TextScale) -> Result<(), PreferencesError> {
+        let path = self.path.with_file_name("text.scale");
+        self.write_value(&path, scale.as_str())
+    }
+
+    fn write_value(&self, path: &Path, value: &str) -> Result<(), PreferencesError> {
+        if let Some(folder) = path.parent() {
             std::fs::create_dir_all(folder).map_err(|error| PreferencesError {
                 reason: error.to_string(),
             })?;
             make_private(folder);
         }
-        std::fs::write(&self.path, mode.as_str()).map_err(|error| PreferencesError {
+        std::fs::write(path, value).map_err(|error| PreferencesError {
             reason: error.to_string(),
         })?;
-        make_private(&self.path);
+        make_private(path);
         Ok(())
     }
 }

@@ -1,10 +1,10 @@
 //! The server of the administration surface.
 //!
 //! What: the server that listens on the loopback interface and answers the
-//!       three routes of the surface.
+//!       authenticated local API routes; no browser UI is served.
 //! Why: the surface is a server of its own, with its own port, its own token
-//!       and its own rules. It is not a path of the media server: the browser
-//!       of the user keeps the two apart, and a page of the internet must not
+//!       and its own rules. It is not a path of the media server: a page of
+//!       the internet must not
 //!       be able to reach the surface through the media server (`OPS-020`).
 //! Example: a server that was started on the loopback interface answers
 //!          `GET /api/status` on `http://127.0.0.1:8210`.
@@ -23,6 +23,7 @@ use tokio::sync::watch;
 
 use crate::backend::AdminBackend;
 use crate::guard::AdminGuard;
+use crate::listener::AdminListener;
 use crate::routes::{self, AdminState};
 use crate::token::{self, AdminToken, TokenError};
 
@@ -77,6 +78,9 @@ impl AdminServer {
         let token = token::load_or_create(&options.token_path)?;
         let guard = Arc::new(AdminGuard::new(token.clone(), options.limits));
         let state = Arc::new(AdminState::new(backend, guard));
+        let connection_budget = Arc::new(tokio::sync::Semaphore::new(
+            options.limits.connections.max(1),
+        ));
         let (shutdown, _) = watch::channel(false);
         let mut addresses = Vec::new();
         let mut failures = Vec::new();
@@ -86,6 +90,12 @@ impl AdminServer {
                     // The address of the socket is the one the client reaches:
                     // a port of 0 means that the machine chose the port.
                     let bound = listener.local_addr().unwrap_or(address);
+                    let listener = AdminListener::new(
+                        listener,
+                        Arc::clone(&connection_budget),
+                        options.limits.read_timeout,
+                        options.limits.write_timeout,
+                    );
                     spawn(listener, state.clone(), shutdown.subscribe());
                     addresses.push(bound);
                 }
@@ -148,7 +158,7 @@ fn addresses_of(options: &AdminOptions) -> Vec<SocketAddr> {
 }
 
 /// Serves the surface on one listener.
-fn spawn(listener: TcpListener, state: Arc<AdminState>, shutdown: watch::Receiver<bool>) {
+fn spawn(listener: AdminListener, state: Arc<AdminState>, shutdown: watch::Receiver<bool>) {
     tokio::spawn(async move {
         let router = routes::router(state);
         let serving =

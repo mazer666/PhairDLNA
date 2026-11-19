@@ -4,7 +4,7 @@ Status: Draft
 
 Owner role: Product/Requirements
 
-Version/date: 0.1 / 2026-11-14
+Version/date: 0.3 / 2026-11-19
 
 Requirements: DOC-001, DOC-002, DOC-003, DOC-004, DOC-005, DOC-006, DOC-007, DOC-008, DOC-009, DOC-010, DOC-011, DOC-012,
 Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
@@ -254,8 +254,11 @@ everywhere, and a behaviour that differs per platform is a different code path b
 **PLT-002** — The project shall provide a build matrix covering macOS (arm64, x86_64), Linux (x86_64) and Windows (x86_64). [DESIGN] The
 matrix is the set of targets the build gate runs on: `aarch64-apple-darwin`, `x86_64-apple-darwin`, `x86_64-unknown-linux-gnu` and
 `x86_64-pc-windows-msvc`. Every one of them builds the workspace and runs the tests; a target that was not run is reported as
-`NOT RUN — <reason>` and never as a pass (§4.2). The matrix is recorded in the CI policy and in the build documentation; a workflow that was
-never triggered is not a green workflow (`../07-project/CI-POLICY.md` §5).
+`NOT RUN — <reason>` and never as a pass (§4.2). The manual matrix routes each leg to a
+self-hosted runner matching its OS and architecture labels; a leg without a matching
+online runner is not run. The matrix is recorded in the CI policy and in the build
+documentation; a workflow that was never triggered is not a green workflow
+(`../07-project/CI-POLICY.md` §5).
 
 **PLT-009** — The build shall not require a C toolchain beyond what the platform already provides, and any native dependency shall be
 documented. [DESIGN] A dependency that needs a C compiler, a `build.rs` that compiles C, or a system library beyond the platform's own is
@@ -271,10 +274,10 @@ an explicit and brittle set of grants that a server for arbitrary user folders c
 
 | Target | Platform | Built and tested by | Status |
 | --- | --- | --- | --- |
-| `aarch64-apple-darwin` | macOS, Apple Silicon | build matrix gate | planned |
-| `x86_64-apple-darwin` | macOS, Intel | build matrix gate | planned |
-| `x86_64-unknown-linux-gnu` | Linux | build matrix gate | planned |
-| `x86_64-pc-windows-msvc` | Windows | build matrix gate | planned |
+| `aarch64-apple-darwin` | macOS, Apple Silicon | self-hosted `macOS` + `ARM64` | NOT RUN — no manual matrix result recorded |
+| `x86_64-apple-darwin` | macOS, Intel | self-hosted `macOS` + `x64` | NOT RUN — no manual matrix result recorded |
+| `x86_64-unknown-linux-gnu` | Linux | self-hosted `linux` + `x64` | NOT RUN — no manual matrix result recorded |
+| `x86_64-pc-windows-msvc` | Windows | self-hosted `windows` + `x64` | NOT RUN — no manual matrix result recorded |
 
 ## 5. Performance requirements
 
@@ -511,13 +514,17 @@ layers), `../00-governance/` (the standards, the documentation policy, the requi
    reading, used here:* a generated view is not a duplicate normative statement, because the definition lives only in the requirement catalogue and
    the generator refuses to drift from it. *Closes when:* the policy states the rule for generated documents.
    *Last verified against the tree: 2026-11-15.*
-8. **[CLOSED 2026-11-15] The build matrix did not name the Intel macOS target.** *Resolved:* `ci-matrix.yml` now names an Intel entry explicitly; while the hosted runner set has no Intel machine, that entry is reported as `NOT RUN — no Intel runner available` rather than being quietly dropped. PLT-002 requires macOS on arm64 **and** macOS on x86_64, but
-   `ci-matrix.yml` names three operating systems — `macos-latest`, `ubuntu-latest`, `windows-latest` — and no Intel macOS target, so half of
-   the required matrix is not covered by the workflow as it stands. *Proposed reading:* the matrix gains an explicit `x86_64-apple-darwin`
-   entry, and an entry the runner set cannot provide is reported as `NOT RUN — <reason>` rather than being quietly left out. *Closes when:* the
-   owner decides how the Intel target is run.
-   *Last verified against the tree: 2026-11-15.*
+8. **[CLOSED 2026-11-19] The Intel macOS target must be named and routed locally.** *Resolved:* `ci-matrix.yml` has explicit Apple Silicon and Intel macOS entries, and routes the Intel entry to a self-hosted `macOS` + `x64` runner. Linux and Windows legs also use OS/architecture labels, not GitHub-hosted runner labels. The matrix is manual-only. Its platform runs remain unverified until an appropriate local runner completes a manual run; this closure is about the workflow definition, not a green matrix result.
+   Original finding (2026-11-15): the matrix did not name the Intel macOS target and implied that the hosted runner set determined which rows could run.
+   *Last verified against the tree: 2026-11-19.*
 9. **[CLOSED 2026-11-15] The CI workflow file names.** *Resolved:* `CI-POLICY.md` §2 now describes the real workflows and names the real scripts, and the workflow gained the QG-03 step it promised. `CI-POLICY.md` §2 names `ci.yml` and `ci-matrix.yml` as "skeletons with the commands listed but the
    implementation not yet present", and names `scripts/check-requirement-views.sh` — a file that does not exist; the script in the repository is
    `scripts/generate_requirement_views.py`. *Closes when:* the policy is corrected to match the tree.
-   *Last verified against the tree: 2026-11-15.*
+   *Last verified against the tree: 2026-11-19.*
+
+## Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 0.3 / 2026-11-19 | Records a successful full local quality-gate run and two fixes it exposed: overlong UI functions and the no-default-features admin reference. |
+| 0.2 / 2026-11-19 | Routes the manual build matrix to matching self-hosted OS/architecture labels, pins the Rust toolchain action, and records matrix execution as NOT RUN until matching local runners complete it. |

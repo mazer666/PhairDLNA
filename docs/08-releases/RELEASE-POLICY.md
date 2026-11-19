@@ -27,8 +27,13 @@ and must never carry a version tag.
 | **Beta** | Early users | Features frozen; bugs expected | Owner |
 | **Stable** | Everyone | The compatibility promise applies | Owner |
 
-The project currently has **no release of any kind**. The first possible release is an
-alpha, and only after M1 has produced a recorded device test.
+**Observed release state (2026-11-18):** GitHub contains the owner-published public
+prerelease [v0.1.0-alpha.1](https://github.com/mazer666/PhairDLNA/releases/tag/v0.1.0-alpha.1),
+tagged at `66e94c9`. It predates current `main` (`9481e49`) and its notes describe the
+earlier Web Admin workflow. This historical alpha does not establish that current HEAD
+is release-ready or waive the checklist for any future release. The rule above remains
+in force: every new release and tag needs explicit owner approval, and the release
+checklist applies.
 
 ---
 

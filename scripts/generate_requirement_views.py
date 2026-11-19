@@ -114,6 +114,14 @@ DEVICE_VERIFICATION = {"INT-001", "INT-004", "INT-006", "INT-010", "INT-100",
 # The status vocabulary is the one of the requirements index:
 # `Baseline`, `Scheduled`, `Implemented`, `Verified`.
 EVIDENCE: dict[str, tuple[str, str]] = {
+    "UX-008": (
+        "Implementation exists: persisted 100% / 150% / 200% setting in preferences and menu; overview sections reflow vertically using character-boundary wrapping and a conservative full-em text-width estimate inside a vertical scroll view. No-clipping, contrast, reduced-motion and real-Mac acceptance checks are NOT RUN. See `qa/macos-usability-protocol.md`",
+        "Scheduled",
+    ),
+    "UX-017": (
+        "Planned: keyboard and focus review at 100%, 150% and 200%; manual acceptance is specified in `qa/macos-usability-protocol.md`",
+        "Scheduled",
+    ),
     "INT-001": (
         "`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`,"
         " `crates/phairdlna-core/src/ssdp/request.rs::tests::the_reply_carries_the_required_headers`"
@@ -583,35 +591,41 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     "LIFE-001": (
         "`crates/phairdlna-core/tests/network_recovery.rs::lifecycle_state_transitions_follow_rules`,"
         " `crates/phairdlna-core/src/lifecycle/state.rs::tests::every_state_has_its_name`"
-        " — the server exposes the 8 distinct states with timestamps, reasons, and user-facing explanations",
-        "Verified",
+        " — the core defines eight lifecycle states and transition rules with reasons and timestamps;"
+        " tests exercise the state model only, not exposure by the serving process",
+        "Implemented",
     ),
     "LIFE-002": (
         "`crates/phairdlna-core/tests/network_recovery.rs::sleep_wake_cycle_updates_state_and_records_timeline`"
-        " — on sleep the server transitions to Suspended and does not report Ready; on wake it recovers and rebinds listeners",
-        "Verified",
+        " — a test simulates the Suspended/Recovering/Ready transitions and timeline writes;"
+        " no production sleep/wake adapter or listener rebind integration exists",
+        "Scheduled",
     ),
     "LIFE-003": (
         "`crates/phairdlna-core/tests/network_recovery.rs::interface_change_does_not_widen_exposure`"
-        " — interface, address or subnet changes re-evaluate policy and never widen exposure beyond configured interfaces",
-        "Verified",
+        " — a mock adapter tests configured-interface filtering; production network-change"
+        " observation and listener rebinding are not wired",
+        "Scheduled",
     ),
     "LIFE-004": (
         "`crates/phairdlna-core/tests/network_recovery.rs::missing_configured_interface_enters_degraded_state`"
-        " — when a configured interface drops the server enters Degraded and never exposes itself on another interface",
-        "Verified",
+        " — test-local logic simulates a Degraded transition and its reason; the serving"
+        " process has no runtime degraded-state integration",
+        "Scheduled",
     ),
     "LIFE-007": (
         "`crates/phairdlna-core/tests/retry_backoff.rs::retry_backoff_is_bounded_and_monotonic`,"
         " `crates/phairdlna-core/tests/retry_backoff.rs::retry_backoff_custom_bounds`"
-        " — discovery and rebinding retries use bounded exponential backoff with ceiling to avoid tight loops and multicast storms",
-        "Verified",
+        " — a generic exponential-backoff policy is tested, but discovery and network"
+        " rebinding do not use it for runtime retries",
+        "Scheduled",
     ),
     "LIFE-011": (
         "`crates/phairdlna-cli/tests/recovery_timeline.rs::recovery_timeline_records_ordered_events_with_redaction`,"
         " `crates/phairdlna-core/src/lifecycle/timeline.rs::tests::a_path_in_the_timeline_is_hidden`"
-        " — the server records lifecycle transitions and recovery events in a bounded, redacted local timeline",
-        "Verified",
+        " — bounded, redacted timeline storage is implemented and tested with synthetic transitions;"
+        " no production transition source writes to it yet",
+        "Implemented",
     ),
     "FUN-040": (
         "`crates/phairdlna-core/tests/http_media.rs::the_client_receives_the_bytes_of_the_file`"
@@ -817,9 +831,8 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     "PLT-013": (
         "`crates/phairdlna-cli/src/service/plist.rs::tests::the_job_file_names_the_program_and_the_arguments`,"
         " `crates/phairdlna-cli/src/service/plist.rs::tests::the_job_file_restarts_the_server`,"
-        " `crates/phairdlna-mac/tests/bundle_metadata.rs::the_bundle_is_an_application_of_the_menu_bar`"
-        " — the server runs as a launchd daemon/job with system scope option and the menu bar UI runs as a separate user agent",
-        "Verified",
+        " — these checks cover only the server job. No approved per-user UI LaunchAgent is packaged, and the requirement conflicts with the regular Dock app in DEC-076; OD-15 must resolve the process model",
+        "Not implemented",
     ),
     "CFG-005": (
         "`crates/phairdlna-core/src/config/validate/admin.rs::tests::a_non_loopback_address_is_refused`,"
@@ -903,7 +916,7 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     "OPS-024": (
         "`crates/phairdlna-cli/tests/admin.rs::the_media_server_does_not_know_the_routes_of_the_surface`,"
         " `crates/phairdlna-admin/tests/admin_surface.rs::an_unknown_path_is_refused`"
-        " — the surface has its own listener and its own three routes; the media server knows none of them,"
+        " — the surface has its own listener and authenticated API routes; the media server knows none of them,"
         " and a path the surface does not know is a generic 404",
         "Verified",
     ),
@@ -937,10 +950,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "UX-007": (
         "`crates/phairdlna-mac/tests/menu.rs::a_running_server_shows_its_streams`,"
+        " `::a_refusing_server_shows_recovery_actions_without_starting_it_again`,"
         " `crates/phairdlna-mac/src/menu.rs::status_line`"
         " — the state of the server is a sentence and never a coloured dot; the keyboard"
         " navigation of the menu is the one of the system and is checked by the manual"
-        " protocol, which has not run yet",
+        " protocol, which has not run yet; a server that refuses access offers recovery"
+        " actions without offering a second start or stop",
         "Implemented",
     ),
     "UX-009": (
@@ -957,10 +972,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "Implemented",
     ),
     "UX-014": (
-        "`crates/phairdlna-mac/tests/menu.rs::a_running_server_shows_its_streams`"
-        " — the menu shows the state, the shared folders and the client that plays in one"
-        " view; the progress of the scan is shown as the state of the server and not as a"
-        " progress of its own",
+        "`crates/phairdlna-mac/tests/menu.rs::a_running_server_shows_its_streams`,"
+        " `crates/phairdlna-mac/tests/overview.rs::a_running_view_lists_every_folder_and_marks_a_missing_volume`,"
+        " `::unavailable_tv_discovery_keeps_the_server_address_visible`"
+        " — the menu shows state, folders and client activity; the overview lists every shared"
+        " folder, marks unavailable volumes, hides stale data and gives the address when TV"
+        " discovery is unavailable; scan progress is shown as server state",
         "Implemented",
     ),
     "UX-015": (
@@ -991,6 +1008,8 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "MB-001": (
         "`crates/phairdlna-mac/tests/application.rs::nothing_of_the_last_answer_stays_when_the_server_is_gone`,"
+        " `crates/phairdlna-mac/tests/overview.rs::stopped_and_refused_views_hide_stale_counts_folders_and_activity`,"
+        " `crates/phairdlna-mac/tests/overview.rs::the_first_view_says_it_is_checking_in_every_section`,"
         " `crates/phairdlna-mac/tests/ipc_client.rs::a_server_that_was_never_started_sends_no_request`"
         " — the application holds no state of the server: it reads the state from the surface"
         " and shows nothing of the last answer when the surface is gone",
@@ -1024,9 +1043,9 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "Implemented",
     ),
     "MB-009": (
-        "`crates/phairdlna-mac/tests/bundle_metadata.rs::the_bundle_is_an_application_of_the_menu_bar`,"
+        "`crates/phairdlna-mac/tests/bundle_metadata.rs::the_bundle_is_a_regular_application`,"
         " `::the_bundle_explains_the_permission_of_the_local_network`"
-        " — the metadata of the bundle carries the key of the menu bar and the text of the"
+        " — the bundle is a regular application and carries the text of the"
         " permission of the local network; the bundle itself is built and signed by the"
         " release, which is not done",
         "Implemented",
@@ -1352,7 +1371,9 @@ def build_rows() -> list[dict]:
 def render_index(rows: list[dict]) -> str:
     out: list[str] = []
     out.append("# Requirements index — PhairDLNA\n")
-    out.append("Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Product Owner\n")
+    out.append(
+        "Status: **Approved (v1.1 accessibility update, 2026-11-18; v1.0 baseline preserved)** · Owner role: Product Owner\n"
+    )
     out.append(
         "This is the **cross-cutting view** of every requirement. The normative text of each\n"
         "requirement is defined exactly once — in `TECHNICAL-REQUIREMENTS.md` (technical\n"
@@ -1369,9 +1390,9 @@ def render_index(rows: list[dict]) -> str:
         "[../00-governance/REQUIREMENTS-METHOD.md](../00-governance/REQUIREMENTS-METHOD.md) section 3.\n"
     )
     out.append(
-        "\n**Status vocabulary.** `Baseline` = defined, internally consistent and traceable,\n"
-        "awaiting the owner's approval of the baseline as a whole (it is `Approved` minus the\n"
-        "sign-off). `Scheduled` = assigned to a milestone. `Implemented` = code exists.\n"
+        "\n**Status vocabulary.** `Baseline` = part of the approved requirement baseline; no\n"
+        "implementation status is claimed. `Scheduled` = assigned to a milestone.\n"
+        "`Implemented` = code exists.\n"
         "`Verified` = evidence recorded.\n"
     )
     out.append(
@@ -1422,6 +1443,12 @@ def render_index(rows: list[dict]) -> str:
         "A requirement is only *planned* when it has all of: an ID, a definition, a priority,\n"
         "an owning feature, a milestone and a verification method. A requirement missing any\n"
         "of these stays `Draft` and is not part of the baseline.\n"
+    )
+    out.append(
+        "\n## Revision history\n\n"
+        "| Version/date | Change |\n"
+        "| --- | --- |\n"
+        "| 1.1 / 2026-11-18 | Owner direction DEC-077 revises UX-008 and UX-017 for app-owned text scaling through 200% and reflow without clipping; the v1.0 baseline is preserved in `docs/99-archive/2026-11-18-larger-text-accessibility/`. |\n"
     )
     return "\n".join(out)
 

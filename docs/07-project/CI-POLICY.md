@@ -1,6 +1,9 @@
 # Continuous integration policy — PhairDLNA
 
-Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Lead / QA
+Status: **In Review (v1.1 proposed, 2026-11-19)** · Owner role: Lead / QA
+Version/date: 1.1 / 2026-11-19
+Purpose: Set the permitted triggers, runners and gate coverage for repository CI.
+Supersedes the approved v1.0 snapshot in `../99-archive/2026-11-19-ci-policy-v1.0/`.
 
 ---
 
@@ -24,14 +27,16 @@ is read and recorded.
 
 | Workflow | Trigger | Purpose |
 | --- | --- | --- |
-| `ci.yml` | `workflow_dispatch` | The full gate set on one platform |
+| `ci.yml` | `workflow_dispatch` | The full gate set on a self-hosted Linux x64 runner |
 | `ci-matrix.yml` | `workflow_dispatch` | The build and test set on macOS, Linux and Windows |
 
-Both workflows are **real and complete**: `ci.yml` runs the gate set — formatting,
+Both workflows are **manual and self-hosted**: `ci.yml` routes to Linux x64 and runs the gate set — formatting,
 lints, no unsafe, build, tests, doctests, licences, advisories, bans and sources,
 the link check, the file-size check, the crate-boundary check and the requirement
-views — and `ci-matrix.yml` builds and tests on macOS, Linux and Windows plus the
-minimum supported Rust version.
+views. `ci-matrix.yml` routes each build to a self-hosted runner matching its OS and
+architecture labels (macOS arm64/x64, Linux x64 and Windows x64), then tests the
+minimum supported Rust version on Linux x64. A matrix leg only runs when that local
+runner is registered and online; no GitHub-hosted fallback exists.
 
 The auxiliary tools are installed as **prebuilt binaries**, not compiled from source:
 building `cargo-deny` and `cargo-audit` from source takes longer than the rest of
@@ -49,9 +54,9 @@ The scripts the workflows call are `scripts/check-file-size.sh` (QG-13),
 ## 3. Rules for a workflow
 
 1. **`workflow_dispatch` only.** No `push`, no `pull_request`, no `schedule`.
-2. **Pinned actions.** Every action is pinned to an exact release tag, and moves to
-   a commit SHA as the project grows. *(In progress: the actions currently use
-   release tags, not digests.)*
+2. **Pinned actions.** Actions are pinned to an exact release tag or full commit SHA.
+   Third-party actions should use a full commit SHA; the Rust toolchain installer is
+   pinned to `683b588c487a69d01f6c6ddf40f036ff682cc2c8`.
 3. **Pinned toolchain.** The `stable` channel is selected in `rust-toolchain.toml`,
    and the build matrix additionally tests the minimum supported version from
    `Cargo.toml` (`rust-version`).
@@ -69,15 +74,16 @@ The scripts the workflows call are `scripts/check-file-size.sh` (QG-13),
 The full list is in `../05-quality/QUALITY-GATES.md`. A `ci.yml` run covers:
 
 `QG-01` formatting · `QG-02` lints · `QG-03` no unsafe · `QG-04` build ·
-`QG-05` unit tests · `QG-07` doctests · `QG-08` licences · `QG-09` advisories ·
-`QG-10` bans and sources · `QG-11` link check · `QG-13` file size ·
-`QG-28` crate boundaries · the requirement views are current.
+`QG-05` unit tests · `QG-06` integration tests · `QG-07` doctests ·
+`QG-08` licences · `QG-09` advisories ·
+`QG-10` bans and sources · `QG-11` documentation-reference check · `QG-13` file size ·
+`QG-14` complexity · `QG-28` crate boundaries · the requirement views are current.
 
-The remaining gates — `QG-06` integration tests, `QG-12` spelling, `QG-14`
-complexity, `QG-15` binary size, `QG-16` snapshots, `QG-17` DIDL-Lite conformance,
+The remaining gates — `QG-12` spelling, `QG-15` binary size, `QG-16` snapshots,
+`QG-17` DIDL-Lite conformance,
 `QG-18` property tests, `QG-19` fuzz smoke, `QG-20` Miri, `QG-21` benchmarks,
 `QG-22` soak, `QG-23` device matrix, `QG-24` semver, `QG-25` outdated,
-`QG-26` coverage, `QG-27` mutation testing and `QG-28` crate boundaries — arrive
+`QG-26` coverage and `QG-27` mutation testing — arrive
 with the code they guard. **A gate that is not in the workflow is not run, and a
 gate that is not run is never reported as a pass.** The canonical list with the
 state of each is in `../05-quality/QUALITY-GATES.md`.
@@ -106,3 +112,9 @@ that "CI is green", the run list and the runner list must both be checked.
 4. The owner has approved the change.
 
 Until then, manual only — without exception.
+
+## Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 1.1 / 2026-11-19 | Records self-hosted workflow routing, current gate coverage and QG-11's documentation-reference check; independent review remains pending. |

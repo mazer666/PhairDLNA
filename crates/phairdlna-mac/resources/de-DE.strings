@@ -5,21 +5,21 @@
 # The state of the server, and the title of the first group of the menu.
 menu.status.header = PhairDLNA
 menu.status.badge = DLNA
+menu.status.checking = Serverstatus wird geprüft …
 menu.status.running = Server läuft — {streams} aktive Streams
 menu.status.scanning = Medienbibliothek wird durchsucht…
 menu.status.stopped = Server angehalten
-menu.status.refused = Server verweigert die Verbindung
+menu.status.refused = Die App kann nicht auf den Server zugreifen
+menu.status.server_controls_unavailable = Zum Starten oder Beenden des Servers wende dich an die Person, die PhairDLNA eingerichtet hat.
 
 # The shared folders and the streams that run.
 menu.status.no_roots = Kein Medienordner freigegeben
-menu.status.root = {name} — {objects} Objekte
+menu.status.roots_checking = Medienordner werden geladen …
+menu.status.root = {name} — {objects} Einträge
 menu.status.root_missing = {name} ist nicht verfügbar
 menu.status.transfer = {client} spielt {title}
 
 # The entries of the menu.
-menu.action.open_admin = Server-Fenster öffnen
-menu.action.start_server = Server starten
-menu.action.stop_server = Server anhalten
 menu.action.open_folders = Medienordner im Finder anzeigen
 menu.action.add_folders = Medienordner hinzufügen…
 menu.action.rescan = Medienbibliothek neu einlesen
@@ -28,85 +28,47 @@ menu.action.export_diagnostics = Diagnosebericht exportieren…
 menu.action.quit = PhairDLNA beenden
 
 # Tooltips of menu actions.
-menu.tooltip.start_server = Startet den PhairDLNA-Hintergrunddienst
-menu.tooltip.stop_server = Hält den PhairDLNA-Hintergrunddienst an
 menu.tooltip.open_folders = Öffnet die freigegebenen Verzeichnisse im Finder
-menu.tooltip.add_folders = Öffnet den Dateidialog zum Hinzufügen neuer Ordner
+menu.tooltip.add_folders = Bitte wende dich an die Person, die PhairDLNA eingerichtet hat, um Ordner hinzuzufügen.
 menu.tooltip.rescan = Durchsucht alle Medienordner nach neuen und geänderten Dateien
 menu.tooltip.preferences = Öffnet die Einstellungen und Konfiguration
-menu.tooltip.export_diagnostics = Erstellt einen Support-Diagnosebericht im Browser
+menu.tooltip.export_diagnostics = Speichert einen bereinigten Diagnosebericht
 menu.tooltip.quit = Beendet die Menüleisten-Applikation
 
 # The name the screen reader reads, and the value it reads per state.
 menu.accessibility.label = PhairDLNA Serverstatus
+menu.accessibility.checking = Die Anwendung prüft den Serverstatus
 menu.accessibility.running = Der Server läuft und überträgt {streams} aktive Streams
 menu.accessibility.scanning = Der Server liest die Medienbibliothek ein
 menu.accessibility.stopped = Der Server ist angehalten
-menu.accessibility.refused = Der Server lehnt die Anfragen der Anwendung ab
+menu.accessibility.refused = Die App kann nicht auf den Server zugreifen
 
 # The messages after a scan of the library.
-notice.rescan_done = Medienbibliothek aktualisiert — {objects} Objekte gefunden
-notice.rescan_failed = Medienbibliothek konnte nicht eingelesen werden: {reason}
-notice.folders_updated = Medienordner aktualisiert
-panel.select_folders = Medienordner auswählen
-panel.folders_error = Medienordner konnten nicht hinzugefügt werden
-wizard.title = PhairDLNA Einrichtungs-Assistent
-wizard.message = Willkommen bei PhairDLNA! Um Filme, Musik und Fotos auf Smart-TVs und DLNA-Geräte im Heimnetzwerk zu übertragen, wählen Sie bitte Ihre Medienordner aus.
-wizard.button_choose = Medienordner auswählen…
-wizard.button_later = Später einrichten
+notice.rescan_done = Medienbibliothek aktualisiert — {objects} Einträge gefunden
 prefs.title = PhairDLNA Einstellungen
 prefs.tab_general = Allgemein
-prefs.tab_advanced = Erweiterte Einstellungen
-prefs.tab_ultra = Roh-Editor (config.toml)
 prefs.tab_expert = Experten-Konfiguration
 prefs.server_name = Servername:
 prefs.http_port = HTTP-Port:
-prefs.ssdp_port = SSDP-Port:
-prefs.log_level = Protokoll-Level:
-prefs.discovery_enabled = SSDP-Geräteerkennung im Netzwerk aktivieren
-prefs.extract_artwork = Albumcover und Bilder automatisch extrahieren
-prefs.redact_logs = Private Pfade und IP-Adressen in Logs anonymisieren
-prefs.save = Konfiguration speichern
-prefs.save_success = Konfiguration erfolgreich gespeichert!
-prefs.save_failed = Fehler beim Speichern der Konfiguration: {reason}
-prefs.add_folder = Medienordner hinzufügen…
-prefs.remove_folder = Markierten Ordner entfernen
 prefs.roots_header = Freigegebene Ordner:
-prefs.summary = Medienordner und DLNA-Serverkonfiguration verwalten.
-prefs.button_add = Medienordner hinzufügen…
-prefs.button_file = Konfigurationsdatei bearbeiten
-prefs.button_done = Fertig
-notice.server_started = Server erfolgreich gestartet
-notice.server_stopped = Server angehalten
-notice.server_control_failed = Server-Aktion fehlgeschlagen: {reason}
-tooltip.server_name = Der angezeigte Name dieses DLNA-Servers auf Smart-TVs und Abspielgeräten
-tooltip.http_port = Der lokale TCP-Port für Medien-Streaming (Standard: 8200)
-tooltip.ssdp_port = Der UDP-Port für DLNA-Suchanfragen (Standard: 1900)
-tooltip.log_level = Detailtiefe der Serverprotokollierung (info, debug, warn, error)
-tooltip.discovery = Ermöglicht Smart-TVs und Geräten, den Server automatisch im WLAN/LAN zu finden
-tooltip.artwork = Liest Cover-Bilder aus Audio- und Videodateien für schöne Menüs aus
-tooltip.redact = Ersetzt Dateipfade in Logs durch Platzhalter zum Schutz der Privatsphäre
-tooltip.add_folder = Öffnet die Dateiauswahl, um einen Medienordner hinzuzufügen
-tooltip.remove_folder = Entfernt das markierte Verzeichnis aus den Freigaben
-tooltip.roots_list = Liste der aktuell für DLNA freigegebenen Verzeichnisse
-tooltip.editor = Direkter Editor für die Konfigurationsdatei config.toml (Ultra-Experten-Modus)
-tooltip.save = Überprüft und speichert alle Einstellungen in config.toml
+notice.folder_changes_unavailable = Ordner lassen sich in der App noch nicht hinzufügen. Bitte wende dich an die Person, die PhairDLNA eingerichtet hat.
 
 # The messages of a failure.
-error.surface_unreachable = Der Server ist nicht erreichbar: {reason}. Starte den Server über die Befehlszeile.
-error.surface_unreadable = Der Server kann nicht gelesen werden: {reason}. Bitte gleich noch einmal versuchen.
-error.answer_invalid = Die Antwort des Servers ist ungültig: {reason}.
-error.answer_unexpected = Die Antwort des Servers entspricht nicht den Erwartungen.
-error.token_refused = Das Installationstoken wurde abgewiesen. Bitte Tokendatei prüfen.
-error.request_refused = Der Server hat die Anfrage abgewiesen: {status}.
-error.token_unreadable = Das Installationstoken kann nicht gelesen werden. Bitte Tokendatei prüfen.
-error.server_not_started = Der Server wurde noch nie gestartet. Bitte über das Terminal starten.
+error.surface_unreachable = PhairDLNA konnte keine Verbindung zum Server herstellen. Prüfe, ob der Server läuft, und versuche es erneut.
+error.surface_unreadable = PhairDLNA konnte den Serverstatus nicht lesen. Versuche es gleich noch einmal.
+error.answer_invalid = Der Server hat eine Antwort gesendet, die die App nicht lesen kann. Versuche es erneut. Falls der Fehler bleibt, prüfe die Servereinrichtung.
+error.answer_unexpected = PhairDLNA hat eine unerwartete Antwort vom Server erhalten. Versuche es erneut. Wenn das weiterhin passiert, prüfe die Servereinrichtung.
+error.token_refused = PhairDLNA konnte die Verbindung zum Server nicht bestätigen. Prüfe die Servereinrichtung und versuche es erneut.
+error.request_refused = Der Server konnte diese Anfrage nicht abschließen. Prüfe, ob er läuft, und versuche es erneut.
+error.token_unreadable = PhairDLNA konnte die gespeicherten Verbindungsdaten nicht lesen. Starte den Server neu oder prüfe die Einrichtung.
+error.server_not_started = Der Server läuft noch nicht. Bitte frage die Person, die PhairDLNA eingerichtet hat, wie du ihn startest, und versuche es erneut.
 error.busy = Der Server ist ausgelastet; bitte in einem Moment erneut versuchen.
 error.scan_silent = Bibliothek wurde nicht aktualisiert: Der Server antwortete nicht.
-error.cannot_open = Das System konnte das Objekt nicht öffnen.
-error.configuration_unreadable = Die Konfiguration kann nicht gelesen werden: {reason}
-error.worker_not_started = Der Hintergrunddienst konnte nicht gestartet werden: {reason}.
-error.preference_failed = Die Einstellung konnte nicht gespeichert werden: {reason}.
+error.cannot_open = PhairDLNA konnte dieses Element nicht öffnen. Prüfe, ob es noch verfügbar ist, und versuche es erneut.
+error.configuration_unreadable = PhairDLNA kann die Einstellungen nicht lesen. Die Datei fehlt möglicherweise oder ist ungültig. Diese App kann die erste Einstellungsdatei noch nicht selbst anlegen. Wenn die Einstellungsdatei fehlt und das Kommandozeilenwerkzeug verfügbar ist, führe im Terminal „phairdlna-cli setup“ aus. Wenn die Datei bereits vorhanden ist, bitte die Person um Hilfe, die PhairDLNA eingerichtet hat, damit sie die Datei lesbar und gültig macht. Öffne danach die App erneut.
+error.worker_not_started = PhairDLNA konnte die Hintergrundverbindung nicht starten. Starte die App neu und versuche es erneut.
+error.preference_failed = PhairDLNA konnte diese App-Einstellung nicht speichern. Die Änderung gilt bis zum Schließen der App. Prüfe, ob die App ihre Einstellungen speichern darf, und versuche es erneut.
+error.diagnostics_save_failed = PhairDLNA konnte den Diagnosebericht dort nicht speichern. Prüfe, ob du an diesem Ort schreiben darfst, wähle einen anderen Ort und versuche es erneut.
 
 # The detail of the server, in the detailed view.
 menu.status.objects = {objects} Objekte im Katalog
@@ -123,11 +85,13 @@ cli.help.equivalent = Jede Aktion dieser Anwendung hat einen Befehl in phairdlna
 cli.error.unknown_option = Unbekannte Option: {option}
 cli.error.missing_value = Option {option} erfordert einen Wert
 cli.error.bad_port = Port {value} ist keine gültige Zahl zwischen 1 und 65535
-cli.error.no_menu_bar = Keine macOS-Menüleiste verfügbar: {reason}
+cli.error.no_menu_bar = PhairDLNA konnte das Symbol nicht zur Menüleiste hinzufügen. Starte die App neu. Wenn das Problem bleibt, prüfe die macOS-Einstellungen.
 cli.error.not_main_thread = Die Anwendung wurde nicht auf dem Haupt-Thread gestartet
 cli.error.not_macos = Diese Anwendung erfordert macOS
 
 panel.save_diagnostics = Diagnosebericht speichern
+panel.diagnostics_saved = Der Diagnosebericht wurde gespeichert.
+panel.diagnostics_error = Diagnosebericht konnte nicht gespeichert werden
 prefs.tab_about = Über
 prefs.about_title = PhairDLNA für macOS
 prefs.about_version = Version: {version}
@@ -135,4 +99,53 @@ prefs.about_license = Lizenz: AGPL-3.0-or-later (Open Source & Datenschutz)
 prefs.about_desc = Privatsphäre-orientierter DLNA/UPnP Medienserver für macOS und lokales Streaming.
 prefs.about_repo = GitHub Repository: {url}
 
-prefs.roots_edit_hint = Tipp: Pfade direkt bearbeiten, neue Zeile hinzufügen oder löschen
+overview.title = PhairDLNA
+overview.heading = Dein Medienserver
+overview.accessibility.status = Serverstatus
+overview.accessibility.library = Inhalt der Mediathek
+overview.accessibility.folders = Geteilte Ordner
+overview.accessibility.connection = Hilfe zur Verbindung mit dem Fernseher
+overview.accessibility.activity = Aktuelle Aktivität
+overview.accessibility.notice = Hinweis
+overview.state.checking = Serverstatus wird geprüft …
+overview.state.running = Server läuft
+overview.state.scanning = Bibliothek wird eingelesen …
+overview.state.stopped = Server läuft nicht
+overview.state.refused = Die App kann nicht auf den Server zugreifen
+overview.library_count = {count} Medien in deiner Bibliothek
+overview.library_checking = Bibliotheksdaten werden geladen …
+overview.library_unavailable = Die Medienbibliothek wird angezeigt, sobald die App wieder mit dem Server verbunden ist.
+overview.folders = Geteilte Ordner
+overview.folders_checking = Freigegebene Ordner werden geladen …
+overview.folders_unavailable = Ordnerdetails erscheinen, sobald die App wieder mit dem Server verbunden ist.
+overview.activity_title = Aktuelle Aktivität
+overview.activity_checking = Aktivität wird geladen …
+overview.activity_unavailable = Aktivität wird angezeigt, sobald die App wieder mit dem Server verbunden ist.
+overview.activity_scanning = Deine Medienbibliothek wird eingelesen …
+overview.activity_empty = Gerade wird nichts wiedergegeben.
+overview.activity_transfer = {client} spielt {title}
+overview.activity_more = und {count} weitere Wiedergaben …
+overview.activity_stream_count = {count} aktive Wiedergaben
+overview.add_folders = Ordner hinzufügen …
+overview.folder_setup_unavailable = Ordner lassen sich in der App noch nicht einrichten
+overview.read_only = Deine Medien werden nur gelesen und nicht verändert.
+overview.connection_title = Fernseher verbinden
+overview.connection_checking = Verbindungsinformationen werden geladen …
+overview.connection_help = Öffne am Fernseher die Medienquellen und suche nach {name}. Falls der Server nicht erscheint, prüfe Netzwerk und Geräteerkennung. Netzwerkadresse: {address}
+overview.connection_local_only = Suche am Fernseher unter Medienquellen nach {name}. Falls er fehlt, prüfe Netzwerk und Geräteerkennung; der Server meldet keine Netzwerkadresse.
+overview.connection_unavailable = Der Servername für den Fernseher fehlt. Prüfe die Servereinrichtung und versuche es erneut.
+overview.connection_discovery_unavailable = {name} wird derzeit nicht per TV-Erkennung angekündigt. Netzwerkadresse: {address}
+overview.connection_discovery_unknown = Suche am Fernseher unter Medienquellen nach {name}. Falls er nicht erscheint, prüfe die Erkennungseinstellung. Netzwerkadresse: {address}
+overview.no_folders = Noch keine Medienordner freigegeben.
+
+menu.text_size = Textgröße: {size}
+menu.text_size_100 = Textgröße 100 %
+menu.text_size_150 = Textgröße 150 %
+menu.text_size_200 = Textgröße 200 %
+prefs.text_size = Textgröße
+
+prefs.roots_read_only = Ordner und Konfiguration werden hier nur angezeigt.
+
+prefs.read_only_notice = Die Serverkonfiguration ist derzeit schreibgeschützt.
+prefs.config_unavailable = Konfiguration nicht verfügbar. Prüfe Datei und Berechtigungen.
+prefs.value_unavailable = Nicht verfügbar

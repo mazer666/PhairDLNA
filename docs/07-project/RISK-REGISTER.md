@@ -1,7 +1,8 @@
 # Risk register — PhairDLNA
 
-Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Lead / Project Manager
+Status: **Approved baseline v1.0 (2026-11-14); current register v1.4 (2026-11-18)** · Owner role: Lead / Project Manager
 Review: at every milestone review, and whenever a risk changes state.
+Revision history: v1.1 adds R-14 for the unverified macOS service-to-folder access boundary; v1.2 adds R-15 for app-side configuration writes and activation drift; v1.3 adds R-16 for larger-text accessibility and layout clipping; v1.4 updates R-16 mitigation for owner direction DEC-077; v1.5 records the responsive text layout and the remaining rendered-app verification; v1.6 records read-only preferences and visible configuration-load failures; v1.7 records first-run persistence error handling and restart messaging. The approved v1.0 baseline is preserved in `../99-archive/2026-11-18-risk-register-baseline/`.
 
 Scoring: **Likelihood** and **Impact** are each Low / Medium / High. The rating is the
 product of the two. A High risk must have a named mitigation and an owner before the
@@ -40,10 +41,10 @@ milestone it affects can start.
 | Likelihood | Medium |
 | Impact | High |
 | Rating | **High** |
-| Mitigation | The always-on server runs as a launchd **daemon**, which the operating system exempts from the local-network prompt, while the user interface runs as an agent (`PLT-013`). The first-run output states which model is in use |
+| Mitigation | PLT-013 currently requires a system-context launchd daemon, but its effective identity and behavior must be established with OD-15 while satisfying OPS-015/PLT-018. Verify Local Network behavior for the selected process model on macOS 15+ and make the app explain any required permission step |
 | Owner | Architect |
 | Detection | The first macOS device test on macOS 15 or later |
-| Residual | The exemption's exact behaviour is documented by Apple but must be verified on a real machine |
+| Residual | The applicable exemption depends on the actual process/service configuration; no real-Mac verification is recorded |
 
 ## R-04 — The Unicode and case-sensitivity model is wrong on an exotic volume
 
@@ -164,6 +165,42 @@ milestone it affects can start.
 | Owner | Owner |
 | Detection | — |
 | Residual | None within the current mandate |
+
+## R-14 — Selected-folder access across the macOS service process boundary is unverified
+
+| | |
+| --- | --- |
+| Likelihood | Medium (unverified) |
+| Impact | High |
+| Rating | **High** |
+| Mitigation | Keep service lifecycle implementation gated by OD-15. On a real Mac, verify access to a selected protected folder, denial for an unselected sibling, and effective revocation; have Security and Platform review the result before choosing the process model |
+| Owner | Security Engineer / Platform Specialist |
+| Detection | The real-Mac experiment in `qa/macos-service-access-protocol.md` and independent security review |
+| Residual | Apple documents scoped bookmarks for App Sandbox processes and per-process access, but not transfer of the unsandboxed UI's consent to a separate service process. A per-user service changes the approved availability and privacy model |
+
+## R-15 — Native app configuration writes bypass the API and may not reach the running server
+
+| | |
+| --- | --- |
+| Likelihood | Low (the direct-write path was removed on 2026-11-19) |
+| Impact | High |
+| Rating | **High** |
+| Mitigation | Keep folder/settings changes disabled until OD-14/OD-15/OD-16 select and review an authenticated update, persistence and activation path. Do not claim a setting is active before the server confirms it |
+| Owner | Architect / Security Engineer |
+| Detection | OD-16 option review; for A/B, API failure/recovery criteria for invalid, concurrent and interrupted updates; for C, verification that app settings are read-only and make no file writes |
+| Residual | Direct writes and LaunchAgent service commands are removed and regression-tested. First-run folder setup and server lifecycle are unavailable in the app pending owner decisions; UX-002/UX-019 remain incomplete. Preferences are read-only; ADR-0004 currently rejects runtime reload |
+
+## R-16 — The native app clips content at larger text sizes
+
+| | |
+| --- | --- |
+| Likelihood | High (fixed font sizes, fixed frames and line caps observed) |
+| Impact | High (accessibility and ordinary-user comprehension) |
+| Rating | **High** |
+| Mitigation | Implement DEC-077's app-level size control with reflow, no hidden actions or content, and manual checks at 100%, 150% and 200% across supported locales; do not claim Dynamic Type on macOS |
+| Owner | Product Owner / Accessibility reviewer |
+| Detection | Mac usability and accessibility protocol at multiple text sizes and locales, including long unbroken folder/media names and wide Unicode text |
+| Residual | Responsive text reflow and conservative line-height estimation are implemented, but no rendered-app verification has been recorded; clipping risk remains unquantified |
 
 ---
 

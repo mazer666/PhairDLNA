@@ -25,6 +25,7 @@ use crate::model::ServerState;
 /// rest of the system.
 fn symbol_of(state: &ServerState) -> &'static str {
     match state {
+        ServerState::Checking => "hourglass",
         ServerState::Running => "antenna.radiowaves.left.and.right",
         ServerState::Scanning => "arrow.triangle.2.circlepath",
         ServerState::Stopped => "antenna.radiowaves.left.and.right.slash",
@@ -35,15 +36,16 @@ fn symbol_of(state: &ServerState) -> &'static str {
 /// The name of the system symbol of a menu action.
 fn action_symbol_of(action: &MenuAction) -> &'static str {
     match action {
-        MenuAction::OpenAdmin => "safari",
+        MenuAction::OpenAdmin => "macwindow",
         MenuAction::OpenMediaFolders => "folder",
         MenuAction::RescanLibrary => "arrow.clockwise",
         MenuAction::OpenPreferences => "gearshape",
         MenuAction::AddMediaFolders => "folder.badge.plus",
         MenuAction::ExportDiagnostics => "square.and.arrow.up",
         MenuAction::TogglePresentation => "slider.horizontal.3",
-        MenuAction::StartServer => "play.fill",
-        MenuAction::StopServer => "stop.fill",
+        MenuAction::TextSize100 | MenuAction::TextSize150 | MenuAction::TextSize200 => {
+            "textformat.size"
+        }
         MenuAction::Quit => "power",
     }
 }

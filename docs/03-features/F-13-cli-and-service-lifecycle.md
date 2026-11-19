@@ -2,7 +2,9 @@
 
 Status: Draft
 Owner role: Product/Requirements
-Version/date: 0.1 / 2026-11-14
+Version/date: 1.7 / 2026-11-19
+Purpose: Specify the headless CLI and the service lifecycle across supported platforms.
+References: `../00-governance/PROJECT-STANDARDS.md`, `../09-research/platform-integration.md`, `../07-project/OPEN-DECISIONS.md` (OD-14, OD-15), `F-15`.
 Requirements: OPS-001, OPS-002, OPS-003, OPS-004, OPS-005, OPS-006, OPS-007, OPS-008,
 Claim tags: `[SPEC]` from a specification · `[OBSERVED]` documented real-world behaviour · `[DESIGN]` our own decision · `[OPEN]` unresolved (see `docs/09-research/`).
 Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12` points at that file and section.
@@ -11,10 +13,11 @@ LIFE-003, LIFE-004, LIFE-005, LIFE-006, LIFE-007, LIFE-008, LIFE-009, LIFE-011
 
 ## 1. Purpose and user story
 
-PhairDLNA is a server, and a server is something you start, watch and stop. The
-**command line** is its primary interface: the product must be complete and usable
-without any graphical application being present or running (PRD-006, UX-001). The
-**menu-bar application** on macOS is a convenience, not a prerequisite.
+PhairDLNA is a server, and a server is something you start, watch and stop. On macOS,
+the **native application** is the primary graphical setup and administration experience
+(F-15, DEC-075/076). The **command line** is the complete headless interface: the product
+must remain usable without any graphical application being present or running (PRD-006,
+UX-001). Other platforms and automated installations can use the CLI directly.
 
 Everything a user needs must therefore exist as a command:
 
@@ -63,8 +66,9 @@ system service, so that my television can find it after a reboot without me logg
 - The AGPL **source offer** — the route that serves the running build's source and the
   exact source revision (OPS-016, OPS-017) — which F-14 owns. This feature only prints
   the route's location in the diagnostic report and the revision in `--version`.
-- The macOS menu-bar application (F-15), which runs as a `launchd` **agent** beside the
-  daemon (PLT-013).
+- The native macOS app (F-15), which is a regular Dock application with a main window
+  and menu-bar status item (DEC-076). Whether and how it is launched alongside the
+  server remains open under OD-15; it is not specified as a LaunchAgent here.
 - Packaging and installation (F-16); the configuration schema itself (F-12).
 - The transcoder's command surface (F-17).
 
@@ -127,13 +131,12 @@ catalogue task flushes the index; the process exits with code 0. A second signal
 abandons the drain and exits at once. *The budget is raised in §12.*
 
 **OPS-009** — The server shall support running as a background service on macOS
-(launchd), Linux (systemd user service) and Windows (service). [DESIGN] macOS: the
-always-on server is a `launchd` **daemon** (`/Library/LaunchDaemons`), because the
-local-network permission exempts daemons but not agents (PLT-013, platform §1.2, §4.2);
-the user interface is a `launchd` **agent** in the user's session (F-15). The job file
-uses `KeepAlive`, sets `StandardOutPath` and `StandardErrorPath` for the logs, and
-`ProcessType: Background` so that the indexer does not compete with the user's work
-(platform §4.2). Linux: a `systemd` unit with `Type=notify`; the daemon calls
+(launchd), Linux (systemd user service) and Windows (service). [OPEN] On macOS, the
+service process model and its relationship to the native app remain gated by OD-15.
+The approved UI is a regular Dock application with a main window and menu-bar status
+item (DEC-076); the requirement baseline's separate LaunchAgent claim in PLT-013 is
+unresolved and must not be treated as an implementation decision. Linux: a `systemd`
+unit with `Type=notify`; the daemon calls
 `sd_notify(READY=1)` once the listeners are up, so that `systemctl start` returns only
 when the server can actually answer (platform §8.1). Windows: a service that follows
 the Service Control Manager interface (platform §9.1). *The unit scope — user or system
@@ -175,9 +178,12 @@ in §12.*
 user's own directories. [DESIGN] The foreground daemon and the per-user service instance
 run as the invoking user and open no privileged port. On macOS the always-on daemon
 runs in a system context so that it is available at boot and exempt from the
-local-network prompt — but root does **not** bypass the macOS privacy prompts for
-protected folders, so folder access is granted through the user agent (platform §5.4,
-PLT-017, PLT-018). *How the two reconcile on macOS is raised in §12.*
+local-network prompt. The selected-folder access model is unresolved: Apple documents
+scoped bookmarks for App Sandbox access and per-process activation, but does not establish
+that consent from this UI process can be transferred to a separate service process
+(platform §5.4, PLT-017, PLT-018, OD-15). Do not claim the macOS folder-access flow
+or service lifecycle complete until the required real-Mac experiment and review pass
+(`qa/macos-service-access-protocol.md`).
 
 ## 4. Technical requirements
 
@@ -310,9 +316,10 @@ qa-performance §2.
 
 ## 6. Usability and accessibility
 
-- The command line is the product's primary interface; every capability of the product
-  must be reachable from it (PRD-006, UX-001). A capability that only exists in the
-  macOS application is a defect.
+- The command line is the complete headless interface; every server capability needed
+  for setup, operation and recovery must be reachable without a graphical application
+  (PRD-006, UX-001). On macOS, the native application remains the primary graphical
+  experience; its user journeys are specified in F-15.
 - [UX-006] Every sub-command has its own `--help`, and every error message states what
   happened, why and what to do next (UX-004).
 - [UX-013] The long-running commands — `serve` and `scan` — report progress and can be
@@ -441,11 +448,13 @@ Verification: automated CLI test · **State: implemented, not yet proven by a te
 (`crates/phairdlna-cli/src/serve/mod.rs::run`); the test that sends two signals is still planned. Planned location:
 `crates/phairdlna-cli/tests/cli_shutdown.rs`
 
-**AC-11** — *Given* the macOS `launchd` job files in the repository, *when* they are inspected, *then* the always-on
-server is a daemon (`/Library/LaunchDaemons`) and the user interface is an agent (`~/Library/LaunchAgents`),
-each starting the same binary with `KeepAlive` and a log path. Requirements: OPS-009, PLT-013 ·
-Verification: automated test over the shipped job files · Planned location:
-`crates/phairdlna-cli/tests/service_units.rs`
+**AC-11** — **BLOCKED / NOT RUN.** DEC-079 selects app-managed `SMAppService` registration
+and a per-user `LaunchAgent` as the preferred OD-15 experiment candidate. Do not revise
+PLT-013 or package a helper until the actual service proves identity, selected-folder access,
+sibling denial, revocation and Local Network behavior, followed by independent security
+review. Requirements: OPS-009, PLT-013 · Verification:
+inspect approved packaged service artifacts and perform the OD-15 real-Mac protocol ·
+Location: `qa/macos-service-access-protocol.md`
 
 **AC-12** — *Given* the Linux `systemd` unit in the repository, *when* it is inspected, *then* it declares
 `Type=notify`, and the daemon sends the readiness notification only after the listeners are up.
@@ -555,12 +564,13 @@ CLI test · Planned location: `crates/phairdlna-cli/tests/recovery_timeline.rs`
 | Description and diagnostic output | `crates/phairdlna-cli/tests/cli_diagnostics.rs` |
 | Two instances side by side | `crates/phairdlna-cli/tests/cli_instances.rs` |
 | Shipped service files | `crates/phairdlna-cli/tests/service_units.rs` |
-| Lifecycle states and transitions, crash recovery | `crates/phairdlna-cli/tests/service_lifecycle.rs` |
-| Sleep/wake, interface change, volume loss and recovery | `crates/phairdlna-core/tests/network_recovery.rs` |
-| Retry backoff and the advertisement rate | `crates/phairdlna-core/tests/retry_backoff.rs` |
+| Lifecycle state and transition primitives | `crates/phairdlna-core/tests/network_recovery.rs`, `crates/phairdlna-core/src/lifecycle/state.rs` | exists — checks the pure transition model; no daemon runtime or API integration |
+| Sleep/wake and interface recovery | `crates/phairdlna-core/tests/network_recovery.rs` | exists — simulations use test-local state changes and a mock network; no platform event adapter or serving-listener rebinding |
+| Generic retry backoff policy | `crates/phairdlna-core/tests/retry_backoff.rs` | exists — tests the generic policy; discovery and network rebinding do not use it for retries |
+| Service lifecycle integration and crash recovery | `crates/phairdlna-cli/tests/service_lifecycle.rs` | planned — file does not exist |
 | A transfer interrupted by a sleep or a network loss | `crates/phairdlna-core/tests/transfer_interruption.rs` |
-| Recovery-event timeline and its export | `crates/phairdlna-cli/tests/recovery_timeline.rs` |
-| Effective interface, address and listener state in the status output | `crates/phairdlna-cli/tests/cli_status.rs` |
+| Recovery-event timeline storage and runtime event source | `crates/phairdlna-cli/tests/recovery_timeline.rs` | exists — writes synthetic transitions; no production event source or export route |
+| Effective interface, address and lifecycle state in the status output | `crates/phairdlna-cli/tests/cli_status.rs` | planned — file does not exist; current `/api/status` has no lifecycle-state field |
 | Signal, exit-code and format unit tests | `crates/phairdlna-cli/src/main.rs`, `crates/phairdlna-cli/src/commands/` (inline `#[cfg(test)]` modules) |
 | Behaviour on a real service manager | `qa/device-matrix.toml` |
 | Behaviour across a real sleep/wake cycle and a real network change | `docs/05-quality/RESILIENCE-ACCEPTANCE-PLAN.md` (cases LIFE-A01 … LIFE-A04, all `NOT RUN`) |
@@ -572,11 +582,11 @@ it, sending the signal and asserting the order of the observable effects — the
 `ssdp:byebye` datagram, the closed transfer, the flushed index and the exit code. The
 shipped `launchd`, `systemd` and Windows service files are checked by a test that
 parses them, so that a broken unit file fails the build rather than the user's machine.
-The lifecycle and the recovery are exercised by driving the same interface the
-platform adapter implements with scripted events — a sleep, a removed interface, a lost
-volume — so that the recovery logic is testable without unplugging a cable; the real
-sleep/wake cycle and the real network change remain manual checks (the resilience
-acceptance plan, cases LIFE-A01 … LIFE-A04, all `NOT RUN`).
+The lifecycle tests currently exercise the core's pure state and storage primitives with
+synthetic transitions and mock network data. They do not drive an interface shared with a
+production platform adapter because that adapter and the daemon lifecycle integration do
+not yet exist. The real sleep/wake cycle and the real network change remain manual checks
+(the resilience acceptance plan, cases LIFE-A01 … LIFE-A04, all `NOT RUN`).
 
 **Dependencies.** F-01 (the SSDP headers the description command prints, and the
 `ssdp:byebye` of the shutdown), F-02 (the device description), F-09 (the catalogue
@@ -597,14 +607,13 @@ results are all `NOT RUN`.
    *Proposed reading:* the project ships both units — a system unit as the primary and a
    user unit as the alternative for people who do not want a system install — and both
    use `Type=notify`. *Closes when:* the owner fixes the primary distribution form.
-2. **[OPEN] The macOS daemon contradicts one research mitigation.** PLT-013 and the
-   platform research both put the always-on server in a system-context `launchd`
-   **daemon**, because the local-network permission exempts daemons but not agents
-   (platform §1.2, §4.2). The security research's mitigation M-07 says the opposite —
-   "ship a per-user LaunchAgent (never root, never a system daemon)". The baseline
-   requirement and the platform facts agree with each other, so this document follows
-   the baseline; the mitigation text needs correcting. *Closes when:* the owner
-   reconciles M-07 with PLT-013.
+2. **[OPEN, OD-15; experiment direction DEC-079] macOS service identity and privilege.** PLT-013 requires a system-context
+   daemon, while OPS-015 and PLT-018 prohibit elevated privilege for serving a user's
+   folders. DEC-079 directs the team to test a per-user `LaunchAgent` first, but does not
+   authorize a PLT-013 change or service packaging until the actual process proves selected
+   access, sibling denial, revocation and Local Network behavior, followed by independent
+   security review. *Closes when:* the experiment passes and the owner approves the PLT-013
+   revision.
 3. **[OPEN] How the commands reach a running daemon.** A separate `status` process and
    a background daemon have to talk. *Proposed reading:* a local, owner-only control
    channel in the instance's data directory, authenticated with the same bearer token as
@@ -623,11 +632,14 @@ results are all `NOT RUN`.
    values. *Proposed:* `0` success, `1` runtime failure, `2` configuration error, `3`
    nothing to do. *Closes when:* the owner fixes the numbers and they are published in
    the command reference.
-7. **[OPEN] Root on macOS and the privacy prompts.** The daemon runs as a daemon in a
-   system context, but root does not bypass the macOS privacy prompts for protected
-   folders (platform §5.4), and the research leaves open whether a root daemon can use
-   a security-scoped bookmark created by the user agent. *Closes when:* a device test
-   settles it; until then the design assumes the agent mediates folder access.
+7. **[OPEN, OD-15] macOS service privilege and selected-folder access.** Apple documents
+   security-scoped bookmarks for App Sandbox processes and access activation per
+   process. That evidence does not establish that the unsandboxed UI can grant its
+   selected-folder access to a separate service process; a configured path is not
+   an authorization grant. *Closes when:* a real-Mac experiment verifies a selected
+   protected folder, denial for an unselected sibling, and revocation, followed by
+   independent security review. If it fails, the owner must reconsider the process
+   model and `PLT-013` before lifecycle implementation.
 8. **[OPEN] The recovery backoff bounds.** LIFE-007 requires a bounded backoff with
    jitter and names no numbers. *Proposed reading:* the first retry waits 1 s, each
    further attempt doubles the delay up to a maximum of 60 s, and every attempt carries
@@ -635,3 +647,15 @@ results are all `NOT RUN`.
    interface comes back. The same numbers govern the rebinding attempts and the
    advertisement re-sends. *Closes when:* the owner fixes the numbers and they are
    published next to the state machine.
+
+### Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 1.7 / 2026-11-19 | Records DEC-079: app-managed service registration, with a per-user LaunchAgent as the preferred but evidence-gated candidate. |
+| 1.0 / 2026-11-18 | Reframes the macOS folder-access question using Apple evidence; removes the unsupported assumption that the UI agent mediates access for a separate service process and links the issue to OD-15. |
+| 1.1 / 2026-11-18 | Makes OD-15 reconcile PLT-013 with the no-elevation requirements OPS-015 and PLT-018; retains the per-user service only as a candidate pending verification. |
+| 1.2 / 2026-11-18 | Links the macOS folder-consent completion gate to the repeatable OD-15 experiment protocol. |
+| 1.3 / 2026-11-18 | Removes the unapproved LaunchAgent implementation claim and marks macOS service acceptance blocked pending OD-15 and reconciliation of PLT-013 with DEC-076. |
+| 1.5 / 2026-11-19 | Splits first-run setup into focused orchestration, prompt, configuration and test modules; updates the generated configuration and setup explanation to describe the native app's local connection accurately. |
+| 1.6 / 2026-11-19 | Aligns F-13 with the approved app-led product direction: the native app is the primary graphical macOS experience, while the CLI remains the complete headless interface. |

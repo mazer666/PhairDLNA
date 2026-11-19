@@ -10,7 +10,7 @@
 /// An action of the menu.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MenuAction {
-    /// Open the address of the administration surface in the browser.
+    /// Open the native server window.
     OpenAdmin,
     /// Open the media folders in the file manager.
     OpenMediaFolders,
@@ -18,16 +18,18 @@ pub enum MenuAction {
     RescanLibrary,
     /// Open the configuration file or dialog.
     OpenPreferences,
-    /// Add media folders via native folder picker.
+    /// Attempt to add media folders from the application.
     AddMediaFolders,
     /// Export the diagnostics report for support.
     ExportDiagnostics,
     /// Switch between the short view and the detailed view.
     TogglePresentation,
-    /// Start the background server.
-    StartServer,
-    /// Stop the background server.
-    StopServer,
+    /// Set the app text size to 100 percent.
+    TextSize100,
+    /// Set the app text size to 150 percent.
+    TextSize150,
+    /// Set the app text size to 200 percent.
+    TextSize200,
     /// Leave the application; the server keeps running.
     Quit,
 }
@@ -48,8 +50,9 @@ impl MenuAction {
             Self::TogglePresentation => 6,
             Self::ExportDiagnostics => 7,
             Self::AddMediaFolders => 8,
-            Self::StartServer => 9,
-            Self::StopServer => 10,
+            Self::TextSize100 => 11,
+            Self::TextSize150 => 12,
+            Self::TextSize200 => 13,
         }
     }
 
@@ -68,8 +71,9 @@ impl MenuAction {
             6 => Some(Self::TogglePresentation),
             7 => Some(Self::ExportDiagnostics),
             8 => Some(Self::AddMediaFolders),
-            9 => Some(Self::StartServer),
-            10 => Some(Self::StopServer),
+            11 => Some(Self::TextSize100),
+            12 => Some(Self::TextSize150),
+            13 => Some(Self::TextSize200),
             _ => None,
         }
     }
@@ -88,8 +92,9 @@ mod tests {
             MenuAction::RescanLibrary,
             MenuAction::OpenPreferences,
             MenuAction::AddMediaFolders,
-            MenuAction::StartServer,
-            MenuAction::StopServer,
+            MenuAction::TextSize100,
+            MenuAction::TextSize150,
+            MenuAction::TextSize200,
             MenuAction::Quit,
             MenuAction::TogglePresentation,
             MenuAction::ExportDiagnostics,
@@ -108,5 +113,7 @@ mod tests {
     fn an_unknown_number_is_nothing() {
         assert_eq!(MenuAction::from_tag(0), None);
         assert_eq!(MenuAction::from_tag(99), None);
+        assert_eq!(MenuAction::from_tag(9), None);
+        assert_eq!(MenuAction::from_tag(10), None);
     }
 }

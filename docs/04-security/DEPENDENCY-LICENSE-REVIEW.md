@@ -1,6 +1,9 @@
 # Dependency, licence and supply-chain review — PhairDLNA
 
-Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Security & Privacy Engineer
+Status: **In Review (v1.3 draft, 2026-11-19)** · Owner role: Security & Privacy Engineer
+Version/date: 1.3 / 2026-11-19
+Purpose: Record the licence, security and maintenance assessment of dependencies and candidates. The resolved graph inventory is being reconciled; this review is not yet complete.
+References: `../00-governance/PROJECT-STANDARDS.md`, `../05-quality/QUALITY-GATES.md`, `../07-project/STATUS.md`
 Requirements: `SUP-001` … `SUP-008`, `SEC-090` … `SEC-096`
 Gate: `../05-quality/QUALITY-GATES.md` (QG-08, QG-09, QG-10)
 Method: crates.io API (`https://crates.io/api/v1/crates/<name>`), retrieved 2026-11-14.
@@ -31,7 +34,12 @@ Method: crates.io API (`https://crates.io/api/v1/crates/<name>`), retrieved 2026
 
 ---
 
-## 2. Version and licence data (verified 2026-11-14)
+## 2. Candidate and direct-dependency review
+
+The metadata below was researched on 2026-11-14. A candidate verdict is not evidence
+that a crate is used. Direct and transitive membership is determined by the committed
+`Cargo.lock`; its current membership was checked on 2026-11-19. Rows marked **not
+adopted** are proposals only and are not part of the product's dependency graph.
 
 Download counts are crates.io totals and are shown only as a rough indicator of
 adoption, not as a quality judgement.
@@ -42,37 +50,37 @@ adoption, not as a quality judgement.
 | `hyper` | 1.12.0 | MIT | 1.63 | 1 129 663 767 | 2026-10-06 | **Adopt** — HTTP/1.1 server |
 | `axum` | 0.8.9 | MIT | 1.80 | 592 932 422 | 2026-04-14 | **Adopt** — routing, service layer |
 | `tower` | 0.5.3 | MIT | — | 841 258 187 | 2026-01-12 | **Adopt** — middleware |
-| `tower-http` | 0.7.1 | MIT | 1.65 | 621 132 531 | 2026-08-31 | **Evaluate** — tracing, timeouts; range support must be verified |
-| `quick-xml` | 0.42.0 | MIT | 1.86 | 548 849 079 | 2026-08-22 | **Adopt** — streaming XML; DTD/entity events surfaced to the caller |
+| `tower-http` | 0.7.1 | MIT | 1.65 | 621 132 531 | 2026-08-31 | **Adopted in current lock by DEC-078** — timeout feature is wired around handler futures; tracing integration and its privacy policy remain under review |
+| `quick-xml` | 0.42.0 | MIT | 1.86 | 548 849 079 | 2026-08-22 | **Adopted in current lock by DEC-078** — bounded event adapter; project retains DTD/entity policy, tree construction and resource bounds |
 | `roxmltree` | 0.21.2 | MIT OR Apache-2.0 | 1.60 | 106 279 045 | 2026-10-24 | **Alternative** — DOM; resolves DTD entities unless disabled |
 | `rusqlite` | 0.42.0 | MIT | 1.89 | 154 994 331 | 2026-11-11 | **Adopt** — SQLite, bundled, extensions off |
 | `sqlx` | 0.9.0 | MIT OR Apache-2.0 | 1.94 | 189 841 591 | 2026-05-01 | **Not adopted** — heavier, async-first; `rusqlite` is enough |
-| `symphonia` | 0.6.1 | **MPL-2.0** | 1.85 | 21 837 379 | 2026-08-13 | **Adopt with assessment** — pure-Rust audio decoding; MPL-2.0 is file-level copyleft |
-| `lofty` | 0.25.5 | MIT OR Apache-2.0 | 1.89 | 1 568 758 | 2026-10-25 | **Adopt** — audio tags, artwork |
-| `notify` | 9.0.0-rc.8 | CC0-1.0 | 1.91 | 198 269 121 | 2026-11-09 | **Adopt the stable 8.x line** — do not depend on a release candidate |
-| `ignore` | 0.4.34 | Unlicense OR MIT | 1.88 | 213 708 619 | 2026-10-27 | **Adopt** — gitignore-style filtering during scans |
+| `symphonia` | 0.6.1 | **MPL-2.0** | 1.85 | 21 837 379 | 2026-08-13 | **ADR-0008 target, not in current lock** — conditional MPL assessment is in §3; current M2.2 deviation is F-10 D-01 / ADR-0011 |
+| `lofty` | 0.25.5 | MIT OR Apache-2.0 | 1.89 | 1 568 758 | 2026-10-25 | **Not adopted** — audio-tag and artwork candidate; absent from the current lock |
+| `notify` | 9.0.0-rc.8 | CC0-1.0 | 1.91 | 198 269 121 | 2026-11-09 | **Not adopted** — a stable 8.x release was preferred over this release candidate; no `notify` crate is in the current lock |
+| `ignore` | 0.4.34 | Unlicense OR MIT | 1.88 | 213 708 619 | 2026-10-27 | **Not adopted** — candidate for gitignore-style filtering; absent from the current lock |
 | `thiserror` | 2.0.21 | MIT OR Apache-2.0 | 1.77 | — | 2026 | **Adopt** — the error types |
 | `tempfile` | 3.27.0 | MIT OR Apache-2.0 | 1.63 | 997 650 245 | 2026-03-11 | **Adopt** — temporary directories in tests (dev-dependency) |
-| `walkdir` | 2.5.0 | MIT | — | 774 949 224 | 2024-03-01 | **Adopt** — traversal primitive |
-| `clap` | 4.6.7 | MIT OR Apache-2.0 | 1.85 | 1 340 276 208 | 2026-09-14 | **Adopt** — CLI parsing |
+| `walkdir` | 2.5.0 | MIT | — | 774 949 224 | 2024-03-01 | **Not adopted** — candidate traversal primitive; absent from the current lock |
+| `clap` | 4.6.7 | MIT OR Apache-2.0 | 1.85 | 1 340 276 208 | 2026-09-14 | **Not adopted** — candidate CLI parser; absent from the current lock |
 | `serde` | 1.0.229 | MIT OR Apache-2.0 | 1.56 | 1 709 177 081 | 2026-07-18 | **Adopt** — serialisation |
-| `toml` | 1.2.1 | MIT OR Apache-2.0 | 1.85 | 1 141 698 378 | 2026-11-06 | **Adopt** — configuration format |
+| `toml` | 1.2.1+spec-1.1.0 | MIT OR Apache-2.0 | 1.85 | 1 141 698 378 | 2026-11-06 | **Adopt** — configuration format; exact lock version |
 | `unicode-normalization` | 0.1.26 | (MIT OR Apache-2.0) AND Unicode-3.0 | 1.36 | 683 092 567 | 2026-10-16 | **Adopt** — NFC normalisation of path components |
 | `unicase` | 2.10.0 | MIT OR Apache-2.0 | — | 492 183 614 | 2026-10-05 | **Adopt** — full Unicode case folding for the path identity |
-| `tracing` | 0.1.44 | MIT | 1.65 | 1 050 071 464 | 2025-12-18 | **Adopt** — structured logging |
+| `tracing` | 0.1.44 | MIT | 1.65 | 1 050 071 464 | 2025-12-18 | **Not adopted** — candidate structured-logging crate; absent from the current lock |
 | `uuid` | 1.29.2 | Apache-2.0 OR MIT | 1.89 | 992 221 000 | 2026-11-09 | **Adopt** — device UDN (v4) |
 | `blake3` | 1.8.7 | CC0-1.0 OR Apache-2.0 (LLVM exception) | — | 227 947 308 | 2026-08-20 | **Adopt** — the object id hash of the catalogue (M1.9, DEC-027); the `pure` feature keeps the build free of a C compiler |
-| `cpufeatures` | 0.2.17 | MIT OR Apache-2.0 | 1.60 | 302 118 751 | 2026-03-24 | **Adopt** — new with `blake3`; reads the CPU flags for the assembly backend |
+| `cpufeatures` | 0.3.1 | MIT OR Apache-2.0 | 1.85 | — | — | **Adopt** — resolved by the current `blake3` dependency; download and update metadata for this lock version not re-researched |
 | `muda` | 0.21.2 | Apache-2.0 OR MIT | 1.90 | 51 346 421 | 2026-10-08 | **Evaluate** — macOS menu bar |
 | `tray-icon` | 0.26.1 | MIT OR Apache-2.0 | 1.90 | 44 016 004 | 2026-10-07 | **Evaluate** — tray/status item |
 | `objc2` | 0.6.5 | MIT | 1.71 | 162 826 258 | 2026-10-05 | **Adopted (macOS only, M2.6)** — modern Objective-C bindings; the runtime of the classes that receive the actions of the menu (ADR-0013) |
-| `objc2-app-kit` | 0.3.2 | Zlib OR Apache-2.0 OR MIT | 1.71 | 89 033 565 | 2025-10-04 | **Adopted (macOS only, M2.6)** — `NSStatusItem`, `NSMenu`, `NSWorkspace` and the accessibility labels of the status item |
+| `objc2-app-kit` | 0.3.2 | Zlib OR Apache-2.0 OR MIT | 1.71 | 89 033 565 | 2025-10-04 | **Adopted (macOS only, M2.6)** — `NSStatusItem`, `NSMenu`, `NSWorkspace`, preferences panels and the primary `NSWindow` overview |
 | `objc2-foundation` | 0.3.2 | MIT | 1.71 | — | 2025-10-04 | **Adopted (macOS only, M2.6)** — the texts, the URLs and the timer of the application; new with M2.6 |
 | `mp4` | 0.14.0 | MIT | — | — | 2023-08-01 | **Not adopted** — unmaintained since 2023 |
 | `matroska` | 0.30.1 | MIT OR Apache-2.0 | — | — | 2026-04-15 | **Evaluate** — Matroska/WebM container parsing |
 | `image` | 0.25.10 | MIT OR Apache-2.0 | 1.88 | — | 2026-03-10 | **Adopt** — the thumbnail of a photo (M2.2, § 2.4); only the `jpeg` and the `png` feature are compiled in |
-| `infer` | 0.22.0 | MIT | 1.74 | — | 2026-07-15 | **Adopt** — content sniffing |
-| `mime_guess` | 2.0.5 | MIT | — | — | 2024-06-29 | **Adopt** — extension → MIME |
+| `infer` | 0.22.0 | MIT | 1.74 | — | 2026-07-15 | **Not adopted** — content-sniffing candidate; absent from the current lock |
+| `mime_guess` | 2.0.5 | MIT | — | — | 2024-06-29 | **Not adopted** — extension-to-MIME candidate; absent from the current lock |
 | `futures-core` | 0.3.34 | MIT OR Apache-2.0 | 1.36 | 305 000 000 | 2025-12-01 | **Adopt** — the `Stream` trait of the media body (M1.11) |
 
 ### 2.1 The crates `blake3` brings with it
@@ -92,6 +100,10 @@ the weakest copyleft obligation of any licence in the set: nothing in the projec
 an obligation from it.
 
 ### 2.2 Test and quality tooling (dev-dependencies only)
+
+This is a reviewed candidate list, not a claim that every tool is installed or in
+`Cargo.lock`. Of the crates shown, `tempfile` is currently a workspace dev-dependency;
+the test-runner and audit commands are separately installed developer tools.
 
 | Crate | Version | Licence | Purpose |
 | --- | --- | --- | --- |
@@ -134,7 +146,7 @@ them is allowed by `deny.toml` and is covered by `cargo deny check licenses` and
 | `matchit` | 0.8.4 | MIT AND BSD-3-Clause | — | the router of the paths |
 | `percent-encoding` | 2.3.2 | MIT OR Apache-2.0 | 1.51 | the escaping of the paths |
 | `tokio` | 1.54.1 | MIT | 1.85 | the runtime, the sockets and the signals |
-| `tokio-macros` | 2.7.1 | MIT | 1.71 | the macros of `tokio` |
+| `tokio-macros` | 2.7.2 | MIT | 1.71 | the macros of `tokio` |
 | `mio` | 1.2.5 | MIT | 1.71 | the readiness of the sockets |
 | `socket2` | 0.6.5 | MIT OR Apache-2.0 | 1.70 | the socket options |
 | `rustix` | 1.1.6 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | 1.65 | the system calls of the sockets |
@@ -190,7 +202,7 @@ and by `cargo audit` like every other crate.
 | `crc32fast` | 1.5.5 | MIT OR Apache-2.0 | 1.65 | the checksum of the PNG chunks |
 | `bitflags` | 2.13.2 | MIT OR Apache-2.0 | 1.56 | the flags of the PNG chunks |
 | `flate2` | 1.1.11 | MIT OR Apache-2.0 | 1.63 | the decompression of the PNG data |
-| `miniz_oxide` | 0.8.9 / 0.9.1 | MIT OR Zlib OR Apache-2.0 | 1.63 | the compressor of `flate2` |
+| `miniz_oxide` | 0.8.9 / 0.9.1 | MIT OR Zlib OR Apache-2.0 | 1.63 | Both versions are required by incompatible upstream bounds: `png` needs `^0.8`, while `flate2` needs `^0.9`; both dependency paths arrive through `image` |
 | `adler2` | 2.0.1 | MIT OR Zlib OR Apache-2.0 | — | the checksum of the compressed data |
 | `simd-adler32` | 0.3.10 | MIT OR Apache-2.0 | — | the fast checksum of the compressed data |
 | `fdeflate` | 0.3.7 | MIT OR Apache-2.0 | — | the fast decompressor of the PNG data |
@@ -244,10 +256,13 @@ different:
 Both are permissively licensed; `unicode-normalization` additionally carries the
 `Unicode-3.0` licence, which the allow-list in `deny.toml` permits.
 
-## 3. The MPL-2.0 assessment (`symphonia`)
+## 3. Conditional MPL-2.0 assessment (`symphonia` candidate)
 
-`symphonia` is the pure-Rust audio decoding library we intend to use. It is
-**MPL-2.0**, which is file-level copyleft.
+ADR-0008 names `symphonia` as the planned pure-Rust audio parser. It is **not in the
+current `Cargo.lock`**: F-10 D-01 and ADR-0011 explicitly record the temporary M2.2
+deviation, where the bounded picture parser runs in the server process before the
+sandboxed child is implemented. The accepted architecture does not mean the crate is
+already shipped. Its MPL-2.0 file-level copyleft must be assessed before M-06 adds it.
 
 **Compatibility:** MPL-2.0 §3 permits combining MPL-covered files with other files
 under different terms, provided the MPL-covered files remain under MPL-2.0 and their
@@ -258,12 +273,12 @@ therefore compatible, provided:
 - the corresponding source of the MPL-covered files is part of the source offer
   (`OPS-016`, `SEC-070`), which the AGPL §13 offer already requires to be complete.
 
-**Decision:** adopt `symphonia` with the conditions above, and list it in the
-`cargo-deny` allow-list as `MPL-2.0` with the reason recorded here.
+**Decision:** retain this compatibility analysis for M-06. Before adding the crate,
+update the dependency review and add the licence to `deny.toml` in the same change.
 
-**Condition:** the `symphonia` dependency must not be the *only* way to read audio
-metadata. The tag-reading path uses `lofty` (MIT/Apache-2.0) so that a licence
-question about metadata extraction can never block the catalogue.
+**Condition retained from the original proposal:** if `symphonia` is considered again,
+the feature owner must define how metadata remains readable without it. Neither
+`symphonia` nor `lofty` is in the current `Cargo.lock`.
 
 ---
 
@@ -289,8 +304,13 @@ question about metadata extraction can never block the catalogue.
 
 ### 5.1 Async runtime and HTTP
 
-**Decision:** Tokio 1.x as the runtime, Hyper 1.x as the HTTP/1.1 implementation,
-Axum 0.8 for routing, Tower for middleware, `tower-http` for tracing and timeouts.
+**Accepted target (ADR-0002):** Tokio 1.x as the runtime, Hyper 1.x as the HTTP/1.1
+implementation, Axum 0.8 for routing, Tower for middleware, and `tower-http` for
+tracing and timeouts. **Current implementation:** `tower-http` 0.7.1 is in the lock and
+its timeout feature wraps the handler future in both routers. The independent
+`DeadlineIo` still enforces reset-on-I/O read and write silence deadlines. The accepted
+tracing role is not yet integrated; adding request logging requires an explicit
+redaction-safe policy and review before M-02 can close.
 
 Rationale: Hyper has the deepest battle history against request smuggling and
 header-injection defects — the exact class of bug that matters most here — and the
@@ -302,16 +322,27 @@ framing policy is ours and is covered by negative tests.
 
 ### 5.2 XML
 
-**Decision:** `quick-xml` for parsing, because it is a **streaming** parser: memory
-use is proportional to the current element, not to the document. `roxmltree` builds a
-whole DOM and resolves DTD entities unless `allow_dtd` is disabled, which makes it the
-wrong shape for a hostile network input.
+**Accepted target (DEC-019 and ADR-0002):** `quick-xml` for parsing, because it is a
+**streaming** parser: memory use is proportional to the current element, not to the
+document. `roxmltree` builds a whole DOM and resolves DTD entities unless `allow_dtd`
+is disabled, which makes it the wrong shape for hostile network input.
+
+**Current implementation:** `quick-xml` 0.42.0 is in the lock and backs the bounded
+adapter in `crates/phairdlna-core/src/upnp/xml_reader.rs`. The project still owns the
+element tree, namespace resolution, entity allowlist, and byte/depth/node/text bounds.
+DOCTYPE and custom entity references are rejected; predefined and legal XML 1.0 numeric
+references are accepted. The 22-case XML reader suite passes, including 11 isolated
+truncation cases with recovery and a positive depth-boundary case. The adapter builds a
+complete tree, so its total application-level memory is proportional to the document;
+the configured byte bound caps that allocation. Full hostile-input and allocation review
+remains open.
 
 **Two facts that shape the implementation:**
 
 1. `quick-xml` *surfaces* `DocType` and `GeneralRef` events to the caller. The
-   server therefore rejects any document containing a doctype and any general entity
-   reference — the decision is ours, not the parser's (`SEC-010`, M-02).
+   server therefore rejects any document containing a doctype and any custom entity
+   reference; only the five predefined and valid numeric references are accepted — the
+   decision is ours, not the parser's (`SEC-010`, M-02).
 2. A streaming parser still performs **crate-internal allocations before the consumer
    sees the event**. Bounding the input is therefore necessary but not sufficient:
    the byte limit must be enforced *before* the parser sees the data.
@@ -350,9 +381,86 @@ project, and it lives in `phairdlna-core` — the crate that was meant to stay p
 
 ## 6. Supply-chain controls
 
+### 6.1 Current resolved graph check
+
+The committed lock file was inspected with `cargo metadata --locked --offline
+--all-features --format-version 1` on 2026-11-19. Cargo reported **126 package
+entries: 4 workspace packages and 122 registry packages, representing 121 distinct
+third-party crate names**. This metadata includes target-specific and optional
+packages; it is not evidence that every package ships in every build. The configured
+licence gate, `cargo deny check licenses`, passed on the same date (`licenses ok`).
+
+That gate proves that the resolved licence expressions satisfy `deny.toml`; it does
+not prove that every resolved crate has the policy-required purpose, maintenance,
+alternative and named-reviewer assessment. Sections 2.1–2.4 record the reviewed direct
+dependencies and selected transitive families. The table below adds the 47 graph crate
+names that those sections did not name, with their locked version, declared licence and
+shortest route from a workspace crate. Together, the sections name all 121 distinct
+third-party crate names in this graph. This is an inventory cross-check, not a completed
+per-crate assessment: maintenance, alternatives and review evidence remain incomplete
+for transitive packages. The project policy therefore remains open before M-02 closes.
+Target-only, development and build-time crates must not be mistaken for runtime product
+dependencies; the routes are provenance, not proof that a package is compiled into each
+artifact. Each distinct version of a duplicate must also be explained. Do not treat the
+passing licence gate as completion of the dependency review.
+
+The shortest paths are derived from the locked, all-features graph. `normal`, `dev` and
+`build` edges can differ by target; use `cargo tree --target <triple>` to confirm the
+artifact-specific graph before making a runtime claim.
+
+| Crate | Lock version | Licence metadata | Shortest dependency path from a workspace crate |
+| --- | --- | --- | --- |
+| `atomic-waker` | `1.1.2` | `Apache-2.0 OR MIT` | `phairdlna-admin → axum → hyper → atomic-waker` |
+| `block2` | `0.6.2` | `MIT` | `phairdlna-mac → objc2-app-kit → block2` |
+| `bumpalo` | `3.20.4` | `MIT OR Apache-2.0` | `phairdlna-admin → uuid → wasm-bindgen → wasm-bindgen-macro → wasm-bindgen-macro-support → bumpalo` |
+| `dispatch2` | `0.3.1` | `Zlib OR Apache-2.0 OR MIT` | `phairdlna-mac → objc2-app-kit → objc2-core-foundation → dispatch2` |
+| `equivalent` | `1.0.3` | `Apache-2.0 OR MIT` | `phairdlna-core → toml → indexmap → equivalent` |
+| `fallible-iterator` | `0.3.0` | `MIT/Apache-2.0` | `phairdlna-core → rusqlite → fallible-iterator` |
+| `fallible-streaming-iterator` | `0.1.9` | `MIT/Apache-2.0` | `phairdlna-core → rusqlite → fallible-streaming-iterator` |
+| `getrandom` | `0.4.3` | `MIT OR Apache-2.0` | `phairdlna-admin → tempfile → getrandom` |
+| `hashbrown` | `0.17.1` | `MIT OR Apache-2.0` | `phairdlna-core → toml → indexmap → hashbrown` |
+| `indexmap` | `2.14.2` | `Apache-2.0 OR MIT` | `phairdlna-core → toml → indexmap` |
+| `js-sys` | `0.3.107` | `MIT OR Apache-2.0` | `phairdlna-admin → uuid → js-sys` |
+| `linux-raw-sys` | `0.12.1` | `Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT` | `phairdlna-admin → tempfile → rustix → linux-raw-sys` |
+| `objc2-cloud-kit` | `0.3.2` | `Zlib OR Apache-2.0 OR MIT` | `phairdlna-mac → objc2-app-kit → objc2-cloud-kit` |
+| `objc2-core-data` | `0.3.2` | `Zlib OR Apache-2.0 OR MIT` | `phairdlna-mac → objc2-app-kit → objc2-core-data` |
+| `objc2-core-foundation` | `0.3.2` | `Zlib OR Apache-2.0 OR MIT` | `phairdlna-mac → objc2-app-kit → objc2-core-foundation` |
+| `objc2-core-graphics` | `0.3.2` | `Zlib OR Apache-2.0 OR MIT` | `phairdlna-mac → objc2-app-kit → objc2-core-graphics` |
+| `objc2-core-image` | `0.3.2` | `Zlib OR Apache-2.0 OR MIT` | `phairdlna-mac → objc2-app-kit → objc2-core-image` |
+| `objc2-core-text` | `0.3.2` | `Zlib OR Apache-2.0 OR MIT` | `phairdlna-mac → objc2-app-kit → objc2-core-text` |
+| `objc2-core-video` | `0.3.2` | `Zlib OR Apache-2.0 OR MIT` | `phairdlna-mac → objc2-app-kit → objc2-core-video` |
+| `objc2-encode` | `4.1.0` | `MIT` | `phairdlna-mac → objc2 → objc2-encode` |
+| `objc2-io-surface` | `0.3.2` | `Zlib OR Apache-2.0 OR MIT` | `phairdlna-mac → objc2-app-kit → objc2-core-graphics → objc2-io-surface` |
+| `objc2-quartz-core` | `0.3.2` | `Zlib OR Apache-2.0 OR MIT` | `phairdlna-mac → objc2-app-kit → objc2-quartz-core` |
+| `pkg-config` | `0.3.34` | `MIT OR Apache-2.0` | `phairdlna-core → rusqlite → libsqlite3-sys → pkg-config` |
+| `proc-macro2` | `1.0.107` | `MIT OR Apache-2.0` | `phairdlna-admin → tokio → tokio-macros → proc-macro2` |
+| `quote` | `1.0.47` | `MIT OR Apache-2.0` | `phairdlna-admin → tokio → tokio-macros → quote` |
+| `r-efi` | `6.0.0` | `MIT OR Apache-2.0 OR LGPL-2.1-or-later` | `phairdlna-admin → tempfile → getrandom → r-efi` |
+| `rustversion` | `1.0.23` | `MIT OR Apache-2.0` | `phairdlna-admin → uuid → wasm-bindgen → rustversion` |
+| `serde_core` | `1.0.229` | `MIT OR Apache-2.0` | `phairdlna-admin → axum → serde_core` |
+| `serde_derive` | `1.0.229` | `MIT OR Apache-2.0` | `phairdlna-core → serde → serde_derive` |
+| `serde_spanned` | `1.1.3` | `MIT OR Apache-2.0` | `phairdlna-core → toml → serde_spanned` |
+| `smallvec` | `1.16.5` | `MIT OR Apache-2.0` | `phairdlna-core → rusqlite → smallvec` |
+| `syn` | `3.0.10` | `MIT OR Apache-2.0` | `phairdlna-admin → tokio → tokio-macros → syn` |
+| `thiserror-impl` | `2.0.21` | `MIT OR Apache-2.0` | `phairdlna-core → thiserror → thiserror-impl` |
+| `tinyvec` | `1.13.3` | `Zlib OR Apache-2.0 OR MIT` | `phairdlna-core → unicode-normalization → tinyvec` |
+| `toml_datetime` | `1.1.3+spec-1.1.0` | `MIT OR Apache-2.0` | `phairdlna-core → toml → toml_datetime` |
+| `toml_parser` | `1.1.5+spec-1.1.0` | `MIT OR Apache-2.0` | `phairdlna-core → toml → toml_parser` |
+| `toml_writer` | `1.2.0+spec-1.1.0` | `MIT OR Apache-2.0` | `phairdlna-core → toml → toml_writer` |
+| `unicode-ident` | `1.0.27` | `(MIT OR Apache-2.0) AND Unicode-3.0` | `phairdlna-admin → tokio → tokio-macros → proc-macro2 → unicode-ident` |
+| `vcpkg` | `0.2.15` | `MIT/Apache-2.0` | `phairdlna-core → rusqlite → libsqlite3-sys → vcpkg` |
+| `wasi` | `0.11.1+wasi-snapshot-preview1` | `Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT` | `phairdlna-admin → tokio → mio → wasi` |
+| `wasm-bindgen` | `0.2.130` | `MIT OR Apache-2.0` | `phairdlna-admin → uuid → wasm-bindgen` |
+| `wasm-bindgen-macro` | `0.2.130` | `MIT OR Apache-2.0` | `phairdlna-admin → uuid → wasm-bindgen → wasm-bindgen-macro` |
+| `wasm-bindgen-macro-support` | `0.2.130` | `MIT OR Apache-2.0` | `phairdlna-admin → uuid → wasm-bindgen → wasm-bindgen-macro → wasm-bindgen-macro-support` |
+| `wasm-bindgen-shared` | `0.2.130` | `MIT OR Apache-2.0` | `phairdlna-admin → uuid → wasm-bindgen → wasm-bindgen-shared` |
+| `windows-link` | `0.2.1` | `MIT OR Apache-2.0` | `phairdlna-admin → tempfile → windows-sys → windows-link` |
+| `windows-sys` | `0.61.2` | `MIT OR Apache-2.0` | `phairdlna-admin → tempfile → windows-sys` |
+| `winnow` | `1.0.5` | `MIT` | `phairdlna-core → toml → winnow` |
+
 | Control | Tool | Rule |
 | --- | --- | --- |
-| Licences | `cargo deny check licenses` | Allow `AGPL-3.0-or-later`, `Apache-2.0`, `MIT`, `BSD-2/3`, `ISC`, `Unicode-3.0`, `Zlib`, `CC0-1.0`, `MPL-2.0`; deny everything else; `unused-allowed-license = warn` |
+| Licences | `cargo deny check licenses` | Allow `AGPL-3.0-or-later`, `Apache-2.0`, `Apache-2.0 WITH LLVM-exception`, `MIT`, `BSD-3-Clause`, `Unicode-3.0`, `Zlib`, `CC0-1.0`, `Unlicense`; deny everything else; add a licence only when an assessed dependency requires it |
 | Advisories | `cargo audit` | Fail on any un-waived RustSec advisory; a waiver needs a record with an expiry date |
 | Bans | `cargo deny check bans` | Banned: the crates in §4, plus any crate with an unreviewed `build.rs` |
 | Sources | `cargo deny check sources` | Only crates.io and the project's own registry; a new source needs a review |
@@ -377,9 +485,17 @@ dependency is read, recorded and reviewed by a named person.
 | SQLite binding | Proposed in ADR-0002 | Architect | 2026-11-14 |
 | Media metadata stack | Proposed in ADR-0008 | Architect | 2026-11-14 |
 | macOS platform crates | Proposed in ADR-0002 | Architect | 2026-11-14 |
-| `symphonia` MPL-2.0 | **Accepted with conditions** (§3) | Security | 2026-11-14 |
+| `symphonia` MPL-2.0 | **ADR-0008 target; not in current lock; conditional review for M-06** (§3) | Security | 2026-11-14 |
 | FFmpeg exclusion | **Accepted** (§1 rule 7) | Security | 2026-11-14 |
 | `image` (the thumbnail decoder) | **Accepted with conditions** (§ 2.4) | Security | 2026-11-16 |
 | `rusqlite` (the index of the catalogue) | **Adopted** in M2.9 — the decision of § 5.3, the version `0.42.0`, `bundled` without `loadable_extension`; the C compiler that the build needs is an owner decision that is recorded and may be overruled | Security | 2026-11-17 |
 
 Every proposal becomes an ADR before the dependency is added to `Cargo.toml`.
+
+## 8. Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 1.3 / 2026-11-19 | Records the all-features locked graph size and passing licence gate; makes explicit that the per-crate purpose, maintenance, alternatives and reviewer inventory remains incomplete. |
+| 1.2 / 2026-11-19 | Records the DEC-078 direct dependencies and targeted test evidence; keeps tracing integration, full parser security review and M-02 closure open. |
+| 1.1 / 2026-11-19 | Separates reviewed candidates from the actual lock graph, records the ADR-0002 implementation discrepancies and `miniz_oxide` version paths, reconciles resolved crate versions, and removes unused licence allowances from the active gate configuration. |

@@ -1,6 +1,5 @@
-# Gate QG-08 / QG-10: licence, advisory, ban and source policy.
-#
-# Rationale and the licence data behind each entry are in
+# Gate QG-08 / QG-10: licence, advisory, ban and source policy. Every active
+# licence allowance is required by a dependency in Cargo.lock; rationale is in
 # docs/04-security/DEPENDENCY-LICENSE-REVIEW.md.
 
 [graph]
@@ -20,22 +19,18 @@ ignore = []
 [licenses]
 version = 2
 # The project is AGPL-3.0-or-later. Permissive licences are allowed without a
-# review. MPL-2.0 is allowed because it is file-level copyleft: the MPL files keep
-# their licence and their source must be part of the source offer (see
-# docs/04-security/DEPENDENCY-LICENSE-REVIEW.md section 3).
+# separate compatibility decision. Add a licence to this active allow-list only
+# when an assessed dependency in Cargo.lock requires it.
 allow = [
     "AGPL-3.0-or-later",
     "Apache-2.0",
     "Apache-2.0 WITH LLVM-exception",
     "MIT",
-    "BSD-2-Clause",
     "BSD-3-Clause",
-    "ISC",
     "Unicode-3.0",
     "Zlib",
     "CC0-1.0",
     "Unlicense",
-    "MPL-2.0",
 ]
 confidence-threshold = 0.8
 unused-allowed-license = "warn"

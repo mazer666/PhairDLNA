@@ -25,6 +25,7 @@ phairdlna-core = { workspace = true }
 # build without the feature is a build without the surface (ADR-0012).
 phairdlna-admin = { workspace = true, optional = true }
 tokio = { workspace = true }
+tower-http = { workspace = true }
 
 [dev-dependencies]
 # The tests write a real picture, so that the thumbnail of the daemon is

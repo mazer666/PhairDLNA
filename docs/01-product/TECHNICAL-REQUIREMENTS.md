@@ -1,6 +1,6 @@
 # Technical requirements — PhairDLNA
 
-Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Lead / Architect
+Status: **Approved (v1.1 accessibility update, 2026-11-18; v1.0 baseline preserved)** · Owner role: Lead / Architect
 Scope: the **normative technical baseline**. This document *defines* the requirement IDs.
 `REQUIREMENTS-INDEX.md` is the cross-cutting *view* of the same IDs (priority, feature,
 milestone, verification, status). Feature specifications in `../03-features/` elaborate
@@ -364,7 +364,7 @@ guidelines require of a media server.
 | UX-005 | The server shall never abort with a panic message that lacks context; unexpected failures shall produce a structured internal error and a readable one-line summary. | MUST |
 | UX-006 | The command line shall provide `--help` for every subcommand. | MUST |
 | UX-007 | The macOS application shall be accessible with the keyboard alone and shall expose the status of the server as text, not only as an icon. | MUST |
-| UX-008 | The macOS application shall respect the system accessibility settings for contrast, motion and text size. | SHOULD |
+| UX-008 | The macOS application shall respect the system accessibility settings for contrast and motion and let users enlarge app text to at least 200% with a layout that reflows without clipping. | SHOULD |
 | UX-009 | The macOS application shall show an accessible status item for assistive technologies. | MUST |
 | UX-010 | The onboarding shall use plain language and avoid protocol jargon in the user-facing text. | MUST |
 | UX-011 | Diagnostics shall be copyable in one action and shall not contain personal data unless the user enables redaction off deliberately. | SHOULD |
@@ -373,7 +373,7 @@ guidelines require of a media server.
 | UX-014 | The user interface shall present the server state, the scan progress, the shared folders and the last observed client activity in one view. | SHOULD |
 | UX-015 | The product shall provide a simple presentation mode and an advanced presentation mode over one configuration schema; switching between them shall never reset a setting, restart the server or interrupt a transfer. | SHOULD |
 | UX-016 | A safety-critical warning raised in the advanced mode shall remain visible in the simple mode. | MUST |
-| UX-017 | The user interface shall be operable with the keyboard alone, shall expose accessible labels and a deterministic focus order, and shall respect the system's text size and contrast settings. | MUST |
+| UX-017 | The user interface shall be operable with the keyboard alone, shall expose accessible labels and a deterministic focus order, shall provide reflowing app-level text scaling and shall respect system contrast settings. | MUST |
 | UX-018 | The user interface shall expose the status of the server as text for assistive technologies, not only as an icon. | MUST |
 | UX-019 | The user shall be able to start and stop the server, pause and resume indexing, and remove a shared folder without touching the source files. | MUST |
 | UX-020 | All user-facing strings shall be prepared for translation, and the set of supported locales shall be decided before the first release. | SHOULD |
@@ -494,3 +494,9 @@ guidelines require of a media server.
 
 The mapping from every ID to feature, milestone, verification method and status is in
 `REQUIREMENTS-INDEX.md`.
+
+## Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 1.1 / 2026-11-18 | Owner direction DEC-077 replaces the unsupported macOS Dynamic Type interpretation in UX-008/UX-017 with app-owned text scaling through 200% and reflow without clipping. The approved v1.0 baseline is preserved in `../99-archive/2026-11-18-larger-text-accessibility/`. |

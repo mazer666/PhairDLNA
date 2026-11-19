@@ -660,6 +660,8 @@ dependencies = [
  "phairdlna-core",
  "tempfile",
  "tokio",
+ "tower",
+ "tower-http",
  "uuid",
 ]
 
@@ -674,6 +676,7 @@ dependencies = [
  "phairdlna-core",
  "tempfile",
  "tokio",
+ "tower-http",
 ]
 
 [[package]]
@@ -682,6 +685,7 @@ version = "0.1.0"
 dependencies = [
  "blake3",
  "image",
+ "quick-xml",
  "rusqlite",
  "serde",
  "tempfile",
@@ -742,6 +746,15 @@ name = "pxfm"
 version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d55d956fa96f5ec02be2e13af0e20391a5aa83d6a074e3ad368959d0fab299ea"
+
+[[package]]
+name = "quick-xml"
+version = "0.42.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41b1177fdf999d2321d3fb46ff47159d9c1fb9ad66a4879f8c50a0b504615e9b"
+dependencies = [
+ "memchr",
+]
 
 [[package]]
 name = "quote"
@@ -1005,6 +1018,23 @@ dependencies = [
  "futures-util",
  "pin-project-lite",
  "sync_wrapper",
+ "tokio",
+ "tower-layer",
+ "tower-service",
+]
+
+[[package]]
+name = "tower-http"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08a05a66a4fdd61cbbe0a1d755ffe0ca6aba159dd4820936a0ff8a8278245b9c"
+dependencies = [
+ "bitflags",
+ "bytes",
+ "http",
+ "http-body",
+ "percent-encoding",
+ "pin-project-lite",
  "tokio",
  "tower-layer",
  "tower-service",

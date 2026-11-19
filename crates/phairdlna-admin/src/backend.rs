@@ -20,6 +20,12 @@ pub use phairdlna_core::diagnostics::{Diagnostics, LogRecord, RootState, Transfe
 /// What the server is doing right now.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Status {
+    /// The name clients see when they discover the media server.
+    pub device_name: String,
+    /// The address the daemon advertises on the local network, when reachable.
+    pub device_address: Option<String>,
+    /// Whether the daemon's SSDP discovery task is currently running.
+    pub discovery_available: bool,
     /// How long the server has been running, in seconds.
     pub uptime_seconds: u64,
     /// The version of the server.

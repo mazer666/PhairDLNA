@@ -47,7 +47,7 @@ fn running() -> ServerSnapshot {
 #[test]
 fn the_answer_of_the_surface_replaces_the_state() {
     let mut app = application();
-    assert_eq!(app.snapshot().state, ServerState::Stopped);
+    assert_eq!(app.snapshot().state, ServerState::Checking);
 
     let outcome = app.take_state(running());
 
@@ -82,13 +82,33 @@ fn a_surface_that_is_not_there_is_a_stopped_server() {
     assert_eq!(app.snapshot().state, ServerState::Stopped);
     let lines = lines_of(&app);
     assert!(
-        lines.iter().any(|line| line.contains("cannot be reached")),
+        lines
+            .iter()
+            .any(|line| line.contains("couldn't connect to the server")),
         "the menu must say why: {lines:?}"
     );
 }
 
-/// The negative case: a surface that refuses the requests is not a surface
-/// that is gone.
+/// A new failure notice changes the menu even while the state stays stopped.
+#[test]
+fn a_changed_failure_message_refreshes_the_menu() {
+    let mut app = application();
+    app.take_failure(&ClientError::Unreachable {
+        reason: "no route to host".to_owned(),
+    });
+
+    let outcome = app.take_failure(&ClientError::Unreadable {
+        reason: "connection reset".to_owned(),
+    });
+    assert_eq!(outcome, phairdlna_mac::app::RefreshOutcome::Changed);
+
+    let outcome = app.take_failure(&ClientError::Unreadable {
+        reason: "connection reset".to_owned(),
+    });
+    assert_eq!(outcome, phairdlna_mac::app::RefreshOutcome::Unchanged);
+}
+
+/// The negative case: a refused request gets plain-language recovery guidance.
 #[test]
 fn a_surface_that_refuses_is_not_a_surface_that_is_gone() {
     let mut app = application();
@@ -98,8 +118,14 @@ fn a_surface_that_refuses_is_not_a_surface_that_is_gone() {
     assert_eq!(app.snapshot().state, ServerState::Refused);
     let lines = lines_of(&app);
     assert!(
-        lines.iter().any(|line| line.contains("403")),
-        "the menu must name the number: {lines:?}"
+        lines
+            .iter()
+            .any(|line| line.contains("couldn't complete this request")),
+        "the menu must explain the refusal in plain language: {lines:?}"
+    );
+    assert!(
+        lines.iter().all(|line| !line.contains("403")),
+        "the menu must not expose the HTTP status code: {lines:?}"
     );
 }
 
@@ -173,14 +199,14 @@ fn a_scan_leaves_a_message() {
 
 /// The action that opens the server window opens the native window.
 #[test]
-fn the_action_that_opens_the_page_asks_for_the_address() {
+fn the_action_that_opens_the_server_window_requests_native_overview() {
     let mut app = application();
 
     let outcome = app.perform(MenuAction::OpenAdmin);
 
     assert_eq!(
         outcome,
-        ActionOutcome::Request(DesktopRequest::ShowPreferences)
+        ActionOutcome::Request(DesktopRequest::ShowMainWindow)
     );
 }
 
@@ -211,10 +237,9 @@ fn the_action_that_exports_diagnostics_asks_for_the_url() {
     );
 }
 
-/// The negative case: a configuration that is not there means that there is
-/// no folder to open, and the menu says so.
+/// The negative case: an unreadable config is explained instead of reported as no roots.
 #[test]
-fn a_configuration_that_is_not_there_means_no_folder() {
+fn an_unreadable_configuration_shows_a_recovery_message() {
     let mut app = application();
 
     let outcome = app.perform(MenuAction::OpenMediaFolders);
@@ -222,8 +247,10 @@ fn a_configuration_that_is_not_there_means_no_folder() {
     assert_eq!(outcome, ActionOutcome::Nothing);
     let lines = lines_of(&app);
     assert!(
-        lines.iter().any(|line| line.contains("No media folder")),
-        "the menu must say so: {lines:?}"
+        lines
+            .iter()
+            .any(|line| line.contains("couldn't read its settings")),
+        "the menu must explain the config problem: {lines:?}"
     );
 }
 

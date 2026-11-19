@@ -1,7 +1,7 @@
 //! The answers of the administration surface.
 //!
-//! What: the three routes of the surface — the state of the server, the scan
-//!       of the library and the diagnostics — and the JSON they answer with.
+//! What: the local API routes for server state, library scans, diagnostics and
+//!       settings explanations, plus the JSON they answer with.
 //! Why: the surface is small on purpose. It answers what a user of the server
 //!       asks on the machine the server runs on, and nothing else
 //!       (`OPS-020`, `F-14`).
@@ -17,15 +17,15 @@ use axum::routing::{get, post};
 use axum::Router;
 use phairdlna_core::security::Redactor;
 
-use crate::backend::{AdminBackend, Diagnostics, RescanOutcome, Status};
+use crate::backend::{AdminBackend, Diagnostics, RescanOutcome};
 use crate::guard::{self, AdminGuard};
 use crate::json::Json;
+mod status;
+mod timeout;
+use timeout::apply_request_timeout;
 
 /// The largest body the surface reads. The surface has no body to read.
 const BODY_BYTES: usize = 4096;
-
-/// The embedded single-page web administration UI.
-const UI_HTML: &str = include_str!("ui.html");
 
 /// What the handlers of the surface share.
 pub struct AdminState {
@@ -59,36 +59,19 @@ impl AdminState {
 /// names another host, or that carries no token, never reaches the server
 /// (`SEC-071`, `OPS-020`).
 pub fn router(state: Arc<AdminState>) -> Router {
-    Router::new()
-        .route("/", get(ui_index))
-        .route("/index.html", get(ui_index))
+    let router = Router::new()
         .route("/api/status", get(status))
         .route("/api/catalogue/rescan", post(rescan))
         .route("/api/diagnostics", get(diagnostics))
         .route("/api/config/explain", get(config_explain))
         .fallback(not_found)
-        .layer(DefaultBodyLimit::max(BODY_BYTES))
+        .layer(DefaultBodyLimit::max(BODY_BYTES));
+    apply_request_timeout(router, state.guard.limits().read_timeout)
         .layer(axum::middleware::from_fn_with_state(
             Arc::clone(&state.guard),
             guard::enforce,
         ))
         .with_state(state)
-}
-
-/// Serves the embedded web administration interface.
-async fn ui_index(State(state): State<Arc<AdminState>>) -> Response {
-    let mut response = UI_HTML.into_response();
-    response.headers_mut().insert(
-        axum::http::header::CONTENT_TYPE,
-        axum::http::HeaderValue::from_static("text/html; charset=\"utf-8\""),
-    );
-    if let Ok(value) = HeaderValue::from_str(&state.guard.csrf_token()) {
-        response.headers_mut().insert(
-            axum::http::HeaderName::from_static("x-phairdlna-admin-csrf"),
-            value,
-        );
-    }
-    response
 }
 
 /// Answers the explanation and documentation of settings.
@@ -122,7 +105,10 @@ async fn config_explain(
 /// Answers the state of the server.
 async fn status(State(state): State<Arc<AdminState>>) -> Response {
     let status = state.backend.status();
-    json_response(json_of_status(&status, &state.redactor), &state.guard)
+    json_response(
+        status::json_of_status(&status, &state.redactor),
+        &state.guard,
+    )
 }
 
 /// Answers the scan of the library.
@@ -148,58 +134,6 @@ async fn not_found(method: Method) -> Response {
         return refused(StatusCode::METHOD_NOT_ALLOWED);
     }
     refused(StatusCode::NOT_FOUND)
-}
-
-/// The state of the server, as JSON.
-fn json_of_status(status: &Status, redactor: &Redactor) -> Json {
-    Json::map(vec![
-        ("version".to_owned(), Json::text(status.version.clone())),
-        (
-            "source_revision".to_owned(),
-            Json::text(status.source_revision.clone()),
-        ),
-        (
-            "uptime_seconds".to_owned(),
-            Json::uint(status.uptime_seconds),
-        ),
-        (
-            "active_streams".to_owned(),
-            Json::uint(status.active_streams as u64),
-        ),
-        (
-            "catalogue_objects".to_owned(),
-            Json::uint(status.catalogue_objects as u64),
-        ),
-        (
-            "resident_bytes".to_owned(),
-            Json::maybe_uint(status.resident_bytes),
-        ),
-        ("cache_bytes".to_owned(), Json::uint(status.cache_bytes)),
-        (
-            "system_update_id".to_owned(),
-            Json::uint(u64::from(status.system_update_id)),
-        ),
-        (
-            "roots".to_owned(),
-            Json::list(
-                status
-                    .roots
-                    .iter()
-                    .map(|root| json_of_root(root, redactor))
-                    .collect(),
-            ),
-        ),
-    ])
-}
-
-/// One root of the library, as JSON.
-fn json_of_root(root: &crate::backend::RootState, redactor: &Redactor) -> Json {
-    Json::map(vec![
-        ("name".to_owned(), Json::text(root.name.clone())),
-        ("path".to_owned(), Json::text(redactor.value(&root.path))),
-        ("mounted".to_owned(), Json::flag(root.mounted)),
-        ("objects".to_owned(), Json::uint(root.objects as u64)),
-    ])
 }
 
 /// The scan of the library, as JSON.
@@ -244,7 +178,7 @@ fn json_of_diagnostics(diagnostics: &Diagnostics, redactor: &Redactor) -> Json {
         ),
         (
             "roots".to_owned(),
-            json_of_roots(&diagnostics.roots, redactor),
+            status::json_of_roots(&diagnostics.roots, redactor),
         ),
         (
             "transfers".to_owned(),
@@ -280,16 +214,6 @@ fn json_of_records(records: &[crate::backend::LogRecord], redactor: &Redactor) -
         records
             .iter()
             .map(|record| json_of_record(record, redactor))
-            .collect(),
-    )
-}
-
-/// The roots of the library, as JSON.
-fn json_of_roots(roots: &[crate::backend::RootState], redactor: &Redactor) -> Json {
-    Json::list(
-        roots
-            .iter()
-            .map(|root| json_of_root(root, redactor))
             .collect(),
     )
 }

@@ -1,6 +1,6 @@
 # Requirements index — PhairDLNA
 
-Status: **Approved (v1.0 baseline, 2026-11-14)** · Owner role: Product Owner
+Status: **Approved (v1.1 accessibility update, 2026-11-18; v1.0 baseline preserved)** · Owner role: Product Owner
 
 This is the **cross-cutting view** of every requirement. The normative text of each
 requirement is defined exactly once — in `TECHNICAL-REQUIREMENTS.md` (technical
@@ -16,9 +16,9 @@ the current baseline. Defined in
 [../00-governance/REQUIREMENTS-METHOD.md](../00-governance/REQUIREMENTS-METHOD.md) section 3.
 
 
-**Status vocabulary.** `Baseline` = defined, internally consistent and traceable,
-awaiting the owner's approval of the baseline as a whole (it is `Approved` minus the
-sign-off). `Scheduled` = assigned to a milestone. `Implemented` = code exists.
+**Status vocabulary.** `Baseline` = part of the approved requirement baseline; no
+implementation status is claimed. `Scheduled` = assigned to a milestone.
+`Implemented` = code exists.
 `Verified` = evidence recorded.
 
 
@@ -277,7 +277,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `UX-005` | Never abort with a panic message that lacks context; unexpected failures shall produce a… | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
 | `UX-006` | Provide `--help` for every subcommand. | MUST | `F-15` | M2 | Manual usability protocol | Implemented |
 | `UX-007` | Be accessible with the keyboard alone and shall expose the status of the server as text | MUST | `F-15` | M2 | Manual usability protocol | Implemented |
-| `UX-008` | Respect the system accessibility settings for contrast | SHOULD | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-008` | Respect the system accessibility settings for contrast and motion and let users enlarge app… | SHOULD | `F-15` | M2 | Manual usability protocol | Scheduled |
 | `UX-009` | Show an accessible status item for assistive technologies. | MUST | `F-15` | M2 | Manual usability protocol | Implemented |
 | `UX-010` | Use plain language and avoid protocol jargon in the user-facing text. | MUST | `F-15` | M2 | Manual usability protocol | Implemented |
 | `UX-011` | Diagnostics shall be copyable in one action and shall not contain personal data unless the user… | SHOULD | `F-14` | M2 | Manual usability protocol | Implemented |
@@ -286,7 +286,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `UX-014` | Present the server state, the scan progress, the shared folders and the last observed client… | SHOULD | `F-15` | M2 | Manual usability protocol | Implemented |
 | `UX-015` | Provide a simple presentation mode and an advanced presentation mode over one configuration… | SHOULD | `F-15` | M2 | Manual usability protocol | Verified |
 | `UX-016` | A safety-critical warning raised in the advanced mode shall remain visible in the simple mode. | MUST | `F-15` | M2 | Manual usability protocol | Verified |
-| `UX-017` | Be operable with the keyboard alone, shall expose accessible labels and a deterministic focus… | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-017` | Be operable with the keyboard alone, shall expose accessible labels and a deterministic focus… | MUST | `F-15` | M2 | Manual usability protocol | Scheduled |
 | `UX-018` | Expose the status of the server as text for assistive technologies | MUST | `F-15` | M2 | Manual usability protocol | Verified |
 | `UX-019` | Be able to start and stop the server, pause and resume indexing, and remove a shared folder… | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
 | `UX-020` | All user-facing strings shall be prepared for translation | SHOULD | `F-15` | M2 | Manual usability protocol | Verified |
@@ -357,7 +357,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `PLT-010` | Behave identically on all platforms with respect to protocol behaviour | MUST | `F-22` | M0 | Build matrix | Verified |
 | `PLT-011` | Treat the mount, unmount and remount of a volume as a first-class event and shall re-key the… | MUST | `F-22` | M2 | Build matrix | Implemented |
 | `PLT-012` | Treat a permission error on a subtree as a quarantined subtree that needs consent | MUST | `F-22` | M3 | Build matrix | Baseline |
-| `PLT-013` | On macOS the always-on server shall run as a system-context launchd daemon and the user… | MUST | `F-22` | M3 | Build matrix | Verified |
+| `PLT-013` | On macOS the always-on server shall run as a system-context launchd daemon and the user… | MUST | `F-22` | M3 | Build matrix | Not implemented |
 | `PLT-014` | Be built as a universal binary for Apple Silicon and Intel. | MUST | `F-22` | M3 | Build matrix | Verified |
 | `PLT-015` | Declare long-path support in the executable manifest and shall document that the system-wide… | MUST | `F-22` | M3 | Build matrix | Verified |
 | `PLT-016` | Provide native packages and shall not use a filesystem-sandboxed package format as its primary… | MUST | `F-22` | M3 | Build matrix | Verified |
@@ -424,17 +424,17 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `LIFE-001` | Expose the distinct states *Starting*, *Ready*, *Degraded*, *Suspended*, *Recovering*,… | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
-| `LIFE-002` | Handle a sleep/wake cycle without spinning, leaking resources or reporting a "ready" state it… | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
-| `LIFE-003` | Handle a change of interface, address, subnet or route, and shall never widen its network… | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
-| `LIFE-004` | When a configured interface disappears the server shall enter the *Degraded* or *Recovering*… | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
+| `LIFE-001` | Expose the distinct states *Starting*, *Ready*, *Degraded*, *Suspended*, *Recovering*,… | MUST | `F-13` | M2 | Lifecycle and recovery test | Implemented |
+| `LIFE-002` | Handle a sleep/wake cycle without spinning, leaking resources or reporting a "ready" state it… | MUST | `F-13` | M2 | Lifecycle and recovery test | Scheduled |
+| `LIFE-003` | Handle a change of interface, address, subnet or route, and shall never widen its network… | MUST | `F-13` | M2 | Lifecycle and recovery test | Scheduled |
+| `LIFE-004` | When a configured interface disappears the server shall enter the *Degraded* or *Recovering*… | MUST | `F-13` | M2 | Lifecycle and recovery test | Scheduled |
 | `LIFE-005` | Detect the loss and the return of a network or removable volume | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 | `LIFE-006` | A transfer interrupted by a real sleep or a real network loss shall end in a way that is… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
-| `LIFE-007` | Retry discovery and rebinding with a bounded backoff and jitter | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
+| `LIFE-007` | Retry discovery and rebinding with a bounded backoff and jitter | MUST | `F-13` | M2 | Lifecycle and recovery test | Scheduled |
 | `LIFE-008` | Recover from an abnormal termination with an atomic state and either a consistent catalogue or… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 | `LIFE-009` | The administration surface and the user interface shall reflect the effective interface | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 | `LIFE-010` | The installation of the login-item service and the permissions it needs shall be explicit and… | MUST | `F-15` | M2 | Lifecycle and recovery test | Verified |
-| `LIFE-011` | Keep a local, redacted timeline of network changes and recovery events that the user may export… | SHOULD | `F-13` | M2 | Lifecycle and recovery test | Verified |
+| `LIFE-011` | Keep a local, redacted timeline of network changes and recovery events that the user may export… | SHOULD | `F-13` | M2 | Lifecycle and recovery test | Implemented |
 
 ## MB — macOS menu bar application
 
@@ -461,3 +461,10 @@ Requirement method, ID rules and the traceability chain are defined in
 A requirement is only *planned* when it has all of: an ID, a definition, a priority,
 an owning feature, a milestone and a verification method. A requirement missing any
 of these stays `Draft` and is not part of the baseline.
+
+
+## Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 1.1 / 2026-11-18 | Owner direction DEC-077 revises UX-008 and UX-017 for app-owned text scaling through 200% and reflow without clipping; the v1.0 baseline is preserved in `docs/99-archive/2026-11-18-larger-text-accessibility/`. |

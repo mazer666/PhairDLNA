@@ -10,6 +10,8 @@
 /// What the application knows about the server.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub enum ServerState {
+    /// The application has not received a status response yet.
+    Checking,
     /// Nothing listens on the port of the administration surface.
     #[default]
     Stopped,
@@ -67,9 +69,65 @@ impl PresentationMode {
     }
 }
 
+/// The app-owned text size for the native interface.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum TextScale {
+    /// The standard size.
+    #[default]
+    Percent100,
+    /// One and a half times the standard size.
+    Percent150,
+    /// Twice the standard size.
+    Percent200,
+}
+
+impl TextScale {
+    /// The multiplier for app content and menu text.
+    pub fn factor(self) -> f64 {
+        match self {
+            Self::Percent100 => 1.0,
+            Self::Percent150 => 1.5,
+            Self::Percent200 => 2.0,
+        }
+    }
+
+    /// The percentage shown in the app.
+    pub fn percent(self) -> &'static str {
+        match self {
+            Self::Percent100 => "100%",
+            Self::Percent150 => "150%",
+            Self::Percent200 => "200%",
+        }
+    }
+
+    /// Reads the saved preference, falling back to the standard size.
+    pub fn of(value: &str) -> Self {
+        match value.trim() {
+            "150" => Self::Percent150,
+            "200" => Self::Percent200,
+            _ => Self::Percent100,
+        }
+    }
+
+    /// The value persisted in app preferences.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Percent100 => "100",
+            Self::Percent150 => "150",
+            Self::Percent200 => "200",
+        }
+    }
+}
+
 /// A snapshot of the server.
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct ServerSnapshot {
+    /// The name media clients see during discovery.
+    pub device_name: String,
+    /// The address advertised to clients on the local network.
+    pub device_address: Option<String>,
+    /// Whether the daemon currently runs its SSDP discovery task.
+    pub discovery_available: Option<bool>,
     /// The state of the server.
     pub state: ServerState,
     /// How long the server has been running, in seconds.
@@ -89,12 +147,23 @@ pub struct ServerSnapshot {
 }
 
 impl ServerSnapshot {
+    /// The application is waiting for the first status response.
+    pub fn checking() -> Self {
+        Self {
+            state: ServerState::Checking,
+            ..Self::default()
+        }
+    }
+
     /// The snapshot of a server that is not there.
     ///
-    /// The application starts with this snapshot, so that the menu shows
-    /// something before the first answer of the surface arrives.
+    /// Use this after the application has confirmed that the surface is
+    /// unreachable; use [`Self::checking`] before the first answer arrives.
     pub fn stopped() -> Self {
-        Self::default()
+        Self {
+            state: ServerState::Stopped,
+            ..Self::default()
+        }
     }
 }
 

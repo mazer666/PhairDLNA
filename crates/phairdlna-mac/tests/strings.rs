@@ -10,193 +10,20 @@
 //! Example: the key `menu.status.running` of the language `en-GB` holds
 //!          "Server running — {streams} active streams".
 
+#[path = "strings/recovery_copy.rs"]
+mod recovery_copy;
 mod support;
 
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 use phairdlna_mac::text::{Strings, StringsError, SUPPORTED_LOCALES};
+use support::locale_contract::{ALLOWED_LITERALS, EXPECTED_KEYS, TECHNICAL_LITERALS};
 use support::{collect_unknown_literals, collect_user_texts, is_unknown_literal, string_literals};
-
-/// The keys the application needs. Every language must carry every one of
-/// them, and the test below fails as soon as one is missing.
-const EXPECTED_KEYS: &[&str] = &[
-    "cli.error.bad_port",
-    "cli.error.missing_value",
-    "cli.error.no_menu_bar",
-    "cli.error.not_macos",
-    "cli.error.not_main_thread",
-    "cli.error.unknown_option",
-    "cli.help.equivalent",
-    "cli.help.port",
-    "cli.help.token_file",
-    "cli.help.usage",
-    "error.answer_invalid",
-    "error.answer_unexpected",
-    "error.busy",
-    "error.cannot_open",
-    "error.configuration_unreadable",
-    "error.preference_failed",
-    "error.request_refused",
-    "error.scan_silent",
-    "error.server_not_started",
-    "error.surface_unreachable",
-    "error.surface_unreadable",
-    "error.token_refused",
-    "error.token_unreadable",
-    "error.worker_not_started",
-    "menu.accessibility.label",
-    "menu.accessibility.refused",
-    "menu.accessibility.running",
-    "menu.accessibility.scanning",
-    "menu.accessibility.stopped",
-    "menu.action.mode_advanced",
-    "menu.action.mode_simple",
-    "menu.action.open_admin",
-    "menu.action.open_folders",
-    "menu.action.add_folders",
-    "menu.action.preferences",
-    "menu.action.export_diagnostics",
-    "menu.action.quit",
-    "menu.action.rescan",
-    "menu.action.start_server",
-    "menu.action.stop_server",
-    "menu.status.badge",
-    "menu.status.header",
-    "menu.status.no_roots",
-    "menu.status.refused",
-    "menu.status.last_scan",
-    "menu.status.objects",
-    "menu.status.root",
-    "menu.status.root_missing",
-    "menu.status.running",
-    "menu.status.scanning",
-    "menu.status.stopped",
-    "menu.status.transfer",
-    "menu.status.uptime",
-    "menu.tooltip.add_folders",
-    "menu.tooltip.export_diagnostics",
-    "menu.tooltip.open_folders",
-    "menu.tooltip.preferences",
-    "menu.tooltip.quit",
-    "menu.tooltip.rescan",
-    "menu.tooltip.start_server",
-    "menu.tooltip.stop_server",
-    "notice.folders_updated",
-    "notice.rescan_done",
-    "notice.rescan_failed",
-    "notice.server_control_failed",
-    "notice.server_started",
-    "notice.server_stopped",
-    "panel.folders_error",
-    "panel.save_diagnostics",
-    "panel.select_folders",
-    "prefs.about_desc",
-    "prefs.about_license",
-    "prefs.about_repo",
-    "prefs.about_title",
-    "prefs.about_version",
-    "prefs.add_folder",
-    "prefs.button_add",
-    "prefs.button_done",
-    "prefs.button_file",
-    "prefs.discovery_enabled",
-    "prefs.extract_artwork",
-    "prefs.http_port",
-    "prefs.log_level",
-    "prefs.redact_logs",
-    "prefs.remove_folder",
-    "prefs.roots_edit_hint",
-    "prefs.roots_header",
-    "prefs.save",
-    "prefs.save_failed",
-    "prefs.save_success",
-    "prefs.server_name",
-    "prefs.ssdp_port",
-    "prefs.summary",
-    "prefs.tab_about",
-    "prefs.tab_advanced",
-    "prefs.tab_expert",
-    "prefs.tab_general",
-    "prefs.tab_ultra",
-    "prefs.title",
-    "tooltip.add_folder",
-    "tooltip.artwork",
-    "tooltip.discovery",
-    "tooltip.editor",
-    "tooltip.http_port",
-    "tooltip.log_level",
-    "tooltip.redact",
-    "tooltip.remove_folder",
-    "tooltip.roots_list",
-    "tooltip.save",
-    "tooltip.server_name",
-    "tooltip.ssdp_port",
-    "wizard.button_choose",
-    "wizard.button_later",
-    "wizard.message",
-    "wizard.title",
-];
 
 /// The tests that read the environment must not run at the same time: the
 /// environment belongs to the whole process, not to a test.
 static ENVIRONMENT: Mutex<()> = Mutex::new(());
-
-/// The literals that are not texts of the user interface.
-///
-/// The rule of the test below is narrow enough that the literals of the
-/// protocol are not texts, but the ones that name a whole header are
-/// listed here so that they do not need a new argument every time.
-const TECHNICAL_LITERALS: &[&str] = &[
-    "Content-Type: application/json",
-    "Content-Type: text/plain",
-    "Content-Type: text/html",
-    "User-Agent",
-    "Authorization",
-    "Accept",
-    "Bearer",
-];
-
-/// The literals of the code that are written down.
-///
-/// Every literal of the production code that holds a space is on this list
-/// or on [`TECHNICAL_LITERALS`]. The list holds the texts that the user never
-/// reads: the diagnostics of the reader of the answers, the diagnostics of
-/// the reader of the resource files and the parts of a request that are
-/// built. A new text of the user interface does not belong here: it belongs
-/// in a resource file (`UX-020`).
-const ALLOWED_LITERALS: &[&str] = &[
-    // The diagnostics of the reader of the answers.
-    "the answer carries no number",
-    "the answer does not begin with a version of the protocol",
-    "the answer has no empty line between the headers and the body",
-    "the document ends in the middle of a value",
-    "the document holds something after byte {position}",
-    "the document is not valid json at byte {position}",
-    "the document nests deeper than {depth} levels",
-    "the document of {length} bytes is too large",
-    "the number at byte {position} cannot be read",
-    "the text at byte {position} cannot be read",
-    // The diagnostics of the reader of the resource files.
-    "the key holds a character that is not a letter, a digit, a dot or an underscore",
-    "the language {locale} is not supported; the application ships with {}",
-    "the line has no `=` between the key and the value",
-    "the line has no key in front of the `=`",
-    "the line must hold the number: {line}",
-    "the value of the key is empty",
-    "line {} of the resource file: the key {key} is written twice",
-    "line {} of the resource file: {reason}",
-    // The parts of a request that are built.
-    ": ",
-    ", ",
-    "{bearer} {token}",
-    "{host}: {value}\r\n",
-    "{method} {path} {version}\r\n",
-    "{version} 200 {ok}\r\n{length}: 2\r\n\r\n{{}}",
-    "{} {}",
-    // The name of the defence of the surface.
-    "cross-site request forgery",
-];
 
 #[test]
 fn every_language_carries_every_key() {
@@ -309,6 +136,24 @@ fn a_language_that_is_not_shipped_falls_back() {
     );
 }
 
+/// The first supported macOS preference wins over the process environment.
+#[test]
+fn the_preferred_language_wins_over_environment() {
+    with_preferred_languages(&["de-AT"], "en-US", "de-DE");
+}
+
+/// An unsupported preferred language is skipped for the next supported one.
+#[test]
+fn the_next_supported_preferred_language_is_selected() {
+    with_preferred_languages(&["it-IT", "fr-CA"], "en-GB", "fr-FR");
+}
+
+/// The process locale is used when no preferred language is supported.
+#[test]
+fn preferred_languages_fall_back_to_environment() {
+    with_preferred_languages(&["it-IT", "ja-JP"], "en-GB", "en-GB");
+}
+
 /// The resource files on the disk are well formed and end with a newline.
 #[test]
 fn the_resource_files_are_well_formed() {
@@ -409,6 +254,22 @@ fn with_environment(variables: &[(&str, &str)], expected: &str) {
         std::env::set_var(name, value);
     }
     let strings = Strings::for_current_locale().expect("the fallback is shipped");
+    assert_eq!(strings.locale(), expected);
+}
+
+/// Reads preferred languages while controlling the environment fallback.
+fn with_preferred_languages(preferences: &[&str], environment: &str, expected: &str) {
+    let _guard = ENVIRONMENT
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    std::env::set_var("LC_ALL", environment);
+    std::env::set_var("LC_MESSAGES", "");
+    std::env::set_var("LANG", "");
+    let preferences: Vec<String> = preferences
+        .iter()
+        .map(|locale| (*locale).to_owned())
+        .collect();
+    let strings = Strings::for_preferred_locales(&preferences).expect("the fallback is shipped");
     assert_eq!(strings.locale(), expected);
 }
 

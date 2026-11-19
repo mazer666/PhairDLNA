@@ -1,8 +1,10 @@
 # F-14 — Local administration and diagnostics
 
-Status: In progress — the administration surface and the diagnostics are implemented (M2.4, M2.5); the source offer (OPS-016, SEC-070) is not
+Status: In progress — the authenticated loopback API and diagnostics are implemented (M2.4, M2.5); the native macOS application is the user-facing administration surface (DEC-075); the source offer (OPS-016, SEC-070) is not
 Owner role: Product/Requirements
-Version/date: 0.2 / 2026-11-16
+Version/date: 1.1 / 2026-11-19
+Purpose: Specify the authenticated loopback API, diagnostics and network source offer; not the user interface.
+References: `../00-governance/PROJECT-STANDARDS.md`, `../00-governance/REQUIREMENTS-METHOD.md`, `F-15`, `../07-project/ROADMAP.md`, `../07-project/OPEN-DECISIONS.md` (OD-16), `DEC-075`.
 Requirements:
 OPS-016, OPS-017, OPS-020, OPS-021, OPS-022, OPS-023, OPS-024, OPS-025, OPS-026, OPS-027, UX-011,
 UX-012, SEC-070, SEC-071, SEC-072
@@ -11,9 +13,10 @@ Research sources: `docs/09-research/` - a citation such as `standards §8.3 C12`
 
 ## 1. Purpose and user story
 
-The **administration surface** is a small HTTP interface, reachable only from the machine the
-server runs on, that shows what the server is doing and lets the user steer it: rescan a folder,
-pause a scan, read the configuration. It is optional — the media server is complete without it.
+The **administration surface** is a small authenticated HTTP API, reachable only from the machine
+the server runs on. The native macOS application uses it to show what the server is doing and let
+the user steer it. The API is optional — the media server is complete without it — and it serves
+no browser interface (DEC-075).
 
 The **diagnostics report** is a structured, redacted snapshot of the running server that a user
 can paste into a bug report.
@@ -25,10 +28,10 @@ corresponding source, at no charge, from a network server. A DLNA server on a LA
 users over a network, so the source offer is a product feature: anybody on the network who can
 reach the server can fetch the source of the exact build that is running.
 
-**User story.** As a user, I want a way to see what the server is doing and to ask it to re-read a
-folder without juggling command-line flags; I want that interface to be reachable only from my own
-machine, even though my browser visits plenty of pages; and because this software is free, I want
-anyone who talks to my server to be able to download the source of the version I am running.
+**User story.** As a Mac user, I want one native application for setup, status and everyday server
+tasks, without having to open a browser or use command-line flags. The application talks to a
+loopback-only authenticated API. As a user of the server, I also want anyone who talks to it to be
+able to download the source of the version I am running.
 
 ## 2. Scope
 
@@ -37,8 +40,8 @@ anyone who talks to my server to be able to download the source of the version I
   control actions the surface offers; the diagnostics report; the display of connected clients; the
   source offer route and the reporting of the source revision.
 
-**Explicitly out of scope** — the macOS menu bar application and any graphical interface (a
-  separate feature); remote administration of any kind; serving media bytes over the administration
+**Explicitly out of scope** — the native macOS application itself (F-15); a browser-based
+  administration interface; remote administration of any kind; serving media bytes over the administration
   origin (OPS-024); the UPnP and DLNA protocol surface, which never mentions the administration
   surface (F-01, F-02); telemetry, analytics and crash reporting of any kind (SEC-090); and the
   licence and supply-chain tooling itself (SUP-001 … SUP-008).
@@ -154,6 +157,13 @@ anyone who talks to my server to be able to download the source of the version I
   (security-landscape §6.2 rule 6). The CSRF token arrives in a header as well. The custom header is a fixed
   non-standard name, for example `X-Phair-Admin`. All three comparisons are constant-time. A log record about a
   rejected request names the reason and a truncated hash of the token, never the token itself.
+- **Status identity.** The authenticated `GET /api/status` response carries `device_name`, matching the
+  friendly name in the UPnP device description, and `device_address`, the advertised IPv4 address or JSON
+  `null` when the daemon is local-only. It also carries `discovery_available`, which is true only while the
+  SSDP discovery task is running and becomes false when discovery is disabled, cannot bind, or stops. The daemon
+  supplies the host it uses to build media URLs and SSDP advertisements; the app does not infer an address from
+  its own configuration. These values stay inside the existing authenticated response and are not added to
+  diagnostics exports.
 - **Token file.** The token file has mode `0600` inside a directory with mode `0700`, in the per-user data
   directory of the platform (ADR-0003, `UserEnvironment`). The server checks the mode at start-up and refuses to
   serve the administration surface from a file that other users can read, explaining why (CFG-014, SEC-013).
@@ -162,9 +172,14 @@ anyone who talks to my server to be able to download the source of the version I
 - **Limits.** The administration surface reads the same limit table as the media surface: request-head size,
   body size, concurrent connections, in-flight requests, read and write timeouts (SEC-011, SEC-012, SEC-016,
   security-landscape §8).
-- **Control actions.** [DESIGN] The action set is closed and small: report status, start a scan, stop a scan,
-  list the roots, list the quarantined subtrees, read and write a small set of configuration values. No action
-  executes a command, opens a file by an arbitrary path or reaches outside the catalogue (SEC-005, SEC-001).
+- **Control actions.** [DESIGN, DEC-079; implementation gated by OD-15] The existing actions report status,
+  start a scan, stop a scan, list roots and list quarantined subtrees. DEC-079 selects an explicit authenticated
+  API allowlist for settings updates after the app creates the initial typed configuration locally. The API must
+  validate the complete candidate, persist atomically and report that a controlled service restart is required;
+  the app must distinguish saved settings from effective settings. No action executes a command, opens a file by
+  an arbitrary path or reaches outside the catalogue (SEC-005, SEC-001). The API has no configuration-write route
+  yet, and the app's folder picker and direct configuration writes have been removed. Implementation remains
+  gated by OD-15's service identity/access evidence and independent review.
 - **Source offer.** [DESIGN] The offer is a single immutable archive produced at build time and embedded in the
   binary, so that the running build always offers the source of *itself* and never of a checkout that happens to
   be lying around. The route serves it with a `Content-Length` and no `Content-Type` invention. The revision
@@ -304,10 +319,12 @@ automated test · **Met** —
 `crates/phairdlna-admin/tests/admin_surface.rs::the_answer_never_carries_a_cross_origin_header` and
 `::a_preflight_question_is_refused`
 
-**AC-06** — *Given* a media URL requested on the administration origin, *when* it is served,
-*then* the answer is a generic `404` and no byte of the media file is returned. Requirements:
-OPS-024 · Verification: negative test · **Met** — the surface knows three routes and nothing
-else; `crates/phairdlna-admin/tests/admin_surface.rs::an_unknown_path_is_refused`
+**AC-06** — *Given* a media URL or a browser document route requested on the administration
+origin, *when* it is served, *then* the answer is a generic `404` and no media byte or HTML page is
+returned. Requirements: OPS-024, DEC-075 · Verification: negative test · **Implemented; evidence
+not run on this change** — `crates/phairdlna-admin/tests/admin_api.rs::browser_routes_are_not_exposed`
+checks `/` and `/index.html`; `crates/phairdlna-admin/tests/admin_surface.rs::an_unknown_path_is_refused`
+covers unknown API paths.
 
 **AC-07** — *Given* a build in which the administration crate is absent or the surface is
 disabled, *when* the server starts, *then* discovery, browsing and media delivery behave exactly
@@ -386,10 +403,14 @@ description and not part of the discovery; it has its own listeners
 
 | Purpose | Path |
 | --- | --- |
-| Request pipeline, token, CSRF token, custom header, `Host` allowlist, CORS refusal, the three routes | `crates/phairdlna-admin/tests/admin_surface.rs` |
+| Request pipeline, token, CSRF token, custom header, `Host` allowlist, CORS refusal and API routes | `crates/phairdlna-admin/tests/admin_surface.rs` |
+| Admin read/write silence deadlines, shared connection cap and partial-header timeout | `crates/phairdlna-admin/src/listener.rs`, `crates/phairdlna-admin/tests/admin_surface/timeout.rs` |
+| Handler-future timeout status and expiry | `crates/phairdlna-admin/src/routes/timeout.rs` |
+| Browser routes remain unavailable; settings explanation API | `crates/phairdlna-admin/tests/admin_api.rs` |
 | The surface of a running daemon: status, diagnostics, rescan, refusals, token file | `crates/phairdlna-cli/tests/admin.rs` |
 | The rules of the configuration of the surface | `crates/phairdlna-core/src/config/validate/admin.rs` |
-| The token file, the comparison and the permissions | `crates/phairdlna-admin/src/token.rs` |
+| Token generation, comparison, private file handling and typed token errors | `crates/phairdlna-admin/src/token.rs`, `crates/phairdlna-admin/src/token/error.rs` |
+| Token secrecy, malformed-input refusal and private-file behavior | `crates/phairdlna-admin/src/token/tests.rs` |
 
 **Method.** The administration surface is driven over the loopback interface with a hand-written
 HTTP client, so that the `Host` header, the credentials and the custom header can be controlled
@@ -418,18 +439,37 @@ pipeline that embeds the revision, and the licence obligations of AGPL-3.0 §13.
    cannot live on the loopback-only administration origin; the media origin is the natural home. That is a
    deliberate asymmetry — the offer is public, the administration surface is not — and it should be stated in the
    user-facing text. *Closes when:* the owner confirms the placement.
-4. **[DECIDED 2026-11-16] Whether a browser session is ever involved.** The session *is* the token of the
-   installation: the "cross-site request forgery" token is derived from it with a keyed hash, and a client
-   that does not know the token cannot compute the value. No cookie and no session store exist (DEC-060). If
-   a browser interface is added later, a cookie with `SameSite=Strict` may be needed.
+4. **[DECIDED 2026-11-16; browser UI removed by DEC-075] Whether a browser session is ever involved.**
+   The session *is* the token of the installation: the "cross-site request forgery" token is derived
+   from it with a keyed hash, and a client that does not know the token cannot compute the value. No
+   cookie and no session store exist (DEC-060). The API serves no browser interface.
 5. **[OPEN] How long a disconnected client stays visible.** UX-012 asks which client is connected; a client that
    disconnected a second ago is not connected. *Proposed decision:* the status output lists the open transfers
    and, separately, the last client that disconnected, with a timestamp. *Closes when:* the owner decides.
 6. **[OPEN] Whether the diagnostics report lists the compatibility profiles.** It is useful and it names client
    families, which are not personal data (SEC-093), but it does tell a reader which devices use this server.
    *Closes when:* the owner decides whether the list is included by default or only in an extended report.
+7. **[DECIDED DIRECTION, DEC-079; implementation gated by OD-15] How app settings are committed and activated.** The app creates
+   the initial typed configuration locally; later updates use the authenticated API, complete-candidate validation,
+   atomic persistence and a controlled restart. The app must distinguish saved from effective values. The admin API
+   has no configuration-write route yet, and F-12 rejects runtime reload. Implementation depends on OD-15's service
+   access evidence. The API path needs positive, negative, concurrency and recovery criteria, including restart failure.
 
 ## 13. Implementation record (M2.4, M2.5)
+
+### Revision history
+
+| Version/date | Change |
+| --- | --- |
+| 1.1 / 2026-11-19 | Records DEC-079's local bootstrap and authenticated settings API direction, gated by the OD-15 service-access review. |
+| 1.0 / 2026-11-19 | Splits token errors and focused security tests into separate modules; the existing public `token::TokenError` path and token behavior remain unchanged. |
+| 0.9 / 2026-11-19 | Adds accepted-connection limits and socket read/write deadlines to the loopback API; records unit and partial-header timeout coverage. |
+| 0.3 / 2026-11-18 | DEC-075 makes the native application the user-facing surface and removes the embedded browser UI; the loopback service is specified as an API. |
+| 0.4 / 2026-11-18 | Extends authenticated status with the UPnP friendly name and advertised LAN address for the native TV-connection view. |
+| 0.5 / 2026-11-18 | Adds live SSDP task availability so the native app does not imply TV discovery is working when it is disabled or failed to start. |
+| 0.6 / 2026-11-18 | Records the API write gap and direct-write prototype; gates validation, persistence and activation semantics on OD-16. |
+| 0.7 / 2026-11-18 | Makes configuration-write actions conditional on OD-16 options A/B and records the first-run/preferences save gaps. |
+| 0.8 / 2026-11-19 | Corrects the current direct-save error handling and records that Preferences are read-only with no Save button. |
 
 What the milestone delivered, and where the delivery differs from the text above. The differences are
 recorded in the decision log and are not silent.
