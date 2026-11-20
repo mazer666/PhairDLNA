@@ -22,20 +22,20 @@
 //! volume are three different things, and each of them is reported
 //! (`FUN-007`, `FUN-017`, `PLT-011`).
 
-use std::collections::HashMap;
-use std::path::{Path, PathBuf};
-
 use crate::config::{MediaRoot, SymlinkPolicy};
-use crate::platform::{FileId, FileSystem, VolumeId};
+use crate::platform::{FileId, FileSystem};
+use std::collections::HashMap;
 
 use super::identifier::object_id;
 use super::library::{Catalogue, CONTENT_DIRECTORY_OBJECT_ID};
-use super::roots::{diagnostic_for, excluded_roots, RootSummary};
-use super::scanner::{scan, RootSpec, ScanEntry, ScanOptions, ScanOutcome};
+use super::roots::{excluded_roots, RootSummary};
+use super::scanner::ScanEntry;
 use super::tree::{add_container, add_standard_containers, fill_playlists, RootContext};
 use super::update_id::{update_id_for, CatalogueFingerprint};
-use super::volumes::{RootChange, VolumeChange, VolumeRegistry, VolumeReport};
+use super::volumes::{VolumeRegistry, VolumeReport};
 use super::ContentItem;
+
+mod scan;
 
 /// A catalogue and what happened to the volumes of the roots while it was built.
 #[derive(Debug, Clone)]
@@ -125,7 +125,8 @@ impl Builder<'_> {
         let root_key = index.to_string();
         let policy = root.symlink_policy.unwrap_or(symlink_policy);
         let excludes = excluded_roots(roots, index);
-        let (volume, path, outcome) = self.scan_root(root, policy, excludes);
+        let (volume, path, outcome) =
+            scan::scan_root(self.filesystem, self.registry, root, policy, excludes);
         let fingerprint = self.filesystem.volume_fingerprint(&path).ok();
         let change = self.registry.observe(
             &root.name,
@@ -134,7 +135,7 @@ impl Builder<'_> {
             fingerprint.as_ref(),
             outcome.root_present,
         );
-        self.report_change(&root.name, change);
+        scan::report_change(&mut self.catalogue, &mut self.report, &root.name, change);
         let id = object_id(&volume, &root_key, "");
         let entries = self.without_duplicates(outcome.entries);
         let context = RootContext {
@@ -200,68 +201,6 @@ impl Builder<'_> {
             kept.push(entry);
         }
         kept
-    }
-
-    /// Writes down what happened to the volume of a root.
-    ///
-    /// The change is both reported in the report of the build and written into
-    /// the diagnostics of the catalogue, so that a person reads it and a client
-    /// sees the identifiers change (`FUN-007`, `PLT-011`).
-    fn report_change(&mut self, name: &str, change: VolumeChange) {
-        if let Some(sentence) = diagnostic_for(name, &change) {
-            self.catalogue.diagnostics.push(sentence);
-        }
-        self.report.changes.push(RootChange {
-            name: name.to_owned(),
-            change,
-        });
-    }
-
-    /// Scans one root and returns what the scan found.
-    fn scan_root(
-        &mut self,
-        root: &MediaRoot,
-        symlink_policy: SymlinkPolicy,
-        nested: Vec<String>,
-    ) -> (VolumeId, PathBuf, ScanOutcome) {
-        let path = PathBuf::from(&root.path);
-        let volume = self.volume_of(&path);
-        let spec = RootSpec {
-            path: path.clone(),
-            name: root.name.clone(),
-            volume: volume.clone(),
-            case_sensitivity: self.filesystem.case_sensitivity(&volume),
-        };
-        let mut excludes = root.exclude.clone();
-        excludes.extend(nested);
-        let options = ScanOptions {
-            symlink_policy,
-            excludes,
-            ..ScanOptions::default()
-        };
-        let outcome = scan(&spec, &options, self.filesystem);
-        (volume, path, outcome)
-    }
-
-    /// The identity of the volume a path lives on.
-    ///
-    /// A path that cannot be read has no volume that the platform could report
-    /// for it: the place of an unplugged drive is a folder of another volume.
-    /// The identity the catalogue remembers is used instead, so that the
-    /// identifiers of the root do not change while the drive is away
-    /// (`INT-062`) and so that the event of the platform finds the root again
-    /// (`PLT-011`).
-    fn volume_of(&self, path: &Path) -> VolumeId {
-        if self.filesystem.is_readable_folder(path) {
-            return self
-                .filesystem
-                .volume_of(path)
-                .unwrap_or_else(|_| VolumeId::new("local"));
-        }
-        self.registry
-            .remembered_identity(path)
-            .cloned()
-            .unwrap_or_else(|| VolumeId::new("local"))
     }
 
     /// Finishes the catalogue and computes its update identifier.
