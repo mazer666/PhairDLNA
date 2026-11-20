@@ -90,9 +90,22 @@ impl Desktop {
         self.main_window = Some(window);
     }
 
-    /// Leaves the application while the server keeps running.
+    /// Leaves the application after asking the user for confirmation.
     pub(super) fn quit(&self) {
-        NSApplication::sharedApplication(self.marker).terminate(None);
+        let title = self.app.localized_text("dialog.quit.title");
+        let message = self.app.localized_text("dialog.quit.message");
+        let confirm = self.app.localized_text("dialog.quit.confirm");
+        let cancel = self.app.localized_text("dialog.quit.cancel");
+
+        if crate::platform::panels::ask_confirmation(
+            self.marker,
+            &title,
+            &message,
+            &confirm,
+            &cancel,
+        ) {
+            NSApplication::sharedApplication(self.marker).terminate(None);
+        }
     }
 
     /// Explains the current configuration state before opening the overview.

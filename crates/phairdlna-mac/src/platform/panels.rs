@@ -42,3 +42,29 @@ pub fn show_alert(mtm: MainThreadMarker, title: &str, message: &str, style: NSAl
     alert.setAlertStyle(style);
     alert.runModal();
 }
+
+/// Shows a native confirmation dialog with confirm and cancel buttons.
+///
+/// Returns `true` if the user clicked the confirm button (first button).
+pub fn ask_confirmation(
+    mtm: MainThreadMarker,
+    title: &str,
+    message: &str,
+    confirm_label: &str,
+    cancel_label: &str,
+) -> bool {
+    let alert = NSAlert::new(mtm);
+    let title_str = NSString::from_str(title);
+    let message_str = NSString::from_str(message);
+    let confirm_str = NSString::from_str(confirm_label);
+    let cancel_str = NSString::from_str(cancel_label);
+
+    alert.setMessageText(&title_str);
+    alert.setInformativeText(&message_str);
+    alert.setAlertStyle(NSAlertStyle::Warning);
+    alert.addButtonWithTitle(&confirm_str);
+    alert.addButtonWithTitle(&cancel_str);
+
+    // NSAlertFirstButtonReturn in AppKit is 1000
+    alert.runModal() == 1000
+}

@@ -149,3 +149,7 @@ prefs.roots_read_only = Las carpetas y la configuración se muestran solo como i
 prefs.read_only_notice = La configuración del servidor es de solo lectura por ahora.
 prefs.config_unavailable = Configuración no disponible. Comprueba el archivo y sus permisos.
 prefs.value_unavailable = No disponible
+dialog.quit.title = ¿Salir de PhairDLNA?
+dialog.quit.message = ¿Estás seguro de que deseas salir de PhairDLNA? El servidor de medios DLNA se detendrá y ya no estará disponible para los dispositivos en tu red.
+dialog.quit.confirm = Salir
+dialog.quit.cancel = Cancelar
