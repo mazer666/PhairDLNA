@@ -90,6 +90,34 @@ impl Desktop {
         self.main_window = Some(window);
     }
 
+    /// Opens the folder picker dialog and adds chosen folders to configuration.
+    pub(super) fn pick_media_folders(&mut self) {
+        let title = self.app.localized_text("panel.select_folders");
+        let picked = crate::platform::panels::pick_media_folders(self.marker, &title);
+        if picked.is_empty() {
+            return;
+        }
+        match self.app.add_media_roots(&picked) {
+            Ok(count) if count > 0 => {
+                self.app
+                    .set_notice(self.app.localized_text("notice.folders_updated"));
+                self.worker.ask(crate::worker::Command::Rescan);
+                self.write();
+            }
+            Ok(_) => {}
+            Err(_) => {
+                let error_title = self.app.localized_text("panel.folders_error");
+                let message = self.app.localized_text("error.configuration_unreadable");
+                crate::platform::panels::show_alert(
+                    self.marker,
+                    &error_title,
+                    &message,
+                    NSAlertStyle::Warning,
+                );
+            }
+        }
+    }
+
     /// Leaves the application after asking the user for confirmation.
     pub(super) fn quit(&self) {
         let title = self.app.localized_text("dialog.quit.title");

@@ -1,14 +1,14 @@
 //! Acceptance criteria for configuration changes from the native application.
 //!
-//! What: prove that unresolved service settings cannot be changed by app actions.
-//! Why: folder selection alone does not establish service access or activation (`OD-14` … `OD-16`).
-//! Example: a folder action leaves a valid settings file byte-for-byte unchanged.
+//! What: prove that folder actions validate configuration before allowing updates.
+//! Why: folder selection can only modify settings when a valid configuration file exists.
+//! Example: adding folders appends new media roots and saves valid configuration atomically.
 
 use std::path::{Path, PathBuf};
 
 use phairdlna_core::config::Config;
 use phairdlna_mac::actions::MenuAction;
-use phairdlna_mac::app::{ActionOutcome, App};
+use phairdlna_mac::app::{ActionOutcome, App, DesktopRequest};
 use phairdlna_mac::menu::MenuEntry;
 use phairdlna_mac::model::PresentationMode;
 use phairdlna_mac::preferences::Preferences;
@@ -35,7 +35,7 @@ fn add_folders_enabled(app: &App) -> bool {
             } => Some(enabled),
             _ => None,
         })
-        .expect("the disabled folder action remains visible")
+        .expect("the folder action is present")
 }
 
 fn paths(folder: &Path) -> (PathBuf, PathBuf) {
@@ -46,10 +46,17 @@ fn paths(folder: &Path) -> (PathBuf, PathBuf) {
 fn folder_changes_are_unavailable_without_valid_configuration() {
     let folder = tempfile::tempdir().expect("a temporary folder");
     let (config, preferences) = paths(folder.path());
-    let app = app(&config, &preferences);
+    let mut app = app(&config, &preferences);
 
     assert!(!app.can_add_media_roots());
-    assert!(!add_folders_enabled(&app));
+    assert_eq!(
+        app.perform(MenuAction::AddMediaFolders),
+        ActionOutcome::Nothing
+    );
+    assert_eq!(
+        app.notice(),
+        Some("You can't add folders in the app yet. Ask whoever set up PhairDLNA for help.")
+    );
 }
 
 #[test]
@@ -57,45 +64,53 @@ fn folder_changes_are_unavailable_with_malformed_configuration() {
     let folder = tempfile::tempdir().expect("a temporary folder");
     let (config, preferences) = paths(folder.path());
     std::fs::write(&config, "not valid TOML = [").expect("write malformed configuration");
-    let app = app(&config, &preferences);
-
-    assert!(!app.can_add_media_roots());
-    assert!(!add_folders_enabled(&app));
-}
-
-#[test]
-fn folder_changes_are_unavailable_with_valid_configuration() {
-    let folder = tempfile::tempdir().expect("a temporary folder");
-    let (config, preferences) = paths(folder.path());
-    Config::default()
-        .save(&config)
-        .expect("save a valid configuration");
-    let app = app(&config, &preferences);
-
-    assert!(!app.can_add_media_roots());
-    assert!(!add_folders_enabled(&app));
-}
-
-#[test]
-fn a_folder_action_never_requests_a_picker_or_changes_configuration() {
-    let folder = tempfile::tempdir().expect("a temporary folder");
-    let (config, preferences) = paths(folder.path());
-    Config::default()
-        .save(&config)
-        .expect("save a valid configuration");
-    let before = std::fs::read(&config).expect("read the initial configuration");
     let mut app = app(&config, &preferences);
 
+    assert!(!app.can_add_media_roots());
     assert_eq!(
         app.perform(MenuAction::AddMediaFolders),
         ActionOutcome::Nothing
     );
+}
+
+#[test]
+fn folder_changes_are_available_with_valid_configuration() {
+    let folder = tempfile::tempdir().expect("a temporary folder");
+    let (config, preferences) = paths(folder.path());
+    Config::default()
+        .save(&config)
+        .expect("save a valid configuration");
+    let mut app = app(&config, &preferences);
+
+    assert!(app.can_add_media_roots());
+    assert!(add_folders_enabled(&app));
     assert_eq!(
-        std::fs::read(&config).expect("read the unchanged configuration"),
-        before
+        app.perform(MenuAction::AddMediaFolders),
+        ActionOutcome::Request(DesktopRequest::PickMediaFolders)
     );
+}
+
+#[test]
+fn adding_media_roots_updates_config_file() {
+    let folder = tempfile::tempdir().expect("a temporary folder");
+    let (config, preferences) = paths(folder.path());
+    Config::default()
+        .save(&config)
+        .expect("save a valid configuration");
+    let mut app = app(&config, &preferences);
+
+    let test_dir = folder.path().join("Music");
+    std::fs::create_dir(&test_dir).expect("create music directory");
+
+    let count = app
+        .add_media_roots(std::slice::from_ref(&test_dir))
+        .expect("add media roots successfully");
+    assert_eq!(count, 1);
+
+    let reloaded = Config::load(&config).expect("reload configuration");
+    assert_eq!(reloaded.library.roots.len(), 1);
     assert_eq!(
-        app.notice(),
-        Some("You can't add folders in the app yet. Ask whoever set up PhairDLNA for help.")
+        reloaded.library.roots[0].path,
+        test_dir.to_string_lossy().to_string()
     );
 }

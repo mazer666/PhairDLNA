@@ -17,12 +17,16 @@ impl App {
             MenuAction::RescanLibrary => self.start_rescan(),
             MenuAction::OpenPreferences => ActionOutcome::Request(DesktopRequest::ShowPreferences),
             MenuAction::AddMediaFolders => {
-                self.notice = Some(
-                    self.strings
-                        .text("notice.folder_changes_unavailable")
-                        .to_owned(),
-                );
-                ActionOutcome::Nothing
+                if self.can_add_media_roots() {
+                    ActionOutcome::Request(DesktopRequest::PickMediaFolders)
+                } else {
+                    self.notice = Some(
+                        self.strings
+                            .text("notice.folder_changes_unavailable")
+                            .to_owned(),
+                    );
+                    ActionOutcome::Nothing
+                }
             }
             MenuAction::ExportDiagnostics => {
                 ActionOutcome::Request(DesktopRequest::ExportDiagnostics)

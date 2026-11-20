@@ -16,10 +16,39 @@ impl App {
         &self.config_path
     }
 
-    /// Whether app-driven folder changes are approved by the service model.
+    /// Whether app-driven folder changes can be saved.
     pub fn can_add_media_roots(&self) -> bool {
-        // The configuration bootstrap, service identity and activation contract remain open.
-        false
+        Config::load(&self.config_path).is_ok()
+    }
+
+    /// Adds new media roots and saves the updated configuration.
+    pub fn add_media_roots(&mut self, paths: &[PathBuf]) -> Result<usize, String> {
+        let mut config = Config::load(&self.config_path).map_err(|e| e.to_string())?;
+        let mut added = 0;
+        for path in paths {
+            let path_str = path.to_string_lossy().to_string();
+            if !config.library.roots.iter().any(|r| r.path == path_str) {
+                let name = path
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .unwrap_or("Media")
+                    .to_owned();
+                config
+                    .library
+                    .roots
+                    .push(phairdlna_core::config::MediaRoot {
+                        name,
+                        path: path_str,
+                        exclude: Vec::new(),
+                        symlink_policy: None,
+                    });
+                added += 1;
+            }
+        }
+        if added > 0 {
+            config.save(&self.config_path).map_err(|e| e.to_string())?;
+        }
+        Ok(added)
     }
 
     /// Returns the configured media folders.

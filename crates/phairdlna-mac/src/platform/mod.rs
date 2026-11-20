@@ -18,6 +18,7 @@ pub mod about_tab;
 pub mod bridge;
 pub mod desktop;
 pub mod icon;
+pub mod main_menu;
 pub mod main_window;
 pub mod panels;
 pub mod preferences_window;

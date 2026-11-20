@@ -54,6 +54,8 @@ pub enum DesktopRequest {
     ShowMainWindow,
     /// Export the diagnostics report.
     ExportDiagnostics,
+    /// Pick media folders to share.
+    PickMediaFolders,
     /// Leave the application; the server keeps running.
     Quit,
 }

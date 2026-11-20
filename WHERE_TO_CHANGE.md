@@ -122,6 +122,7 @@
 | `crates/phairdlna-mac/src/platform/` | The AppKit adapter: status menu, native overview and preferences windows (`desktop/windows.rs`), runtime bridge and workspace; server lifecycle controls are not integrated while OD-14/OD-15 remain open | F-15 |
 | `crates/phairdlna-mac/src/platform/desktop/windows.rs` | Main and preferences window lifecycle, inline initial-configuration guidance, and diagnostics save-panel flow | F-15 |
 | `crates/phairdlna-mac/src/platform/main_window.rs` | The native overview, with scrollable content for the app-owned 100% / 150% / 200% text setting | F-15 |
+| `crates/phairdlna-mac/src/platform/main_menu.rs` | The native application main menu bar at top-left (App, File, Window menus) | F-15 |
 | `crates/phairdlna-mac/src/platform/main_window/layout.rs`, `crates/phairdlna-mac/src/platform/main_window/layout/reflow.rs` | Overview controls, localized accessibility names and responsive vertical reflow for larger text and wrapped content | F-15 |
 | `crates/phairdlna-mac/src/platform/main_window/layout/geometry.rs` | Pure document-height calculation that centers short content and preserves scroll height for long content | F-15 |
 | `crates/phairdlna-mac/src/overview.rs` | Localized state-dependent content for the native server overview | F-15 |

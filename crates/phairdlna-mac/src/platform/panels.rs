@@ -7,8 +7,32 @@
 use std::path::PathBuf;
 
 use objc2::MainThreadMarker;
-use objc2_app_kit::{NSAlert, NSAlertStyle, NSModalResponseOK, NSSavePanel};
+use objc2_app_kit::{NSAlert, NSAlertStyle, NSModalResponseOK, NSOpenPanel, NSSavePanel};
 use objc2_foundation::NSString;
+
+/// Prompts the user to select one or more media folders using a native `NSOpenPanel`.
+pub fn pick_media_folders(mtm: MainThreadMarker, prompt_title: &str) -> Vec<PathBuf> {
+    let panel = NSOpenPanel::openPanel(mtm);
+    let title = NSString::from_str(prompt_title);
+    panel.setMessage(Some(&title));
+    panel.setCanChooseDirectories(true);
+    panel.setCanChooseFiles(false);
+    panel.setAllowsMultipleSelection(true);
+    panel.setResolvesAliases(true);
+
+    if panel.runModal() != NSModalResponseOK {
+        return Vec::new();
+    }
+
+    let urls = panel.URLs();
+    let mut selected = Vec::new();
+    for url in urls.iter() {
+        if let Some(path_str) = url.path() {
+            selected.push(PathBuf::from(path_str.to_string()));
+        }
+    }
+    selected
+}
 
 /// Prompts the user to save a file with a suggested filename using `NSSavePanel`.
 pub fn pick_save_file(

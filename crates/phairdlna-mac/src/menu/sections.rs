@@ -79,7 +79,7 @@ pub(super) fn action_entries(
             strings,
             "menu.action.add_folders",
             MenuAction::AddMediaFolders,
-            false,
+            true,
         ),
         action(
             strings,

@@ -82,6 +82,11 @@ impl Desktop {
             prefs_window: None,
             main_window: None,
         };
+        super::main_menu::install_main_menu(
+            marker,
+            &desktop.item.menu_target(),
+            desktop.app.strings(),
+        );
         desktop.write();
         desktop.show_initial_configuration_guidance();
         desktop.show_main_window();
@@ -169,6 +174,7 @@ impl Desktop {
             DesktopRequest::ExportDiagnostics => {
                 let _ = self.worker.ask(Command::ExportDiagnostics);
             }
+            DesktopRequest::PickMediaFolders => self.pick_media_folders(),
             DesktopRequest::Quit => self.quit(),
         }
     }
