@@ -68,6 +68,21 @@ pub(super) fn action_entries(
 ) -> Vec<MenuEntry> {
     let serving = matches!(snapshot.state, ServerState::Running | ServerState::Scanning);
     let mut actions = Vec::new();
+    if serving {
+        actions.push(action(
+            strings,
+            "menu.action.stop_server",
+            MenuAction::StopServer,
+            true,
+        ));
+    } else {
+        actions.push(action(
+            strings,
+            "menu.action.start_server",
+            MenuAction::StartServer,
+            true,
+        ));
+    }
     actions.extend([
         action(
             strings,
@@ -121,6 +136,8 @@ fn mode_key(mode: PresentationMode) -> &'static str {
 /// One action of the menu.
 fn action(strings: &Strings, key: &str, action: MenuAction, enabled: bool) -> MenuEntry {
     let tooltip_key = match action {
+        MenuAction::StartServer => Some("menu.tooltip.start_server"),
+        MenuAction::StopServer => Some("menu.tooltip.stop_server"),
         MenuAction::OpenMediaFolders => Some("menu.tooltip.open_folders"),
         MenuAction::AddMediaFolders => Some("menu.tooltip.add_folders"),
         MenuAction::RescanLibrary => Some("menu.tooltip.rescan"),

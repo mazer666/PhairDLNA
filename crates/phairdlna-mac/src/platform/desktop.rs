@@ -175,6 +175,8 @@ impl Desktop {
                 let _ = self.worker.ask(Command::ExportDiagnostics);
             }
             DesktopRequest::PickMediaFolders => self.pick_media_folders(),
+            DesktopRequest::StartServer => self.start_server(),
+            DesktopRequest::StopServer => self.stop_server(),
             DesktopRequest::Quit => self.quit(),
         }
     }

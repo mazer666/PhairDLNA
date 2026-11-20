@@ -28,6 +28,8 @@ impl App {
                     ActionOutcome::Nothing
                 }
             }
+            MenuAction::StartServer => ActionOutcome::Request(DesktopRequest::StartServer),
+            MenuAction::StopServer => ActionOutcome::Request(DesktopRequest::StopServer),
             MenuAction::ExportDiagnostics => {
                 ActionOutcome::Request(DesktopRequest::ExportDiagnostics)
             }

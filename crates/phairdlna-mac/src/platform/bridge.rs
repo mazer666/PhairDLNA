@@ -122,6 +122,20 @@ define_class!(
             dispatch(MenuAction::AddMediaFolders.tag());
         }
 
+        /// The action "Start Server".
+        #[unsafe(method(phairStartServer:))]
+        fn phair_start_server(&self, sender: &AnyObject) {
+            let _ = sender;
+            dispatch(MenuAction::StartServer.tag());
+        }
+
+        /// The action "Stop Server".
+        #[unsafe(method(phairStopServer:))]
+        fn phair_stop_server(&self, sender: &AnyObject) {
+            let _ = sender;
+            dispatch(MenuAction::StopServer.tag());
+        }
+
         /// The action "Quit".
         #[unsafe(method(phairQuit:))]
         fn phair_quit(&self, sender: &AnyObject) {

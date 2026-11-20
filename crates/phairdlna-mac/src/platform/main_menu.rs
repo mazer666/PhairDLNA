@@ -15,8 +15,19 @@ use crate::text::Strings;
 /// Installs the macOS application main menu bar at the top-left of the screen.
 pub fn install_main_menu(mtm: MainThreadMarker, target: &MenuTarget, strings: &Strings) {
     let main_menu = NSMenu::new(mtm);
+    main_menu.addItem(&build_app_menu(mtm, target, strings));
+    main_menu.addItem(&build_file_menu(mtm, target, strings));
+    main_menu.addItem(&build_window_menu(mtm, target, strings));
 
-    // App Submenu ("PhairDLNA")
+    let app = NSApplication::sharedApplication(mtm);
+    app.setMainMenu(Some(&main_menu));
+}
+
+fn build_app_menu(
+    mtm: MainThreadMarker,
+    target: &MenuTarget,
+    strings: &Strings,
+) -> objc2::rc::Retained<NSMenuItem> {
     let app_menu_item = NSMenuItem::new(mtm);
     let app_menu = NSMenu::new(mtm);
     let title_app = NSString::from_str("PhairDLNA");
@@ -28,7 +39,6 @@ pub fn install_main_menu(mtm: MainThreadMarker, target: &MenuTarget, strings: &S
         MenuAction::OpenPreferences,
     );
     app_menu.addItem(&about_item);
-
     app_menu.addItem(&NSMenuItem::separatorItem(mtm));
 
     let prefs_item = target.menu_item(
@@ -38,7 +48,6 @@ pub fn install_main_menu(mtm: MainThreadMarker, target: &MenuTarget, strings: &S
     );
     prefs_item.setKeyEquivalent(&NSString::from_str(","));
     app_menu.addItem(&prefs_item);
-
     app_menu.addItem(&NSMenuItem::separatorItem(mtm));
 
     let quit_item = target.menu_item(mtm, strings.text("menu.action.quit"), MenuAction::Quit);
@@ -46,13 +55,33 @@ pub fn install_main_menu(mtm: MainThreadMarker, target: &MenuTarget, strings: &S
     app_menu.addItem(&quit_item);
 
     app_menu_item.setSubmenu(Some(&app_menu));
-    main_menu.addItem(&app_menu_item);
+    app_menu_item
+}
 
-    // File Submenu
+fn build_file_menu(
+    mtm: MainThreadMarker,
+    target: &MenuTarget,
+    strings: &Strings,
+) -> objc2::rc::Retained<NSMenuItem> {
     let file_menu_item = NSMenuItem::new(mtm);
     let file_menu = NSMenu::new(mtm);
     let title_file = NSString::from_str(strings.text("menu.title.file"));
     file_menu.setTitle(&title_file);
+
+    let start_server = target.menu_item(
+        mtm,
+        strings.text("menu.action.start_server"),
+        MenuAction::StartServer,
+    );
+    file_menu.addItem(&start_server);
+
+    let stop_server = target.menu_item(
+        mtm,
+        strings.text("menu.action.stop_server"),
+        MenuAction::StopServer,
+    );
+    file_menu.addItem(&stop_server);
+    file_menu.addItem(&NSMenuItem::separatorItem(mtm));
 
     let add_folders = target.menu_item(
         mtm,
@@ -71,9 +100,14 @@ pub fn install_main_menu(mtm: MainThreadMarker, target: &MenuTarget, strings: &S
     file_menu.addItem(&rescan);
 
     file_menu_item.setSubmenu(Some(&file_menu));
-    main_menu.addItem(&file_menu_item);
+    file_menu_item
+}
 
-    // Window Submenu
+fn build_window_menu(
+    mtm: MainThreadMarker,
+    target: &MenuTarget,
+    strings: &Strings,
+) -> objc2::rc::Retained<NSMenuItem> {
     let win_menu_item = NSMenuItem::new(mtm);
     let win_menu = NSMenu::new(mtm);
     let title_win = NSString::from_str(strings.text("menu.title.window"));
@@ -84,8 +118,5 @@ pub fn install_main_menu(mtm: MainThreadMarker, target: &MenuTarget, strings: &S
     win_menu.addItem(&overview);
 
     win_menu_item.setSubmenu(Some(&win_menu));
-    main_menu.addItem(&win_menu_item);
-
-    let app = NSApplication::sharedApplication(mtm);
-    app.setMainMenu(Some(&main_menu));
+    win_menu_item
 }

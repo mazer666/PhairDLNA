@@ -118,6 +118,40 @@ impl Desktop {
         }
     }
 
+    /// Starts the background server service.
+    pub(super) fn start_server(&mut self) {
+        if let Err(e) = crate::platform::service_control::ServiceControl::system().start() {
+            let error_title = self.app.localized_text("panel.server_error");
+            crate::platform::panels::show_alert(
+                self.marker,
+                &error_title,
+                &e.to_string(),
+                NSAlertStyle::Warning,
+            );
+        } else {
+            self.app
+                .set_notice(self.app.localized_text("notice.server_started"));
+            self.write();
+        }
+    }
+
+    /// Stops the background server service.
+    pub(super) fn stop_server(&mut self) {
+        if let Err(e) = crate::platform::service_control::ServiceControl::system().stop() {
+            let error_title = self.app.localized_text("panel.server_error");
+            crate::platform::panels::show_alert(
+                self.marker,
+                &error_title,
+                &e.to_string(),
+                NSAlertStyle::Warning,
+            );
+        } else {
+            self.app
+                .set_notice(self.app.localized_text("notice.server_stopped"));
+            self.write();
+        }
+    }
+
     /// Leaves the application after asking the user for confirmation.
     pub(super) fn quit(&self) {
         let title = self.app.localized_text("dialog.quit.title");

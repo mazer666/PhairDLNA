@@ -20,6 +20,10 @@ pub enum MenuAction {
     OpenPreferences,
     /// Attempt to add media folders from the application.
     AddMediaFolders,
+    /// Start the server background service.
+    StartServer,
+    /// Stop the server background service.
+    StopServer,
     /// Export the diagnostics report for support.
     ExportDiagnostics,
     /// Switch between the short view and the detailed view.
@@ -50,6 +54,8 @@ impl MenuAction {
             Self::TogglePresentation => 6,
             Self::ExportDiagnostics => 7,
             Self::AddMediaFolders => 8,
+            Self::StartServer => 9,
+            Self::StopServer => 10,
             Self::TextSize100 => 11,
             Self::TextSize150 => 12,
             Self::TextSize200 => 13,
@@ -71,6 +77,8 @@ impl MenuAction {
             6 => Some(Self::TogglePresentation),
             7 => Some(Self::ExportDiagnostics),
             8 => Some(Self::AddMediaFolders),
+            9 => Some(Self::StartServer),
+            10 => Some(Self::StopServer),
             11 => Some(Self::TextSize100),
             12 => Some(Self::TextSize150),
             13 => Some(Self::TextSize200),
@@ -92,6 +100,8 @@ mod tests {
             MenuAction::RescanLibrary,
             MenuAction::OpenPreferences,
             MenuAction::AddMediaFolders,
+            MenuAction::StartServer,
+            MenuAction::StopServer,
             MenuAction::TextSize100,
             MenuAction::TextSize150,
             MenuAction::TextSize200,
@@ -113,7 +123,7 @@ mod tests {
     fn an_unknown_number_is_nothing() {
         assert_eq!(MenuAction::from_tag(0), None);
         assert_eq!(MenuAction::from_tag(99), None);
-        assert_eq!(MenuAction::from_tag(9), None);
-        assert_eq!(MenuAction::from_tag(10), None);
+        assert_eq!(MenuAction::from_tag(14), None);
+        assert_eq!(MenuAction::from_tag(15), None);
     }
 }

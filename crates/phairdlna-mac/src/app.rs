@@ -56,6 +56,10 @@ pub enum DesktopRequest {
     ExportDiagnostics,
     /// Pick media folders to share.
     PickMediaFolders,
+    /// Start the background server.
+    StartServer,
+    /// Stop the background server.
+    StopServer,
     /// Leave the application; the server keeps running.
     Quit,
 }

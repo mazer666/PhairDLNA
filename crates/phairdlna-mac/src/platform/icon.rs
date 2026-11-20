@@ -41,6 +41,8 @@ fn action_symbol_of(action: &MenuAction) -> &'static str {
         MenuAction::RescanLibrary => "arrow.clockwise",
         MenuAction::OpenPreferences => "gearshape",
         MenuAction::AddMediaFolders => "folder.badge.plus",
+        MenuAction::StartServer => "play.fill",
+        MenuAction::StopServer => "stop.fill",
         MenuAction::ExportDiagnostics => "square.and.arrow.up",
         MenuAction::TogglePresentation => "slider.horizontal.3",
         MenuAction::TextSize100 | MenuAction::TextSize150 | MenuAction::TextSize200 => {

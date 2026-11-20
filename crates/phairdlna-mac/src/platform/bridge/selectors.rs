@@ -17,6 +17,8 @@ pub(super) fn selector_of(action: MenuAction) -> Sel {
         MenuAction::RescanLibrary => sel!(phairRescan:),
         MenuAction::OpenPreferences => sel!(phairPreferences:),
         MenuAction::AddMediaFolders => sel!(phairAddFolders:),
+        MenuAction::StartServer => sel!(phairStartServer:),
+        MenuAction::StopServer => sel!(phairStopServer:),
         MenuAction::ExportDiagnostics => sel!(phairExportDiagnostics:),
         MenuAction::Quit => sel!(phairQuit:),
         MenuAction::TogglePresentation => sel!(phairTogglePresentation:),
