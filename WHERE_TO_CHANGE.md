@@ -120,6 +120,8 @@
 | `crates/phairdlna-mac/src/text/strings/resource.rs` | Embedded translation resources, locale matching and resource parsing | F-15 |
 | `crates/phairdlna-mac/src/text/strings/format.rs` | Named placeholder replacement for translated sentences | F-15 |
 | `crates/phairdlna-mac/src/platform/` | The AppKit adapter: status menu, native overview and preferences windows (`desktop/windows.rs`), runtime bridge and workspace; server lifecycle controls are not integrated while OD-14/OD-15 remain open | F-15 |
+| `crates/phairdlna-mac/src/platform/service_control.rs` | The mechanism that starts and stops the job `org.phairdlna.server` with `launchctl`; the mechanism is built, but no user-facing control calls it while OD-14/OD-15 remain open | F-15 |
+| `crates/phairdlna-mac/tests/service_control.rs` | Acceptance checks for the commands of `launchctl`, the refusal of the service manager and the absence of any privilege in the control | F-15 |
 | `crates/phairdlna-mac/src/platform/desktop/windows.rs` | Main and preferences window lifecycle, inline initial-configuration guidance, and diagnostics save-panel flow | F-15 |
 | `crates/phairdlna-mac/src/platform/main_window.rs` | The native overview, with scrollable content for the app-owned 100% / 150% / 200% text setting | F-15 |
 | `crates/phairdlna-mac/src/platform/main_menu.rs` | The native application main menu bar at top-left (App, File, Window menus) | F-15 |

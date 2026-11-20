@@ -202,4 +202,10 @@ pub const ALLOWED_LITERALS: &[&str] = &[
     "{} {}",
     // The name of the defence of the surface.
     "cross-site request forgery",
+    // The diagnostics of the control of the job of the server in launchd.
+    "the program {program} cannot be run: {error}",
+    "the label {label} is not the label of a job of launchd",
+    "the command {} cannot be run: {error}",
+    "the command {} failed and said nothing",
+    "the command {} failed: {reason}",
 ];

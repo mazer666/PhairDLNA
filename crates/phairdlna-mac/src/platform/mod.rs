@@ -22,5 +22,6 @@ pub mod main_menu;
 pub mod main_window;
 pub mod panels;
 pub mod preferences_window;
+pub mod service_control;
 pub mod status_item;
 pub mod workspace;
