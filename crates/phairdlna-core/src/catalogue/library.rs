@@ -26,12 +26,16 @@ use std::path::{Path, PathBuf};
 
 use crate::config::{MediaRoot, SymlinkPolicy};
 use crate::media::{Artwork, ArtworkFinder, ArtworkSource};
-use crate::platform::{FileSystem, VolumeEvent, VolumeId};
+use crate::platform::{FileSystem, VolumeEvent};
 
 use super::volumes::{VolumeRegistry, VolumeReport};
 use super::{ContentContainer, ContentItem, ContentSource, MediaKind};
 
 pub use super::roots::RootSummary;
+
+mod helpers;
+use helpers::roots_of_volume;
+pub(super) use helpers::sort_children;
 
 /// The identifier of the root container.
 pub const ROOT_OBJECT_ID: &str = "0";
@@ -283,36 +287,4 @@ impl ContentSource for Catalogue {
         }
         Some(item)
     }
-}
-
-/// Orders the children of a container: the folders first, then the files.
-///
-/// A playlist is a container like a folder and is listed with them. The
-/// children of a playlist are not sorted: they keep the order of the playlist
-/// (`FUN-015`).
-pub(super) fn sort_children(children: &mut [ContentItem]) {
-    children.sort_by(|left, right| {
-        let rank = |item: &ContentItem| match item.kind {
-            MediaKind::Folder | MediaKind::Playlist => 0,
-            _ => 1,
-        };
-        rank(left)
-            .cmp(&rank(right))
-            .then_with(|| left.title.to_lowercase().cmp(&right.title.to_lowercase()))
-            .then_with(|| left.id.cmp(&right.id))
-    });
-}
-
-/// The paths of the roots that live on a volume.
-///
-/// A platform that reports volumes knows which root is on which volume; the
-/// portable adapter does not, and then every root shares the one identity
-/// (`PLT-005`, `PLT-011`).
-fn roots_of_volume(registry: &VolumeRegistry, volume: &VolumeId) -> Vec<PathBuf> {
-    registry
-        .roots()
-        .iter()
-        .filter(|root| &root.identity == volume)
-        .map(|root| root.path.clone())
-        .collect()
 }
