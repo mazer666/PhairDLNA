@@ -89,8 +89,8 @@ impl StatusItem {
     ///
     /// The menu is built again from the entries, so that the menu and the
     /// model of the menu can never disagree.
-    pub fn set_entries(&mut self, mtm: MainThreadMarker, entries: &[MenuEntry], scale: f64) {
-        self.target.set_menu_text_size(&self.menu, scale);
+    pub fn set_entries(&mut self, mtm: MainThreadMarker, entries: &[MenuEntry]) {
+        self.target.apply_standard_menu_font(&self.menu);
         self.menu.removeAllItems();
         for entry in entries {
             match entry {

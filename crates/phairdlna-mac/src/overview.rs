@@ -4,8 +4,47 @@
 //! Why: the same state rules need automated coverage without opening AppKit windows.
 //! Example: a stopped server gets unavailable library, folder and activity text.
 
+use crate::actions::MenuAction;
 use crate::model::{ServerSnapshot, ServerState};
 use crate::text::Strings;
+
+/// What the control that starts and stops the server offers for a state.
+///
+/// The rule lives here and not in the window, so that the state of the
+/// control can be checked without a window (`MB-004`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ServerToggle {
+    /// The action the control carries out.
+    pub action: MenuAction,
+    /// The key of the text the control shows.
+    pub title_key: &'static str,
+    /// Whether the control may be chosen.
+    pub enabled: bool,
+}
+
+/// The control that starts or stops the server, for the state of the server.
+///
+/// A server that is checked cannot be started or stopped yet, so the control
+/// is disabled until the application knows the state.
+pub fn server_toggle(state: ServerState) -> ServerToggle {
+    match state {
+        ServerState::Running | ServerState::Scanning => ServerToggle {
+            action: MenuAction::StopServer,
+            title_key: "menu.action.stop_server",
+            enabled: true,
+        },
+        ServerState::Stopped | ServerState::Refused => ServerToggle {
+            action: MenuAction::StartServer,
+            title_key: "menu.action.start_server",
+            enabled: true,
+        },
+        ServerState::Checking => ServerToggle {
+            action: MenuAction::StartServer,
+            title_key: "menu.action.start_server",
+            enabled: false,
+        },
+    }
+}
 
 /// The localized text displayed by the server overview.
 #[derive(Clone, Debug, PartialEq, Eq)]

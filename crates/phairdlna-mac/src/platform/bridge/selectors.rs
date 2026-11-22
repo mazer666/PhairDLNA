@@ -22,8 +22,7 @@ pub(super) fn selector_of(action: MenuAction) -> Sel {
         MenuAction::ExportDiagnostics => sel!(phairExportDiagnostics:),
         MenuAction::Quit => sel!(phairQuit:),
         MenuAction::TogglePresentation => sel!(phairTogglePresentation:),
-        MenuAction::TextSize100 => sel!(phairTextSize100:),
-        MenuAction::TextSize150 => sel!(phairTextSize150:),
-        MenuAction::TextSize200 => sel!(phairTextSize200:),
+        MenuAction::SaveSettings => sel!(phairSaveSettings:),
+        MenuAction::RemoveMediaFolder => sel!(phairRemoveFolder:),
     }
 }

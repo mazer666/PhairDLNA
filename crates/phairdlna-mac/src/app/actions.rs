@@ -6,10 +6,17 @@
 
 use crate::actions::MenuAction;
 use crate::app::{ActionOutcome, App, DesktopRequest};
-use crate::model::{ServerState, TextScale};
+use crate::model::ServerState;
 
 impl App {
     /// Carries out an action of the menu.
+    ///
+    /// The two actions of the overview that carry values — saving the settings
+    /// and removing a folder — are carried out by the platform layer, because
+    /// only it knows what the user typed into the controls of the window. The
+    /// application answers them with [`ActionOutcome::Nothing`] and waits for
+    /// the platform to call [`crate::app::App::save_settings`] and
+    /// [`crate::app::App::remove_media_root`].
     pub fn perform(&mut self, action: MenuAction) -> ActionOutcome {
         match action {
             MenuAction::OpenAdmin => ActionOutcome::Request(DesktopRequest::ShowMainWindow),
@@ -34,9 +41,8 @@ impl App {
                 ActionOutcome::Request(DesktopRequest::ExportDiagnostics)
             }
             MenuAction::TogglePresentation => self.switch_view(),
-            MenuAction::TextSize100 => self.set_text_scale(TextScale::Percent100),
-            MenuAction::TextSize150 => self.set_text_scale(TextScale::Percent150),
-            MenuAction::TextSize200 => self.set_text_scale(TextScale::Percent200),
+            MenuAction::SaveSettings => ActionOutcome::Nothing,
+            MenuAction::RemoveMediaFolder => ActionOutcome::Nothing,
             MenuAction::Quit => ActionOutcome::Request(DesktopRequest::Quit),
         }
     }
@@ -48,14 +54,6 @@ impl App {
         ) {
             self.scanning = true;
             self.snapshot.state = ServerState::Scanning;
-        }
-        ActionOutcome::Nothing
-    }
-
-    fn set_text_scale(&mut self, scale: TextScale) -> ActionOutcome {
-        self.text_scale = scale;
-        if self.preferences.set_text_scale(scale).is_err() {
-            self.notice = Some(self.strings.text("error.preference_failed").to_owned());
         }
         ActionOutcome::Nothing
     }

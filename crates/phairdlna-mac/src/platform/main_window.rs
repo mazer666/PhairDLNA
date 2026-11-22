@@ -13,7 +13,8 @@ use objc2_app_kit::{
 use objc2_foundation::{NSPoint, NSRect, NSSize, NSString};
 
 use super::bridge::MenuTarget;
-use crate::model::{ServerSnapshot, ServerState, TextScale};
+use crate::app::ServerSettings;
+use crate::model::{ServerSnapshot, ServerState};
 use crate::text::Strings;
 
 mod layout;
@@ -34,11 +35,11 @@ impl MainWindow {
         strings: &Strings,
         snapshot: &ServerSnapshot,
         target: MenuTarget,
-        scale: TextScale,
         notice: Option<&str>,
         folder_action_available: bool,
+        settings: &ServerSettings,
     ) -> Self {
-        let views = OverviewViews::new(mtm, strings, &target);
+        let views = OverviewViews::new(mtm, strings, &target, settings);
         let scroll = NSScrollView::new(mtm);
         scroll.setFrame(NSRect::new(
             NSPoint::new(0.0, 0.0),
@@ -64,24 +65,25 @@ impl MainWindow {
         window.setContentMinSize(NSSize::new(600.0, 400.0));
         window.setTitle(&NSString::from_str(strings.text("overview.title")));
         window.center();
+        target.attach_window_delegate(&window);
 
         let result = Self {
             window,
             views,
             _target: target,
         };
-        result.update(strings, snapshot, scale, notice, folder_action_available);
+        result.update(strings, snapshot, notice, folder_action_available, settings);
         result
     }
 
-    /// Updates visible state, then reflows every section for the selected text size.
+    /// Updates visible state, then reflows every section.
     pub fn update(
         &self,
         strings: &Strings,
         snapshot: &ServerSnapshot,
-        scale: TextScale,
         notice: Option<&str>,
         folder_action_available: bool,
+        settings: &ServerSettings,
     ) {
         let content = crate::overview::overview_content(strings, snapshot);
         self.views
@@ -115,7 +117,29 @@ impl MainWindow {
             .add_folders
             .setTitle(&NSString::from_str(folder_action));
         self.views.add_folders.setEnabled(folder_action_available);
-        self.views.reflow(scale);
+        self.views.controls.set_toggle(
+            strings,
+            crate::overview::server_toggle(snapshot.state),
+            &self._target,
+        );
+        self.views.controls.set_roots(&settings.roots);
+        self.views.reflow();
+    }
+
+    /// The values the user typed into the server settings fields.
+    pub fn input_values(&self) -> (String, String) {
+        self.views.controls.values()
+    }
+
+    /// The path of the shared folder the user chose in the list.
+    pub fn selected_root(&self) -> Option<String> {
+        self.views.controls.selected_root()
+    }
+
+    /// Updates the settings fields with the stored values.
+    pub fn set_settings(&self, settings: &ServerSettings) {
+        self.views.controls.set_values(settings);
+        self.views.controls.set_roots(&settings.roots);
     }
 
     fn update_status_color(&self, state: ServerState) {

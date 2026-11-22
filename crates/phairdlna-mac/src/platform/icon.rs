@@ -45,9 +45,8 @@ fn action_symbol_of(action: &MenuAction) -> &'static str {
         MenuAction::StopServer => "stop.fill",
         MenuAction::ExportDiagnostics => "square.and.arrow.up",
         MenuAction::TogglePresentation => "slider.horizontal.3",
-        MenuAction::TextSize100 | MenuAction::TextSize150 | MenuAction::TextSize200 => {
-            "textformat.size"
-        }
+        MenuAction::SaveSettings => "square.and.arrow.down",
+        MenuAction::RemoveMediaFolder => "trash",
         MenuAction::Quit => "power",
     }
 }

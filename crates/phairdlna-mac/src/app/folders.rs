@@ -6,8 +6,9 @@
 
 use std::path::{Path, PathBuf};
 
-use phairdlna_core::config::Config;
+use phairdlna_core::config::{validate, Config};
 
+use crate::app::settings::SettingsError;
 use crate::app::{ActionOutcome, App, DesktopRequest};
 
 impl App {
@@ -60,6 +61,26 @@ impl App {
             .iter()
             .map(|root| PathBuf::from(&root.path))
             .collect())
+    }
+
+    /// Removes one shared folder and saves the updated configuration.
+    ///
+    /// The folder is looked up by its path, because the path is the only part
+    /// of a root that identifies it. A path that is not configured changes
+    /// nothing and is not an error: the configuration of another program must
+    /// not be rewritten because of a stale choice.
+    pub fn remove_media_root(&mut self, path: &str) -> Result<bool, SettingsError> {
+        let mut config = Config::load(&self.config_path).map_err(|_| SettingsError::Unreadable)?;
+        let before = config.library.roots.len();
+        config.library.roots.retain(|root| root.path != path);
+        if config.library.roots.len() == before {
+            return Ok(false);
+        }
+        validate(&config).map_err(|_| SettingsError::Invalid)?;
+        config
+            .save(&self.config_path)
+            .map_err(|_| SettingsError::Unwritable)?;
+        Ok(true)
     }
 
     pub(super) fn open_media_folders(&mut self) -> ActionOutcome {

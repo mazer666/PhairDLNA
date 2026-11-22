@@ -24,10 +24,12 @@
 use std::cell::RefCell;
 
 use objc2::rc::Retained;
-use objc2::runtime::AnyObject;
+use objc2::runtime::{AnyObject, ProtocolObject};
 use objc2::{define_class, msg_send, sel, MainThreadMarker, MainThreadOnly};
-use objc2_app_kit::{NSButton, NSMenuItem};
-use objc2_foundation::{NSObject, NSString, NSTimer};
+use objc2_app_kit::{
+    NSApplication, NSApplicationDelegate, NSButton, NSMenuItem, NSWindow, NSWindowDelegate,
+};
+use objc2_foundation::{NSObject, NSObjectProtocol, NSString, NSTimer};
 
 use crate::actions::MenuAction;
 
@@ -94,25 +96,18 @@ define_class!(
             dispatch(MenuAction::ExportDiagnostics.tag());
         }
 
-        /// Selects 100% text size with an explicit menu selector.
-        #[unsafe(method(phairTextSize100:))]
-        fn phair_text_size_100(&self, sender: &AnyObject) {
+        /// The action "Save settings".
+        #[unsafe(method(phairSaveSettings:))]
+        fn phair_save_settings(&self, sender: &AnyObject) {
             let _ = sender;
-            dispatch(MenuAction::TextSize100.tag());
+            dispatch(MenuAction::SaveSettings.tag());
         }
 
-        /// Selects 150% text size with an explicit menu selector.
-        #[unsafe(method(phairTextSize150:))]
-        fn phair_text_size_150(&self, sender: &AnyObject) {
+        /// The action "Remove media folder".
+        #[unsafe(method(phairRemoveFolder:))]
+        fn phair_remove_folder(&self, sender: &AnyObject) {
             let _ = sender;
-            dispatch(MenuAction::TextSize150.tag());
-        }
-
-        /// Selects 200% text size with an explicit menu selector.
-        #[unsafe(method(phairTextSize200:))]
-        fn phair_text_size_200(&self, sender: &AnyObject) {
-            let _ = sender;
-            dispatch(MenuAction::TextSize200.tag());
+            dispatch(MenuAction::RemoveMediaFolder.tag());
         }
 
         /// The action "Add media folders".
@@ -155,6 +150,28 @@ define_class!(
         fn phair_timer_fired(&self, timer: &NSTimer) {
             dispatch(TICK);
             let _ = timer;
+        }
+    }
+
+    unsafe impl NSObjectProtocol for Target {}
+
+    unsafe impl NSApplicationDelegate for Target {
+        #[unsafe(method(applicationShouldHandleReopen:hasVisibleWindows:))]
+        fn application_should_handle_reopen(
+            &self,
+            _sender: &NSApplication,
+            _has_visible_windows: bool,
+        ) -> bool {
+            dispatch(MenuAction::OpenAdmin.tag());
+            false
+        }
+    }
+
+    unsafe impl NSWindowDelegate for Target {
+        #[unsafe(method(windowShouldClose:))]
+        fn window_should_close(&self, sender: &NSWindow) -> bool {
+            sender.orderOut(None);
+            false
         }
     }
 );
@@ -263,14 +280,26 @@ impl MenuTarget {
         }
     }
 
-    /// Applies the app-owned text size to an AppKit menu.
-    pub fn set_menu_text_size(&self, menu: &objc2_app_kit::NSMenu, factor: f64) {
-        let font = objc2_app_kit::NSFont::menuFontOfSize(13.0 * factor);
+    /// Applies the standard system font to an AppKit menu.
+    pub fn apply_standard_menu_font(&self, menu: &objc2_app_kit::NSMenu) {
+        let font = objc2_app_kit::NSFont::menuFontOfSize(13.0);
         // SAFETY: AppKit owns this menu on the main thread, and the font is a
-        // system menu font returned for the same native UI scale preference.
+        // system menu font of standard size.
         unsafe {
             menu.setFont(Some(&font));
         }
+    }
+
+    /// Connects the application delegate to receive reopen events from the Dock.
+    pub fn attach_application_delegate(&self, app: &NSApplication) {
+        let delegate = ProtocolObject::from_ref(&*self.target);
+        app.setDelegate(Some(delegate));
+    }
+
+    /// Connects the window delegate to intercept window close requests.
+    pub fn attach_window_delegate(&self, window: &NSWindow) {
+        let delegate = ProtocolObject::from_ref(&*self.target);
+        window.setDelegate(Some(delegate));
     }
 
     /// Creates the timer that ticks on the main thread.

@@ -15,18 +15,16 @@ use objc2_app_kit::{
 use objc2_foundation::{NSPoint, NSRect, NSSize, NSString};
 use phairdlna_core::config::Config;
 
+use super::controls::{PreferenceField, PreferenceTextView};
 use super::general::build_general_tab;
-use super::scaling::{ScaledTextField, ScaledTextView};
 
 pub(super) const TAB_WIDTH: f64 = 640.0;
 pub(super) const TAB_HEIGHT: f64 = 475.0;
 
 pub(super) struct PreferenceTabs {
     pub(super) tab_view: Retained<NSTabView>,
-    pub(super) roots_scroll: Retained<NSScrollView>,
-    pub(super) expert_scroll: Retained<NSScrollView>,
-    pub(super) text_fields: Vec<ScaledTextField>,
-    pub(super) text_views: Vec<ScaledTextView>,
+    pub(super) text_fields: Vec<PreferenceField>,
+    pub(super) text_views: Vec<PreferenceTextView>,
 }
 
 pub(super) fn build_tabs(
@@ -43,7 +41,7 @@ pub(super) fn build_tabs(
     ));
     let general = build_general_tab(mtm, &config, config_available, strings);
     tab_view.addTabViewItem(&general.tab);
-    let (expert_tab, expert_view, expert_scroll) = build_expert_tab(mtm, &raw_toml, strings);
+    let (expert_tab, expert_view) = build_expert_tab(mtm, &raw_toml, strings);
     tab_view.addTabViewItem(&expert_tab);
     let (about_tab, about_fields) = super::super::about_tab::build_about_tab(mtm, strings);
     tab_view.addTabViewItem(&about_tab);
@@ -51,7 +49,7 @@ pub(super) fn build_tabs(
     text_fields.extend(
         about_fields
             .into_iter()
-            .map(|(field, frame)| ScaledTextField {
+            .map(|(field, frame)| PreferenceField {
                 wrap_text: None,
                 frame,
                 field,
@@ -60,16 +58,14 @@ pub(super) fn build_tabs(
     );
     PreferenceTabs {
         tab_view,
-        roots_scroll: general.roots_scroll,
-        expert_scroll,
         text_fields,
         text_views: vec![
-            ScaledTextView {
+            PreferenceTextView {
                 view: general.roots_view,
                 font_size: 12.0,
                 fixed_pitch: false,
             },
-            ScaledTextView {
+            PreferenceTextView {
                 view: expert_view,
                 font_size: 12.0,
                 fixed_pitch: true,
@@ -95,11 +91,7 @@ fn build_expert_tab(
     mtm: MainThreadMarker,
     raw_toml: &str,
     strings: &crate::text::Strings,
-) -> (
-    Retained<NSTabViewItem>,
-    Retained<NSTextView>,
-    Retained<NSScrollView>,
-) {
+) -> (Retained<NSTabViewItem>, Retained<NSTextView>) {
     let tab = NSTabViewItem::new();
     tab.setLabel(&NSString::from_str(strings.text("prefs.tab_expert")));
     let scroll = NSScrollView::new(mtm);
@@ -117,7 +109,7 @@ fn build_expert_tab(
     editor.setString(&NSString::from_str(raw_toml));
     scroll.setDocumentView(Some(&editor));
     tab.setView(Some(&scroll));
-    (tab, editor, scroll)
+    (tab, editor)
 }
 
 pub(super) fn add_tab_scroll(
@@ -140,9 +132,8 @@ pub(super) fn add_tab_scroll(
     scroll
 }
 
-pub(super) fn tab_scroll_frame(factor: f64, content_size: NSSize) -> NSRect {
-    let bottom_controls_end = 46.0 * factor;
-    let y = 90.0_f64.max(bottom_controls_end + 8.0);
+pub(super) fn tab_scroll_frame(content_size: NSSize) -> NSRect {
+    let y = 90.0_f64;
     NSRect::new(
         NSPoint::new(10.0, y),
         NSSize::new(content_size.width - 20.0, content_size.height - y - 10.0),
@@ -154,7 +145,7 @@ pub(super) fn add_notice(
     content: &NSView,
     config_path: &Path,
     strings: &crate::text::Strings,
-) -> ScaledTextField {
+) -> PreferenceField {
     let key = if Config::load(config_path).is_ok() {
         "prefs.read_only_notice"
     } else {
@@ -166,7 +157,7 @@ pub(super) fn add_notice(
     notice.setFont(Some(&NSFont::systemFontOfSize(11.0)));
     notice.setTextColor(Some(&objc2_app_kit::NSColor::secondaryLabelColor()));
     content.addSubview(&notice);
-    ScaledTextField {
+    PreferenceField {
         wrap_text: None,
         field: notice,
         frame,

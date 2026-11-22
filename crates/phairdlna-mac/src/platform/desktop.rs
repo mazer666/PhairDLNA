@@ -82,6 +82,10 @@ impl Desktop {
             prefs_window: None,
             main_window: None,
         };
+        desktop
+            .item
+            .menu_target()
+            .attach_application_delegate(&objc2_app_kit::NSApplication::sharedApplication(marker));
         super::main_menu::install_main_menu(
             marker,
             &desktop.item.menu_target(),
@@ -108,7 +112,57 @@ impl Desktop {
         let outcome = self.app.perform(action);
         self.ask_worker(action);
         self.apply(outcome);
+        self.handle_window_actions(action);
         self.write();
+    }
+
+    /// Handles actions triggered directly from the main window controls.
+    fn handle_window_actions(&mut self, action: MenuAction) {
+        match action {
+            MenuAction::SaveSettings => self.save_window_settings(),
+            MenuAction::RemoveMediaFolder => self.remove_selected_folder(),
+            _ => {}
+        }
+    }
+
+    /// Saves the settings entered in the overview window.
+    fn save_window_settings(&mut self) {
+        let Some(ref window) = self.main_window else {
+            return;
+        };
+        let (device_name, http_port) = window.input_values();
+        match self.app.save_settings(&device_name, &http_port) {
+            Ok(()) => {
+                let notice = self.app.localized_text("notice.settings_saved");
+                self.app.set_notice(notice);
+            }
+            Err(e) => {
+                let notice = self.app.localized_text(e.notice_key());
+                self.app.set_notice(notice);
+            }
+        }
+    }
+
+    /// Removes the folder selected in the overview folder picker.
+    fn remove_selected_folder(&mut self) {
+        let Some(ref window) = self.main_window else {
+            return;
+        };
+        let Some(path) = window.selected_root() else {
+            return;
+        };
+        match self.app.remove_media_root(&path) {
+            Ok(true) => {
+                let notice = self.app.localized_text("notice.folders_updated");
+                self.app.set_notice(notice);
+                self.worker.ask(Command::Rescan);
+            }
+            Ok(false) => {}
+            Err(e) => {
+                let notice = self.app.localized_text(e.notice_key());
+                self.app.set_notice(notice);
+            }
+        }
     }
 
     /// The tick of the timer.
@@ -188,23 +242,20 @@ impl Desktop {
     fn write(&mut self) {
         let entries = self.app.entries();
         if let Some(ref window) = self.main_window {
+            let settings = self.app.settings();
             window.update(
                 self.app.strings(),
                 self.app.snapshot(),
-                self.app.text_scale(),
                 self.app.notice(),
                 self.app.can_add_media_roots(),
+                &settings,
             );
-        }
-        if let Some(ref window) = self.prefs_window {
-            window.update_text_scale(self.app.text_scale());
         }
         if entries == self.written {
             return;
         }
         self.written = entries.clone();
-        self.item
-            .set_entries(self.marker, &entries, self.app.text_scale().factor());
+        self.item.set_entries(self.marker, &entries);
         self.item.set_state(&self.app.snapshot().state);
         self.item.set_badge(&self.app.badge());
         let (label, value) = self.app.accessibility();

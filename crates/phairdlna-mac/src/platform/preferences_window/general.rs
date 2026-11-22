@@ -7,13 +7,13 @@
 use objc2::rc::Retained;
 use objc2::MainThreadMarker;
 use objc2_app_kit::{
-    NSAccessibility, NSLineBreakMode, NSScrollView, NSTabViewItem, NSTextField, NSTextView, NSView,
+    NSAccessibility, NSLineBreakMode, NSTabViewItem, NSTextField, NSTextView, NSView,
 };
 use objc2_foundation::{NSPoint, NSRect, NSSize, NSString};
 use phairdlna_core::config::Config;
 
+use super::controls::PreferenceField;
 use super::roots::build_roots_view;
-use super::ScaledTextField;
 
 struct ValueRow<'a> {
     title: &'a str,
@@ -25,8 +25,7 @@ struct ValueRow<'a> {
 
 pub(super) struct GeneralTab {
     pub(super) tab: Retained<NSTabViewItem>,
-    pub(super) text_fields: Vec<ScaledTextField>,
-    pub(super) roots_scroll: Retained<NSScrollView>,
+    pub(super) text_fields: Vec<PreferenceField>,
     pub(super) roots_view: Retained<NSTextView>,
 }
 
@@ -64,7 +63,7 @@ pub(super) fn build_general_tab(
         },
         &mut text_fields,
     );
-    let (roots_scroll, roots_view) = add_roots(
+    let roots_view = add_roots(
         &view,
         mtm,
         config,
@@ -76,7 +75,6 @@ pub(super) fn build_general_tab(
     GeneralTab {
         tab,
         text_fields,
-        roots_scroll,
         roots_view,
     }
 }
@@ -101,13 +99,13 @@ fn add_value_row(
     view: &NSView,
     mtm: MainThreadMarker,
     row: ValueRow<'_>,
-    text_fields: &mut Vec<ScaledTextField>,
+    text_fields: &mut Vec<PreferenceField>,
 ) {
     let label = NSTextField::wrappingLabelWithString(&NSString::from_str(row.title), mtm);
     let label_frame = NSRect::new(NSPoint::new(20.0, row.y), NSSize::new(180.0, 24.0));
     label.setFrame(label_frame);
     view.addSubview(&label);
-    text_fields.push(ScaledTextField {
+    text_fields.push(PreferenceField {
         wrap_text: None,
         field: label,
         frame: label_frame,
@@ -127,7 +125,7 @@ fn add_value_row(
     field.setLineBreakMode(NSLineBreakMode::ByCharWrapping);
     field.setMaximumNumberOfLines(0);
     view.addSubview(&field);
-    text_fields.push(ScaledTextField {
+    text_fields.push(PreferenceField {
         wrap_text: row.wrap_long_value.then(|| row.value.clone()),
         field,
         frame: field_frame,
@@ -141,8 +139,8 @@ fn add_roots(
     config: &Config,
     available: bool,
     strings: &crate::text::Strings,
-    text_fields: &mut Vec<ScaledTextField>,
-) -> (Retained<NSScrollView>, Retained<NSTextView>) {
+    text_fields: &mut Vec<PreferenceField>,
+) -> Retained<NSTextView> {
     let heading = NSTextField::wrappingLabelWithString(
         &NSString::from_str(strings.text("prefs.roots_header")),
         mtm,
@@ -150,7 +148,7 @@ fn add_roots(
     let heading_frame = NSRect::new(NSPoint::new(20.0, 320.0), NSSize::new(300.0, 24.0));
     heading.setFrame(heading_frame);
     view.addSubview(&heading);
-    text_fields.push(ScaledTextField {
+    text_fields.push(PreferenceField {
         wrap_text: None,
         field: heading,
         frame: heading_frame,
@@ -164,7 +162,7 @@ fn add_roots(
     let hint_frame = NSRect::new(NSPoint::new(20.0, 298.0), NSSize::new(595.0, 20.0));
     hint.setFrame(hint_frame);
     view.addSubview(&hint);
-    text_fields.push(ScaledTextField {
+    text_fields.push(PreferenceField {
         wrap_text: None,
         field: hint,
         frame: hint_frame,
@@ -172,5 +170,5 @@ fn add_roots(
     });
     let (roots_scroll, roots_view) = build_roots_view(mtm, config, available, strings);
     view.addSubview(&roots_scroll);
-    (roots_scroll, roots_view)
+    roots_view
 }

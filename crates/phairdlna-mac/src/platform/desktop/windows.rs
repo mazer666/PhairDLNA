@@ -57,22 +57,21 @@ impl Desktop {
             self.marker,
             self.app.config_path(),
             self.app.strings(),
-            self.item.menu_target(),
         );
-        window.update_text_scale(self.app.text_scale());
         window.show(self.marker);
         self.prefs_window = Some(window);
     }
 
     /// Opens the overview and refreshes it from the current server snapshot.
     pub(super) fn show_main_window(&mut self) {
+        let settings = self.app.settings();
         if let Some(ref window) = self.main_window {
             window.update(
                 self.app.strings(),
                 self.app.snapshot(),
-                self.app.text_scale(),
                 self.app.notice(),
                 self.app.can_add_media_roots(),
+                &settings,
             );
             window.show(self.marker);
             return;
@@ -82,9 +81,9 @@ impl Desktop {
             self.app.strings(),
             self.app.snapshot(),
             self.item.menu_target(),
-            self.app.text_scale(),
             self.app.notice(),
             self.app.can_add_media_roots(),
+            &settings,
         );
         window.show(self.marker);
         self.main_window = Some(window);

@@ -69,56 +69,6 @@ impl PresentationMode {
     }
 }
 
-/// The app-owned text size for the native interface.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub enum TextScale {
-    /// The standard size.
-    #[default]
-    Percent100,
-    /// One and a half times the standard size.
-    Percent150,
-    /// Twice the standard size.
-    Percent200,
-}
-
-impl TextScale {
-    /// The multiplier for app content and menu text.
-    pub fn factor(self) -> f64 {
-        match self {
-            Self::Percent100 => 1.0,
-            Self::Percent150 => 1.5,
-            Self::Percent200 => 2.0,
-        }
-    }
-
-    /// The percentage shown in the app.
-    pub fn percent(self) -> &'static str {
-        match self {
-            Self::Percent100 => "100%",
-            Self::Percent150 => "150%",
-            Self::Percent200 => "200%",
-        }
-    }
-
-    /// Reads the saved preference, falling back to the standard size.
-    pub fn of(value: &str) -> Self {
-        match value.trim() {
-            "150" => Self::Percent150,
-            "200" => Self::Percent200,
-            _ => Self::Percent100,
-        }
-    }
-
-    /// The value persisted in app preferences.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Self::Percent100 => "100",
-            Self::Percent150 => "150",
-            Self::Percent200 => "200",
-        }
-    }
-}
-
 /// A snapshot of the server.
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct ServerSnapshot {

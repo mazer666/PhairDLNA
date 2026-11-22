@@ -24,13 +24,15 @@ use std::time::Instant;
 
 mod actions;
 mod folders;
+mod settings;
 mod state;
 
-use crate::actions::MenuAction;
 use crate::menu::{self, MenuEntry};
-use crate::model::{PresentationMode, ServerSnapshot, TextScale};
+use crate::model::{PresentationMode, ServerSnapshot};
 use crate::preferences::Preferences;
 use crate::text::Strings;
+
+pub use settings::{ConfiguredRoot, ServerSettings, SettingsError};
 
 /// The result of a refresh of the state.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -86,8 +88,6 @@ pub struct App {
     preferences: Preferences,
     /// The mode of the presentation.
     mode: PresentationMode,
-    /// The app-owned size of native text.
-    text_scale: TextScale,
     /// The last answer of the surface.
     snapshot: ServerSnapshot,
     /// What happened last, as the user reads it.
@@ -114,14 +114,12 @@ impl App {
         preferences: Preferences,
         mode: PresentationMode,
     ) -> Self {
-        let text_scale = preferences.text_scale();
         Self {
             strings,
             config_path,
             address,
             preferences,
             mode,
-            text_scale,
             snapshot: ServerSnapshot::checking(),
             notice: None,
             scanning: false,
@@ -132,11 +130,6 @@ impl App {
     /// The mode of the presentation.
     pub fn mode(&self) -> PresentationMode {
         self.mode
-    }
-
-    /// The app-owned text size.
-    pub fn text_scale(&self) -> TextScale {
-        self.text_scale
     }
 
     /// The state of the server as the application knows it.
@@ -156,43 +149,12 @@ impl App {
 
     /// The entries of the menu.
     pub fn entries(&self) -> Vec<MenuEntry> {
-        let mut entries = menu::entries(
+        menu::entries(
             &self.snapshot,
             &self.strings,
             self.notice.as_deref(),
             self.mode,
-        );
-        entries.push(MenuEntry::Separator);
-        entries.push(MenuEntry::Status {
-            title: self
-                .strings
-                .format("menu.text_size", &[("size", self.text_scale.percent())]),
-        });
-        for (action, key, scale) in [
-            (
-                MenuAction::TextSize100,
-                "menu.text_size_100",
-                TextScale::Percent100,
-            ),
-            (
-                MenuAction::TextSize150,
-                "menu.text_size_150",
-                TextScale::Percent150,
-            ),
-            (
-                MenuAction::TextSize200,
-                "menu.text_size_200",
-                TextScale::Percent200,
-            ),
-        ] {
-            entries.push(MenuEntry::Action {
-                title: self.strings.text(key).to_owned(),
-                action,
-                enabled: scale != self.text_scale,
-                tooltip: None,
-            });
-        }
-        entries
+        )
     }
 
     /// The text of a file or an address that the system refuses to open.

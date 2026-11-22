@@ -28,12 +28,10 @@ pub enum MenuAction {
     ExportDiagnostics,
     /// Switch between the short view and the detailed view.
     TogglePresentation,
-    /// Set the app text size to 100 percent.
-    TextSize100,
-    /// Set the app text size to 150 percent.
-    TextSize150,
-    /// Set the app text size to 200 percent.
-    TextSize200,
+    /// Save the server settings the user typed into the overview.
+    SaveSettings,
+    /// Remove the media folder the user chose in the overview.
+    RemoveMediaFolder,
     /// Leave the application; the server keeps running.
     Quit,
 }
@@ -56,9 +54,8 @@ impl MenuAction {
             Self::AddMediaFolders => 8,
             Self::StartServer => 9,
             Self::StopServer => 10,
-            Self::TextSize100 => 11,
-            Self::TextSize150 => 12,
-            Self::TextSize200 => 13,
+            Self::SaveSettings => 11,
+            Self::RemoveMediaFolder => 12,
         }
     }
 
@@ -79,9 +76,8 @@ impl MenuAction {
             8 => Some(Self::AddMediaFolders),
             9 => Some(Self::StartServer),
             10 => Some(Self::StopServer),
-            11 => Some(Self::TextSize100),
-            12 => Some(Self::TextSize150),
-            13 => Some(Self::TextSize200),
+            11 => Some(Self::SaveSettings),
+            12 => Some(Self::RemoveMediaFolder),
             _ => None,
         }
     }
@@ -102,9 +98,8 @@ mod tests {
             MenuAction::AddMediaFolders,
             MenuAction::StartServer,
             MenuAction::StopServer,
-            MenuAction::TextSize100,
-            MenuAction::TextSize150,
-            MenuAction::TextSize200,
+            MenuAction::SaveSettings,
+            MenuAction::RemoveMediaFolder,
             MenuAction::Quit,
             MenuAction::TogglePresentation,
             MenuAction::ExportDiagnostics,
@@ -123,7 +118,7 @@ mod tests {
     fn an_unknown_number_is_nothing() {
         assert_eq!(MenuAction::from_tag(0), None);
         assert_eq!(MenuAction::from_tag(99), None);
+        assert_eq!(MenuAction::from_tag(13), None);
         assert_eq!(MenuAction::from_tag(14), None);
-        assert_eq!(MenuAction::from_tag(15), None);
     }
 }

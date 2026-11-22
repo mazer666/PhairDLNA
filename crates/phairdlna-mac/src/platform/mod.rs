@@ -8,11 +8,11 @@
 //!          image, so that it follows the appearance of the menu bar
 //!          (`MB-006`).
 //!
-//! **The one file that speaks to the runtime.** [`bridge`] is the only file of
-//! this crate that uses `unsafe`, because AppKit hands the action of a menu
-//! item to an object of a class of our own, and a class of our own cannot be
-//! written without it. The safety argument of every block is in that file and
-//! in ADR-0013.
+//! **The one place that speaks to the runtime.** [`bridge`] and the module of
+//! its Objective-C class are the only files of this crate that use `unsafe`,
+//! because AppKit hands the action of a menu item to an object of a class of
+//! our own, and a class of our own cannot be written without it. The safety
+//! argument of every block is in those files and in ADR-0013.
 
 pub mod about_tab;
 pub mod bridge;

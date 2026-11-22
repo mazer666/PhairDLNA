@@ -123,9 +123,10 @@
 | `crates/phairdlna-mac/src/platform/service_control.rs` | The mechanism that starts and stops the job `org.phairdlna.server` with `launchctl`; the mechanism is built, but no user-facing control calls it while OD-14/OD-15 remain open | F-15 |
 | `crates/phairdlna-mac/tests/service_control.rs` | Acceptance checks for the commands of `launchctl`, the refusal of the service manager and the absence of any privilege in the control | F-15 |
 | `crates/phairdlna-mac/src/platform/desktop/windows.rs` | Main and preferences window lifecycle, inline initial-configuration guidance, and diagnostics save-panel flow | F-15 |
-| `crates/phairdlna-mac/src/platform/main_window.rs` | The native overview, with scrollable content for the app-owned 100% / 150% / 200% text setting | F-15 |
+| `crates/phairdlna-mac/src/platform/main_window.rs` | The native overview window lifecycle and controls | F-15 |
+| `crates/phairdlna-mac/src/app/settings.rs` | Direct server settings management (device name, HTTP port) and atomic persistence | F-12, F-15 |
 | `crates/phairdlna-mac/src/platform/main_menu.rs` | The native application main menu bar at top-left (App, File, Window menus) | F-15 |
-| `crates/phairdlna-mac/src/platform/main_window/layout.rs`, `crates/phairdlna-mac/src/platform/main_window/layout/reflow.rs` | Overview controls, localized accessibility names and responsive vertical reflow for larger text and wrapped content | F-15 |
+| `crates/phairdlna-mac/src/platform/main_window/layout.rs`, `crates/phairdlna-mac/src/platform/main_window/layout/reflow.rs`, `crates/phairdlna-mac/src/platform/main_window/layout/controls.rs` | Overview controls, interactive server steering, localized accessibility names and responsive vertical reflow | F-15 |
 | `crates/phairdlna-mac/src/platform/main_window/layout/geometry.rs` | Pure document-height calculation that centers short content and preserves scroll height for long content | F-15 |
 | `crates/phairdlna-mac/src/overview.rs` | Localized state-dependent content for the native server overview | F-15 |
 | `crates/phairdlna-mac/tests/overview.rs` | Acceptance checks for checking, scanning, running, stopped and refused overview content | F-15 |
@@ -134,9 +135,9 @@
 | `crates/phairdlna-mac/tests/onboarding.rs` | Missing, malformed, empty and already-configured first-run decision coverage | F-15 |
 | `crates/phairdlna-mac/src/platform/preferences_window/general.rs` | General preferences tab with read-only server values and shared folders | F-15 |
 | `crates/phairdlna-mac/src/platform/preferences_window/roots.rs` | Read-only media-root presentation in preferences | F-15 |
-| `crates/phairdlna-mac/src/platform/preferences_window/text_scale.rs` | Text-size controls and selected-state feedback in preferences | F-15 |
-| `crates/phairdlna-mac/src/platform/preferences_window/scaling.rs`, `crates/phairdlna-mac/src/platform/preferences_window/tabs.rs` | Text-size reflow, resizable outer viewport and tab construction for general, expert and About preferences | F-15 |
-| `crates/phairdlna-mac/src/platform/preferences_window.rs`, `crates/phairdlna-mac/src/platform/about_tab.rs` | Preferences window lifecycle, app-wide text scaling and About tab | F-15 |
+| `crates/phairdlna-mac/src/platform/preferences_window/controls.rs` | Preference controls and standard text placement in preferences | F-15 |
+| `crates/phairdlna-mac/src/platform/preferences_window/tabs.rs` | Resizable outer viewport and tab construction for general, expert and About preferences | F-15 |
+| `crates/phairdlna-mac/src/platform/preferences_window.rs`, `crates/phairdlna-mac/src/platform/about_tab.rs` | Preferences window lifecycle and About tab | F-15 |
 | `crates/phairdlna-mac/src/platform/bridge/selectors.rs` | Mapping from application actions to the AppKit selectors implemented by the bridge | F-15 |
 | `crates/phairdlna-mac/src/platform/bridge/menu_items.rs` | Disabled status rows for non-action menu information | F-15 |
 | `crates/phairdlna-mac/resources/` | Localized UI text, bundle metadata, the app-icon source artwork (`AppIcon-v2.png`) and its multi-resolution ICNS resource | F-15 |

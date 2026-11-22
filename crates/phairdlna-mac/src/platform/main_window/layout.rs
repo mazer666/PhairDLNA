@@ -1,8 +1,8 @@
 //! Responsive layout for the native overview.
 //!
-//! What: places overview sections according to the selected text size and text length.
-//! Why: larger text needs additional height and must push later sections down.
-//! Example: at 200%, wrapped folder names get extra rows and the overview scrolls vertically.
+//! What: places overview sections according to the length of their text.
+//! Why: a long text needs more rows and must push the later sections down.
+//! Example: a long folder name gets extra rows and the overview scrolls.
 
 use objc2::rc::Retained;
 use objc2::MainThreadMarker;
@@ -13,10 +13,13 @@ use objc2_foundation::NSString;
 
 use super::super::bridge::MenuTarget;
 use crate::actions::MenuAction;
+use crate::app::ServerSettings;
 use crate::text::Strings;
 
+mod controls;
 mod geometry;
 mod reflow;
+use controls::ServerControls;
 
 /// The controls that form the scrolling overview document.
 pub(super) struct OverviewViews {
@@ -35,30 +38,32 @@ pub(super) struct OverviewViews {
     pub(super) notice: Retained<NSTextField>,
     pub(super) add_folders: Retained<NSButton>,
     pub(super) read_only: Retained<NSTextField>,
+    /// The controls that change the server.
+    pub(super) controls: ServerControls,
 }
 
 impl OverviewViews {
     /// Builds every overview control once; later updates change text and frames.
-    pub(super) fn new(mtm: MainThreadMarker, strings: &Strings, target: &MenuTarget) -> Self {
+    pub(super) fn new(
+        mtm: MainThreadMarker,
+        strings: &Strings,
+        target: &MenuTarget,
+        settings: &ServerSettings,
+    ) -> Self {
         let document = NSView::new(mtm);
         let heading = label(mtm, strings.text("overview.heading"));
-        let status = label(mtm, "");
-        let library = label(mtm, "");
+        let (status, library) = (label(mtm, ""), label(mtm, ""));
         let folders_heading = label(mtm, strings.text("overview.folders"));
-        let folders = label(mtm, "");
-        let folders_rule = separator(mtm);
+        let (folders, folders_rule) = (label(mtm, ""), separator(mtm));
         let connection_heading = label(mtm, strings.text("overview.connection_title"));
-        let connection = label(mtm, "");
-        let connection_rule = separator(mtm);
+        let (connection, connection_rule) = (label(mtm, ""), separator(mtm));
         let activity_heading = label(mtm, strings.text("overview.activity_title"));
-        let activity = label(mtm, "");
-        let notice = label(mtm, "");
+        let (activity, notice) = (label(mtm, ""), label(mtm, ""));
         notice.setTextColor(Some(&objc2_app_kit::NSColor::secondaryLabelColor()));
-        let add_folders = NSButton::new(mtm);
-        add_folders.setTitle(&NSString::from_str(strings.text("overview.add_folders")));
-        target.button_action(&add_folders, MenuAction::AddMediaFolders);
+        let add_folders = folder_button(mtm, strings, target);
         let read_only = label(mtm, strings.text("overview.read_only"));
         read_only.setTextColor(Some(&objc2_app_kit::NSColor::secondaryLabelColor()));
+        let controls = ServerControls::new(mtm, strings, target, settings);
 
         set_accessibility_labels(
             strings,
@@ -70,20 +75,26 @@ impl OverviewViews {
             &notice,
         );
 
-        document.addSubview(&heading);
-        document.addSubview(&status);
-        document.addSubview(&library);
-        document.addSubview(&folders_heading);
-        document.addSubview(&folders);
-        document.addSubview(&folders_rule);
-        document.addSubview(&connection_heading);
-        document.addSubview(&connection);
-        document.addSubview(&connection_rule);
-        document.addSubview(&activity_heading);
-        document.addSubview(&activity);
-        document.addSubview(&notice);
-        document.addSubview(&add_folders);
-        document.addSubview(&read_only);
+        add_subviews(
+            &document,
+            &[
+                &heading,
+                &status,
+                &library,
+                &folders_heading,
+                &folders,
+                &connection_heading,
+                &connection,
+                &activity_heading,
+                &activity,
+                &notice,
+                &read_only,
+            ],
+            &[&folders_rule, &connection_rule],
+            &add_folders,
+            &controls,
+        );
+
         Self {
             document,
             heading,
@@ -100,8 +111,51 @@ impl OverviewViews {
             notice,
             add_folders,
             read_only,
+            controls,
         }
     }
+}
+
+/// Creates the add folders button.
+fn folder_button(
+    mtm: MainThreadMarker,
+    strings: &Strings,
+    target: &MenuTarget,
+) -> Retained<NSButton> {
+    let button = NSButton::new(mtm);
+    button.setTitle(&NSString::from_str(strings.text("overview.add_folders")));
+    target.button_action(&button, MenuAction::AddMediaFolders);
+    button
+}
+
+/// Puts the views that form the document into the scrollable view.
+fn add_subviews(
+    document: &NSView,
+    labels: &[&NSTextField],
+    rules: &[&NSBox],
+    button: &NSButton,
+    controls: &ServerControls,
+) {
+    for view in labels {
+        document.addSubview(view);
+    }
+    for rule in rules {
+        document.addSubview(rule);
+    }
+    document.addSubview(button);
+    add_controls(document, controls);
+}
+
+/// Puts the controls that change the server into the document.
+fn add_controls(document: &NSView, controls: &ServerControls) {
+    document.addSubview(&controls.toggle);
+    document.addSubview(&controls.folder_picker);
+    document.addSubview(&controls.remove_folder);
+    document.addSubview(&controls.device_name_label);
+    document.addSubview(&controls.device_name_field);
+    document.addSubview(&controls.http_port_label);
+    document.addSubview(&controls.http_port_field);
+    document.addSubview(&controls.save_settings);
 }
 
 fn set_accessibility_labels(
