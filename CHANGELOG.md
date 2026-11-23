@@ -5,6 +5,36 @@ All notable changes to PhairDLNA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0-alpha.2] - 2026-11-23
+
+Second Alpha Release of PhairDLNA — direct server steering, window lifecycle management, streamlined native typography, and native settings editing without web UI.
+
+### Added
+
+- **Direct Server Steering (`DEC-080`, `UX-019`):**
+  - Direct graphical Start/Stop button in the overview window with dynamic status reflection.
+  - Native service start/stop controls in application menus and status item.
+  - Interactive folder management directly in the overview window (add/remove media roots).
+- **Primary Settings in Main Window:**
+  - Direct viewing and editing of Server Name (`device_name`) and Port (`http_port`) in the main window.
+  - Validated and atomic persistence to `config.toml` without routing through preferences.
+- **macOS Window Lifecycle & Reopen (`ADR-0013`):**
+  - Window close button (red "X" or `Cmd+W`) hides/minimizes the window (`orderOut:`) while keeping the application and DLNA server running in the background.
+  - Seamless window restoration when clicking the Dock icon (`applicationShouldHandleReopen:hasVisibleWindows:`) or choosing "PhairDLNA Übersicht" (`Cmd+1`).
+  - Native multi-language quit confirmation dialog ensuring the server is not stopped unintentionally.
+- **Streamlined Typography:**
+  - Removed obsolete manual text scaling controls (100%/150%/200%) in favor of native macOS system typography and Dynamic Type compatibility.
+- **Diagnostics & About:**
+  - Native file-save panel for exporting sanitized diagnostics bundles.
+  - Dedicated About tab with project version, license, and repository links.
+
+### Changed
+
+- Complete retirement of the legacy Web Admin UI in favor of pure-native macOS AppKit controls (`DEC-075`).
+- Refactored `OverviewViews` and responsive vertical reflow geometry.
+
+---
+
 ## [0.1.0-alpha.1] - 2026-11-17
 
 First Alpha Release of PhairDLNA — a headless Rust DLNA / UPnP media server with a native macOS menu bar companion, loopback administration API and multi-platform architecture.
