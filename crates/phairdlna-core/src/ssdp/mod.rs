@@ -20,6 +20,7 @@
 //! ```
 
 mod constants;
+mod replay;
 mod request;
 mod targets;
 
@@ -29,6 +30,7 @@ pub use constants::{
     MIN_MX_SECONDS, MULTICAST_GROUP, MULTICAST_GROUP_V6, MULTICAST_TTL, NTS_ALIVE, NTS_BYEBYE,
     NT_ALL, NT_ROOT_DEVICE, PORT, SERVICE_TYPE_CONNECTION_MANAGER, SERVICE_TYPE_CONTENT_DIRECTORY,
 };
+pub use replay::{replay_datagram, replay_path, FileReplayOutcome, ReplayResult};
 pub use request::{
     build_advertisement, build_response, format_http_date, location_url, parse_search,
     reply_delay_millis, Ignored, Search, ServerIdentity,

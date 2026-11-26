@@ -41,7 +41,7 @@
 | `crates/phairdlna-core/src/xml/` | The one XML writer of the project — the escaping, the length rules and the writer | F-02, F-05 |
 | `crates/phairdlna-core/src/platform/` | The capability traits, the path model, the portable filesystem adapter, the memory of the process (`memory.rs`) and the default implementation | F-08, F-13, F-14, F-15 |
 | `crates/phairdlna-core/tests/platform_matrix.rs` | Acceptance tests for build matrix coverage and platform targets | F-22 |
-| `crates/phairdlna-core/src/ssdp/` | The discovery protocol: parsing a search, matching the targets, building the bytes (the **socket** is in `crates/phairdlna-cli/src/serve/ssdp.rs`) | F-01 |
+| `crates/phairdlna-core/src/ssdp/` | The discovery protocol: parsing a search, matching targets, building bytes, and replaying stored M-SEARCH diagnostics requests (`replay.rs`) | F-01, F-07 |
 | `crates/phairdlna-core/src/identity.rs` | The persistent device identity | F-01, F-02 |
 | `crates/phairdlna-core/src/catalogue/` | The catalogue — the model of the items and containers, the scanner of a root, the opaque identifiers, the identity key of a file, the playlists (`playlist.rs`), the subtitle sidecars (`subtitle.rs`), the memory of the volumes of the roots, the assembly of the tree, the sniffer of a file, the registry of the formats the server serves and the index of the catalogue on disk (`index/`) | F-05, F-08, F-09, F-11 |
 | `crates/phairdlna-core/src/media/` | The pictures of the library — the discovery of the artwork of a media file (`artwork/`), the pictures that are embedded in it (`id3/`, `mp4/`), the images that lie next to it (`sidecar.rs`), the thumbnail of a photo (`thumbnail.rs`) and the disposable cache of the pictures that were produced (`cache.rs`) | F-10 |
@@ -55,6 +55,7 @@
 | `crates/phairdlna-core/src/config/` | The typed, validated, versioned configuration | F-12 |
 | `crates/phairdlna-core/src/scheduler/` | The one scheduler of the server — the priority classes, the bounds of the workers and of the queues, the hysteresis of the pressure and the report of the resources | F-18 |
 | `crates/phairdlna-cli/src/lib.rs` | The commands, as pure functions over their arguments | F-13 |
+| `crates/phairdlna-cli/src/ssdp_cmd.rs` | SSDP CLI command handlers: headers inspection and stored M-SEARCH replay diagnostics | F-01, F-07 |
 | `crates/phairdlna-cli/src/setup.rs`, `crates/phairdlna-cli/src/setup/` | First-run orchestration, prompts, configuration validation and writing, plus user-facing setup guidance | F-13 |
 | `crates/phairdlna-core/src/catalogue/index/` | The index of the catalogue on disk — the schema of the database, the writing of a catalogue, the reading of it back and the recovery from a damaged file | F-09 |
 | `crates/phairdlna-core/tests/catalogue_rebuild.rs` | The index on disk — the round trip, the catalogue during a rescan, the restart and the file that belongs to the user alone | F-09 |

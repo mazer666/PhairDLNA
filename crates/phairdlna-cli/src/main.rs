@@ -24,6 +24,7 @@ Commands:
   config import <file>     Read a configuration file and print what it would become (or --apply)
   config explain           Explain the configuration settings and tiers
   ssdp headers             Print the SSDP headers the server would send
+  ssdp replay <corpus>     Replay stored M-SEARCH requests and inspect responses (INT-103)
   catalogue scan           Print the tree of the library with the client identifiers
   catalogue browse <id>    Print the document a client receives for a container
   serve                    Start the server in the foreground
@@ -277,8 +278,18 @@ fn service_command(rest: &[&str], options: Options) -> Result<Command, String> {
 fn ssdp_command(rest: &[&str], config_path: Option<PathBuf>) -> Result<Command, String> {
     match rest.first().copied() {
         Some("headers") => Ok(Command::SsdpHeaders { path: config_path }),
+        Some("replay") => {
+            let corpus = rest
+                .get(1)
+                .copied()
+                .ok_or("ssdp replay needs a corpus path or request file")?;
+            Ok(Command::SsdpReplay {
+                corpus: PathBuf::from(corpus),
+                path: config_path,
+            })
+        }
         Some(other) => Err(format!("unknown ssdp command \"{other}\"")),
-        None => Err("ssdp needs a subcommand: headers".to_owned()),
+        None => Err("ssdp needs a subcommand: headers, replay".to_owned()),
     }
 }
 

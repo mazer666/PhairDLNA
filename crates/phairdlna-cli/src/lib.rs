@@ -13,6 +13,7 @@ pub mod explain;
 pub mod serve;
 pub mod service;
 pub mod setup;
+pub mod ssdp_cmd;
 
 use std::path::PathBuf;
 
@@ -64,6 +65,13 @@ pub enum Command {
     },
     /// Print the SSDP headers the server would send.
     SsdpHeaders {
+        /// The configuration file to read.
+        path: Option<PathBuf>,
+    },
+    /// Replay stored M-SEARCH requests and inspect the responses (`INT-103`).
+    SsdpReplay {
+        /// The file or directory containing stored M-SEARCH requests.
+        corpus: PathBuf,
         /// The configuration file to read.
         path: Option<PathBuf>,
     },
@@ -180,7 +188,8 @@ pub fn run(command: &Command) -> Outcome {
         Command::ConfigExport { path } => config_export(path.as_deref()),
         Command::ConfigImport { path, target } => config_import(path, target.as_deref()),
         Command::ConfigExplain { expert, json } => explain::explain(*expert, *json),
-        Command::SsdpHeaders { path } => ssdp_headers(path.as_deref()),
+        Command::SsdpHeaders { path } => ssdp_cmd::headers(path.as_deref()),
+        Command::SsdpReplay { corpus, path } => ssdp_cmd::replay(corpus.as_path(), path.as_deref()),
         Command::CatalogueScan { path } => catalogue::scan(&resolve(path.as_deref())),
         Command::CatalogueBrowse { object_id, path } => {
             catalogue::browse(&resolve(path.as_deref()), object_id)
@@ -311,72 +320,12 @@ fn config_import(path: &std::path::Path, target: Option<&std::path::Path>) -> Ou
     }
 }
 
-/// Prints the SSDP bytes the server would send.
-///
-/// This is the diagnostic switch of `INT-015` and `OPS-005`: an interoperability
-/// problem can be looked at without capturing a packet.
-fn ssdp_headers(path: Option<&std::path::Path>) -> Outcome {
-    let path = resolve(path);
-    let config = match Config::load(&path) {
-        Ok(config) => config,
-        Err(error) => {
-            return Outcome::failure(format!(
-                "the configuration \"{}\" is not usable:\n{}\n",
-                path.display(),
-                error.message()
-            ))
-        }
-    };
-    let identity = match load_identity(&config) {
-        Ok(identity) => identity,
-        Err(error) => {
-            return Outcome::failure(format!("cannot read the device identity: {error}\n"))
-        }
-    };
-    Outcome::ok(ssdp_report(&identity, &config))
-}
-
 /// Loads the persistent device identity.
-fn load_identity(config: &Config) -> std::io::Result<phairdlna_core::identity::InstalledIdentity> {
+pub(crate) fn load_identity(
+    config: &Config,
+) -> std::io::Result<phairdlna_core::identity::InstalledIdentity> {
     let path = phairdlna_core::identity::identity_path();
     phairdlna_core::identity::load_or_create(&path, &config.server.device_name)
-}
-
-/// The text of the SSDP report.
-fn ssdp_report(identity: &phairdlna_core::identity::InstalledIdentity, config: &Config) -> String {
-    use phairdlna_core::ssdp::{
-        advertised_targets, build_advertisement, build_response, location_url, ServerIdentity,
-    };
-    let device = identity.as_device_identity();
-    let server = ServerIdentity {
-        friendly_name: config.server.device_name.clone(),
-        product: phairdlna_core::identity::PRODUCT_NAME.to_owned(),
-        version: phairdlna_core::PROJECT_VERSION.to_owned(),
-    };
-    let location = location_url("192.168.0.10", config.server.http_port);
-    let mut report = String::new();
-    report.push_str(&format!(
-        "Device identity: {}\nDevice name:      {}\n\n",
-        device.uuid(),
-        identity.friendly_name
-    ));
-    report.push_str("=== advertisement (one per advertised target) ===\n\n");
-    for target in advertised_targets(&device) {
-        report.push_str(&build_advertisement(&target, &server, &location, true));
-    }
-    report.push_str("=== example answer to 'M-SEARCH * HTTP/1.1' with ST: ssdp:all ===\n\n");
-    let target = advertised_targets(&device)
-        .into_iter()
-        .next()
-        .unwrap_or_else(|| unreachable!("the root device is always advertised"));
-    report.push_str(&build_response(&target, &server, &location));
-    report.push_str("=== notes ===\n\n");
-    report.push_str(
-        "The LOCATION above uses a placeholder address. The server replaces it with the\n\
-         address of the interface the request arrived on, never a wildcard or a loopback\n\
-         address. Run 'ssdp headers' on the machine that serves the library.\n",
-    );
-    report
 }
 
 /// Starts the server.

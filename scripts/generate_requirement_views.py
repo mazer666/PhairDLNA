@@ -1239,6 +1239,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — every device-test result records device model, firmware, client application, media format, and observed outcome in machine-readable matrix",
         "Verified",
     ),
+    "INT-103": (
+        "`crates/phairdlna-cli/src/ssdp_cmd.rs::replay`, `crates/phairdlna-core/src/ssdp/replay.rs`,"
+        " `crates/phairdlna-cli/tests/ssdp_replay.rs`"
+        " — replay stored M-SEARCH requests and print exact byte-for-byte response datagrams for diagnostics",
+        "Verified",
+    ),
     "INT-104": (
         "`crates/phairdlna-core/src/profile.rs::ProfileStore::disable`,"
         " `crates/phairdlna-core/tests/client_profiles.rs::disabled_profiles_restore_plain_behavior_without_recompilation`"
