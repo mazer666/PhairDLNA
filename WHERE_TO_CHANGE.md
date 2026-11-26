@@ -153,6 +153,7 @@
 | `qa/macos-service-access-protocol.md` | Real-Mac experiment for service identity, selected-folder scope, revocation and Local Network behavior | OD-15, F-22 AC-14 |
 | `scripts/` | Repository gates and the requirement-view generator | F-19 |
 | `scripts/package-macos-app.sh` | Builds the macOS app bundle, validates its eight-byte PkgInfo marker and architecture slices, applies its final ad-hoc signature, and verifies the signature | F-15, F-19 |
+| `scripts/generate-release-artefacts.sh` | Builds the distribution tarball, generates SHA-256 checksums and software bill of materials (SBOM) | F-19, F-22 |
 | `.github/workflows/` | Manual-only continuous integration | F-19 |
 | `docs/` | The documentation tree | F-19 |
 | `docs/99-archive/2026-11-19-dependency-license-review/` | Immutable copy and manifest of the prior approved dependency/licence review | F-19 |

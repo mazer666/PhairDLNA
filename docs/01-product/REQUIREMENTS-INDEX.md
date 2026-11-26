@@ -389,7 +389,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SUP-002` | Every direct dependency shall be recorded with its licence and its purpose before it is used. | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
 | `SUP-003` | Fail the build if a dependency uses a licence that is incompatible with AGPL-3.0-or-later. | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
 | `SUP-004` | Run over the dependency graph and its result shall be recorded. | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
-| `SUP-005` | Release artefacts shall be accompanied by a software bill of materials and a checksum. | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
+| `SUP-005` | Release artefacts shall be accompanied by a software bill of materials and a checksum. | MUST | `F-19` | M0 | Licence and advisory gate | Verified |
 | `SUP-006` | Any dependency that requires a native toolchain or ships a licence with distribution… | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
 | `SUP-007` | Not vendor third-party source code into the repository without a record of its licence and… | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
 | `SUP-008` | Carry no `unsafe` code unless an ADR approves it with a written safety argument. | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |

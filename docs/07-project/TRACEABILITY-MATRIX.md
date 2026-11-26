@@ -335,7 +335,7 @@ that was actually observed; an empty cell means *not implemented*, not *passed*.
 | `SUP-002` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |
 | `SUP-003` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |
 | `SUP-004` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |
-| `SUP-005` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |
+| `SUP-005` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | `scripts/generate-release-artefacts.sh`, `crates/phairdlna-cli/tests/release_artefacts.rs::release_packaging_script_exists_and_implements_sbom_and_checksums` — release packaging script generates SHA-256 checksums and dependency SBOM metadata for distribution packages | Verified |
 | `SUP-006` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |
 | `SUP-007` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |
 | `SUP-008` | `F-19` | M0 | `Cargo.toml, deny.toml, .github/workflows` | Licence and advisory gate | — | Not implemented |

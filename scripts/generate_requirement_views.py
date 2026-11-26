@@ -1213,6 +1213,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " the wake do not release the workers of the scheduler yet",
         "Implemented",
     ),
+    "SUP-005": (
+        "`scripts/generate-release-artefacts.sh`,"
+        " `crates/phairdlna-cli/tests/release_artefacts.rs::release_packaging_script_exists_and_implements_sbom_and_checksums`"
+        " — release packaging script generates SHA-256 checksums and dependency SBOM metadata for distribution packages",
+        "Verified",
+    ),
+
 }
 
 

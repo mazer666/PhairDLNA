@@ -152,8 +152,8 @@ multiple roots, artwork, playlists.
 | --- | --- | --- | --- |
 | M3.1 | Platform traits for Linux and Windows | `PLT-002`, `PLT-003`, `PLT-015`, `PLT-016` | **done (2026-11-26)** — all OS-specific behavior is isolated behind documented traits with explicit unsupported fallbacks (`PLT-003`); the self-hosted build matrix covers macOS (arm64, x86_64), Linux (x86_64), Windows (x86_64) and MSRV without cloud runners (`PLT-002`); Windows executable manifest declares `longPathAware` and registry requirement `LongPathsEnabled` is documented (`PLT-015`); primary Linux distribution is specified as native packages rather than sandboxed formats (`PLT-016`) |
 | M3.2 | Service integration: systemd, Windows service | `OPS-009` | **done (2026-11-26)** — service managers supported across macOS (`launchd`), Linux (`systemd` with `Type=notify`, `READY=1` socket notification and graceful `STOPPING=1` signaling), and Windows (`sc.exe` Service Control Manager command generation, specification files and status querying) (`OPS-009`) |
-| M3.3 | Packaging and installation | `PLT-016`, `SUP-005` |
-| M3.4 | Cross-platform behaviour parity | `PLT-010` |
+| M3.3 | Packaging and installation | `PLT-016`, `SUP-005` | **done (2026-11-26)** — release packaging script generates unconfined distribution tarballs, SHA-256 checksums, and dependency Software Bill of Materials (SBOM) (`SUP-005`); release policy requires native unconfined packages rather than sandboxed formats (`PLT-016`) |
+| M3.4 | Cross-platform behaviour parity | `PLT-010` | **done (2026-11-26)** — protocol behaviour, device description, SCPD documents, SOAP envelopes, and DIDL-Lite ordering are byte-deterministic across platforms (`PLT-010`) |
 
 **Exit criteria:** the build matrix is green on all three platforms; the same protocol
 fixture suite passes unchanged; a recorded device test on at least one non-macOS
