@@ -159,6 +159,14 @@ fn json_of_diagnostics(diagnostics: &Diagnostics, redactor: &Redactor) -> Json {
         .collect();
     fields.push(("warnings".to_owned(), Json::list(warnings)));
     fields.push((
+        "resources".to_owned(),
+        diagnostics
+            .resources
+            .as_ref()
+            .map(|res| Json::text(res.clone()))
+            .unwrap_or(Json::Null),
+    ));
+    fields.push((
         "timeline".to_owned(),
         diagnostics
             .timeline

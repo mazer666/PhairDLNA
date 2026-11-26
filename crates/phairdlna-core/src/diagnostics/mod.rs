@@ -47,6 +47,8 @@ pub struct Diagnostics {
     pub records: Vec<LogRecord>,
     /// The warnings the server holds.
     pub warnings: Vec<String>,
+    /// Summary of the scheduler and resource status (RES-006).
+    pub resources: Option<String>,
     /// The lines of the local redacted recovery timeline (LIFE-011).
     pub timeline: Option<String>,
     /// When the library was scanned the last time.
@@ -162,6 +164,7 @@ fn redact_diagnostics(diagnostics: &Diagnostics, redactor: &Redactor) -> Diagnos
             .iter()
             .map(|warning| redactor.value(warning))
             .collect(),
+        resources: diagnostics.resources.clone(),
         timeline: diagnostics.timeline.as_ref().map(|tl| redactor.value(tl)),
         last_scan: diagnostics.last_scan.clone(),
     }
@@ -199,6 +202,7 @@ pub fn from_json(document: &Json) -> Diagnostics {
         transfers: transfers_of(document),
         records: records_of(document),
         warnings: list_of(document, "warnings"),
+        resources: optional_text_of(document, "resources"),
         timeline: optional_text_of(document, "timeline"),
         last_scan: optional_text_of(document, "last_scan"),
     }

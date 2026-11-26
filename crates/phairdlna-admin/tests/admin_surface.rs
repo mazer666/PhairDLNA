@@ -102,6 +102,7 @@ impl AdminBackend for Fake {
                 fields: vec![("path".to_owned(), "/Users/me/Films/a.mkv".to_owned())],
             }],
             warnings: vec!["a root could not be read".to_owned()],
+            resources: Some("4 workers, machine calm".to_owned()),
             timeline: Some("2026-11-26T08:00:00Z ready reason=\"listening\"".to_owned()),
             last_scan: Some("7 objects".to_owned()),
         }

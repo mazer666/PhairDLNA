@@ -30,6 +30,7 @@ use super::library::Library;
 use super::lifecycle::LifecycleController;
 use super::log::Logger;
 use super::pictures::Pictures;
+use super::resources::Resources;
 use super::transfers::Transfers;
 
 /// How many records the diagnostics show.
@@ -45,6 +46,8 @@ pub struct DaemonAdmin {
     discovery_available: Arc<AtomicBool>,
     /// The operational lifecycle controller.
     lifecycle: LifecycleController,
+    /// The scheduler resources of the daemon.
+    resources: Resources,
     /// The library of the daemon.
     library: Library,
     /// The transfers that are running.
@@ -81,6 +84,8 @@ pub struct AdminStartup<'a> {
     pub discovery_available: Arc<AtomicBool>,
     /// Operational lifecycle controller.
     pub lifecycle: LifecycleController,
+    /// Scheduler resources.
+    pub resources: Resources,
     /// Optional port override.
     pub port: Option<u16>,
 }
@@ -170,6 +175,7 @@ impl AdminBackend for DaemonAdmin {
             transfers: self.transfers_of_the_clients(),
             records,
             warnings,
+            resources: Some(self.resources.report().summary()),
             timeline: self.lifecycle.read_timeline().ok(),
             last_scan: None,
         }
@@ -235,6 +241,7 @@ pub async fn start(startup: AdminStartup<'_>) -> Result<Option<AdminServer>, Str
         device_address,
         discovery_available,
         lifecycle,
+        resources,
         port,
     } = startup;
     if !config.security.admin_enabled {
@@ -251,6 +258,7 @@ pub async fn start(startup: AdminStartup<'_>) -> Result<Option<AdminServer>, Str
         device_address,
         discovery_available,
         lifecycle,
+        resources,
         library,
         transfers,
         pictures,

@@ -56,6 +56,7 @@ pub async fn start(options: ServeOptions) -> Result<Daemon, String> {
         transfers,
         discovery_available: &discovery_available,
         lifecycle: lifecycle.clone(),
+        resources: resources.clone(),
     })
     .await?;
     let (ssdp, stop_ssdp, ssdp_task) = start_ssdp(
@@ -120,6 +121,7 @@ async fn start_admin(
         transfers,
         discovery_available,
         lifecycle,
+        resources,
     } = inputs;
     let server = admin::start(AdminStartup {
         config,
@@ -132,6 +134,7 @@ async fn start_admin(
         device_address: (!host.is_loopback() && !host.is_unspecified()).then(|| host.to_string()),
         discovery_available: Arc::clone(discovery_available),
         lifecycle,
+        resources,
         port,
     })
     .await?;
@@ -151,6 +154,7 @@ struct AdminInputs<'a> {
     transfers: Transfers,
     discovery_available: &'a Arc<AtomicBool>,
     lifecycle: LifecycleController,
+    resources: super::super::resources::Resources,
 }
 
 /// Says that the server is listening.

@@ -61,6 +61,8 @@ fn the_diagnostics_of_the_server_are_answered() {
     assert_eq!(answer.status, 200, "{}", answer.text());
     assert!(answer.text().contains("\"records\""), "{}", answer.text());
     assert!(answer.text().contains("\"warnings\""), "{}", answer.text());
+    assert!(answer.text().contains("\"resources\""), "{}", answer.text());
+    assert!(answer.text().contains("workers"), "{}", answer.text());
 }
 
 /// The positive case: the library is read again.

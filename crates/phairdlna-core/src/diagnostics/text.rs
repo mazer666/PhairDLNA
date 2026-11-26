@@ -49,9 +49,19 @@ pub fn render(diagnostics: &Diagnostics, report: &Report, redacted: bool) -> Str
     write_configuration(&mut text, &context);
     write_library(&mut text, &facts);
     write_transfers(&mut text, &facts);
+    write_resources(&mut text, &facts);
     write_warnings(&mut text, &facts);
     write_records(&mut text, &facts);
     text
+}
+
+/// Writes the resource and scheduler status summary.
+fn write_resources(text: &mut String, diagnostics: &Diagnostics) {
+    if let Some(res) = &diagnostics.resources {
+        section(text, "The resource scheduler");
+        text.push_str(res);
+        text.push_str("\n\n");
+    }
 }
 
 /// Writes the title of the report and the warning that belongs to it.
@@ -272,6 +282,7 @@ mod tests {
                 fields: vec![("objects".to_owned(), "128".to_owned())],
             }],
             warnings: vec!["a warning".to_owned()],
+            resources: Some("3 workers, machine calm".to_owned()),
             timeline: Some("2026-11-26T08:00:00Z ready reason=\"listening\"".to_owned()),
             last_scan: Some("10:00:00".to_owned()),
         }
