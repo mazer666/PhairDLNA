@@ -165,3 +165,8 @@ menu.tooltip.stop_server = Arrête le serveur multimédia PhairDLNA
 notice.server_started = Serveur démarré
 notice.server_stopped = Serveur arrêté
 panel.server_error = Erreur de service
+
+overview.remove_folder = Supprimer le dossier
+overview.server_name = Nom du serveur
+overview.http_port = Port HTTP
+overview.save_settings = Enregistrer les paramètres

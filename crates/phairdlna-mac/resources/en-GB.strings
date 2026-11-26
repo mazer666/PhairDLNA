@@ -176,3 +176,8 @@ menu.tooltip.stop_server = Stops the PhairDLNA media server
 notice.server_started = Server started
 notice.server_stopped = Server stopped
 panel.server_error = Service Error
+
+overview.remove_folder = Remove folder
+overview.server_name = Server name
+overview.http_port = HTTP port
+overview.save_settings = Save settings
