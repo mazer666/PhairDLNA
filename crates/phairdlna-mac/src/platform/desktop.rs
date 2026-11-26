@@ -121,6 +121,7 @@ impl Desktop {
         match action {
             MenuAction::SaveSettings => self.save_window_settings(),
             MenuAction::RemoveMediaFolder => self.remove_selected_folder(),
+            MenuAction::RevealSelectedFolder => self.reveal_selected_folder(),
             MenuAction::RescanLibrary => {
                 self.worker.ask(Command::Rescan);
                 self.write();
@@ -157,6 +158,22 @@ impl Desktop {
             return;
         };
         self.confirm_and_remove_folder(&path);
+    }
+
+    /// Opens the folder selected in the overview folder picker in Finder.
+    fn reveal_selected_folder(&mut self) {
+        let Some(ref window) = self.main_window else {
+            return;
+        };
+        let Some(path) = window.selected_root() else {
+            return;
+        };
+        let pb = std::path::PathBuf::from(path);
+        if !crate::platform::workspace::open_path(&pb) {
+            let notice = self.app.localized_text("error.cannot_open");
+            self.app.set_notice(notice);
+            self.write();
+        }
     }
 
     /// The tick of the timer.

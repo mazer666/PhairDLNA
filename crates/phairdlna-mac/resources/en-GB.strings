@@ -184,6 +184,7 @@ notice.server_stopped = Server stopped
 panel.server_error = Service Error
 
 overview.remove_folder = Remove folder
+overview.reveal_folder = Show in Finder
 overview.server_name = Server name
 overview.http_port = HTTP port
 overview.save_settings = Save settings

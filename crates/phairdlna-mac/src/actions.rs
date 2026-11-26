@@ -32,6 +32,8 @@ pub enum MenuAction {
     SaveSettings,
     /// Remove the media folder the user chose in the overview.
     RemoveMediaFolder,
+    /// Open the selected media folder directly in Finder.
+    RevealSelectedFolder,
     /// Leave the application; the server keeps running.
     Quit,
 }
@@ -56,6 +58,7 @@ impl MenuAction {
             Self::StopServer => 10,
             Self::SaveSettings => 11,
             Self::RemoveMediaFolder => 12,
+            Self::RevealSelectedFolder => 13,
         }
     }
 
@@ -78,6 +81,7 @@ impl MenuAction {
             10 => Some(Self::StopServer),
             11 => Some(Self::SaveSettings),
             12 => Some(Self::RemoveMediaFolder),
+            13 => Some(Self::RevealSelectedFolder),
             _ => None,
         }
     }
@@ -100,6 +104,7 @@ mod tests {
             MenuAction::StopServer,
             MenuAction::SaveSettings,
             MenuAction::RemoveMediaFolder,
+            MenuAction::RevealSelectedFolder,
             MenuAction::Quit,
             MenuAction::TogglePresentation,
             MenuAction::ExportDiagnostics,
@@ -118,7 +123,7 @@ mod tests {
     fn an_unknown_number_is_nothing() {
         assert_eq!(MenuAction::from_tag(0), None);
         assert_eq!(MenuAction::from_tag(99), None);
-        assert_eq!(MenuAction::from_tag(13), None);
         assert_eq!(MenuAction::from_tag(14), None);
+        assert_eq!(MenuAction::from_tag(15), None);
     }
 }

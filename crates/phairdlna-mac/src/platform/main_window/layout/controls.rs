@@ -27,6 +27,8 @@ pub(in crate::platform::main_window) struct ServerControls {
     pub(super) toggle: Retained<NSButton>,
     /// The list of the shared folders the user may remove.
     pub(super) folder_picker: Retained<NSPopUpButton>,
+    /// The button that reveals the chosen folder in Finder.
+    pub(super) reveal_folder: Retained<NSButton>,
     /// The button that removes the chosen folder.
     pub(super) remove_folder: Retained<NSButton>,
     /// The label of the server name.
@@ -53,6 +55,12 @@ impl ServerControls {
     ) -> Self {
         let toggle = button(mtm, "", MenuAction::StartServer, target);
         let folder_picker = NSPopUpButton::new(mtm);
+        let reveal_folder = button(
+            mtm,
+            strings.text("overview.reveal_folder"),
+            MenuAction::RevealSelectedFolder,
+            target,
+        );
         let remove_folder = button(
             mtm,
             strings.text("overview.remove_folder"),
@@ -80,6 +88,7 @@ impl ServerControls {
         let controls = Self {
             toggle,
             folder_picker,
+            reveal_folder,
             remove_folder,
             device_name_label,
             device_name_field,
@@ -125,6 +134,7 @@ impl ServerControls {
         }
         let empty = roots.is_empty();
         self.folder_picker.setEnabled(!empty);
+        self.reveal_folder.setEnabled(!empty);
         self.remove_folder.setEnabled(!empty);
     }
 

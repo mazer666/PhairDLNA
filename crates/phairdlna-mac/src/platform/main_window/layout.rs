@@ -230,6 +230,7 @@ fn assemble_document(
 fn add_controls(document: &NSView, controls: &ServerControls) {
     document.addSubview(&controls.toggle);
     document.addSubview(&controls.folder_picker);
+    document.addSubview(&controls.reveal_folder);
     document.addSubview(&controls.remove_folder);
     document.addSubview(&controls.device_name_label);
     document.addSubview(&controls.device_name_field);

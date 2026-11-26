@@ -96,23 +96,30 @@ pub(super) fn place_folders_card(
     ));
     inner -= PICKER_HEIGHT + TIGHT_GAP;
 
-    // Distribute buttons: Remove, Add, Rescan
+    // Distribute buttons across two rows or grid:
+    // Row 1: Finder-Anzeigen, Ordner entfernen
+    // Row 2: Ordner hinzufügen, Neu einlesen
     let btn_gap = 8.0;
-    let btn_w = ((grid.inner_width - 2.0 * btn_gap) / 3.0).floor().max(80.0);
-    let mut btn_x = grid.col1_x + PAD;
+    let btn_w = ((grid.inner_width - btn_gap) / 2.0).floor().max(80.0);
 
+    // Row 1: Actions on selected folder
+    views.controls.reveal_folder.setFrame(NSRect::new(
+        NSPoint::new(grid.col1_x + PAD, inner - BUTTON_HEIGHT),
+        NSSize::new(btn_w, BUTTON_HEIGHT),
+    ));
     views.controls.remove_folder.setFrame(NSRect::new(
-        NSPoint::new(btn_x, inner - BUTTON_HEIGHT),
+        NSPoint::new(grid.col1_x + PAD + btn_w + btn_gap, inner - BUTTON_HEIGHT),
         NSSize::new(btn_w, BUTTON_HEIGHT),
     ));
-    btn_x += btn_w + btn_gap;
+    inner -= BUTTON_HEIGHT + TIGHT_GAP;
+
+    // Row 2: Global folder actions
     views.add_folders.setFrame(NSRect::new(
-        NSPoint::new(btn_x, inner - BUTTON_HEIGHT),
+        NSPoint::new(grid.col1_x + PAD, inner - BUTTON_HEIGHT),
         NSSize::new(btn_w, BUTTON_HEIGHT),
     ));
-    btn_x += btn_w + btn_gap;
     views.rescan_button.setFrame(NSRect::new(
-        NSPoint::new(btn_x, inner - BUTTON_HEIGHT),
+        NSPoint::new(grid.col1_x + PAD + btn_w + btn_gap, inner - BUTTON_HEIGHT),
         NSSize::new(btn_w, BUTTON_HEIGHT),
     ));
 

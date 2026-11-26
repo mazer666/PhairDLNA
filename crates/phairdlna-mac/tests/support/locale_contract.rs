@@ -123,6 +123,7 @@ pub const EXPECTED_KEYS: &[&str] = &[
     "overview.activity_unavailable",
     "overview.add_folders",
     "overview.remove_folder",
+    "overview.reveal_folder",
     "overview.rescan",
     "overview.server_name",
     "overview.http_port",

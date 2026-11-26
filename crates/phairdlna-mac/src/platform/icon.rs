@@ -47,6 +47,7 @@ fn action_symbol_of(action: &MenuAction) -> &'static str {
         MenuAction::TogglePresentation => "slider.horizontal.3",
         MenuAction::SaveSettings => "square.and.arrow.down",
         MenuAction::RemoveMediaFolder => "trash",
+        MenuAction::RevealSelectedFolder => "folder",
         MenuAction::Quit => "power",
     }
 }

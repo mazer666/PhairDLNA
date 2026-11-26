@@ -24,5 +24,6 @@ pub(super) fn selector_of(action: MenuAction) -> Sel {
         MenuAction::TogglePresentation => sel!(phairTogglePresentation:),
         MenuAction::SaveSettings => sel!(phairSaveSettings:),
         MenuAction::RemoveMediaFolder => sel!(phairRemoveFolder:),
+        MenuAction::RevealSelectedFolder => sel!(phairRevealFolder:),
     }
 }

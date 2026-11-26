@@ -43,6 +43,7 @@ impl App {
             MenuAction::TogglePresentation => self.switch_view(),
             MenuAction::SaveSettings => ActionOutcome::Nothing,
             MenuAction::RemoveMediaFolder => ActionOutcome::Nothing,
+            MenuAction::RevealSelectedFolder => ActionOutcome::Nothing,
             MenuAction::Quit => ActionOutcome::Request(DesktopRequest::Quit),
         }
     }

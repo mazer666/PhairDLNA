@@ -110,6 +110,13 @@ define_class!(
             dispatch(MenuAction::RemoveMediaFolder.tag());
         }
 
+        /// The action "Reveal selected media folder in Finder".
+        #[unsafe(method(phairRevealFolder:))]
+        fn phair_reveal_folder(&self, sender: &AnyObject) {
+            let _ = sender;
+            dispatch(MenuAction::RevealSelectedFolder.tag());
+        }
+
         /// The action "Add media folders".
         #[unsafe(method(phairAddFolders:))]
         fn phair_add_folders(&self, sender: &AnyObject) {

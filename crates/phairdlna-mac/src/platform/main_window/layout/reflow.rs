@@ -83,6 +83,7 @@ fn configure_fonts(views: &OverviewViews) {
         &views.add_folders,
         &views.rescan_button,
         &views.controls.toggle,
+        &views.controls.reveal_folder,
         &views.controls.remove_folder,
         &views.controls.save_settings,
     ] {
@@ -137,8 +138,16 @@ fn card_heights(heights: &Heights) -> (f64, f64, f64, f64) {
         }
         + 2.0 * PAD;
 
-    let folders_card =
-        20.0 + TIGHT_GAP + heights.folders + GAP + PICKER_HEIGHT + TIGHT_GAP + 32.0 + 2.0 * PAD;
+    let folders_card = 20.0
+        + TIGHT_GAP
+        + heights.folders
+        + GAP
+        + PICKER_HEIGHT
+        + TIGHT_GAP
+        + BUTTON_HEIGHT
+        + TIGHT_GAP
+        + BUTTON_HEIGHT
+        + 2.0 * PAD;
 
     let settings_card = 20.0
         + TIGHT_GAP

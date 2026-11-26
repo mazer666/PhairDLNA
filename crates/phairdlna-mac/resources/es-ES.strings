@@ -173,6 +173,7 @@ notice.server_stopped = Servidor detenido
 panel.server_error = Error del servicio
 
 overview.remove_folder = Eliminar carpeta
+overview.reveal_folder = Mostrar en Finder
 overview.server_name = Nombre del servidor
 overview.http_port = Puerto HTTP
 overview.save_settings = Guardar ajustes
