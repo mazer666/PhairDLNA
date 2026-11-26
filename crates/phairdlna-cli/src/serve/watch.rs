@@ -25,6 +25,7 @@ use phairdlna_core::platform::LocalFileSystem;
 use tokio::task::JoinHandle;
 
 use super::library::Library;
+use super::lifecycle::LifecycleController;
 use super::log::Logger;
 use super::resources::Resources;
 
@@ -39,8 +40,9 @@ pub fn spawn(
     library: Library,
     logger: Logger,
     resources: Resources,
+    lifecycle: LifecycleController,
 ) -> (tokio::sync::watch::Sender<bool>, JoinHandle<()>) {
-    spawn_with_interval(library, logger, resources, WATCH_INTERVAL)
+    spawn_with_interval(library, logger, resources, lifecycle, WATCH_INTERVAL)
 }
 
 /// Starts the watch with a given interval and hands back the task and the way
@@ -52,6 +54,7 @@ pub fn spawn_with_interval(
     library: Library,
     logger: Logger,
     resources: Resources,
+    lifecycle: LifecycleController,
     interval: Duration,
 ) -> (tokio::sync::watch::Sender<bool>, JoinHandle<()>) {
     let (stop, mut stopped) = tokio::sync::watch::channel(false);
@@ -71,8 +74,9 @@ pub fn spawn_with_interval(
                     let library = library.clone();
                     let logger = logger.clone();
                     let resources = resources.clone();
+                    let lifecycle = lifecycle.clone();
                     if let Err(error) =
-                        resources.submit_background(move || watch_once(&library, &logger))
+                        resources.submit_background(move || watch_once(&library, &logger, &lifecycle))
                     {
                         // The scan waits: the machine is busy or the queue is
                         // full. The next tick tries again.
@@ -87,19 +91,43 @@ pub fn spawn_with_interval(
 }
 
 /// Looks at the roots once and reads the catalogue again when something moved.
-fn watch_once(library: &Library, logger: &Logger) {
+fn watch_once(library: &Library, logger: &Logger, lifecycle: &LifecycleController) {
     if !library.changed(&LocalFileSystem) {
         return;
     }
     let report = library.refresh(&LocalFileSystem);
+    let mut any_lost = false;
+    let mut any_returned = false;
     for change in &report.changes {
         if matches!(change.change, VolumeChange::First | VolumeChange::Unchanged) {
             continue;
+        }
+        if matches!(change.change, VolumeChange::Lost) {
+            any_lost = true;
+        } else if matches!(
+            change.change,
+            VolumeChange::Returned | VolumeChange::Remounted
+        ) {
+            any_returned = true;
         }
         let sentence = sentence_of(&change.change);
         logger.info(
             "the library changed",
             &[("root", &change.name), ("reason", &sentence)],
+        );
+    }
+
+    if any_lost {
+        lifecycle.transition(
+            phairdlna_core::lifecycle::LifecycleState::Degraded,
+            "one or more media roots are unavailable",
+        );
+    } else if any_returned
+        && lifecycle.state() == phairdlna_core::lifecycle::LifecycleState::Degraded
+    {
+        lifecycle.transition(
+            phairdlna_core::lifecycle::LifecycleState::Ready,
+            "all media roots have returned",
         );
     }
 }
@@ -119,7 +147,7 @@ fn sentence_of(change: &VolumeChange) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{sentence_of, spawn_with_interval};
+    use super::{sentence_of, spawn_with_interval, LifecycleController};
     use crate::serve::library::Library;
     use crate::serve::log::{Level, Logger};
     use crate::serve::resources::Resources;
@@ -163,12 +191,15 @@ mod tests {
             symlink_policy: None,
         }];
         let library = Library::build(&roots, SymlinkPolicy::Skip, &LocalFileSystem);
-        let logger = Logger::with_redactor(Level::Info, "daemon", Arc::new(Redactor::new()));
+        let redactor = Arc::new(Redactor::new());
+        let logger = Logger::with_redactor(Level::Info, "daemon", Arc::clone(&redactor));
+        let lifecycle = LifecycleController::new(redactor, logger.clone());
         let resources = Resources::new(&phairdlna_core::config::Config::default(), &logger);
         let (stop, task) = spawn_with_interval(
             library.clone(),
             logger,
             resources,
+            lifecycle,
             Duration::from_millis(20),
         );
 

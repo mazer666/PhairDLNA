@@ -83,7 +83,7 @@ fn the_server_answers_a_client() {
     let records = String::from_utf8_lossy(&records).into_owned();
     let record = records
         .lines()
-        .find(|line| line.contains("the server is listening"))
+        .find(|line| line.contains("daemon the server is listening"))
         .expect("the server writes a record about itself");
     let mut parts = record.split_whitespace();
     let moment = parts.next().expect("the record has a moment");

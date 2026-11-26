@@ -130,6 +130,14 @@ impl<T: Transport> AdminClient<T> {
     pub fn status(&mut self) -> Result<StatusSnapshot, ClientError> {
         let document = self.read(METHOD_GET, PATH_STATUS)?;
         Ok(StatusSnapshot {
+            lifecycle_state: document
+                .get("lifecycle_state")
+                .and_then(Json::as_str)
+                .map(str::to_owned),
+            lifecycle_reason: document
+                .get("lifecycle_reason")
+                .and_then(Json::as_str)
+                .map(str::to_owned),
             device_name: document
                 .get("device_name")
                 .and_then(Json::as_str)

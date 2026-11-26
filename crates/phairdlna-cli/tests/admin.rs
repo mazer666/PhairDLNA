@@ -30,6 +30,11 @@ fn the_status_of_the_server_is_answered() {
         answer.text()
     );
     assert!(
+        answer.text().contains("\"lifecycle_state\":\"ready\""),
+        "the status exposes the lifecycle state: {}",
+        answer.text()
+    );
+    assert!(
         answer.text().contains("\"active_streams\":0"),
         "no stream runs: {}",
         answer.text()

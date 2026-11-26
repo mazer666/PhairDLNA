@@ -27,6 +27,7 @@ use phairdlna_core::platform::{LocalFileSystem, LocalProcessMemory, ProcessMemor
 use phairdlna_core::security::Redactor;
 
 use super::library::Library;
+use super::lifecycle::LifecycleController;
 use super::log::Logger;
 use super::pictures::Pictures;
 use super::transfers::Transfers;
@@ -42,6 +43,8 @@ pub struct DaemonAdmin {
     device_address: Option<String>,
     /// Whether the SSDP listener and its task are running.
     discovery_available: Arc<AtomicBool>,
+    /// The operational lifecycle controller.
+    lifecycle: LifecycleController,
     /// The library of the daemon.
     library: Library,
     /// The transfers that are running.
@@ -76,6 +79,8 @@ pub struct AdminStartup<'a> {
     pub device_address: Option<String>,
     /// Whether discovery is currently available.
     pub discovery_available: Arc<AtomicBool>,
+    /// Operational lifecycle controller.
+    pub lifecycle: LifecycleController,
     /// Optional port override.
     pub port: Option<u16>,
 }
@@ -114,7 +119,10 @@ impl DaemonAdmin {
 impl AdminBackend for DaemonAdmin {
     /// The state of the server.
     fn status(&self) -> Status {
+        let current_transition = self.lifecycle.current_transition();
         Status {
+            lifecycle_state: current_transition.state,
+            lifecycle_reason: current_transition.reason,
             device_name: self.device_name.clone(),
             device_address: self.device_address.clone(),
             discovery_available: self.discovery_available.load(Ordering::Acquire),
@@ -162,6 +170,7 @@ impl AdminBackend for DaemonAdmin {
             transfers: self.transfers_of_the_clients(),
             records,
             warnings,
+            timeline: self.lifecycle.read_timeline().ok(),
             last_scan: None,
         }
     }
@@ -225,6 +234,7 @@ pub async fn start(startup: AdminStartup<'_>) -> Result<Option<AdminServer>, Str
         device_name,
         device_address,
         discovery_available,
+        lifecycle,
         port,
     } = startup;
     if !config.security.admin_enabled {
@@ -240,6 +250,7 @@ pub async fn start(startup: AdminStartup<'_>) -> Result<Option<AdminServer>, Str
         device_name,
         device_address,
         discovery_available,
+        lifecycle,
         library,
         transfers,
         pictures,

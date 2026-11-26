@@ -22,6 +22,7 @@ pub mod guard;
 pub mod http;
 pub mod index;
 pub mod library;
+pub mod lifecycle;
 pub mod limit;
 pub mod log;
 pub mod media;

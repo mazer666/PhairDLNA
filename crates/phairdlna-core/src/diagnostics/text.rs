@@ -272,6 +272,7 @@ mod tests {
                 fields: vec![("objects".to_owned(), "128".to_owned())],
             }],
             warnings: vec!["a warning".to_owned()],
+            timeline: Some("2026-11-26T08:00:00Z ready reason=\"listening\"".to_owned()),
             last_scan: Some("10:00:00".to_owned()),
         }
     }

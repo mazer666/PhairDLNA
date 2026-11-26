@@ -151,61 +151,63 @@ fn json_of_rescan(outcome: &RescanOutcome) -> Json {
 
 /// The diagnostics of the server, as JSON.
 fn json_of_diagnostics(diagnostics: &Diagnostics, redactor: &Redactor) -> Json {
-    Json::map(vec![
-        (
-            "version".to_owned(),
-            Json::text(diagnostics.version.clone()),
-        ),
+    let mut fields = core_diagnostics_fields(diagnostics, redactor);
+    let warnings = diagnostics
+        .warnings
+        .iter()
+        .map(|w| Json::text(w.clone()))
+        .collect();
+    fields.push(("warnings".to_owned(), Json::list(warnings)));
+    fields.push((
+        "timeline".to_owned(),
+        diagnostics
+            .timeline
+            .as_ref()
+            .map(|tl| Json::text(tl.clone()))
+            .unwrap_or(Json::Null),
+    ));
+    fields.push((
+        "last_scan".to_owned(),
+        diagnostics
+            .last_scan
+            .as_ref()
+            .map(|s| Json::text(s.clone()))
+            .unwrap_or(Json::Null),
+    ));
+    Json::map(fields)
+}
+
+/// The core status fields of the diagnostics.
+fn core_diagnostics_fields(d: &Diagnostics, redactor: &Redactor) -> Vec<(String, Json)> {
+    vec![
+        ("version".to_owned(), Json::text(d.version.clone())),
         (
             "source_revision".to_owned(),
-            Json::text(diagnostics.source_revision.clone()),
+            Json::text(d.source_revision.clone()),
         ),
-        (
-            "uptime_seconds".to_owned(),
-            Json::uint(diagnostics.uptime_seconds),
-        ),
+        ("uptime_seconds".to_owned(), Json::uint(d.uptime_seconds)),
         (
             "catalogue_objects".to_owned(),
-            Json::uint(diagnostics.catalogue_objects as u64),
+            Json::uint(d.catalogue_objects as u64),
         ),
         (
             "resident_bytes".to_owned(),
-            Json::maybe_uint(diagnostics.resident_bytes),
+            Json::maybe_uint(d.resident_bytes),
         ),
         (
             "system_update_id".to_owned(),
-            Json::uint(u64::from(diagnostics.system_update_id)),
+            Json::uint(u64::from(d.system_update_id)),
         ),
         (
             "roots".to_owned(),
-            status::json_of_roots(&diagnostics.roots, redactor),
+            status::json_of_roots(&d.roots, redactor),
         ),
         (
             "transfers".to_owned(),
-            Json::list(diagnostics.transfers.iter().map(json_of_transfer).collect()),
+            Json::list(d.transfers.iter().map(json_of_transfer).collect()),
         ),
-        (
-            "records".to_owned(),
-            json_of_records(&diagnostics.records, redactor),
-        ),
-        (
-            "warnings".to_owned(),
-            Json::list(
-                diagnostics
-                    .warnings
-                    .iter()
-                    .map(|warning| Json::text(warning.clone()))
-                    .collect(),
-            ),
-        ),
-        (
-            "last_scan".to_owned(),
-            match &diagnostics.last_scan {
-                Some(scan) => Json::text(scan.clone()),
-                None => Json::Null,
-            },
-        ),
-    ])
+        ("records".to_owned(), json_of_records(&d.records, redactor)),
+    ]
 }
 
 /// The records of the log, as JSON.

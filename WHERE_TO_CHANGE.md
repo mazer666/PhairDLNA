@@ -61,6 +61,7 @@
 | `crates/phairdlna-cli/src/serve/guard.rs`, `crates/phairdlna-cli/src/serve/guard/tests.rs` | Request admission rules and their private-helper tests: client access, host, framing and bounded transfers | F-13, F-16 |
 | `crates/phairdlna-cli/src/serve/setup.rs`, `crates/phairdlna-cli/src/serve/setup/` | The daemon startup facade and its configuration, HTTP, discovery and ordered-startup modules | F-13, F-14 |
 | `crates/phairdlna-cli/src/serve/admin.rs` | The wiring of the administration surface — the view of the daemon that the surface asks | F-14 |
+| `crates/phairdlna-cli/src/serve/lifecycle.rs` | The daemon lifecycle controller and local timeline event recorder | F-13 |
 | `crates/phairdlna-cli/src/serve/resources.rs` | The scheduler of the daemon — the classes of the work, the hints about the machine and the place of a transfer | F-18 |
 | `crates/phairdlna-cli/src/serve/index.rs` | The index of the catalogue in the daemon — the opening of the file, the catalogue that is read out of it and the warnings that belong to the server | F-09 |
 | `crates/phairdlna-cli/src/main.rs` | The argument parsing and the exit code | F-13 |

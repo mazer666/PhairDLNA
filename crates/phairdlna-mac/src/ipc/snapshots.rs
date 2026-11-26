@@ -25,6 +25,10 @@ pub struct RootSnapshot {
 /// The state of the server, as the surface tells it.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct StatusSnapshot {
+    /// The lifecycle state of the server (LIFE-001, LIFE-009).
+    pub lifecycle_state: Option<String>,
+    /// The user-facing explanation of the lifecycle state.
+    pub lifecycle_reason: Option<String>,
     /// The name media clients see during discovery.
     pub device_name: String,
     /// The advertised local address, absent when no LAN address is available.

@@ -16,6 +16,7 @@ use super::super::admin::{self, AdminStartup};
 use super::super::guard::Guard;
 use super::super::http;
 use super::super::library::{build_library, Library};
+use super::super::lifecycle::LifecycleController;
 use super::super::limit::CappedListener;
 use super::super::log::{Level, Logger};
 use super::super::media;
@@ -37,25 +38,13 @@ pub async fn start(options: ServeOptions) -> Result<Daemon, String> {
     let identity = prepared.identity.clone();
     let library = prepared.library.clone();
     let resources = prepared.resources.clone();
+    let lifecycle = LifecycleController::new(Arc::clone(&prepared.redactor), logger.clone());
     let (host, port) = address_and_port(&options, &config);
     let discovery_available = Arc::new(AtomicBool::new(false));
     let (listener, address, base_url) = open_the_socket(host, port).await?;
-    // The transfers that are running are shared: the media route registers
-    // them, and the administration surface counts them (`UX-012`).
     let transfers = Transfers::new();
     let (context, limits) = build_server_context(&config, &prepared, base_url, transfers.clone())?;
-    // The listener keeps the connections inside the bounds and gives every
-    // connection a deadline (`SEC-012`, `SEC-016`).
-    let listener = CappedListener::new(
-        listener,
-        limits.connections,
-        limits.read_timeout,
-        limits.write_timeout,
-    );
-    let server = start_http(listener, context.clone());
-    // The administration surface is a server of its own, on the loopback
-    // interface, and it starts only when the configuration asks for it
-    // (`OPS-020`, `OPS-025`).
+    let server = start_capped_http(listener, &limits, context.clone());
     #[cfg(feature = "admin")]
     let admin = start_admin(AdminInputs {
         config: &config,
@@ -66,6 +55,7 @@ pub async fn start(options: ServeOptions) -> Result<Daemon, String> {
         port: options.admin_port,
         transfers,
         discovery_available: &discovery_available,
+        lifecycle: lifecycle.clone(),
     })
     .await?;
     let (ssdp, stop_ssdp, ssdp_task) = start_ssdp(
@@ -78,11 +68,12 @@ pub async fn start(options: ServeOptions) -> Result<Daemon, String> {
         discovery_available,
     )
     .await;
-    // The watch keeps the catalogue in step with the drives of the library: a
-    // removable drive that is unplugged, and a network share that comes back,
-    // are seen by the running server and not only by the next start
-    // (`FUN-017`, `PLT-011`).
-    let (stop_watch, watch_task) = watch::spawn(library, logger.clone(), resources);
+    lifecycle.transition(
+        phairdlna_core::lifecycle::LifecycleState::Ready,
+        format!("the server is listening on {address}"),
+    );
+    let (stop_watch, watch_task) =
+        watch::spawn(library, logger.clone(), resources, lifecycle.clone());
     announce(&logger, &address, &context.base_url);
     Ok(Daemon {
         context,
@@ -99,6 +90,21 @@ pub async fn start(options: ServeOptions) -> Result<Daemon, String> {
     })
 }
 
+/// Starts the HTTP server with bounded connections and timeouts.
+fn start_capped_http(
+    listener: TcpListener,
+    limits: &Limits,
+    context: Arc<http::ServerContext>,
+) -> super::http_server::HttpServer {
+    let capped = CappedListener::new(
+        listener,
+        limits.connections,
+        limits.read_timeout,
+        limits.write_timeout,
+    );
+    start_http(capped, context)
+}
+
 /// Starts the optional authenticated administration API.
 #[cfg(feature = "admin")]
 async fn start_admin(
@@ -113,6 +119,7 @@ async fn start_admin(
         port,
         transfers,
         discovery_available,
+        lifecycle,
     } = inputs;
     let server = admin::start(AdminStartup {
         config,
@@ -124,6 +131,7 @@ async fn start_admin(
         device_name: config.server.device_name.clone(),
         device_address: (!host.is_loopback() && !host.is_unspecified()).then(|| host.to_string()),
         discovery_available: Arc::clone(discovery_available),
+        lifecycle,
         port,
     })
     .await?;
@@ -142,6 +150,7 @@ struct AdminInputs<'a> {
     port: Option<u16>,
     transfers: Transfers,
     discovery_available: &'a Arc<AtomicBool>,
+    lifecycle: LifecycleController,
 }
 
 /// Says that the server is listening.

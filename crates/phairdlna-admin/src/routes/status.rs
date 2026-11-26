@@ -14,6 +14,14 @@ use crate::json::Json;
 pub(super) fn json_of_status(status: &Status, redactor: &Redactor) -> Json {
     Json::map(vec![
         (
+            "lifecycle_state".to_owned(),
+            Json::text(status.lifecycle_state.as_str().to_owned()),
+        ),
+        (
+            "lifecycle_reason".to_owned(),
+            Json::text(status.lifecycle_reason.clone()),
+        ),
+        (
             "device_name".to_owned(),
             Json::text(status.device_name.clone()),
         ),

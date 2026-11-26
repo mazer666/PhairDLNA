@@ -16,10 +16,15 @@
 /// application and the surface show the same facts and cannot disagree about
 /// them (`OPS-013`, `UX-011`).
 pub use phairdlna_core::diagnostics::{Diagnostics, LogRecord, RootState, TransferInfo};
+pub use phairdlna_core::lifecycle::LifecycleState;
 
 /// What the server is doing right now.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Status {
+    /// The lifecycle state of the server (LIFE-001, LIFE-009).
+    pub lifecycle_state: LifecycleState,
+    /// The user-facing explanation or reason for the current state (LIFE-001).
+    pub lifecycle_reason: String,
     /// The name clients see when they discover the media server.
     pub device_name: String,
     /// The address the daemon advertises on the local network, when reachable.
@@ -44,6 +49,27 @@ pub struct Status {
     pub system_update_id: u32,
     /// The roots of the library.
     pub roots: Vec<RootState>,
+}
+
+impl Default for Status {
+    fn default() -> Self {
+        Self {
+            lifecycle_state: LifecycleState::Ready,
+            lifecycle_reason: LifecycleState::Ready.explanation().to_owned(),
+            device_name: String::new(),
+            device_address: None,
+            discovery_available: false,
+            uptime_seconds: 0,
+            version: String::new(),
+            source_revision: String::new(),
+            active_streams: 0,
+            catalogue_objects: 0,
+            resident_bytes: None,
+            cache_bytes: 0,
+            system_update_id: 0,
+            roots: Vec::new(),
+        }
+    }
 }
 
 /// What a scan of the library found.
