@@ -171,7 +171,7 @@ client.
 | M4.2 | The real-device matrix | `INT-102` | **done (2026-11-26)** — machine-readable device trial matrix recorded in `qa/device-matrix.toml` with device model, firmware, client app, media format and observed outcome (`INT-102`) |
 | M4.3 | Fuzzing, property tests, resource-bound tests | `SEC-060` … `SEC-072` | **done (2026-11-26)** — robust parser fuzzing, property tests, strict input and memory allocation bounds, path containment, and DIDL-Lite page limits (`SEC-060`, `SEC-061`, `SEC-065`, `SEC-067`, `SEC-068`, `SEC-071`, `SEC-072`) |
 | M4.4 | Soak test, crash and corruption recovery | `REL-001` … `REL-006` | **done (2026-11-26)** — automated soak test harness (`scripts/soak.sh`), crash recovery and media original immutability tests, offline volume resilience, atomic configuration validation, and headless lifecycle independence (`REL-001` … `REL-006`) |
-| M4.5 | Security review of the whole surface | `../04-security/SECURITY-MODEL.md` |
+| M4.5 | Security review of the whole surface | `../04-security/SECURITY-MODEL.md` | **done (2026-11-26)** — comprehensive security review of all 8 normative mitigations (`M-01` … `M-08`) and attack surfaces recorded in `docs/05-quality/reviews/M4-SECURITY-REVIEW-2026-11-26.md` |
 
 **Exit criteria:** the device matrix has at least one observed result per priority
 client family; the fuzz targets are clean; the seven-day soak shows flat memory,
