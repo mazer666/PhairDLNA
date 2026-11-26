@@ -88,7 +88,7 @@ impl ServerControls {
             save_settings,
             roots: RefCell::new(Vec::new()),
         };
-        controls.set_roots(&settings.roots);
+        controls.set_roots(strings, &settings.roots);
         controls
     }
 
@@ -109,15 +109,18 @@ impl ServerControls {
 
     /// Fills the list of the shared folders.
     ///
-    /// The list holds the name of every folder; the path of a folder is kept
-    /// beside it, because the name of a folder may be given twice and only
-    /// the path identifies it.
-    pub(in crate::platform::main_window) fn set_roots(&self, roots: &[ConfiguredRoot]) {
+    /// The list holds the name and path hint of every folder.
+    pub(in crate::platform::main_window) fn set_roots(
+        &self,
+        strings: &Strings,
+        roots: &[ConfiguredRoot],
+    ) {
         self.folder_picker.removeAllItems();
         self.roots.borrow_mut().clear();
         for root in roots {
+            let label = folder_item_label(strings, &root.name, &root.path);
             self.folder_picker
-                .addItemWithTitle(&NSString::from_str(&root.name));
+                .addItemWithTitle(&NSString::from_str(&label));
             self.roots.borrow_mut().push(root.path.clone());
         }
         let empty = roots.is_empty();
@@ -189,5 +192,23 @@ fn port_text(port: u16) -> String {
     match port {
         0 => String::new(),
         port => port.to_string(),
+    }
+}
+
+/// Formats a folder name and path hint for the picker.
+fn folder_item_label(strings: &Strings, name: &str, path: &str) -> String {
+    let home = std::env::var("HOME").unwrap_or_default();
+    let display_path = if !home.is_empty() && path.starts_with(&home) {
+        format!("~{}", &path[home.len()..])
+    } else {
+        path.to_owned()
+    };
+    if display_path == name {
+        name.to_owned()
+    } else {
+        strings.format(
+            "overview.folder_item",
+            &[("name", name), ("path", &display_path)],
+        )
     }
 }

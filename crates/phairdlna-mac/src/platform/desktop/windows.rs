@@ -176,4 +176,36 @@ impl Desktop {
             self.app.set_notice(self.app.localized_text(key));
         }
     }
+
+    /// Removes a media folder from configuration after user confirmation.
+    pub(super) fn confirm_and_remove_folder(&mut self, path: &str) {
+        let title = self.app.localized_text("dialog.remove_folder.title");
+        let message = self.app.localized_text("dialog.remove_folder.message");
+        let confirm = self.app.localized_text("dialog.remove_folder.confirm");
+        let cancel = self.app.localized_text("dialog.remove_folder.cancel");
+
+        if !crate::platform::panels::ask_confirmation(
+            self.marker,
+            &title,
+            &message,
+            &confirm,
+            &cancel,
+        ) {
+            return;
+        }
+
+        match self.app.remove_media_root(path) {
+            Ok(true) => {
+                let notice = self.app.localized_text("notice.folders_updated");
+                self.app.set_notice(notice);
+                self.worker.ask(crate::worker::Command::Rescan);
+            }
+            Ok(false) => {}
+            Err(e) => {
+                let notice = self.app.localized_text(e.notice_key());
+                self.app.set_notice(notice);
+            }
+        }
+        self.write();
+    }
 }

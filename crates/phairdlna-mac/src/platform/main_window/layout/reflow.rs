@@ -12,60 +12,43 @@ use objc2_app_kit::{NSFont, NSLineBreakMode, NSTextField};
 use objc2_foundation::{NSPoint, NSRect, NSSize};
 
 use super::geometry::centered_document_height;
+use super::grid::{
+    GridLayout, BODY_SIZE, BOTTOM_SPACE, BUTTON_HEIGHT, FIELD_HEIGHT, GAP, GUIDANCE_SIZE,
+    HEADING_SIZE, LINE_HEIGHT, MARGIN, PAD, PICKER_HEIGHT, SECTION_SIZE, STATUS_SIZE, TIGHT_GAP,
+};
+use super::placement::{
+    place_folders_card, place_info_card, place_settings_card, place_status_card,
+};
 use super::OverviewViews;
 
-/// The left edge of the content.
-const X: f64 = 28.0;
-/// The width of the content.
-const WIDTH: f64 = 544.0;
-/// The inner horizontal padding for card boxes.
-const PAD: f64 = 16.0;
-/// The inner content width inside cards.
-const INNER_WIDTH: f64 = WIDTH - 2.0 * PAD;
-/// The space between two blocks.
-const GAP: f64 = 14.0;
-/// The space between a heading and its content.
-const TIGHT_GAP: f64 = 6.0;
-/// The size of the font of the heading.
-const HEADING_SIZE: f64 = 24.0;
-/// The size of the font of the state.
-const STATUS_SIZE: f64 = 18.0;
-/// The size of the font of a section heading.
-const SECTION_SIZE: f64 = 14.0;
-/// The size of the font of the body.
-const BODY_SIZE: f64 = 13.0;
-/// The size of the font of the guidance.
-const GUIDANCE_SIZE: f64 = 12.0;
-/// The height of one line of the body.
-const LINE_HEIGHT: f64 = 19.0;
-/// The height of a button.
-const BUTTON_HEIGHT: f64 = 30.0;
-/// The height of a field.
-const FIELD_HEIGHT: f64 = 24.0;
-/// The height of the label of a field.
-const LABEL_HEIGHT: f64 = 18.0;
-/// The height of the list of the folders.
-const PICKER_HEIGHT: f64 = 26.0;
-/// The space below the last section.
-const BOTTOM_SPACE: f64 = 30.0;
-
 /// The heights the text of the sections needs.
-struct Heights {
-    folders: f64,
-    connection: f64,
-    activity: f64,
-    notice: f64,
-    read_only: f64,
+pub(super) struct Heights {
+    pub folders: f64,
+    pub connection: f64,
+    pub activity: f64,
+    pub notice: f64,
+    pub read_only: f64,
 }
 
 impl OverviewViews {
     /// Reflows all sections and text frames for their current content.
     pub(in crate::platform::main_window) fn reflow(&self) {
         configure_fonts(self);
-        let heights = measure(self);
-        let document_height = resize_document(self, flow_height(&heights));
-        place_sections(self, &heights, document_height);
+        let viewport_width = current_viewport_width(self);
+        let grid = GridLayout::for_width(viewport_width);
+        let heights = measure(self, grid.inner_width);
+        let (doc_w, doc_h) = calculate_document_size(&grid, &heights, self);
+        resize_document(self, doc_w, doc_h);
+        place_sections(self, &heights, &grid, doc_h);
     }
+}
+
+fn current_viewport_width(views: &OverviewViews) -> f64 {
+    views
+        .document
+        .enclosingScrollView()
+        .map(|scroll| scroll.contentView().bounds().size.width)
+        .unwrap_or(600.0)
 }
 
 /// Applies the standard fonts of the system to every control.
@@ -98,6 +81,7 @@ fn configure_fonts(views: &OverviewViews) {
     }
     for button in [
         &views.add_folders,
+        &views.rescan_button,
         &views.controls.toggle,
         &views.controls.remove_folder,
         &views.controls.save_settings,
@@ -113,31 +97,34 @@ fn configure_fonts(views: &OverviewViews) {
 }
 
 /// Measures the text of the sections that change with their content.
-fn measure(views: &OverviewViews) -> Heights {
+fn measure(views: &OverviewViews, inner_width: f64) -> Heights {
     let notice_text = views.notice.stringValue().to_string();
     let notice_lines = if notice_text.is_empty() {
         0
     } else {
-        wrapped_lines(&notice_text, GUIDANCE_SIZE)
+        wrapped_lines(&notice_text, GUIDANCE_SIZE, inner_width)
     };
     Heights {
-        folders: measured_height(&views.folders),
-        connection: measured_height(&views.connection),
-        activity: measured_height(&views.activity),
+        folders: measured_height(&views.folders, inner_width),
+        connection: measured_height(&views.connection, inner_width),
+        activity: measured_height(&views.activity, inner_width),
         notice: 17.0 * notice_lines as f64,
         read_only: 17.0
-            * wrapped_lines(&views.read_only.stringValue().to_string(), GUIDANCE_SIZE) as f64,
+            * wrapped_lines(
+                &views.read_only.stringValue().to_string(),
+                GUIDANCE_SIZE,
+                inner_width,
+            ) as f64,
     }
 }
 
 /// The height a text of the body needs.
-fn measured_height(field: &NSTextField) -> f64 {
-    LINE_HEIGHT * wrapped_lines(&field.stringValue().to_string(), BODY_SIZE) as f64
+fn measured_height(field: &NSTextField, inner_width: f64) -> f64 {
+    LINE_HEIGHT * wrapped_lines(&field.stringValue().to_string(), BODY_SIZE, inner_width) as f64
 }
 
-/// Calculates the heights of the cards and total document flow.
-fn card_heights(heights: &Heights) -> (f64, f64, f64, f64, f64) {
-    // Status card: status + library + button + optional notice
+/// Calculates the heights of the individual cards.
+fn card_heights(heights: &Heights) -> (f64, f64, f64, f64) {
     let status_card = 28.0
         + TIGHT_GAP
         + 20.0
@@ -150,11 +137,9 @@ fn card_heights(heights: &Heights) -> (f64, f64, f64, f64, f64) {
         }
         + 2.0 * PAD;
 
-    // Folders card: heading + folder list + picker + remove + add
     let folders_card =
         20.0 + TIGHT_GAP + heights.folders + GAP + PICKER_HEIGHT + TIGHT_GAP + 32.0 + 2.0 * PAD;
 
-    // Settings card: heading + 2 form rows (label + field) + save button
     let settings_card = 20.0
         + TIGHT_GAP
         + FIELD_HEIGHT
@@ -164,7 +149,6 @@ fn card_heights(heights: &Heights) -> (f64, f64, f64, f64, f64) {
         + BUTTON_HEIGHT
         + 2.0 * PAD;
 
-    // Info card: connection heading + connection text + activity heading + activity + read-only
     let info_card = 20.0
         + TIGHT_GAP
         + heights.connection
@@ -176,218 +160,84 @@ fn card_heights(heights: &Heights) -> (f64, f64, f64, f64, f64) {
         + heights.read_only
         + 2.0 * PAD;
 
-    let total = 36.0 // Page heading
-        + GAP
-        + status_card
-        + GAP
-        + folders_card
-        + GAP
-        + settings_card
-        + GAP
-        + info_card
-        + BOTTOM_SPACE;
-
-    (status_card, folders_card, settings_card, info_card, total)
+    (status_card, folders_card, settings_card, info_card)
 }
 
-/// The height the whole document needs.
-fn flow_height(heights: &Heights) -> f64 {
-    let (_, _, _, _, total) = card_heights(heights);
-    total
-}
+/// Calculates document dimensions given grid layout and measured card heights.
+fn calculate_document_size(
+    grid: &GridLayout,
+    heights: &Heights,
+    views: &OverviewViews,
+) -> (f64, f64) {
+    let (h_status, h_folders, h_settings, h_info) = card_heights(heights);
+    let flow = if grid.is_two_col {
+        let col1_flow = h_status + GAP + h_folders;
+        let col2_flow = h_settings + GAP + h_info;
+        36.0 + GAP + col1_flow.max(col2_flow) + BOTTOM_SPACE
+    } else {
+        36.0 + GAP + h_status + GAP + h_folders + GAP + h_settings + GAP + h_info + BOTTOM_SPACE
+    };
 
-/// Grows the document to the height it needs and returns that height.
-fn resize_document(views: &OverviewViews, flow_height: f64) -> f64 {
     let viewport_height = views
         .document
         .enclosingScrollView()
         .map(|scroll| scroll.contentView().bounds().size.height)
         .unwrap_or(800.0);
-    let height = centered_document_height(flow_height, viewport_height);
-    views.document.setFrameSize(NSSize::new(600.0, height));
+
+    let doc_height = centered_document_height(flow, viewport_height);
+    let doc_width = if grid.is_two_col {
+        grid.col2_x + grid.col_width + MARGIN
+    } else {
+        grid.col_width + 2.0 * MARGIN
+    };
+    (doc_width, doc_height)
+}
+
+/// Resizes the document view.
+fn resize_document(views: &OverviewViews, width: f64, height: f64) {
+    views.document.setFrameSize(NSSize::new(width, height));
     views.document.setBounds(NSRect::new(
         NSPoint::new(0.0, 0.0),
-        NSSize::new(600.0, height),
+        NSSize::new(width, height),
     ));
-    height
 }
 
 /// Places every control in reading order inside styled card containers.
-fn place_sections(views: &OverviewViews, heights: &Heights, document_height: f64) {
-    let (h_status, h_folders, h_settings, h_info, _) = card_heights(heights);
+fn place_sections(
+    views: &OverviewViews,
+    heights: &Heights,
+    grid: &GridLayout,
+    document_height: f64,
+) {
+    let (h_status, h_folders, h_settings, h_info) = card_heights(heights);
     let mut top = document_height - 18.0;
+    let heading_w = if grid.is_two_col {
+        grid.col_width * 2.0 + GAP
+    } else {
+        grid.col_width
+    };
 
-    place(&views.heading, X, WIDTH, 32.0, &mut top, GAP);
-    top = place_status_card(views, heights, top, h_status);
-    top = place_folders_card(views, heights, top, h_folders);
-    top = place_settings_card(views, top, h_settings);
-    place_info_card(views, heights, top, h_info);
-}
+    place(&views.heading, grid.col1_x, heading_w, 32.0, &mut top, GAP);
 
-fn place_status_card(views: &OverviewViews, heights: &Heights, top: f64, height: f64) -> f64 {
-    views.status_card.setFrame(NSRect::new(
-        NSPoint::new(X, top - height),
-        NSSize::new(WIDTH, height),
-    ));
-    let mut inner = top - PAD;
-    place(
-        &views.status,
-        X + PAD,
-        INNER_WIDTH - 150.0,
-        26.0,
-        &mut inner,
-        TIGHT_GAP,
-    );
-    views.controls.toggle.setFrame(NSRect::new(
-        NSPoint::new(X + WIDTH - PAD - 140.0, top - PAD - BUTTON_HEIGHT),
-        NSSize::new(140.0, BUTTON_HEIGHT),
-    ));
-    place(
-        &views.library,
-        X + PAD,
-        INNER_WIDTH,
-        20.0,
-        &mut inner,
-        TIGHT_GAP,
-    );
-    if heights.notice > 0.0 {
-        place(
-            &views.notice,
-            X + PAD,
-            INNER_WIDTH,
-            heights.notice,
-            &mut inner,
-            0.0,
-        );
+    if grid.is_two_col {
+        let mut left_top = top;
+        left_top = place_status_card(views, heights, grid, left_top, h_status);
+        place_folders_card(views, heights, grid, left_top, h_folders);
+
+        let mut right_top = top;
+        right_top = place_settings_card(views, grid, right_top, h_settings);
+        place_info_card(views, heights, grid, right_top, h_info);
+    } else {
+        top = place_status_card(views, heights, grid, top, h_status);
+        top = place_folders_card(views, heights, grid, top, h_folders);
+        top = place_settings_card(views, grid, top, h_settings);
+        place_info_card(views, heights, grid, top, h_info);
     }
-    top - height - GAP
-}
-
-fn place_folders_card(views: &OverviewViews, heights: &Heights, top: f64, height: f64) -> f64 {
-    views.folders_card.setFrame(NSRect::new(
-        NSPoint::new(X, top - height),
-        NSSize::new(WIDTH, height),
-    ));
-    let mut inner = top - PAD;
-    place(
-        &views.folders_heading,
-        X + PAD,
-        INNER_WIDTH,
-        20.0,
-        &mut inner,
-        TIGHT_GAP,
-    );
-    place(
-        &views.folders,
-        X + PAD,
-        INNER_WIDTH,
-        heights.folders,
-        &mut inner,
-        GAP,
-    );
-    views.controls.folder_picker.setFrame(NSRect::new(
-        NSPoint::new(X + PAD, inner - PICKER_HEIGHT),
-        NSSize::new(INNER_WIDTH, PICKER_HEIGHT),
-    ));
-    inner -= PICKER_HEIGHT + TIGHT_GAP;
-    views.controls.remove_folder.setFrame(NSRect::new(
-        NSPoint::new(X + PAD, inner - BUTTON_HEIGHT),
-        NSSize::new(170.0, BUTTON_HEIGHT),
-    ));
-    views.add_folders.setFrame(NSRect::new(
-        NSPoint::new(X + PAD + 180.0, inner - BUTTON_HEIGHT),
-        NSSize::new(190.0, BUTTON_HEIGHT),
-    ));
-    top - height - GAP
-}
-
-fn place_settings_card(views: &OverviewViews, top: f64, height: f64) -> f64 {
-    views.settings_card.setFrame(NSRect::new(
-        NSPoint::new(X, top - height),
-        NSSize::new(WIDTH, height),
-    ));
-    let mut inner = top - PAD;
-    let (label_w, field_x) = (120.0, X + PAD + 130.0);
-
-    views.controls.device_name_label.setFrame(NSRect::new(
-        NSPoint::new(X + PAD, inner - LABEL_HEIGHT - 3.0),
-        NSSize::new(label_w, LABEL_HEIGHT),
-    ));
-    views.controls.device_name_field.setFrame(NSRect::new(
-        NSPoint::new(field_x, inner - FIELD_HEIGHT),
-        NSSize::new(260.0, FIELD_HEIGHT),
-    ));
-    inner -= FIELD_HEIGHT + TIGHT_GAP;
-
-    views.controls.http_port_label.setFrame(NSRect::new(
-        NSPoint::new(X + PAD, inner - LABEL_HEIGHT - 3.0),
-        NSSize::new(label_w, LABEL_HEIGHT),
-    ));
-    views.controls.http_port_field.setFrame(NSRect::new(
-        NSPoint::new(field_x, inner - FIELD_HEIGHT),
-        NSSize::new(100.0, FIELD_HEIGHT),
-    ));
-    inner -= FIELD_HEIGHT + GAP;
-
-    views.controls.save_settings.setFrame(NSRect::new(
-        NSPoint::new(field_x, inner - BUTTON_HEIGHT),
-        NSSize::new(180.0, BUTTON_HEIGHT),
-    ));
-    top - height - GAP
-}
-
-fn place_info_card(views: &OverviewViews, heights: &Heights, top: f64, height: f64) {
-    views.info_card.setFrame(NSRect::new(
-        NSPoint::new(X, top - height),
-        NSSize::new(WIDTH, height),
-    ));
-    let mut inner = top - PAD;
-    place(
-        &views.connection_heading,
-        X + PAD,
-        INNER_WIDTH,
-        20.0,
-        &mut inner,
-        TIGHT_GAP,
-    );
-    place(
-        &views.connection,
-        X + PAD,
-        INNER_WIDTH,
-        heights.connection,
-        &mut inner,
-        GAP,
-    );
-    place(
-        &views.activity_heading,
-        X + PAD,
-        INNER_WIDTH,
-        20.0,
-        &mut inner,
-        TIGHT_GAP,
-    );
-    place(
-        &views.activity,
-        X + PAD,
-        INNER_WIDTH,
-        heights.activity,
-        &mut inner,
-        TIGHT_GAP,
-    );
-    place(
-        &views.read_only,
-        X + PAD,
-        INNER_WIDTH,
-        heights.read_only,
-        &mut inner,
-        0.0,
-    );
 }
 
 /// The number of lines a text needs in the width of the document.
-fn wrapped_lines(text: &str, font_size: f64) -> usize {
-    // Budget one full em per character to accommodate wide-script and fallback glyphs.
-    let chars_per_line = (INNER_WIDTH / font_size).floor().max(1.0) as usize;
+fn wrapped_lines(text: &str, font_size: f64, inner_width: f64) -> usize {
+    let chars_per_line = (inner_width / font_size).floor().max(1.0) as usize;
     text.lines()
         .map(|line| line.chars().count().max(1).div_ceil(chars_per_line))
         .sum::<usize>()
@@ -395,7 +245,7 @@ fn wrapped_lines(text: &str, font_size: f64) -> usize {
 }
 
 /// Places a text field with custom frame and gap.
-fn place(field: &NSTextField, x: f64, width: f64, height: f64, top: &mut f64, gap: f64) {
+pub(super) fn place(field: &NSTextField, x: f64, width: f64, height: f64, top: &mut f64, gap: f64) {
     *top -= height;
     field.setFrame(NSRect::new(
         NSPoint::new(x, *top),
@@ -411,15 +261,18 @@ mod tests {
     /// The estimate changes at the exact width boundary of the standard font.
     #[test]
     fn wrapped_line_estimate_respects_the_width_boundary() {
-        assert_eq!(wrapped_lines(&"x".repeat(42), GUIDANCE_SIZE), 1);
-        assert_eq!(wrapped_lines(&"x".repeat(43), GUIDANCE_SIZE), 2);
+        assert_eq!(wrapped_lines(&"x".repeat(42), GUIDANCE_SIZE, 512.0), 1);
+        assert_eq!(wrapped_lines(&"x".repeat(43), GUIDANCE_SIZE, 512.0), 2);
     }
 
     /// Each hard line and each wide-script character receives conservative space.
     #[test]
     fn wrapped_line_estimate_counts_explicit_and_wide_text() {
         let wide = "界".repeat(43);
-        assert_eq!(wrapped_lines(&wide, GUIDANCE_SIZE), 2);
-        assert_eq!(wrapped_lines(&format!("short\n{wide}"), GUIDANCE_SIZE), 3);
+        assert_eq!(wrapped_lines(&wide, GUIDANCE_SIZE, 512.0), 2);
+        assert_eq!(
+            wrapped_lines(&format!("short\n{wide}"), GUIDANCE_SIZE, 512.0),
+            3
+        );
     }
 }

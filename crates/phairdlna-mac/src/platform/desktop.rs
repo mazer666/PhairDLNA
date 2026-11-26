@@ -121,6 +121,10 @@ impl Desktop {
         match action {
             MenuAction::SaveSettings => self.save_window_settings(),
             MenuAction::RemoveMediaFolder => self.remove_selected_folder(),
+            MenuAction::RescanLibrary => {
+                self.worker.ask(Command::Rescan);
+                self.write();
+            }
             _ => {}
         }
     }
@@ -141,6 +145,7 @@ impl Desktop {
                 self.app.set_notice(notice);
             }
         }
+        self.write();
     }
 
     /// Removes the folder selected in the overview folder picker.
@@ -151,18 +156,7 @@ impl Desktop {
         let Some(path) = window.selected_root() else {
             return;
         };
-        match self.app.remove_media_root(&path) {
-            Ok(true) => {
-                let notice = self.app.localized_text("notice.folders_updated");
-                self.app.set_notice(notice);
-                self.worker.ask(Command::Rescan);
-            }
-            Ok(false) => {}
-            Err(e) => {
-                let notice = self.app.localized_text(e.notice_key());
-                self.app.set_notice(notice);
-            }
-        }
+        self.confirm_and_remove_folder(&path);
     }
 
     /// The tick of the timer.

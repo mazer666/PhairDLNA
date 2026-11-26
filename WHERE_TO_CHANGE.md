@@ -137,6 +137,7 @@
 | `crates/phairdlna-mac/tests/service_control.rs` | Acceptance checks for the commands of `launchctl`, the refusal of the service manager and the absence of any privilege in the control | F-15 |
 | `crates/phairdlna-mac/src/platform/desktop/windows.rs` | Main and preferences window lifecycle, inline initial-configuration guidance, and diagnostics save-panel flow | F-15 |
 | `crates/phairdlna-mac/src/platform/main_window.rs` | The native overview window lifecycle and controls | F-15 |
+| `crates/phairdlna-mac/src/platform/main_window/layout/` | Responsive card-based dashboard layout, grid calculation (`grid.rs`), card placement (`placement.rs`) and dynamic text reflow (`reflow.rs`) | F-15, UX-020 |
 | `crates/phairdlna-mac/src/app/settings.rs` | Direct server settings management (device name, HTTP port) and atomic persistence | F-12, F-15 |
 | `crates/phairdlna-mac/src/platform/main_menu.rs` | The native application main menu bar at top-left (App, File, Window menus) | F-15 |
 | `crates/phairdlna-mac/src/platform/main_window/layout.rs`, `crates/phairdlna-mac/src/platform/main_window/layout/reflow.rs`, `crates/phairdlna-mac/src/platform/main_window/layout/controls.rs` | Overview controls, interactive server steering, localized accessibility names and responsive vertical reflow | F-15 |

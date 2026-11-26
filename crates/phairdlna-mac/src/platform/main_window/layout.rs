@@ -19,6 +19,8 @@ use crate::text::Strings;
 
 mod controls;
 mod geometry;
+mod grid;
+mod placement;
 mod reflow;
 use controls::ServerControls;
 
@@ -40,6 +42,7 @@ pub(super) struct OverviewViews {
     pub(super) activity: Retained<NSTextField>,
     pub(super) notice: Retained<NSTextField>,
     pub(super) add_folders: Retained<NSButton>,
+    pub(super) rescan_button: Retained<NSButton>,
     pub(super) read_only: Retained<NSTextField>,
     /// The controls that change the server.
     pub(super) controls: ServerControls,
@@ -60,6 +63,7 @@ impl OverviewViews {
         let (connection_heading, connection, activity_heading, activity, notice, read_only) =
             build_info_labels(mtm, strings);
         let add_folders = folder_button(mtm, strings, target);
+        let rescan_button = rescan_button(mtm, strings, target);
         let controls = ServerControls::new(mtm, strings, target, settings);
 
         set_accessibility_labels(
@@ -72,13 +76,9 @@ impl OverviewViews {
             &notice,
         );
 
-        add_cards(
+        assemble_document(
             &document,
             &[&status_card, &folders_card, &settings_card, &info_card],
-        );
-
-        add_subviews(
-            &document,
             &[
                 &heading,
                 &status,
@@ -92,7 +92,7 @@ impl OverviewViews {
                 &notice,
                 &read_only,
             ],
-            &add_folders,
+            &[&add_folders, &rescan_button],
             &controls,
         );
 
@@ -113,6 +113,7 @@ impl OverviewViews {
             activity,
             notice,
             add_folders,
+            rescan_button,
             read_only,
             controls,
         }
@@ -191,24 +192,37 @@ fn folder_button(
     button
 }
 
-/// Puts the background cards into the document view.
-fn add_cards(document: &NSView, cards: &[&NSBox]) {
+/// Creates the library rescan button.
+fn rescan_button(
+    mtm: MainThreadMarker,
+    strings: &Strings,
+    target: &MenuTarget,
+) -> Retained<NSButton> {
+    let button = NSButton::new(mtm);
+    button.setTitle(&NSString::from_str(strings.text("overview.rescan")));
+    let img = icon::action_image_of(&MenuAction::RescanLibrary);
+    target.configure_push_button(&button, img.as_deref());
+    target.button_action(&button, MenuAction::RescanLibrary);
+    button
+}
+
+/// Assembles all cards, labels, buttons and controls into the document view.
+fn assemble_document(
+    document: &NSView,
+    cards: &[&NSBox],
+    labels: &[&NSTextField],
+    buttons: &[&NSButton],
+    controls: &ServerControls,
+) {
     for card in cards {
         document.addSubview(card);
     }
-}
-
-/// Puts the views that form the document into the scrollable view.
-fn add_subviews(
-    document: &NSView,
-    labels: &[&NSTextField],
-    button: &NSButton,
-    controls: &ServerControls,
-) {
     for view in labels {
         document.addSubview(view);
     }
-    document.addSubview(button);
+    for button in buttons {
+        document.addSubview(button);
+    }
     add_controls(document, controls);
 }
 

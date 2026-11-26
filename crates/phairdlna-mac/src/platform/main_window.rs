@@ -122,7 +122,7 @@ impl MainWindow {
             crate::overview::server_toggle(snapshot.state),
             &self._target,
         );
-        self.views.controls.set_roots(&settings.roots);
+        self.views.controls.set_roots(strings, &settings.roots);
         self.views.reflow();
     }
 
@@ -137,9 +137,9 @@ impl MainWindow {
     }
 
     /// Updates the settings fields with the stored values.
-    pub fn set_settings(&self, settings: &ServerSettings) {
+    pub fn set_settings(&self, strings: &Strings, settings: &ServerSettings) {
         self.views.controls.set_values(settings);
-        self.views.controls.set_roots(&settings.roots);
+        self.views.controls.set_roots(strings, &settings.roots);
     }
 
     fn update_status_color(&self, state: ServerState) {
