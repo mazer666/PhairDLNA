@@ -59,7 +59,7 @@
 | `crates/phairdlna-cli/src/serve/` | The daemon — the start of the server, the HTTP routes, the discovery socket, the library and the watch of the drives, the media of the library, the body of a media answer, the cache of the pictures, the log, the signals and the transfers that run (`transfers.rs`) | F-01, F-02, F-03, F-04, F-06, F-08, F-10, F-13 |
 | `crates/phairdlna-cli/src/serve/limit.rs`, `crates/phairdlna-cli/src/serve/limit/tests.rs` | Shared connection-cap enforcement and per-read/per-write socket deadlines, with focused connection-budget tests | F-13, F-16 |
 | `crates/phairdlna-cli/src/serve/guard.rs`, `crates/phairdlna-cli/src/serve/guard/tests.rs` | Request admission rules and their private-helper tests: client access, host, framing and bounded transfers | F-13, F-16 |
-| `crates/phairdlna-cli/src/serve/setup.rs`, `crates/phairdlna-cli/src/serve/setup/` | The daemon startup facade and its configuration, HTTP, discovery and ordered-startup modules | F-13, F-14 |
+| `crates/phairdlna-cli/src/serve/setup.rs`, `crates/phairdlna-cli/src/serve/setup/` | The daemon startup facade and its configuration, socket, HTTP, discovery and ordered-startup modules | F-13, F-14 |
 | `crates/phairdlna-cli/src/serve/admin.rs` | The wiring of the administration surface — the view of the daemon that the surface asks | F-14 |
 | `crates/phairdlna-cli/src/serve/lifecycle.rs` | The daemon lifecycle controller and local timeline event recorder | F-13 |
 | `crates/phairdlna-cli/src/serve/resources.rs` | The scheduler of the daemon — the classes of the work, the hints about the machine and the place of a transfer | F-18 |

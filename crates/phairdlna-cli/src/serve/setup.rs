@@ -10,9 +10,11 @@
 mod configuration;
 mod discovery;
 mod http_server;
+mod socket;
 mod startup;
 
 pub use configuration::{address_and_port, device_info, load_config, load_identity, roots_of};
 pub use discovery::start_ssdp;
 pub use http_server::{start_http, HttpServer};
+pub use socket::{open_the_socket, start_capped_http};
 pub use startup::start;

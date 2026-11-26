@@ -7,9 +7,7 @@ use std::sync::Arc;
 use phairdlna_core::config::Config;
 use phairdlna_core::identity;
 use phairdlna_core::security::{ClientAccess, HostPolicy, Limits, Redactor};
-use phairdlna_core::upnp::BaseUrl;
-use phairdlna_core::upnp::DeviceDescription;
-use tokio::net::TcpListener;
+use phairdlna_core::upnp::{BaseUrl, DeviceDescription};
 
 #[cfg(feature = "admin")]
 use super::super::admin::{self, AdminStartup};
@@ -17,7 +15,6 @@ use super::super::guard::Guard;
 use super::super::http;
 use super::super::library::{build_library, Library};
 use super::super::lifecycle::LifecycleController;
-use super::super::limit::CappedListener;
 use super::super::log::{Level, Logger};
 use super::super::media;
 use super::super::pictures::Pictures;
@@ -27,7 +24,7 @@ use super::super::watch;
 use super::super::{Daemon, ServeOptions};
 use super::configuration::{address_and_port, device_info, load_config, load_identity, roots_of};
 use super::discovery::start_ssdp;
-use super::http_server::start_http;
+use super::socket::{open_the_socket, start_capped_http};
 
 /// Starts the daemon: the configuration, the identity, the catalogue, the
 /// HTTP server and the discovery socket.
@@ -89,21 +86,6 @@ pub async fn start(options: ServeOptions) -> Result<Daemon, String> {
         #[cfg(feature = "admin")]
         admin,
     })
-}
-
-/// Starts the HTTP server with bounded connections and timeouts.
-fn start_capped_http(
-    listener: TcpListener,
-    limits: &Limits,
-    context: Arc<http::ServerContext>,
-) -> super::http_server::HttpServer {
-    let capped = CappedListener::new(
-        listener,
-        limits.connections,
-        limits.read_timeout,
-        limits.write_timeout,
-    );
-    start_http(capped, context)
 }
 
 /// Starts the optional authenticated administration API.
@@ -204,27 +186,6 @@ fn prepare(config: &Config, options: &ServeOptions) -> Result<Prepared, String> 
         library,
         resources,
     })
-}
-
-/// Opens the socket of the media server and builds its base URL.
-///
-/// The base URL carries the port the operating system gave, not the one that
-/// was asked for: the port `0` means "any free port", and a client that reads
-/// the description must learn the port that is really open (`INT-022`,
-/// `INT-006`).
-async fn open_the_socket(
-    host: Ipv4Addr,
-    port: u16,
-) -> Result<(TcpListener, std::net::SocketAddr, BaseUrl), String> {
-    let listener = TcpListener::bind((Ipv4Addr::UNSPECIFIED, port))
-        .await
-        .map_err(|error| format!("the port {port} cannot be opened: {error}"))?;
-    let address = listener
-        .local_addr()
-        .map_err(|error| format!("the address of the server is not known: {error}"))?;
-    let base_url = BaseUrl::new(&format!("http://{host}:{}", address.port()))
-        .map_err(|error| format!("the base URL is not usable: {error}"))?;
-    Ok((listener, address, base_url))
 }
 
 /// Tells the user where the administration surface is and where its token is.
