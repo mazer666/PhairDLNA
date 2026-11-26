@@ -11,7 +11,14 @@
 
 use std::path::PathBuf;
 
-use super::layout::{Platform, Scope, ServiceLayout};
+mod commands_builder;
+pub mod windows;
+
+mod status_reader;
+pub use commands_builder::commands_for;
+pub use status_reader::read_the_status;
+
+use super::layout::{Platform, ServiceLayout};
 use super::runner::{CommandOutcome, ServiceRunner};
 use super::{plist, unit};
 
@@ -35,95 +42,6 @@ pub struct ServiceCommands {
     pub pid: Option<Vec<String>>,
     /// The command that makes the manager read the service file again.
     pub reload: Option<Vec<String>>,
-}
-
-/// The commands that belong to the service of the server.
-///
-/// The two platforms are told apart here and nowhere else: the rest of the
-/// command works with the service, not with the manager of the platform.
-pub fn commands_for(layout: &ServiceLayout) -> ServiceCommands {
-    match (layout.platform, layout.scope) {
-        (Platform::MacOs, Scope::User) => commands_of_the_agent(layout),
-        (Platform::MacOs, Scope::System) => commands_of_the_daemon(layout),
-        (Platform::Linux, scope) => commands_of_the_unit(layout, scope),
-    }
-}
-
-/// The commands of the job of the user on macOS.
-///
-/// The job of the user is loaded and unloaded with the file of the job; the
-/// modern commands of `launchctl` belong to the system scope.
-fn commands_of_the_agent(layout: &ServiceLayout) -> ServiceCommands {
-    let file = layout.unit_path.to_string_lossy().into_owned();
-    ServiceCommands {
-        program: "launchctl".to_owned(),
-        load: vec!["load".to_owned(), "-w".to_owned(), file.clone()],
-        unload: vec!["unload".to_owned(), "-w".to_owned(), file],
-        start: vec!["start".to_owned(), layout.label.clone()],
-        stop: vec!["stop".to_owned(), layout.label.clone()],
-        status: vec!["list".to_owned(), layout.label.clone()],
-        pid: None,
-        reload: None,
-    }
-}
-
-/// The commands of the job of the machine on macOS.
-///
-/// The job of the machine lives in the domain of the system, and the commands
-/// of `launchctl` name that domain.
-fn commands_of_the_daemon(layout: &ServiceLayout) -> ServiceCommands {
-    let target = format!("system/{}", layout.label);
-    ServiceCommands {
-        program: "launchctl".to_owned(),
-        load: vec![
-            "bootstrap".to_owned(),
-            "system".to_owned(),
-            layout.unit_path.to_string_lossy().into_owned(),
-        ],
-        unload: vec!["bootout".to_owned(), target.clone()],
-        start: vec!["kickstart".to_owned(), "-k".to_owned(), target.clone()],
-        stop: vec!["kill".to_owned(), "SIGTERM".to_owned(), target.clone()],
-        status: vec!["print".to_owned(), target.clone()],
-        pid: None,
-        reload: None,
-    }
-}
-
-/// The commands of the unit of the server on Linux.
-///
-/// The unit of the user is managed by `systemctl --user`; the unit of the
-/// machine is managed by the system itself.
-fn commands_of_the_unit(layout: &ServiceLayout, scope: Scope) -> ServiceCommands {
-    let mut prefix = Vec::new();
-    if scope == Scope::User {
-        prefix.push("--user".to_owned());
-    }
-    let unit_name = layout.service_name();
-    let with_prefix = |arguments: Vec<String>| -> Vec<String> {
-        let mut all = prefix.clone();
-        all.extend(arguments);
-        all
-    };
-    ServiceCommands {
-        program: "systemctl".to_owned(),
-        load: with_prefix(vec!["enable".to_owned(), unit_name.clone()]),
-        unload: with_prefix(vec![
-            "disable".to_owned(),
-            "--now".to_owned(),
-            unit_name.clone(),
-        ]),
-        start: with_prefix(vec!["start".to_owned(), unit_name.clone()]),
-        stop: with_prefix(vec!["stop".to_owned(), unit_name.clone()]),
-        status: with_prefix(vec!["is-active".to_owned(), unit_name.clone()]),
-        pid: Some(with_prefix(vec![
-            "show".to_owned(),
-            "-p".to_owned(),
-            "MainPID".to_owned(),
-            "--value".to_owned(),
-            unit_name.clone(),
-        ])),
-        reload: Some(with_prefix(vec!["daemon-reload".to_owned()])),
-    }
 }
 
 /// What the service manager knows about the service.
@@ -168,6 +86,7 @@ impl<'a> ServiceManager<'a> {
         match self.layout.platform {
             Platform::MacOs => plist::render(self.layout),
             Platform::Linux => unit::render(self.layout),
+            Platform::Windows => windows::render(self.layout),
         }
     }
 
@@ -291,58 +210,6 @@ impl<'a> ServiceManager<'a> {
                 reason
             }
         ))
-    }
-}
-
-/// Reads the answer of the manager about the service.
-///
-/// The three answers differ per platform, and the words of the manager are
-/// kept: the user should see what the system said.
-fn read_the_status(platform: Platform, outcome: &CommandOutcome) -> (bool, bool, String) {
-    match platform {
-        Platform::MacOs => read_the_status_of_launchd(outcome),
-        Platform::Linux => read_the_status_of_systemd(outcome),
-    }
-}
-
-/// Reads the answer of `launchctl`.
-///
-/// The answer of `launchctl list` is a table: the first column is the number
-/// of the process, and a dash means that the job is loaded and does not run.
-fn read_the_status_of_launchd(outcome: &CommandOutcome) -> (bool, bool, String) {
-    if !outcome.is_success() {
-        return (false, false, the_words_of_the_manager(outcome));
-    }
-    let text = outcome.stdout.trim();
-    if text.is_empty() {
-        return (true, false, "the job is loaded and does not run".to_owned());
-    }
-    let row = text.lines().nth(1).unwrap_or(text);
-    let number = row.split_whitespace().next().unwrap_or("");
-    let running = number.parse::<u32>().is_ok();
-    (true, running, text.lines().next().unwrap_or("").to_owned())
-}
-
-/// Reads the answer of `systemctl`.
-///
-/// The answer of `systemctl is-active` is one word: `active` when the server
-/// runs, and something else when it does not.
-fn read_the_status_of_systemd(outcome: &CommandOutcome) -> (bool, bool, String) {
-    let text = outcome.stdout.trim();
-    if !outcome.is_success() && text.is_empty() {
-        return (false, false, the_words_of_the_manager(outcome));
-    }
-    let running = text == "active" || text == "activating";
-    (true, running, text.to_owned())
-}
-
-/// The words of the manager about a service that is not there.
-fn the_words_of_the_manager(outcome: &CommandOutcome) -> String {
-    let reason = outcome.stderr.trim();
-    if reason.is_empty() {
-        "the service is not loaded".to_owned()
-    } else {
-        reason.to_owned()
     }
 }
 

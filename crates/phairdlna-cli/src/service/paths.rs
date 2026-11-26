@@ -22,6 +22,9 @@ pub const LABEL: &str = "org.phairdlna.server";
 /// The name of the unit file of the server on Linux.
 pub const UNIT_NAME: &str = "phairdlna.service";
 
+/// The name of the service definition file on Windows.
+pub const WINDOWS_DEF_NAME: &str = "phairdlna-service.json";
+
 /// The folder the job file of the service belongs into.
 pub fn unit_directory(platform: super::Platform, scope: super::Scope, home: &Path) -> PathBuf {
     use super::{Platform, Scope};
@@ -30,6 +33,8 @@ pub fn unit_directory(platform: super::Platform, scope: super::Scope, home: &Pat
         (Platform::MacOs, Scope::System) => PathBuf::from("/Library/LaunchDaemons"),
         (Platform::Linux, Scope::User) => home.join(".config").join("systemd").join("user"),
         (Platform::Linux, Scope::System) => PathBuf::from("/etc/systemd/system"),
+        (Platform::Windows, Scope::User) => user_data_dir().join("service"),
+        (Platform::Windows, Scope::System) => PathBuf::from(r"C:\ProgramData\PhairDLNA\service"),
     }
 }
 
@@ -39,6 +44,7 @@ pub fn unit_path(platform: super::Platform, scope: super::Scope, home: &Path) ->
     match platform {
         super::Platform::MacOs => directory.join(format!("{LABEL}.plist")),
         super::Platform::Linux => directory.join(UNIT_NAME),
+        super::Platform::Windows => directory.join(WINDOWS_DEF_NAME),
     }
 }
 
@@ -50,6 +56,8 @@ pub fn log_directory(platform: super::Platform, scope: super::Scope, home: &Path
         (Platform::MacOs, Scope::System) => PathBuf::from("/var/log/phairdlna"),
         (Platform::Linux, Scope::User) => user_data_dir().join("logs"),
         (Platform::Linux, Scope::System) => PathBuf::from("/var/log/phairdlna"),
+        (Platform::Windows, Scope::User) => user_data_dir().join("logs"),
+        (Platform::Windows, Scope::System) => PathBuf::from(r"C:\ProgramData\PhairDLNA\logs"),
     }
 }
 
@@ -89,7 +97,7 @@ pub fn default_config_path() -> PathBuf {
 
 #[cfg(test)]
 mod tests {
-    use super::{default_config_path, environment, unit_path, LABEL, UNIT_NAME};
+    use super::{default_config_path, environment, unit_path, LABEL, UNIT_NAME, WINDOWS_DEF_NAME};
     use crate::service::{Platform, Scope};
     use std::path::{Path, PathBuf};
 
@@ -151,5 +159,11 @@ mod tests {
 
         assert!(path.to_string_lossy().ends_with(".toml"), "{path:?}");
         assert!(path.to_string_lossy().contains("phairdlna"), "{path:?}");
+    }
+    #[test]
+    fn the_windows_service_definition_lies_in_service_folder() {
+        let path = unit_path(Platform::Windows, Scope::User, Path::new("/users/tester"));
+        assert!(path.to_string_lossy().contains("service"), "{path:?}");
+        assert!(path.ends_with(WINDOWS_DEF_NAME), "{path:?}");
     }
 }

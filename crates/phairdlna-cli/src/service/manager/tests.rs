@@ -35,6 +35,18 @@ fn a_linux_layout() -> ServiceLayout {
     ServiceLayout::build(&request).expect("a layout")
 }
 
+/// A layout on Windows, for the tests.
+fn a_windows_layout() -> ServiceLayout {
+    let request = LayoutRequest {
+        platform: Platform::Windows,
+        scope: Scope::User,
+        home: PathBuf::from("/users/tester"),
+        program: a_program(),
+        config: PathBuf::from("/users/tester/config.toml"),
+    };
+    ServiceLayout::build(&request).expect("a layout")
+}
+
 /// The positive case: the commands of macOS are the commands of `launchctl`.
 #[test]
 fn the_macos_commands_are_the_commands_of_launchctl() {
@@ -63,6 +75,42 @@ fn the_linux_commands_are_the_commands_of_systemctl() {
         commands.status,
         vec!["--user", "is-active", "phairdlna.service"]
     );
+}
+
+/// The positive case: the commands of Windows are the commands of `sc.exe`.
+#[test]
+fn the_windows_commands_are_the_commands_of_sc_exe() {
+    let layout = a_windows_layout();
+    let commands = commands_for(&layout);
+
+    assert_eq!(commands.program, "sc.exe");
+    assert_eq!(commands.load[0], "create");
+    assert_eq!(
+        commands.start,
+        vec!["start".to_owned(), "org.phairdlna.server".to_owned()]
+    );
+    assert_eq!(
+        commands.stop,
+        vec!["stop".to_owned(), "org.phairdlna.server".to_owned()]
+    );
+    assert_eq!(
+        commands.status,
+        vec!["query".to_owned(), "org.phairdlna.server".to_owned()]
+    );
+}
+
+/// The positive case: Windows service query output is correctly parsed.
+#[test]
+fn the_windows_status_query_is_read() {
+    let running = CommandOutcome::success("STATE              : 4  RUNNING");
+    let (loaded, is_running, _) = read_the_status(Platform::Windows, &running);
+    assert!(loaded);
+    assert!(is_running);
+
+    let stopped = CommandOutcome::success("STATE              : 1  STOPPED");
+    let (loaded, is_running, _) = read_the_status(Platform::Windows, &stopped);
+    assert!(loaded);
+    assert!(!is_running);
 }
 
 /// The negative case: a file that is already there is not replaced without

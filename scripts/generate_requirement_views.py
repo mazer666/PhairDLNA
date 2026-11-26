@@ -574,9 +574,10 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "OPS-009": (
         "`crates/phairdlna-cli/src/service/plist.rs::tests::the_job_file_names_the_program_and_the_arguments`,"
-        " `crates/phairdlna-cli/src/service/plist.rs::tests::the_job_file_restarts_the_server`,"
-        " `crates/phairdlna-cli/src/service/unit.rs::tests::the_unit_file_names_the_program`"
-        " — the server generates launchd property lists (macOS) and systemd unit files (Linux) with auto-restart",
+        " `crates/phairdlna-cli/src/service/unit.rs::tests::the_unit_declares_the_readiness_notification`,"
+        " `crates/phairdlna-cli/tests/service_notify.rs::systemd_notification_is_delivered_on_socket`,"
+        " `crates/phairdlna-cli/src/service/manager/tests.rs::the_windows_commands_are_the_commands_of_sc_exe`"
+        " — the server supports background service integration for launchd (macOS), systemd with READY/STOPPING notify (Linux) and Service Control Manager (Windows)",
         "Verified",
     ),
     "OPS-012": (
