@@ -199,7 +199,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-099` | Emit `realTimeInfo.dlna.org` with `DLNA.ORG_TLAG=*` on media responses. | COULD | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-100` | Maintain a declarative profile of known client quirks | MUST | `F-07` | M4 | Protocol conformance + device test | Verified |
 | `INT-101` | A quirk workaround shall never violate a normative requirement of the UPnP or DLNA… | MUST | `F-07` | M4 | Protocol conformance test | Verified |
-| `INT-102` | Record every device-test result — device model | MUST | `F-07` | M4 | Protocol conformance + device test | Baseline |
+| `INT-102` | Record every device-test result — device model | MUST | `F-07` | M4 | Protocol conformance + device test | Verified |
 | `INT-103` | Provide a diagnostics command that replays a stored `M-SEARCH` request and prints the response… | SHOULD | `F-07` | M4 | Protocol conformance + device test | Baseline |
 | `INT-104` | Allow the user to disable a quirk workaround globally without editing source code. | SHOULD | `F-07` | M4 | Protocol conformance test | Verified |
 | `INT-105` | Give each additional resource of an item a `protocolInfo` that names its own MIME type | MUST | `F-11` | M2 | Protocol conformance test | Verified |

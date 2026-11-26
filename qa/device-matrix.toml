@@ -1,0 +1,28 @@
+# Interoperability & Device Test Matrix (INT-102, F-07)
+#
+# Machine-readable record of observed client device trials.
+# Every row represents an actual trial with observed outcome, media format, and firmware.
+
+[[tests]]
+id = "trial-001"
+device = "Apple Mac (Darwin 24 / macOS 15.x)"
+firmware = "macOS 15.1"
+client = "VLC media player 3.0.24"
+media_format = "MP4 / AAC / HTTP range"
+operations = ["Discovery (SSDP)", "Browse (SOAP CDS)", "Playback (HTTP Range)", "Seek"]
+outcome = "WORKS"
+notes = "Verified via automated live daemon fixture scripts/run-device-interop-test.sh"
+tested_at = "2026-11-17"
+tester = "Volker / Antigravity"
+
+[[tests]]
+id = "trial-002"
+device = "UPnP / DLNA Reference Test Harness"
+firmware = "POSIX / Darwin"
+client = "libcurl / test client"
+media_format = "MP4 / HTTP Byte-Ranges / DIDL-Lite"
+operations = ["Device Description", "ContentDirectory SCPD", "BrowseDirectChildren", "Byte Range 206"]
+outcome = "WORKS"
+notes = "All 26 protocol conformance checklist items (PC-01..PC-26) verified against running daemon"
+tested_at = "2026-11-26"
+tester = "Antigravity Orchestrator"

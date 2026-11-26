@@ -1232,6 +1232,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — quirk workarounds are strictly scoped to output shaping adjustments and never violate normative UPnP/DLNA requirements for other clients",
         "Verified",
     ),
+
+    "INT-102": (
+        "`qa/device-matrix.toml`,"
+        " `crates/phairdlna-core/tests/device_matrix.rs::device_matrix_records_have_mandatory_attributes`"
+        " — every device-test result records device model, firmware, client application, media format, and observed outcome in machine-readable matrix",
+        "Verified",
+    ),
     "INT-104": (
         "`crates/phairdlna-core/src/profile.rs::ProfileStore::disable`,"
         " `crates/phairdlna-core/tests/client_profiles.rs::disabled_profiles_restore_plain_behavior_without_recompilation`"

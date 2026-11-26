@@ -168,7 +168,7 @@ client.
 | Step | Content | Requirements | State |
 | --- | --- | --- | --- |
 | M4.1 | Client compatibility profiles | `INT-100` … `INT-104` | **in part (2026-11-26)** — declarative client profile store with mandatory evidence gate, symptom documentation, request User-Agent matching, and non-recompilation disable switch (`INT-100`, `INT-101`, `INT-104`) |
-| M4.2 | The real-device matrix | `INT-102` |
+| M4.2 | The real-device matrix | `INT-102` | **done (2026-11-26)** — machine-readable device trial matrix recorded in `qa/device-matrix.toml` with device model, firmware, client app, media format and observed outcome (`INT-102`) |
 | M4.3 | Fuzzing, property tests, resource-bound tests | `SEC-060` … `SEC-072` |
 | M4.4 | Soak test, crash and corruption recovery | `REL-001` … `REL-006` |
 | M4.5 | Security review of the whole surface | `../04-security/SECURITY-MODEL.md` |
