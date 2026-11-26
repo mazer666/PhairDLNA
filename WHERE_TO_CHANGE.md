@@ -65,6 +65,7 @@
 | `crates/phairdlna-cli/src/serve/lifecycle.rs` | The daemon lifecycle controller and local timeline event recorder | F-13 |
 | `crates/phairdlna-cli/src/serve/resources.rs` | The scheduler of the daemon — the classes of the work, the hints about the machine and the place of a transfer | F-18 |
 | `crates/phairdlna-cli/src/serve/index.rs` | The index of the catalogue in the daemon — the opening of the file, the catalogue that is read out of it and the warnings that belong to the server | F-09 |
+| `crates/phairdlna-cli/src/service/` | The background service commands (install, uninstall, start, stop, status), layout, managers, and systemd readiness notification | F-13 |
 | `crates/phairdlna-cli/src/main.rs` | The argument parsing and the exit code | F-13 |
 | `crates/phairdlna-core/tests/media_roots.rs` | The acceptance criteria of F-08 for one root | F-08 |
 | `crates/phairdlna-core/tests/media_roots_multiple.rs` | The acceptance criteria of F-08 for more than one root | F-08 |
@@ -82,6 +83,7 @@
 | `crates/phairdlna-cli/tests/artwork.rs` | The artwork of the daemon — the route that answers a request for a picture | F-10 |
 | `crates/phairdlna-cli/tests/discovery.rs` | The discovery of the daemon — the advertisements, the answer of a search and the withdrawal | F-01 |
 | `crates/phairdlna-cli/tests/serve_command.rs` | The `serve` command of the command line and the graceful shutdown | F-13 |
+| `crates/phairdlna-cli/tests/service_notify.rs` | Acceptance checks for systemd notify readiness and shutdown reporting | F-13 |
 | `crates/phairdlna-cli/tests/support/` | The fixtures of the tests of the daemon — the daemon in a thread and the small HTTP client | F-13 |
 | `crates/phairdlna-core/tests/scheduler_priority.rs` | The acceptance criteria of F-18 — the order of the classes and the isolation of a slow client | F-18 |
 | `crates/phairdlna-core/tests/scheduler_hysteresis.rs` | The acceptance criteria of F-18 — the hysteresis of the background work, with a synthetic clock | F-18 |

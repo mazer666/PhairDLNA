@@ -208,6 +208,7 @@ impl Daemon {
     /// the server before the server stops answering; the open transfers are
     /// then drained.
     pub async fn shutdown(&mut self) -> Result<(), String> {
+        let _ = crate::service::notify::notify_stopping();
         self.stop_sequence().await
     }
 

@@ -73,6 +73,7 @@ pub async fn start(options: ServeOptions) -> Result<Daemon, String> {
     let (stop_watch, watch_task) =
         watch::spawn(library, logger.clone(), resources, lifecycle.clone());
     announce(&logger, &address, &context.base_url);
+    let _ = crate::service::notify::notify_ready(&format!("the server is listening on {address}"));
     Ok(Daemon {
         context,
         address,
