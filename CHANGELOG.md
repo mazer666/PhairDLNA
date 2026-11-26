@@ -5,6 +5,26 @@ All notable changes to PhairDLNA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0-alpha.3] - 2026-11-26
+
+Third Alpha Release of PhairDLNA — responsive 2-column landscape grid, card-based dashboard containers, interactive folder confirmation dialog, library rescan action, and Milestone 4 hardening completion.
+
+### Added
+
+- **macOS Responsive 2-Column Grid (`UX-020`):**
+  - Dynamic 2-column layout when window width ≥ 750 pt (landscape/widescreen), grouping Status & Folders on the left and Settings & TV Connection on the right.
+  - Native card containers (`NSBoxCustom`) with rounded corners and subtle background styling.
+  - Native modal folder removal confirmation dialog (`dialog.remove_folder.*`).
+  - Library Rescan button ("Neu einlesen") with SF Symbol `arrow.clockwise`.
+  - Path hints (`~/...`) in the folder picker dropdown.
+- **Milestone 4 Interoperability, Reliability & Security (`M4`):**
+  - Client compatibility quirk engine and device matrix (`INT-100`..`INT-104`).
+  - Stored M-SEARCH replay diagnostics (`INT-103`).
+  - Parser fuzzing and containment bounds (`SEC-060`..`SEC-068`).
+  - Long-haul soak test and crash recovery verification (`REL-001`..`REL-006`).
+
+---
+
 ## [0.1.0-alpha.2] - 2026-11-23
 
 Second Alpha Release of PhairDLNA — direct server steering, window lifecycle management, streamlined native typography, and native settings editing without web UI.
