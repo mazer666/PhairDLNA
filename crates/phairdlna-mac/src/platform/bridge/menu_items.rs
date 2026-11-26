@@ -1,14 +1,17 @@
-//! Status-only menu items that cannot dispatch application actions.
+//! Status-only menu items and native control styling that cannot dispatch application actions.
 //!
-//! What: creates disabled labels for non-interactive menu status.
-//! Why: action items and status rows have different safety behavior.
+//! What: creates disabled labels for non-interactive menu status and styles buttons.
+//! Why: action items, status rows and control bezels have AppKit safety behavior.
 //! Example: the server state is shown as a disabled menu row.
 
-// gate: unsafe-exempt ADR-0013 — menu item initialization uses the Objective-C AppKit bridge.
+// gate: unsafe-exempt ADR-0013 — menu item and button initialization uses the Objective-C AppKit bridge.
 
 use objc2::rc::Retained;
 use objc2::{MainThreadMarker, MainThreadOnly};
-use objc2_app_kit::NSMenuItem;
+use objc2_app_kit::{
+    NSBezelStyle, NSButton, NSCellImagePosition, NSImage, NSMenuItem, NSTextField,
+    NSTextFieldBezelStyle,
+};
 use objc2_foundation::NSString;
 
 use super::MenuTarget;
@@ -34,5 +37,20 @@ impl MenuTarget {
         };
         item.setEnabled(false);
         item
+    }
+
+    /// Styles an AppKit button as a native push button, optionally with an icon.
+    pub fn configure_push_button(&self, button: &NSButton, icon: Option<&NSImage>) {
+        button.setBezelStyle(NSBezelStyle::Push);
+        if let Some(image) = icon {
+            button.setImage(Some(image));
+            button.setImagePosition(NSCellImagePosition::ImageLeading);
+        }
+    }
+
+    /// Styles an editable text field with rounded borders.
+    pub fn configure_rounded_field(&self, field: &NSTextField) {
+        field.setBezelStyle(NSTextFieldBezelStyle::RoundedBezel);
+        field.setBezeled(true);
     }
 }

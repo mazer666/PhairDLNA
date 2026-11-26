@@ -15,6 +15,7 @@ use objc2_app_kit::{NSAccessibility, NSButton, NSPopUpButton, NSTextField};
 use objc2_foundation::NSString;
 
 use super::super::super::bridge::MenuTarget;
+use super::super::super::icon;
 use crate::actions::MenuAction;
 use crate::app::{ConfiguredRoot, ServerSettings};
 use crate::overview::ServerToggle;
@@ -62,11 +63,13 @@ impl ServerControls {
             mtm,
             strings.text("overview.server_name"),
             &settings.device_name,
+            target,
         );
         let (http_port_label, http_port_field) = editable_field(
             mtm,
             strings.text("overview.http_port"),
             &port_text(settings.http_port),
+            target,
         );
         let save_settings = button(
             mtm,
@@ -98,6 +101,8 @@ impl ServerControls {
     ) {
         self.toggle
             .setTitle(&NSString::from_str(strings.text(toggle.title_key)));
+        let img = icon::action_image_of(&toggle.action);
+        target.configure_push_button(&self.toggle, img.as_deref());
         target.button_action(&self.toggle, toggle.action);
         self.toggle.setEnabled(toggle.enabled);
     }
@@ -155,6 +160,8 @@ fn button(
 ) -> Retained<NSButton> {
     let button = NSButton::new(mtm);
     button.setTitle(&NSString::from_str(title));
+    let img = icon::action_image_of(&action);
+    target.configure_push_button(&button, img.as_deref());
     target.button_action(&button, action);
     button
 }
@@ -164,6 +171,7 @@ fn editable_field(
     mtm: MainThreadMarker,
     label: &str,
     value: &str,
+    target: &MenuTarget,
 ) -> (Retained<NSTextField>, Retained<NSTextField>) {
     let label_field = NSTextField::wrappingLabelWithString(&NSString::from_str(label), mtm);
     label_field.setTextColor(Some(&objc2_app_kit::NSColor::secondaryLabelColor()));
@@ -171,6 +179,7 @@ fn editable_field(
     field.setStringValue(&NSString::from_str(value));
     field.setEditable(true);
     field.setSelectable(true);
+    target.configure_rounded_field(&field);
     field.setAccessibilityLabel(Some(&NSString::from_str(label)));
     (label_field, field)
 }

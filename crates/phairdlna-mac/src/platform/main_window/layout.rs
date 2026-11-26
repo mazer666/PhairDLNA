@@ -12,6 +12,7 @@ use objc2_app_kit::{
 use objc2_foundation::NSString;
 
 use super::super::bridge::MenuTarget;
+use super::super::icon;
 use crate::actions::MenuAction;
 use crate::app::ServerSettings;
 use crate::text::Strings;
@@ -124,6 +125,8 @@ fn folder_button(
 ) -> Retained<NSButton> {
     let button = NSButton::new(mtm);
     button.setTitle(&NSString::from_str(strings.text("overview.add_folders")));
+    let img = icon::action_image_of(&MenuAction::AddMediaFolders);
+    target.configure_push_button(&button, img.as_deref());
     target.button_action(&button, MenuAction::AddMediaFolders);
     button
 }

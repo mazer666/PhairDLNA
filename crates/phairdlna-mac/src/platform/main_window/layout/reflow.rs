@@ -189,7 +189,7 @@ fn resize_document(views: &OverviewViews, flow_height: f64) -> f64 {
         .document
         .enclosingScrollView()
         .map(|scroll| scroll.contentView().bounds().size.height)
-        .unwrap_or(560.0);
+        .unwrap_or(800.0);
     let height = centered_document_height(flow_height, viewport_height);
     views.document.setFrameSize(NSSize::new(600.0, height));
     views.document.setBounds(NSRect::new(
@@ -204,7 +204,7 @@ fn place_sections(views: &OverviewViews, heights: &Heights, document_height: f64
     let mut top = document_height - 20.0;
     place(&views.heading, 34.0, &mut top, GAP);
     place(&views.status, 42.0, &mut top, GAP);
-    place_button(&views.controls.toggle, BUTTON_HEIGHT, &mut top, GAP);
+    place_compact_button(&views.controls.toggle, 160.0, BUTTON_HEIGHT, &mut top, GAP);
     if heights.notice > 0.0 {
         place(&views.notice, heights.notice, &mut top, heights.notice_gap);
     }
@@ -213,21 +213,23 @@ fn place_sections(views: &OverviewViews, heights: &Heights, document_height: f64
     place(&views.folders, heights.folders, &mut top, GAP);
     place_rule(&views.folders_rule, &mut top, GAP);
     place_picker(&views.controls.folder_picker, &mut top, TIGHT_GAP);
-    place_button(
+    place_compact_button(
         &views.controls.remove_folder,
+        180.0,
         BUTTON_HEIGHT,
         &mut top,
         TIGHT_GAP,
     );
-    place_button(&views.add_folders, 36.0, &mut top, GAP);
+    place_compact_button(&views.add_folders, 200.0, 36.0, &mut top, GAP);
     place(
         &views.controls.device_name_label,
         LABEL_HEIGHT,
         &mut top,
         TIGHT_GAP,
     );
-    place(
+    place_field(
         &views.controls.device_name_field,
+        340.0,
         FIELD_HEIGHT,
         &mut top,
         TIGHT_GAP,
@@ -238,13 +240,20 @@ fn place_sections(views: &OverviewViews, heights: &Heights, document_height: f64
         &mut top,
         TIGHT_GAP,
     );
-    place(
+    place_field(
         &views.controls.http_port_field,
+        120.0,
         FIELD_HEIGHT,
         &mut top,
         TIGHT_GAP,
     );
-    place_button(&views.controls.save_settings, BUTTON_HEIGHT, &mut top, GAP);
+    place_compact_button(
+        &views.controls.save_settings,
+        210.0,
+        BUTTON_HEIGHT,
+        &mut top,
+        GAP,
+    );
     place(&views.connection_heading, 24.0, &mut top, TIGHT_GAP);
     place(&views.connection, heights.connection, &mut top, GAP);
     place_rule(&views.connection_rule, &mut top, GAP);
@@ -273,6 +282,16 @@ fn place(field: &NSTextField, height: f64, top: &mut f64, gap: f64) {
     *top -= gap;
 }
 
+/// Places an input field with custom width.
+fn place_field(field: &NSTextField, width: f64, height: f64, top: &mut f64, gap: f64) {
+    *top -= height;
+    field.setFrame(NSRect::new(
+        NSPoint::new(X, *top),
+        NSSize::new(width, height),
+    ));
+    *top -= gap;
+}
+
 /// Places a rule.
 fn place_rule(rule: &NSBox, top: &mut f64, gap: f64) {
     *top -= 1.0;
@@ -280,12 +299,12 @@ fn place_rule(rule: &NSBox, top: &mut f64, gap: f64) {
     *top -= gap;
 }
 
-/// Places a button.
-fn place_button(button: &NSButton, height: f64, top: &mut f64, gap: f64) {
+/// Places a button with custom width.
+fn place_compact_button(button: &NSButton, width: f64, height: f64, top: &mut f64, gap: f64) {
     *top -= height;
     button.setFrame(NSRect::new(
         NSPoint::new(X, *top),
-        NSSize::new(WIDTH, height),
+        NSSize::new(width, height),
     ));
     *top -= gap;
 }

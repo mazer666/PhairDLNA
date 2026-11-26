@@ -43,7 +43,7 @@ impl MainWindow {
         let scroll = NSScrollView::new(mtm);
         scroll.setFrame(NSRect::new(
             NSPoint::new(0.0, 0.0),
-            NSSize::new(600.0, 560.0),
+            NSSize::new(600.0, 800.0),
         ));
         scroll.setAutoresizingMask(
             NSAutoresizingMaskOptions::ViewWidthSizable
@@ -55,7 +55,7 @@ impl MainWindow {
         let controller = NSViewController::new(mtm);
         controller.setView(&scroll);
         let window = NSWindow::windowWithContentViewController(&controller);
-        window.setContentSize(NSSize::new(600.0, 560.0));
+        window.setContentSize(NSSize::new(600.0, 800.0));
         window.setStyleMask(
             NSWindowStyleMask::Titled
                 | NSWindowStyleMask::Closable
