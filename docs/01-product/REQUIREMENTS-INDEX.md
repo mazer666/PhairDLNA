@@ -346,7 +346,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | `PLT-001` | Not depend on any OS-specific crate and shall compile on macOS | MUST | `F-22` | M0 | Build matrix | Verified |
-| `PLT-002` | Provide a build matrix covering macOS (arm64, x86_64), Linux (x86_64) and Windows (x86_64). | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-002` | Provide a build matrix covering macOS (arm64, x86_64), Linux (x86_64) and Windows (x86_64). | MUST | `F-22` | M0 | Build matrix | Verified |
 | `PLT-003` | All OS-specific behaviour shall be reachable through a documented trait with a default… | MUST | `F-22` | M0 | Build matrix | Verified |
 | `PLT-004` | Support macOS Apple Silicon natively without a Rosetta translation requirement. | MUST | `F-15` | M0 | Build matrix | Verified |
 | `PLT-005` | Detect the case sensitivity, the Unicode normalisation behaviour and the volume identity of… | MUST | `F-22` | M0 | Build matrix | Baseline |

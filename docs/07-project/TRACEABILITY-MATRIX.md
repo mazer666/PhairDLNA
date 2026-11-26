@@ -247,7 +247,7 @@ that was actually observed; an empty cell means *not implemented*, not *passed*.
 | `PERF-014` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
 | `PERF-015` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
 | `PLT-001` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | `scripts/check-crate-boundaries.sh` — core crate contains no OS-specific dependencies and dependency direction is strictly one-way (QG-28) | Verified |
-| `PLT-002` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |
+| `PLT-002` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | `crates/phairdlna-core/tests/platform_matrix.rs::the_build_matrix_covers_all_required_platforms`, `.github/workflows/ci-matrix.yml` — build matrix covers macOS (arm64, x86_64), Linux (x86_64) and Windows (x86_64) via self-hosted runners | Verified |
 | `PLT-003` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | `crates/phairdlna-core/src/platform/traits.rs`, `crates/phairdlna-core/src/platform/unsupported.rs` — OS-specific behavior is isolated behind documented traits with explicit Unsupported fallbacks | Verified |
 | `PLT-004` | `F-15` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | `crates/phairdlna-mac/tests/apple_silicon_native.rs::application_target_matches_host_architecture` — native Apple Silicon (aarch64-apple-darwin) execution without Rosetta translation requirement | Verified |
 | `PLT-005` | `F-22` | M0 | `crates/phairdlna-core/src/platform` | Build matrix | — | Not implemented |

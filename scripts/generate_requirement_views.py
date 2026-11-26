@@ -1063,6 +1063,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — core crate contains no OS-specific dependencies and dependency direction is strictly one-way (QG-28)",
         "Verified",
     ),
+    "PLT-002": (
+        "`crates/phairdlna-core/tests/platform_matrix.rs::the_build_matrix_covers_all_required_platforms`,"
+        " `.github/workflows/ci-matrix.yml`"
+        " — build matrix covers macOS (arm64, x86_64), Linux (x86_64) and Windows (x86_64) via self-hosted runners",
+        "Verified",
+    ),
     "PLT-003": (
         "`crates/phairdlna-core/src/platform/traits.rs`,"
         " `crates/phairdlna-core/src/platform/unsupported.rs`"

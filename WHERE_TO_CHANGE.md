@@ -40,6 +40,7 @@
 | `crates/phairdlna-core/src/error.rs` | The core error type | F-12 |
 | `crates/phairdlna-core/src/xml/` | The one XML writer of the project — the escaping, the length rules and the writer | F-02, F-05 |
 | `crates/phairdlna-core/src/platform/` | The capability traits, the path model, the portable filesystem adapter, the memory of the process (`memory.rs`) and the default implementation | F-08, F-13, F-14, F-15 |
+| `crates/phairdlna-core/tests/platform_matrix.rs` | Acceptance tests for build matrix coverage and platform targets | F-22 |
 | `crates/phairdlna-core/src/ssdp/` | The discovery protocol: parsing a search, matching the targets, building the bytes (the **socket** is in `crates/phairdlna-cli/src/serve/ssdp.rs`) | F-01 |
 | `crates/phairdlna-core/src/identity.rs` | The persistent device identity | F-01, F-02 |
 | `crates/phairdlna-core/src/catalogue/` | The catalogue — the model of the items and containers, the scanner of a root, the opaque identifiers, the identity key of a file, the playlists (`playlist.rs`), the subtitle sidecars (`subtitle.rs`), the memory of the volumes of the roots, the assembly of the tree, the sniffer of a file, the registry of the formats the server serves and the index of the catalogue on disk (`index/`) | F-05, F-08, F-09, F-11 |
