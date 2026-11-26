@@ -368,7 +368,27 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "Verified",
     ),
     "SEC-060": (
-        "`crates/phairdlna-core/tests/xml_reader.rs::a_document_that_is_too_large_is_refused`",
+        "`crates/phairdlna-core/tests/xml_reader.rs::a_document_that_is_too_large_is_refused`,"
+        " `crates/phairdlna-core/tests/parser_fuzz_bounds.rs`"
+        " — every parser in the server has explicit input bounds and documented graceful refusal",
+        "Verified",
+    ),
+    "SEC-061": (
+        "`crates/phairdlna-core/tests/resource_bounds.rs`,"
+        " `crates/phairdlna-core/tests/parser_fuzz_bounds.rs::browse_extreme_counts_bounded_to_page_limit`"
+        " — bounding the number of entries in a single DIDL-Lite response and generated XML size",
+        "Verified",
+    ),
+    "SEC-065": (
+        "`crates/phairdlna-core/tests/http_framing.rs`,"
+        " `crates/phairdlna-core/tests/resource_bounds.rs`"
+        " — memory allocation is never proportional to untrusted client-supplied length field without validation",
+        "Verified",
+    ),
+    "SEC-068": (
+        "`crates/phairdlna-core/tests/playlists.rs`,"
+        " `crates/phairdlna-core/tests/parser_fuzz_bounds.rs::playlist_network_and_traversal_paths_contained`"
+        " — playlist entries treated as untrusted, contained within roots, network schemes refused",
         "Verified",
     ),
     "INT-044": (

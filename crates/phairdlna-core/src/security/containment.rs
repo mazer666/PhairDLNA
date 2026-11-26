@@ -100,11 +100,12 @@ pub fn resolve_reference(
     if text.is_empty() {
         return Err(ContainmentError::Empty);
     }
+    let unified = text.replace('\\', "/");
     let path = match scheme_of(text) {
         Some(Scheme::File) => path_of_file_address(text),
         Some(Scheme::Network) => return Err(ContainmentError::NetworkAddress),
         Some(Scheme::Other(scheme)) => return Err(ContainmentError::UnsupportedScheme(scheme)),
-        None => PathBuf::from(text),
+        None => PathBuf::from(unified),
     };
     let joined = if path.is_absolute() {
         path

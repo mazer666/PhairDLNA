@@ -226,14 +226,14 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SEC-017` | Never bind a non-loopback port other than the media port without an explicit configuration… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-018` | Treat an SSDP or SOAP peer as untrusted and shall perform no action on its behalf other than… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-060` | Every parser in the server shall have an explicit input size bound and a documented failure… | MUST | `F-16` | M1 | Negative security test | Verified |
-| `SEC-061` | Bound the number of entries in a single DIDL-Lite response and the size of the generated XML… | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-061` | Bound the number of entries in a single DIDL-Lite response and the size of the generated XML… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-062` | Run metadata extraction with a time limit per file and shall abandon a file that exceeds it. | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-063` | Bound the number of open file descriptors used by transfers and shall release them on… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-064` | Bound the size of its on-disk cache and shall evict entries when the limit is exceeded. | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-065` | Never allocate memory proportional to a client-supplied length field without validating it… | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-065` | Never allocate memory proportional to a client-supplied length field without validating it… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-066` | Parse media metadata and generate thumbnails in a separate | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-067` | Bound the declared dimensions of an image before allocating any buffer for it | MUST | `F-16` | M1 | Negative security test | Implemented |
-| `SEC-068` | Treat playlist entries as untrusted paths, shall resolve and contain them, and shall refuse… | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-068` | Treat playlist entries as untrusted paths, shall resolve and contain them, and shall refuse… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-069` | Not resolve or follow a macOS Finder alias as if it were a symbolic link; aliases shall be… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-070` | Offer the corresponding source of the running build | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-071` | Accept only a `Host` header that matches a configured local host name | MUST | `F-16` | M1 | Negative security test | Verified |
