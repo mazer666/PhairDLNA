@@ -148,9 +148,9 @@ multiple roots, artwork, playlists.
 
 **Goal:** the same core, the same behaviour, on the other two platforms.
 
-| Step | Content | Requirements |
-| --- | --- | --- |
-| M3.1 | Platform traits for Linux and Windows | `PLT-002`, `PLT-003`, `PLT-015`, `PLT-016` |
+| Step | Content | Requirements | State |
+| --- | --- | --- | --- |
+| M3.1 | Platform traits for Linux and Windows | `PLT-002`, `PLT-003`, `PLT-015`, `PLT-016` | **done (2026-11-26)** — all OS-specific behavior is isolated behind documented traits with explicit unsupported fallbacks (`PLT-003`); the self-hosted build matrix covers macOS (arm64, x86_64), Linux (x86_64), Windows (x86_64) and MSRV without cloud runners (`PLT-002`); Windows executable manifest declares `longPathAware` and registry requirement `LongPathsEnabled` is documented (`PLT-015`); primary Linux distribution is specified as native packages rather than sandboxed formats (`PLT-016`) |
 | M3.2 | Service integration: systemd, Windows service | `OPS-009` |
 | M3.3 | Packaging and installation | `PLT-016`, `SUP-005` |
 | M3.4 | Cross-platform behaviour parity | `PLT-010` |
