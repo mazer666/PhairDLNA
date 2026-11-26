@@ -391,6 +391,36 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — playlist entries treated as untrusted, contained within roots, network schemes refused",
         "Verified",
     ),
+    "REL-001": (
+        "`crates/phairdlna-cli/tests/crash_recovery.rs`"
+        " — abrupt termination never modifies media originals and catalogue is consistently rebuilt on restart",
+        "Verified",
+    ),
+    "REL-002": (
+        "`crates/phairdlna-core/tests/offline_volume.rs`"
+        " — offline media root reported as unavailable and never silently removed from configuration",
+        "Verified",
+    ),
+    "REL-003": (
+        "`crates/phairdlna-core/tests/network_recovery.rs`"
+        " — network interface changes, sleep/wake cycles, and disconnects do not leak sockets or tasks",
+        "Verified",
+    ),
+    "REL-004": (
+        "`scripts/soak.sh`"
+        " — automated soak test harness measuring RSS, open descriptors, and thread counts over long-term runs",
+        "Verified",
+    ),
+    "REL-005": (
+        "`crates/phairdlna-cli/tests/invalid_configuration.rs`"
+        " — invalid configuration changes rejected with named field and previous state preserved atomically",
+        "Verified",
+    ),
+    "REL-006": (
+        "`crates/phairdlna-mac/tests/presentation_modes.rs`"
+        " — headless media server service remains independent of GUI lifecycle and presentation mode transitions",
+        "Verified",
+    ),
     "INT-044": (
         "`crates/phairdlna-core/tests/device_description.rs::the_service_list_names_both_mandatory_services`",
         "Verified",

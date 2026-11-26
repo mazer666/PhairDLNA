@@ -42,6 +42,9 @@
 | `crates/phairdlna-core/src/platform/` | The capability traits, the path model, the portable filesystem adapter, the memory of the process (`memory.rs`) and the default implementation | F-08, F-13, F-14, F-15 |
 | `crates/phairdlna-core/tests/platform_matrix.rs` | Acceptance tests for build matrix coverage and platform targets | F-22 |
 | `crates/phairdlna-core/tests/parser_fuzz_bounds.rs` | Parser robustness, SSDP datagram fuzzing, boundary limits and path containment tests | F-16 |
+| `crates/phairdlna-core/tests/offline_volume.rs` | Offline media root non-destructive handling and availability reporting | F-18 |
+| `crates/phairdlna-cli/tests/crash_recovery.rs` | Crash and corruption recovery tests verifying immutability of media originals | F-18 |
+| `crates/phairdlna-cli/tests/invalid_configuration.rs` | Atomic validation and rejection tests for invalid configurations | F-18 |
 | `crates/phairdlna-core/src/ssdp/` | The discovery protocol: parsing a search, matching targets, building bytes, and replaying stored M-SEARCH diagnostics requests (`replay.rs`) | F-01, F-07 |
 | `crates/phairdlna-core/src/identity.rs` | The persistent device identity | F-01, F-02 |
 | `crates/phairdlna-core/src/catalogue/` | The catalogue — the model of the items and containers, the scanner of a root, the opaque identifiers, the identity key of a file, the playlists (`playlist.rs`), the subtitle sidecars (`subtitle.rs`), the memory of the volumes of the roots, the assembly of the tree, the sniffer of a file, the registry of the formats the server serves and the index of the catalogue on disk (`index/`) | F-05, F-08, F-09, F-11 |
@@ -159,6 +162,7 @@
 | `qa/macos-service-access-protocol.md` | Real-Mac experiment for service identity, selected-folder scope, revocation and Local Network behavior | OD-15, F-22 AC-14 |
 | `scripts/` | Repository gates and the requirement-view generator | F-19 |
 | `scripts/package-macos-app.sh` | Builds the macOS app bundle, validates its eight-byte PkgInfo marker and architecture slices, applies its final ad-hoc signature, and verifies the signature | F-15, F-19 |
+| `scripts/soak.sh` | Automated soak and stability testing harness monitoring RSS, open descriptors, and thread counts | F-18 |
 | `scripts/generate-release-artefacts.sh` | Builds the distribution tarball, generates SHA-256 checksums and software bill of materials (SBOM) | F-19, F-22 |
 | `.github/workflows/` | Manual-only continuous integration | F-19 |
 | `docs/` | The documentation tree | F-19 |

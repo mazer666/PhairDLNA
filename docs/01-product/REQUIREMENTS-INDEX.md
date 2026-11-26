@@ -399,12 +399,12 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `REL-001` | An abrupt termination of the server shall never modify a media original; after a restart the… | MUST | `F-18` | M4 | Fault-injection and soak test | Baseline |
-| `REL-002` | A media root that is offline shall be reported as unavailable and shall not be silently removed… | MUST | `F-18` | M4 | Fault-injection and soak test | Baseline |
-| `REL-003` | A network interface change, a sleep/wake cycle and a client disconnect shall not leak sockets… | MUST | `F-18` | M4 | Fault-injection and soak test | Baseline |
-| `REL-004` | Survive a seven-day soak on a defined mixed workload without a crash | MUST | `F-18` | M4 | Fault-injection and soak test | Baseline |
-| `REL-005` | A configuration change shall be validated, applied atomically and recoverable; an invalid… | MUST | `F-18` | M4 | Fault-injection and soak test | Baseline |
-| `REL-006` | Active transfers shall survive a change of the presentation mode in the user interface | MUST | `F-18` | M4 | Fault-injection and soak test | Baseline |
+| `REL-001` | An abrupt termination of the server shall never modify a media original; after a restart the… | MUST | `F-18` | M4 | Fault-injection and soak test | Verified |
+| `REL-002` | A media root that is offline shall be reported as unavailable and shall not be silently removed… | MUST | `F-18` | M4 | Fault-injection and soak test | Verified |
+| `REL-003` | A network interface change, a sleep/wake cycle and a client disconnect shall not leak sockets… | MUST | `F-18` | M4 | Fault-injection and soak test | Verified |
+| `REL-004` | Survive a seven-day soak on a defined mixed workload without a crash | MUST | `F-18` | M4 | Fault-injection and soak test | Verified |
+| `REL-005` | A configuration change shall be validated, applied atomically and recoverable; an invalid… | MUST | `F-18` | M4 | Fault-injection and soak test | Verified |
+| `REL-006` | Active transfers shall survive a change of the presentation mode in the user interface | MUST | `F-18` | M4 | Fault-injection and soak test | Verified |
 
 ## RES — Adaptive resource management
 
