@@ -165,9 +165,9 @@ client.
 
 **Goal:** the difference between "works" and "works everywhere".
 
-| Step | Content | Requirements |
-| --- | --- | --- |
-| M4.1 | Client compatibility profiles | `INT-100` … `INT-104` |
+| Step | Content | Requirements | State |
+| --- | --- | --- | --- |
+| M4.1 | Client compatibility profiles | `INT-100` … `INT-104` | **in part (2026-11-26)** — declarative client profile store with mandatory evidence gate, symptom documentation, request User-Agent matching, and non-recompilation disable switch (`INT-100`, `INT-101`, `INT-104`) |
 | M4.2 | The real-device matrix | `INT-102` |
 | M4.3 | Fuzzing, property tests, resource-bound tests | `SEC-060` … `SEC-072` |
 | M4.4 | Soak test, crash and corruption recovery | `REL-001` … `REL-006` |

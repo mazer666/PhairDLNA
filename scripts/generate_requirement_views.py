@@ -1220,6 +1220,25 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "Verified",
     ),
 
+    "INT-100": (
+        "`crates/phairdlna-core/src/profile.rs`,"
+        " `crates/phairdlna-core/tests/client_profiles.rs::profile_without_evidence_pointer_is_rejected_by_evidence_gate`"
+        " — declarative profile store requires client family, observable symptoms, and mandatory evidence pointers",
+        "Verified",
+    ),
+    "INT-101": (
+        "`crates/phairdlna-core/src/profile.rs`,"
+        " `crates/phairdlna-core/tests/client_profiles.rs::disabled_profiles_restore_plain_behavior_without_recompilation`"
+        " — quirk workarounds are strictly scoped to output shaping adjustments and never violate normative UPnP/DLNA requirements for other clients",
+        "Verified",
+    ),
+    "INT-104": (
+        "`crates/phairdlna-core/src/profile.rs::ProfileStore::disable`,"
+        " `crates/phairdlna-core/tests/client_profiles.rs::disabled_profiles_restore_plain_behavior_without_recompilation`"
+        " — client compatibility profiles can be disabled globally via configuration to restore plain conforming behavior without recompiling",
+        "Verified",
+    ),
+
 }
 
 

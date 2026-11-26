@@ -30,6 +30,7 @@ pub mod json;
 pub mod lifecycle;
 pub mod media;
 pub mod platform;
+pub mod profile;
 pub mod scheduler;
 pub mod security;
 pub mod ssdp;

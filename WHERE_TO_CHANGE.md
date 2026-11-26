@@ -45,6 +45,8 @@
 | `crates/phairdlna-core/src/identity.rs` | The persistent device identity | F-01, F-02 |
 | `crates/phairdlna-core/src/catalogue/` | The catalogue — the model of the items and containers, the scanner of a root, the opaque identifiers, the identity key of a file, the playlists (`playlist.rs`), the subtitle sidecars (`subtitle.rs`), the memory of the volumes of the roots, the assembly of the tree, the sniffer of a file, the registry of the formats the server serves and the index of the catalogue on disk (`index/`) | F-05, F-08, F-09, F-11 |
 | `crates/phairdlna-core/src/media/` | The pictures of the library — the discovery of the artwork of a media file (`artwork/`), the pictures that are embedded in it (`id3/`, `mp4/`), the images that lie next to it (`sidecar.rs`), the thumbnail of a photo (`thumbnail.rs`) and the disposable cache of the pictures that were produced (`cache.rs`) | F-10 |
+| `crates/phairdlna-core/src/profile.rs` | Client compatibility profiles, declarative quirk mitigation and evidence gate | F-07 |
+| `crates/phairdlna-core/tests/client_profiles.rs` | Acceptance tests for client compatibility profiles, evidence gate, and disable switch | F-07 |
 | `crates/phairdlna-core/src/didl/` | The DIDL-Lite document — the object model, the `protocolInfo`, the value rules, the policy of the document and the writer | F-05, F-11 |
 | `crates/phairdlna-core/src/http/` | The delivery of media over HTTP — the `Range` header, the headers of a media answer, the containment of a media URL and the evaluator of a request | F-06, F-11 |
 | `crates/phairdlna-core/src/upnp/` | The device description, the service descriptions (SCPD), the SOAP dispatcher and the ContentDirectory and ConnectionManager actions | F-02, F-03, F-04 |
