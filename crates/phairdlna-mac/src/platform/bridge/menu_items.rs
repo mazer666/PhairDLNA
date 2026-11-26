@@ -9,8 +9,8 @@
 use objc2::rc::Retained;
 use objc2::{MainThreadMarker, MainThreadOnly};
 use objc2_app_kit::{
-    NSBezelStyle, NSButton, NSCellImagePosition, NSImage, NSMenuItem, NSTextField,
-    NSTextFieldBezelStyle,
+    NSBezelStyle, NSBox, NSBoxType, NSButton, NSCellImagePosition, NSColor, NSImage, NSMenuItem,
+    NSTextField, NSTextFieldBezelStyle,
 };
 use objc2_foundation::NSString;
 
@@ -52,5 +52,14 @@ impl MenuTarget {
     pub fn configure_rounded_field(&self, field: &NSTextField) {
         field.setBezelStyle(NSTextFieldBezelStyle::RoundedBezel);
         field.setBezeled(true);
+    }
+
+    /// Styles an NSBox as a macOS card container with rounded corners and subtle background.
+    pub fn configure_card_box(&self, box_view: &NSBox) {
+        box_view.setBoxType(NSBoxType::Custom);
+        box_view.setCornerRadius(10.0);
+        box_view.setBorderWidth(1.0);
+        box_view.setBorderColor(&NSColor::separatorColor());
+        box_view.setFillColor(&NSColor::quaternarySystemFillColor());
     }
 }
