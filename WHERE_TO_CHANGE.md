@@ -65,6 +65,7 @@
 | `crates/phairdlna-cli/src/describe.rs` | Device description and SSDP header inspection command offline (`OPS-005`, `INT-015`) | F-01, F-02, F-13 |
 | `crates/phairdlna-cli/src/interfaces.rs` | Interfaces listing and exposure evaluation command (`OPS-004`) | F-12, F-13 |
 | `crates/phairdlna-cli/tests/cli_interfaces.rs` | Acceptance tests for network interfaces inspection command | F-12, F-13 |
+| `crates/phairdlna-cli/tests/cli_lifecycle.rs` | Acceptance tests for CLI lifecycle, help, version and exit code scheme (`OPS-011`, `OPS-014`) | F-13 |
 | `crates/phairdlna-cli/tests/cli_diagnostics.rs` | Acceptance tests for offline device description and SSDP header blocks | F-01, F-13 |
 | `crates/phairdlna-cli/src/ssdp_cmd.rs` | SSDP CLI command handlers: headers inspection and stored M-SEARCH replay diagnostics | F-01, F-07 |
 | `crates/phairdlna-cli/src/setup.rs`, `crates/phairdlna-cli/src/setup/` | First-run orchestration, prompts, configuration validation and writing, plus user-facing setup guidance | F-13 |

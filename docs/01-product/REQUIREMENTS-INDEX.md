@@ -305,10 +305,10 @@ Requirement method, ID rules and the traceability chain are defined in
 | `OPS-008` | Shut down gracefully on `SIGINT` and `SIGTERM` | MUST | `F-13` | M1 | Automated CLI test | Implemented |
 | `OPS-009` | Support running as a background service on macOS (launchd) | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-010` | Support a configuration file that sets the service identity | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
-| `OPS-011` | Provide `--help` and `--version` output that names the version | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-011` | Provide `--help` and `--version` output that names the version | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-012` | Expose its version in the `SERVER` header and in the device description. | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-013` | Write a structured diagnostic report (anonymised) that a user can attach to a bug report. | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
-| `OPS-014` | Return a distinct exit code for configuration errors | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-014` | Return a distinct exit code for configuration errors | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-015` | Never require root privileges to serve media from the user's own directories. | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-016` | Expose an unauthenticated route that serves the corresponding source of the exact running build | MUST | `F-14` | M2 | Automated CLI test | Baseline |
 | `OPS-017` | Report the exact source revision it was built from in its status output and in the source offer. | MUST | `F-14` | M2 | Automated CLI test | Implemented |
