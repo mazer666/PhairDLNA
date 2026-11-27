@@ -65,8 +65,13 @@ fn the_dry_run_of_the_install_writes_nothing() {
         "{}",
         answer.stdout
     );
+    let expected_service_marker = if cfg!(target_os = "linux") {
+        "phairdlna.service"
+    } else {
+        "org.phairdlna.server"
+    };
     assert!(
-        answer.stdout.contains("org.phairdlna.server"),
+        answer.stdout.contains(expected_service_marker),
         "{}",
         answer.stdout
     );

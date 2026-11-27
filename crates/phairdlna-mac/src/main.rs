@@ -225,6 +225,7 @@ fn start(_options: &Options, strings: &Strings) -> Result<(), String> {
 }
 
 /// The file of the configuration of the server.
+#[cfg(target_os = "macos")]
 fn config_path() -> PathBuf {
     phairdlna_core::config::resolve_path(None)
 }
