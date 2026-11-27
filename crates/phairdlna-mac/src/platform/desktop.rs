@@ -122,10 +122,6 @@ impl Desktop {
             MenuAction::SaveSettings => self.save_window_settings(),
             MenuAction::RemoveMediaFolder => self.remove_selected_folder(),
             MenuAction::RevealSelectedFolder => self.reveal_selected_folder(),
-            MenuAction::RescanLibrary => {
-                self.worker.ask(Command::Rescan);
-                self.write();
-            }
             _ => {}
         }
     }
