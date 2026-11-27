@@ -165,6 +165,7 @@
 | `qa/macos-service-access-protocol.md` | Real-Mac experiment for service identity, selected-folder scope, revocation and Local Network behavior | OD-15, F-22 AC-14 |
 | `scripts/` | Repository gates and the requirement-view generator | F-19 |
 | `scripts/package-macos-app.sh` | Builds the macOS app bundle, validates its eight-byte PkgInfo marker and architecture slices, applies its final ad-hoc signature, and verifies the signature | F-15, F-19 |
+| `scripts/package-linux-deb.sh` | Packages standard unconfined Debian archive (`.deb`) with systemd service unit (PLT-016, M3.3) | F-13, F-20 |
 | `scripts/soak.sh` | Automated soak and stability testing harness monitoring RSS, open descriptors, and thread counts | F-18 |
 | `scripts/generate-release-artefacts.sh` | Builds the distribution tarball, generates SHA-256 checksums and software bill of materials (SBOM) | F-19, F-22 |
 | `.github/workflows/` | Manual-only continuous integration | F-19 |

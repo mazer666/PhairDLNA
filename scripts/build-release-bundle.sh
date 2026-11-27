@@ -43,9 +43,13 @@ CLI_TAR="${ASSETS_DIR}/phairdlna-${VERSION}-macOS-universal-cli.tar.gz"
 tar -czf "${CLI_TAR}" -C "${CLI_STAGING}" phairdlna LICENSE README.md
 rm -rf "${CLI_STAGING}"
 
-echo "=== 4. Generating SHA256 Checksums ==="
+echo "=== 4. Packaging Linux Debian Package (M3.3, PLT-016) ==="
+./scripts/package-linux-deb.sh "${VERSION}"
+DEB_PKG="${ASSETS_DIR}/phairdlna_${VERSION#v}_amd64.deb"
+
+echo "=== 5. Generating SHA256 Checksums ==="
 cd "${ASSETS_DIR}"
-shasum -a 256 "$(basename "${DMG_PATH}")" "$(basename "${CLI_TAR}")" > "SHA256SUMS-${VERSION}.txt"
+shasum -a 256 "$(basename "${DMG_PATH}")" "$(basename "${CLI_TAR}")" "$(basename "${DEB_PKG}")" > "SHA256SUMS-${VERSION}.txt"
 
 echo "=== SUCCESS: Assets built ==="
 ls -la "${ASSETS_DIR}"/*"${VERSION}"*

@@ -5,6 +5,21 @@ All notable changes to PhairDLNA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0-alpha.8] - 2026-11-27
+
+Eighth Alpha Release of PhairDLNA — native Linux Debian packaging (`.deb`), systemd service integration, automated multi-platform release bundle packaging, and documentation alignment.
+
+### Added
+
+- **Native Linux Debian Packaging (`PLT-016`, `SUP-005`, `M3.3`):**
+  - Added dedicated packaging script [`scripts/package-linux-deb.sh`](scripts/package-linux-deb.sh) building standard unconfined `.deb` packages (`phairdlna_<version>_amd64.deb`).
+  - Integrated systemd service unit (`phairdlna.service`) with `Type=notify`, `NotifyAccess=main`, and automatic `daemon-reload` in maintainer scripts (`postinst`/`prerm`).
+- **Unified Multi-Platform Release Tooling:**
+  - Extended [`scripts/build-release-bundle.sh`](scripts/build-release-bundle.sh) to assemble macOS DMG, CLI Universal Tarballs, Linux Debian packages, and SHA-256 checksums in a single automated step.
+  - Registered scripts in `WHERE_TO_CHANGE.md` and verified all 11 quality gates.
+
+---
+
 ## [0.1.0-alpha.7] - 2026-11-27
 
 Seventh Alpha Release of PhairDLNA — real-device interoperability trial expansion (Samsung Tizen, LG webOS), enhanced device matrix fixtures, and verified compliance across client profiles.
