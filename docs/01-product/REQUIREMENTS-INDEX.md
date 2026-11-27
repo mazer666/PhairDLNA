@@ -154,9 +154,9 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-054` | Return the same `Source` value in `GetCurrentConnectionInfo` as the `res` URI it serves for the… | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
 | `INT-055` | Advertise the `http-get` protocol with the `*` wildcard for the additional header field only… | SHOULD | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-056` | Not implement the `http-subscribe` transfer protocol in the baseline. | MUST | `F-04` | M1 | Protocol conformance test | Verified |
-| `INT-057` | Reject every GENA `SUBSCRIBE` request unless the user has explicitly enabled eventing | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
-| `INT-058` | Never implement the UPnP Internet Gateway Device actions (`AddPortMapping` | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
-| `INT-059` | Not implement a network self-update mechanism; updates shall be installed by the user through… | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
+| `INT-057` | Reject every GENA `SUBSCRIBE` request unless the user has explicitly enabled eventing | MUST | `F-04` | M1 | Protocol conformance test | Verified |
+| `INT-058` | Never implement the UPnP Internet Gateway Device actions (`AddPortMapping` | MUST | `F-04` | M1 | Protocol conformance test | Verified |
+| `INT-059` | Not implement a network self-update mechanism; updates shall be installed by the user through… | MUST | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-060` | Every `<item>` and `<container>` shall carry the attributes `id` | MUST | `F-05` | M1 | Protocol conformance test | Implemented |
 | `INT-061` | Use the UPnP object classes `object.item.audioItem.musicTrack` | MUST | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-062` | The `id` attribute shall be a stable, opaque identifier for the object that does not change… | MUST | `F-05` | M1 | Protocol conformance test | Implemented |

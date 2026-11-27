@@ -390,6 +390,23 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "`crates/phairdlna-core/tests/connection_manager.rs::no_entry_uses_the_push_protocol`",
         "Verified",
     ),
+    "INT-057": (
+        "`crates/phairdlna-core/tests/protocol_conformance_security.rs::pc_31_gena_subscribe_is_rejected_without_eventing_enabled`,"
+        " `crates/phairdlna-cli/tests/serve.rs::an_event_subscription_is_answered`"
+        " — GENA SUBSCRIBE requests are rejected with 501 Not Implemented and eventing remains opt-in only",
+        "Verified",
+    ),
+    "INT-058": (
+        "`crates/phairdlna-core/tests/protocol_conformance_security.rs::pc_29_igd_actions_rejected_with_error`,"
+        " `crates/phairdlna-core/tests/ssdp_hardening.rs::an_igd_action_is_refused`"
+        " — UPnP Internet Gateway Device actions are rejected with UPnP fault 401 without executing",
+        "Verified",
+    ),
+    "INT-059": (
+        "`crates/phairdlna-core/tests/protocol_conformance_security.rs::pc_30_no_network_self_update_facility`"
+        " — no network self-update mechanism is implemented; updates remain platform-managed",
+        "Verified",
+    ),
     "SEC-010": (
         "`crates/phairdlna-core/tests/xml_reader.rs::a_document_type_declaration_is_refused`",
         "Verified",
