@@ -11,6 +11,7 @@
 use std::net::Ipv4Addr;
 use std::path::{Path, PathBuf};
 
+use super::change::{ChangeReliability, ChangeWatcher, FileChange};
 use super::path::{CaseSensitivity, FileId, MediaPath, VolumeId};
 use super::traits::{
     Consent, ConsentOutcome, FileSystem, LocalNetworkStatus, LogRecord, LogSink, Network,
@@ -70,6 +71,20 @@ pub struct UnsupportedVolumeWatcher;
 impl VolumeWatcher for UnsupportedVolumeWatcher {
     fn poll_events(&self) -> PlatformResult<Vec<VolumeEvent>> {
         Err(PlatformError::unsupported("watching volumes"))
+    }
+}
+
+/// A change watcher that never sees anything.
+#[derive(Debug, Default, Clone, Copy)]
+pub struct UnsupportedChangeWatcher;
+
+impl ChangeWatcher for UnsupportedChangeWatcher {
+    fn poll_changes(&self) -> PlatformResult<Vec<FileChange>> {
+        Err(PlatformError::unsupported("watching changes"))
+    }
+
+    fn reliability(&self, _root: &Path) -> ChangeReliability {
+        ChangeReliability::Unknown
     }
 }
 

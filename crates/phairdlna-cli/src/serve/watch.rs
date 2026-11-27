@@ -18,10 +18,12 @@
 //! clients of the server and yields while the machine is busy (`RES-001`,
 //! `RES-003`).
 
+use std::path::PathBuf;
+use std::sync::Arc;
 use std::time::Duration;
 
-use phairdlna_core::catalogue::VolumeChange;
-use phairdlna_core::platform::LocalFileSystem;
+use phairdlna_core::catalogue::{RootChange, VolumeChange};
+use phairdlna_core::platform::{ChangeWatcher, FsChangeWatcher, LocalFileSystem};
 use tokio::task::JoinHandle;
 
 use super::library::Library;
@@ -45,6 +47,25 @@ pub fn spawn(
     spawn_with_interval(library, logger, resources, lifecycle, WATCH_INTERVAL)
 }
 
+/// Builds the change watcher for the media roots of the library.
+fn build_fs_watcher(library: &Library, logger: &Logger) -> Option<Arc<FsChangeWatcher>> {
+    let roots: Vec<PathBuf> = library
+        .roots()
+        .iter()
+        .map(|r| PathBuf::from(&r.path))
+        .collect();
+    match FsChangeWatcher::new(&roots) {
+        Ok(w) => Some(Arc::new(w)),
+        Err(e) => {
+            logger.warn(
+                "filesystem change watcher unavailable",
+                &[("reason", &e.to_string())],
+            );
+            None
+        }
+    }
+}
+
 /// Starts the watch with a given interval and hands back the task and the way
 /// to stop it.
 ///
@@ -57,6 +78,7 @@ pub fn spawn_with_interval(
     lifecycle: LifecycleController,
     interval: Duration,
 ) -> (tokio::sync::watch::Sender<bool>, JoinHandle<()>) {
+    let fs_watcher = build_fs_watcher(&library, &logger);
     let (stop, mut stopped) = tokio::sync::watch::channel(false);
     let task = tokio::spawn(async move {
         let mut ticker = tokio::time::interval(interval);
@@ -66,20 +88,14 @@ pub fn spawn_with_interval(
                     if *stopped.borrow() {
                         break;
                     }
-                    // The work of the watch reads the disk, and a network
-                    // share that does not answer would hold a worker of the
-                    // runtime for as long as it takes. The work therefore
-                    // runs in the background class of the scheduler, which
-                    // gives it a worker of its own (`OPS-016`, `RES-003`).
                     let library = library.clone();
                     let logger = logger.clone();
                     let resources = resources.clone();
                     let lifecycle = lifecycle.clone();
-                    if let Err(error) =
-                        resources.submit_background(move || watch_once(&library, &logger, &lifecycle))
-                    {
-                        // The scan waits: the machine is busy or the queue is
-                        // full. The next tick tries again.
+                    let fs_watcher = fs_watcher.clone();
+                    if let Err(error) = resources.submit_background(move || {
+                        watch_once(&library, &logger, &lifecycle, fs_watcher.as_deref());
+                    }) {
                         resources.explain(&error);
                     }
                 }
@@ -91,14 +107,33 @@ pub fn spawn_with_interval(
 }
 
 /// Looks at the roots once and reads the catalogue again when something moved.
-fn watch_once(library: &Library, logger: &Logger, lifecycle: &LifecycleController) {
-    if !library.changed(&LocalFileSystem) {
+fn watch_once(
+    library: &Library,
+    logger: &Logger,
+    lifecycle: &LifecycleController,
+    fs_watcher: Option<&FsChangeWatcher>,
+) {
+    let roots_changed = library.changed(&LocalFileSystem);
+    let fs_changed = fs_watcher
+        .and_then(|w| w.poll_changes().ok())
+        .map(|changes| !changes.is_empty())
+        .unwrap_or(false);
+
+    if !roots_changed && !fs_changed {
         return;
     }
+    if fs_changed {
+        logger.info("filesystem change detected, refreshing catalogue", &[]);
+    }
     let report = library.refresh(&LocalFileSystem);
+    handle_volume_changes(&report.changes, logger, lifecycle);
+}
+
+/// Applies volume changes to server lifecycle and structured logs.
+fn handle_volume_changes(changes: &[RootChange], logger: &Logger, lifecycle: &LifecycleController) {
     let mut any_lost = false;
     let mut any_returned = false;
-    for change in &report.changes {
+    for change in changes {
         if matches!(change.change, VolumeChange::First | VolumeChange::Unchanged) {
             continue;
         }
@@ -215,6 +250,60 @@ mod tests {
             library.with_catalogue(|catalogue| catalogue.roots()[0].entries) == 0,
             "the files of the drive that is gone left the catalogue"
         );
+    }
+
+    /// The watch picks up newly created media files automatically via filesystem watcher.
+    #[tokio::test]
+    async fn the_watch_picks_up_newly_created_media_files() {
+        let folder = tempfile::tempdir().expect("a temporary directory");
+        let roots = vec![MediaRoot {
+            name: "Movies".to_owned(),
+            path: folder.path().to_string_lossy().into_owned(),
+            exclude: Vec::new(),
+            symlink_policy: None,
+        }];
+        let library = Library::build(&roots, SymlinkPolicy::Skip, &LocalFileSystem);
+        let redactor = Arc::new(Redactor::new());
+        let logger = Logger::with_redactor(Level::Info, "daemon", Arc::clone(&redactor));
+        let lifecycle = LifecycleController::new(redactor, logger.clone());
+        let resources = Resources::new(&phairdlna_core::config::Config::default(), &logger);
+        let (stop, task) = spawn_with_interval(
+            library.clone(),
+            logger,
+            resources,
+            lifecycle,
+            Duration::from_millis(50),
+        );
+
+        assert_eq!(
+            library.with_catalogue(|c| c.roots()[0].entries),
+            0,
+            "catalogue starts empty"
+        );
+
+        // A new film is added to the watched folder.
+        std::fs::write(folder.path().join("new_video.mp4"), MP4_HEAD).expect("new film written");
+
+        let found = wait_until_entries(&library, 1).await;
+        let _ = stop.send(true);
+        let _ = task.await;
+        assert!(
+            found,
+            "the watch detected the new video and refreshed the catalogue"
+        );
+    }
+
+    /// Waits until the first root of the library has at least `expected` entries.
+    async fn wait_until_entries(library: &Library, expected: usize) -> bool {
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while Instant::now() < deadline {
+            let entries = library.with_catalogue(|c| c.roots()[0].entries);
+            if entries >= expected {
+                return true;
+            }
+            tokio::time::sleep(Duration::from_millis(50)).await;
+        }
+        false
     }
 
     /// Waits until the root of the library is not there any more.

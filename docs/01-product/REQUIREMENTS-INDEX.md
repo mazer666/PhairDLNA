@@ -77,7 +77,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-022` | Support multiple roots that point to the same underlying volume without producing duplicate… | SHOULD | `F-11` | M2 | Protocol conformance + device test | Implemented |
 | `FUN-023` | Expose the free space of a root through the ContentDirectory service when the file system… | COULD | `F-08` | M2 | Automated test | Baseline |
 | `FUN-024` | Allow the user to configure a scan schedule (interval | SHOULD | `F-08` | M2 | Automated test | Baseline |
-| `FUN-025` | Make a newly added file visible in the catalogue within 30 seconds on a file system that… | SHOULD | `F-09` | M1 | Automated test | Baseline |
+| `FUN-025` | Make a newly added file visible in the catalogue within 30 seconds on a file system that… | SHOULD | `F-09` | M1 | Automated test | Implemented |
 | `FUN-026` | Offer a subtitle sidecar as an additional resource with the MIME type that matches its format | MUST | `F-11` | M2 | Automated test | Verified |
 | `FUN-027` | Deliver a subtitle file in a character set the client can read | MUST | `F-11` | M2 | Automated test | Implemented |
 | `FUN-028` | Serve a file larger than 4 GiB with correct byte offsets across the 4 GiB boundary and at the… | MUST | `F-06` | M1 | Automated test | Baseline |

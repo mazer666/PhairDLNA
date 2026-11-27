@@ -1,6 +1,6 @@
 //! The boundary between the core and the operating system.
 //!
-//! What: the eight capability traits, the path model, and the default
+//! What: the nine capability traits, the path model, and the default
 //!       implementation that refuses politely.
 //! Why: the core must compile unchanged on macOS, Linux and Windows. The only
 //!      way to keep that true is to put every operating-system question behind
@@ -17,12 +17,16 @@
 //! }
 //! ```
 
+mod change;
+mod fs_watcher;
 mod local;
 mod memory;
 mod path;
 mod traits;
 mod unsupported;
 
+pub use change::{ChangeReliability, ChangeWatcher, FileChange};
+pub use fs_watcher::FsChangeWatcher;
 pub use local::{LocalFileSystem, LOCAL_VOLUME};
 pub use memory::{LocalProcessMemory, ProcessMemory};
 pub use path::{
@@ -35,7 +39,7 @@ pub use traits::{
     UserEnvironment, UserNotifier, VolumeEvent, VolumeWatcher,
 };
 pub use unsupported::{
-    UnsupportedConsent, UnsupportedFileSystem, UnsupportedLogSink, UnsupportedNetwork,
-    UnsupportedServiceManager, UnsupportedUserEnvironment, UnsupportedUserNotifier,
-    UnsupportedVolumeWatcher,
+    UnsupportedChangeWatcher, UnsupportedConsent, UnsupportedFileSystem, UnsupportedLogSink,
+    UnsupportedNetwork, UnsupportedServiceManager, UnsupportedUserEnvironment,
+    UnsupportedUserNotifier, UnsupportedVolumeWatcher,
 };

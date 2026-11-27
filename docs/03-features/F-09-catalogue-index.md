@@ -568,7 +568,7 @@ names the reason, because a skip is never a pass.
 | AC-14 (a subtree that cannot be read) | partly implemented — the folder is reported in the diagnostics (`crates/phairdlna-core/tests/media_diagnostics.rs`); the list of quarantined subtrees that need consent does not exist yet |
 | AC-15 (a removable volume) | **NOT RUN** — needs the volume identity and the volume watcher of the platform adapter (F-13) |
 | AC-16 (nothing is written) | implemented | `crates/phairdlna-core/tests/media_roots.rs::the_scanner_never_writes_to_the_library`, `crates/phairdlna-core/tests/catalogue_rebuild.rs::the_media_of_the_library_is_never_written_to`, `crates/phairdlna-cli/tests/catalogue_index.rs::the_daemon_never_writes_to_the_media` |
-| AC-17 (a change event) | **NOT RUN** — the watcher of the platform layer is M2 (FUN-025) |
+| AC-17 (a change event) | implemented | `crates/phairdlna-core/src/platform/fs_watcher.rs`, `crates/phairdlna-cli/src/serve/watch.rs::tests::the_watch_picks_up_newly_created_media_files` (FUN-025) |
 
 ### 12.2 Open questions
 

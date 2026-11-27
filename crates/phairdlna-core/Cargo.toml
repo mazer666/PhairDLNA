@@ -22,6 +22,7 @@ thiserror = { workspace = true }
 unicode-normalization = { workspace = true }
 unicase = { workspace = true }
 uuid = { workspace = true }
+notify = "8.2.2"
 
 [dev-dependencies]
 # The tests write a database of another schema by hand, to check that the

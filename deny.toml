@@ -31,6 +31,7 @@ allow = [
     "Zlib",
     "CC0-1.0",
     "Unlicense",
+    "ISC",
 ]
 confidence-threshold = 0.8
 unused-allowed-license = "warn"

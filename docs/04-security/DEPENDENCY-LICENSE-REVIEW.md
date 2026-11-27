@@ -57,7 +57,7 @@ adoption, not as a quality judgement.
 | `sqlx` | 0.9.0 | MIT OR Apache-2.0 | 1.94 | 189 841 591 | 2026-05-01 | **Not adopted** — heavier, async-first; `rusqlite` is enough |
 | `symphonia` | 0.6.1 | **MPL-2.0** | 1.85 | 21 837 379 | 2026-08-13 | **ADR-0008 target, not in current lock** — conditional MPL assessment is in §3; current M2.2 deviation is F-10 D-01 / ADR-0011 |
 | `lofty` | 0.25.5 | MIT OR Apache-2.0 | 1.89 | 1 568 758 | 2026-10-25 | **Not adopted** — audio-tag and artwork candidate; absent from the current lock |
-| `notify` | 9.0.0-rc.8 | CC0-1.0 | 1.91 | 198 269 121 | 2026-11-09 | **Not adopted** — a stable 8.x release was preferred over this release candidate; no `notify` crate is in the current lock |
+| `notify` | 8.2.2 | CC0-1.0 | 1.88 | 198 269 121 | 2026-11-09 | **Adopt** — stable 8.2.2 line with native FSEvents (macOS) and inotify (Linux) backends for FUN-025 automatic filesystem change monitoring |
 | `ignore` | 0.4.34 | Unlicense OR MIT | 1.88 | 213 708 619 | 2026-10-27 | **Not adopted** — candidate for gitignore-style filtering; absent from the current lock |
 | `thiserror` | 2.0.21 | MIT OR Apache-2.0 | 1.77 | — | 2026 | **Adopt** — the error types |
 | `tempfile` | 3.27.0 | MIT OR Apache-2.0 | 1.63 | 997 650 245 | 2026-03-11 | **Adopt** — temporary directories in tests (dev-dependency) |

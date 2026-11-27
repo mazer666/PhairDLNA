@@ -1,7 +1,10 @@
 //! The traits that isolate the core from the operating system.
 //!
 //! What: the eight capabilities the core needs from a platform, each with a
-//!       default implementation that reports "not supported".
+//!       default implementation that reports "not supported". The ninth
+//!       capability, the change events of the filesystem, lives beside this
+//!       module in `change.rs` because it grew past the size this file may
+//!       reach.
 //! Why: a core that calls the operating system directly stops being portable
 //!       (ADR-0003). A core that asks a trait stays portable, and a platform
 //!       that is not implemented yet degrades explicitly instead of failing in

@@ -851,6 +851,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " produced, because the baseline ships no video decoder (F-10 § 12 Q1)",
         "Implemented",
     ),
+    "FUN-025": (
+        "`crates/phairdlna-core/src/platform/fs_watcher.rs`,"
+        " `crates/phairdlna-cli/src/serve/watch.rs::tests::the_watch_picks_up_newly_created_media_files`"
+        " — the server monitors media roots with native OS change events (FSEvents/inotify), debounces event bursts"
+        " and automatically updates the catalogue within the 30-second window",
+        "Implemented",
+    ),
     "SEC-067": (
         "`crates/phairdlna-core/src/media/thumbnail.rs::tests::a_picture_that_lies_about_its_size_is_refused_before_it_is_decoded`,"
         " `::a_picture_with_too_many_pixels_is_refused`"
