@@ -5,6 +5,25 @@ All notable changes to PhairDLNA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0-alpha.5] - 2026-11-27
+
+Fifth Alpha Release of PhairDLNA — incremental rescan verification, battery/energy platform telemetry for adaptive resource scheduling, and local-ci hardening.
+
+### Added
+
+- **Incremental Rescan Verification (`PERF-003`, `AC-08`):**
+  - Added dedicated integration test (`catalogue_incremental.rs`) verifying that incremental scans across 100 media files avoid re-reading file bodies when metadata (size, mtime) is unchanged.
+  - Proved via zero-read-permission checks (`chmod 000`) that scanning uncorrupted files relies entirely on cached directory entries without file body I/O overhead.
+- **Adaptive Platform Telemetry (`RES-008`, `M2.8`):**
+  - Integrated energy and battery constraints check into background scheduling arbitration (`is_energy_constrained`).
+  - Read battery discharge states via sysfs on Linux (`/sys/class/power_supply/BAT0/`) and system signals without subprocess overhead (`SEC-TH-11`).
+  - Background scanning automatically yields during low battery states (< 20% capacity) while active streaming and media exposure remain unhindered.
+- **Service Integration and Architecture Hardening (`M2.7`, `PLT-013`):**
+  - Consolidated `ServiceControl` and `SystemRunner` boundaries across platforms.
+  - Verified documentation links, strict file budgets, and updated requirement traceability.
+
+---
+
 ## [0.1.0-alpha.4] - 2026-11-27
 
 Fourth Alpha Release of PhairDLNA — native filesystem change monitoring (FSEvents/inotify), enhanced folder toolbar ergonomics with Finder integration, hardened discovery/interop suite, and cross-platform CI fixes.

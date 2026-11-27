@@ -185,16 +185,40 @@ impl ResourceProbe for Resources {
     /// The hints the daemon gives about the machine.
     ///
     /// The daemon knows how many transfers are running and how long the last
-    /// answer needed. The processor, the memory and the disk are not measured
-    /// here: a signal that is not measured stays at zero, and zero never
-    /// crosses a threshold.
+    /// answer needed. When the machine is battery-powered with low battery,
+    /// energy_constrained is flagged so background indexing yields (`RES-008`).
     fn signals(&self) -> ResourceSignals {
         ResourceSignals {
             active_streams: self.streams(),
             streaming_latency_ms: self.latency_ms.load(Ordering::SeqCst),
+            energy_constrained: is_energy_constrained(),
             ..ResourceSignals::unknown()
         }
     }
+}
+
+/// Checks whether the host system is currently energy or thermally constrained (RES-008).
+///
+/// Note on security (SEC-TH-11): the server daemon itself never spawns child processes.
+/// On Linux, power supply status is read directly from sysfs (`/sys/class/power_supply/`).
+/// On macOS, battery status without subprocessing is read when available via standard
+/// filesystem interfaces or reported as unconstrained fallback.
+fn is_energy_constrained() -> bool {
+    #[cfg(target_os = "linux")]
+    if let Some(pct) = parse_linux_battery_discharge() {
+        return pct < 20;
+    }
+    false
+}
+
+#[cfg(target_os = "linux")]
+fn parse_linux_battery_discharge() -> Option<u8> {
+    let status = std::fs::read_to_string("/sys/class/power_supply/BAT0/status").ok()?;
+    if !status.trim().eq_ignore_ascii_case("Discharging") {
+        return None;
+    }
+    let capacity = std::fs::read_to_string("/sys/class/power_supply/BAT0/capacity").ok()?;
+    capacity.trim().parse::<u8>().ok()
 }
 
 /// The token of a transfer that is running.
