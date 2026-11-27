@@ -620,6 +620,18 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — the command starts the daemon in the foreground, and the daemon answers a client on the network",
         "Verified",
     ),
+    "OPS-002": (
+        "`crates/phairdlna-cli/tests/cli_commands.rs::status_with_running_daemon_reports_status`,"
+        " `::status_with_no_daemon_running_exits_nothing_to_do`"
+        " — status queries running daemon via local administration surface reporting version, uptime, roots and streams, or exits with code 3 when stopped",
+        "Verified",
+    ),
+    "OPS-003": (
+        "`crates/phairdlna-cli/tests/cli_commands.rs::scan_with_running_daemon_triggers_rescan`,"
+        " `::scan_without_running_daemon_performs_in_process_scan`"
+        " — scan triggers on-demand library rescan via administration surface or scans in-process when daemon is stopped",
+        "Verified",
+    ),
     "OPS-004": (
         "`crates/phairdlna-cli/tests/cli_interfaces.rs::default_configuration_evaluates_interfaces`,"
         " `::interfaces_command_outputs_json`"

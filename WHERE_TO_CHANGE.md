@@ -64,6 +64,9 @@
 | `crates/phairdlna-cli/src/lib.rs` | The commands, as pure functions over their arguments | F-13 |
 | `crates/phairdlna-cli/src/describe.rs` | Device description and SSDP header inspection command offline (`OPS-005`, `INT-015`) | F-01, F-02, F-13 |
 | `crates/phairdlna-cli/src/interfaces.rs` | Interfaces listing and exposure evaluation command (`OPS-004`) | F-12, F-13 |
+| `crates/phairdlna-cli/src/status.rs` | Daemon status command over local administration surface (`OPS-002`, `OPS-014`) | F-13, F-14 |
+| `crates/phairdlna-cli/src/scan.rs` | On-demand library scan command via surface or in-process (`OPS-003`) | F-09, F-13 |
+| `crates/phairdlna-cli/tests/cli_commands.rs` | Acceptance tests for status and scan CLI commands (`OPS-002`, `OPS-003`, `OPS-014`) | F-13, F-14 |
 | `crates/phairdlna-cli/tests/cli_interfaces.rs` | Acceptance tests for network interfaces inspection command | F-12, F-13 |
 | `crates/phairdlna-cli/tests/cli_lifecycle.rs` | Acceptance tests for CLI lifecycle, help, version and exit code scheme (`OPS-011`, `OPS-014`) | F-13 |
 | `crates/phairdlna-cli/tests/cli_diagnostics.rs` | Acceptance tests for offline device description and SSDP header blocks | F-01, F-13 |

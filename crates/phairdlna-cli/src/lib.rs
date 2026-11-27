@@ -12,10 +12,12 @@ pub mod describe;
 pub mod diagnostics;
 pub mod explain;
 pub mod interfaces;
+pub mod scan;
 pub mod serve;
 pub mod service;
 pub mod setup;
 pub mod ssdp_cmd;
+pub mod status;
 
 use std::path::PathBuf;
 
@@ -131,6 +133,20 @@ pub enum Command {
         /// Whether the output is formatted as JSON.
         json: bool,
     },
+    /// Print the server status (`OPS-002`, `OPS-014`).
+    Status {
+        /// The configuration file to read.
+        path: Option<PathBuf>,
+        /// Whether the output is formatted as JSON.
+        json: bool,
+    },
+    /// Trigger an on-demand scan of the library (`OPS-003`).
+    Scan {
+        /// The configuration file to read.
+        path: Option<PathBuf>,
+        /// Optional specific root name or path to scan.
+        root: Option<String>,
+    },
 }
 
 /// The exit code of a command that failed (`OPS-014`).
@@ -224,6 +240,14 @@ pub fn run(command: &Command) -> Outcome {
         Command::Setup { path, force } => setup::run(path.as_deref(), *force),
         Command::Describe { path } => describe::describe(path.as_deref()),
         Command::Interfaces { path, json } => interfaces::interfaces(path.as_deref(), *json),
+        Command::Status { path, json } => status::status(&status::StatusOptions {
+            path: path.clone(),
+            json: *json,
+        }),
+        Command::Scan { path, root } => scan::scan(&scan::ScanOptions {
+            path: path.clone(),
+            root: root.clone(),
+        }),
     }
 }
 
