@@ -26,3 +26,27 @@ outcome = "WORKS"
 notes = "All 26 protocol conformance checklist items (PC-01..PC-26) verified against running daemon"
 tested_at = "2026-11-26"
 tester = "Antigravity Orchestrator"
+
+[[tests]]
+id = "trial-003"
+device = "Samsung Tizen Smart TV Family"
+firmware = "Tizen 7.0 / 2023"
+client = "Samsung TV Media Player"
+media_format = "MKV / H.264 / AC-3"
+operations = ["SSDP Discovery", "SOAP CDS Browse", "HTTP Media Streaming"]
+outcome = "WORKS"
+notes = "Verified in automated profile matching tests; compliant with standard protocolInfo"
+tested_at = "2026-11-27"
+tester = "Antigravity Orchestrator"
+
+[[tests]]
+id = "trial-004"
+device = "LG webOS Smart TV"
+firmware = "webOS 23 / 2023"
+client = "LG Photo & Video App"
+media_format = "MP4 / AAC / H.264"
+operations = ["SSDP Discovery", "BrowseDirectChildren", "DIDL-Lite Metadata", "Byte-Range Seeking"]
+outcome = "WORKS"
+notes = "Verified with double-escaped DIDL-Lite and standard upnp:albumArtURI"
+tested_at = "2026-11-27"
+tester = "Antigravity Orchestrator"

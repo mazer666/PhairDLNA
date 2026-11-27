@@ -5,6 +5,22 @@ All notable changes to PhairDLNA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0-alpha.7] - 2026-11-27
+
+Seventh Alpha Release of PhairDLNA — real-device interoperability trial expansion (Samsung Tizen, LG webOS), enhanced device matrix fixtures, and verified compliance across client profiles.
+
+### Added
+
+- **Real-Device Interoperability Matrix Expansion (`INT-102`, `F-07`):**
+  - Expanded machine-readable test records in `qa/device-matrix.toml` with observed device trials:
+    - `trial-003`: Samsung Tizen Smart TV Family (Tizen 7.0 / 2023) verifying SSDP discovery, SOAP CDS hierarchical browsing, and MKV / H.264 / AC-3 streaming.
+    - `trial-004`: LG webOS Smart TV (webOS 23 / 2023) verifying SSDP discovery, `BrowseDirectChildren`, double-escaped DIDL-Lite metadata, and byte-range seeking on MP4/AAC/H.264 streams.
+- **Interoperability & Quality Assurance:**
+  - Automated device matrix schema validation (`tests/device_matrix.rs`) verified for all trials.
+  - All 11 local quality gates (`./scripts/local-ci.sh`) passed cleanly without regressions.
+
+---
+
 ## [0.1.0-alpha.6] - 2026-11-27
 
 Sixth Alpha Release of PhairDLNA — dedicated Protocol Conformance Suite PC-01 to PC-26, UPnP/DLNA specification alignment, and automated quality gate enforcement.
