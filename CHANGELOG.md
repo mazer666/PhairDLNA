@@ -5,6 +5,22 @@ All notable changes to PhairDLNA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0-alpha.6] - 2026-11-27
+
+Sixth Alpha Release of PhairDLNA — dedicated Protocol Conformance Suite PC-01 to PC-26, UPnP/DLNA specification alignment, and automated quality gate enforcement.
+
+### Added
+
+- **Automated Protocol Conformance Suite (`PC-01` .. `PC-26`):**
+  - Added dedicated integration test suite [`crates/phairdlna-core/tests/protocol_conformance.rs`](crates/phairdlna-core/tests/protocol_conformance.rs) implementing mandatory UPnP Device Architecture and AV checks per `INTEROPERABILITY-MATRIX.md`.
+  - Automated verification for SSDP discovery matching & USN formats (`PC-01`, `PC-04`), missing MX header rejection (`PC-02`), device description schema conformance (`PC-06`), ContentDirectory and ConnectionManager SCPD validity (`PC-07`).
+  - Automated verification for SOAP Browse response parameters (`PC-08`, `PC-09`), NoSuchObjectID 701 error handling (`PC-10`), standard capability boundaries (`PC-11`, `PC-12`), GetProtocolInfo MIME alignment (`PC-13`, `PC-22`), DIDL-Lite double-escaping (`PC-15`), and graceful fault handling without panics (`PC-24`, `PC-25`).
+- **Roadmap & Navigation Integrity:**
+  - Registered `protocol_conformance.rs` in `WHERE_TO_CHANGE.md`.
+  - All 11 local quality gates (`./scripts/local-ci.sh`) fully passed.
+
+---
+
 ## [0.1.0-alpha.5] - 2026-11-27
 
 Fifth Alpha Release of PhairDLNA — incremental rescan verification, battery/energy platform telemetry for adaptive resource scheduling, and local-ci hardening.

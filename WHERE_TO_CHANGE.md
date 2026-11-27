@@ -41,6 +41,7 @@
 | `crates/phairdlna-core/src/xml/` | The one XML writer of the project — the escaping, the length rules and the writer | F-02, F-05 |
 | `crates/phairdlna-core/src/platform/` | The capability traits, the path model, the portable filesystem adapter, the native filesystem change watcher (`fs_watcher.rs`, `change.rs`), the memory of the process (`memory.rs`) and the default implementation | F-08, F-09, F-13, F-14, F-15 |
 | `crates/phairdlna-core/tests/catalogue_incremental.rs` | Acceptance test for incremental rescan verifying unchanged files are not re-read (PERF-003) | F-09, F-21 |
+| `crates/phairdlna-core/tests/protocol_conformance.rs` | Acceptance test suite for protocol conformance checks (PC-01 .. PC-26) | F-01, F-02, F-03, F-05, F-07 |
 | `crates/phairdlna-core/tests/platform_matrix.rs` | Acceptance tests for build matrix coverage and platform targets | F-22 |
 | `crates/phairdlna-core/tests/parser_fuzz_bounds.rs` | Parser robustness, SSDP datagram fuzzing, boundary limits and path containment tests | F-16 |
 | `crates/phairdlna-core/tests/offline_volume.rs` | Offline media root non-destructive handling and availability reporting | F-18 |
