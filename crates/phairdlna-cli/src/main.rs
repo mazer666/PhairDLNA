@@ -35,6 +35,7 @@ Commands:
   service stop             Stop the service
   diagnostics              Write the report for a support ticket
   setup                    Ask the questions of the first run and write the configuration
+  describe                 Print the device description and SSDP headers (OPS-005)
 
 Options:
   --config <path>          The configuration file to use
@@ -197,6 +198,13 @@ fn command_from(rest: &[&str], options: Options) -> Result<Command, String> {
             Ok(Command::Setup {
                 path: options.config,
                 force: options.force,
+            })
+        }
+        Some("describe") => {
+            check_no_service_options(&options)?;
+            check_no_diagnostics_options(&options)?;
+            Ok(Command::Describe {
+                path: options.config,
             })
         }
         Some(other) => Err(format!("unknown command \"{other}\"")),

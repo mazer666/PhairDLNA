@@ -61,6 +61,8 @@
 | `crates/phairdlna-core/src/config/` | The typed, validated, versioned configuration | F-12 |
 | `crates/phairdlna-core/src/scheduler/` | The one scheduler of the server — the priority classes, the bounds of the workers and of the queues, the hysteresis of the pressure and the report of the resources | F-18 |
 | `crates/phairdlna-cli/src/lib.rs` | The commands, as pure functions over their arguments | F-13 |
+| `crates/phairdlna-cli/src/describe.rs` | Device description and SSDP header inspection command offline (`OPS-005`, `INT-015`) | F-01, F-02, F-13 |
+| `crates/phairdlna-cli/tests/cli_diagnostics.rs` | Acceptance tests for offline device description and SSDP header blocks | F-01, F-13 |
 | `crates/phairdlna-cli/src/ssdp_cmd.rs` | SSDP CLI command handlers: headers inspection and stored M-SEARCH replay diagnostics | F-01, F-07 |
 | `crates/phairdlna-cli/src/setup.rs`, `crates/phairdlna-cli/src/setup/` | First-run orchestration, prompts, configuration validation and writing, plus user-facing setup guidance | F-13 |
 | `crates/phairdlna-core/src/catalogue/index/` | The index of the catalogue on disk — the schema of the database, the writing of a catalogue, the reading of it back and the recovery from a damaged file | F-09 |

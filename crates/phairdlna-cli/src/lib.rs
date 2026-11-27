@@ -8,6 +8,7 @@
 //!      configuration file, or says that it is valid.
 
 mod catalogue;
+pub mod describe;
 pub mod diagnostics;
 pub mod explain;
 pub mod serve;
@@ -117,6 +118,11 @@ pub enum Command {
         /// Whether a configuration that is already there may be replaced.
         force: bool,
     },
+    /// Print the device description and the SSDP headers it would advertise (`OPS-005`, `INT-015`).
+    Describe {
+        /// The configuration file to read.
+        path: Option<PathBuf>,
+    },
 }
 
 /// The exit code of a command that failed (`OPS-014`).
@@ -208,6 +214,7 @@ pub fn run(command: &Command) -> Outcome {
             json: *json,
         }),
         Command::Setup { path, force } => setup::run(path.as_deref(), *force),
+        Command::Describe { path } => describe::describe(path.as_deref()),
     }
 }
 

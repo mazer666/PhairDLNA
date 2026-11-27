@@ -191,6 +191,11 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "`crates/phairdlna-core/src/identity.rs::tests::the_identity_survives_a_restart`",
         "Verified",
     ),
+    "INT-015": (
+        "`crates/phairdlna-cli/tests/cli_diagnostics.rs::describe_prints_xml_and_headers`"
+        " — describe prints UPnP device description XML and SSDP headers without opening a socket",
+        "Verified",
+    ),
     "INT-016": (
         "`crates/phairdlna-cli/src/serve/ssdp.rs`"
         " — the daemon sets the time to live of the advertisements to 2; the value is not observed on the wire",
@@ -607,6 +612,11 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     "OPS-001": (
         "`crates/phairdlna-cli/tests/serve_command.rs::the_server_answers_a_client`"
         " — the command starts the daemon in the foreground, and the daemon answers a client on the network",
+        "Verified",
+    ),
+    "OPS-005": (
+        "`crates/phairdlna-cli/tests/cli_diagnostics.rs::describe_prints_xml_and_headers`"
+        " — describe outputs the device description and the SSDP headers it would advertise offline",
         "Verified",
     ),
     "OPS-006": (

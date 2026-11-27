@@ -112,7 +112,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-012` | Expose the configured `friendlyName`, `manufacturer`, `modelName` and `UDN` in the SSDP… | MUST | `F-01` | M1 | Protocol conformance test | Implemented |
 | `INT-013` | Answer `M-SEARCH` only when the `MAN` header contains the quoted token `ssdp:discover` | SHOULD | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-014` | Use a stable `UDN` across restarts for the same installation unless the user resets the… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
-| `INT-015` | Provide a CLI switch to print the exact SSDP headers it would send | SHOULD | `F-01` | M1 | Protocol conformance test | Baseline |
+| `INT-015` | Provide a CLI switch to print the exact SSDP headers it would send | SHOULD | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-016` | Set the multicast time-to-live of its advertisements to 2 | MUST | `F-01` | M1 | Protocol conformance test | Implemented |
 | `INT-017` | Answer `M-SEARCH` for the device type `urn:schemas-upnp-org:device:MediaServer:1` in addition… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-018` | Not rely on mDNS for discovery; SSDP is the DLNA discovery mechanism and no mDNS advertisement… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
@@ -299,7 +299,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `OPS-002` | Provide a command that reports the current status: version | MUST | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-003` | Provide a command that scans a root on demand and reports progress and errors. | MUST | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-004` | Provide a command that lists the known network interfaces and which ones would be used for… | MUST | `F-13` | M1 | Automated CLI test | Baseline |
-| `OPS-005` | Provide a command that prints the device description and the SSDP headers it would advertise | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-005` | Provide a command that prints the device description and the SSDP headers it would advertise | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-006` | Write logs with a timestamp, a level, a component and a structured message. | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-007` | Log output shall be redactable: file system paths | MUST | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-008` | Shut down gracefully on `SIGINT` and `SIGTERM` | MUST | `F-13` | M1 | Automated CLI test | Implemented |
