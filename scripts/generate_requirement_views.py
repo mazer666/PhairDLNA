@@ -661,6 +661,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "`crates/phairdlna-core/src/ssdp/request.rs::tests::the_server_header_names_the_platform`",
         "Verified",
     ),
+    "OPS-013": (
+        "`crates/phairdlna-cli/tests/cli_diagnostics.rs::diagnostics_produces_redacted_report`,"
+        " `::diagnostics_supports_json_and_export_file`"
+        " — diagnostics outputs structured report with automatic redaction, JSON rendering and file export",
+        "Verified",
+    ),
     "OPS-014": (
         "`crates/phairdlna-cli/tests/cli_lifecycle.rs::ops_014_exit_code_scheme`"
         " — distinct exit codes for configuration error, runtime failure and nothing to do",

@@ -80,3 +80,57 @@ fn describe_fails_on_broken_config() {
     assert_eq!(outcome.exit_code, 1);
     assert!(outcome.stdout.contains("not usable"));
 }
+
+/// OPS-013 & AC-16: Diagnostics command produces structured report with redaction by default.
+#[test]
+fn diagnostics_produces_redacted_report() {
+    let toml = r#"
+schema_version = 1
+
+[server]
+device_name = "Living Room Server"
+
+[[library.roots]]
+name = "Personal Movies"
+path = "/Users/secretuser/Movies/PrivateCollection"
+"#;
+    let path = write_config(toml);
+    let outcome = run(&Command::Diagnostics {
+        path: Some(path.clone()),
+        unredacted: false,
+        export: None,
+        json: false,
+    });
+    assert_eq!(outcome.exit_code, 0, "{}", outcome.stdout);
+    assert!(outcome.stdout.contains("PhairDLNA"));
+    // Real path is redacted by default (OPS-013, SEC-094)
+    assert!(!outcome
+        .stdout
+        .contains("/Users/secretuser/Movies/PrivateCollection"));
+    assert!(outcome.stdout.contains("<path:"));
+}
+
+/// OPS-013: Diagnostics command supports JSON and export to file.
+#[test]
+fn diagnostics_supports_json_and_export_file() {
+    let toml = r#"
+schema_version = 1
+
+[server]
+device_name = "JSON Server"
+"#;
+    let path = write_config(toml);
+    let export_dir = tempfile::tempdir().expect("tempdir");
+    let export_file = export_dir.path().join("report.json");
+
+    let outcome = run(&Command::Diagnostics {
+        path: Some(path),
+        unredacted: false,
+        export: Some(export_file.clone()),
+        json: true,
+    });
+    assert_eq!(outcome.exit_code, 0, "{}", outcome.stdout);
+    assert!(export_file.exists());
+    let content = fs::read_to_string(&export_file).expect("read export");
+    assert!(content.contains("\"version\""));
+}
