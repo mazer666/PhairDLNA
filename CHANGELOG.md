@@ -5,6 +5,30 @@ All notable changes to PhairDLNA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0-alpha.4] - 2026-11-27
+
+Fourth Alpha Release of PhairDLNA — native filesystem change monitoring (FSEvents/inotify), enhanced folder toolbar ergonomics with Finder integration, hardened discovery/interop suite, and cross-platform CI fixes.
+
+### Added
+
+- **Native Filesystem Change Monitoring (`FUN-025`):**
+  - Continuous media folder watching via OS-native backends (FSEvents on macOS, inotify on Linux via `notify 8.2.2`).
+  - Event burst coalescing and 500ms debounce to prevent redundant scan floods during large file copies.
+  - Automatic background catalog refresh when media files are added, modified, or removed, without manual rescan.
+  - Integration tests verifying rapid visibility of added media files within seconds.
+- **Enhanced macOS Folder Management & Ergonomics (`UX-020`):**
+  - "Im Finder zeigen" ("Reveal in Finder") action with SF Symbol `folder` allowing instant navigation to shared media folders.
+  - Responsive 2x2 folder toolbar layout separating addition, removal, reveal, and rescan operations.
+  - Deduplicated rescan dispatch ensuring single trigger invocation.
+- **Hardened Interoperability Verification (`INT-001`..`INT-003`, `PC-01`..`PC-08`):**
+  - End-to-end device interop script (`scripts/run-device-interop-test.sh`) updated with genuine UDP multicast SSDP M-SEARCH probing.
+  - Hierarchical ContentDirectory Service (CDS) browse verifying media resource URL extraction and byte-range delivery.
+- **Cross-Platform & CI Hardening:**
+  - Linux service dry-run test aligned with `phairdlna.service` systemd unit naming.
+  - Non-macOS target clippy warning cleanups for auxiliary configuration helpers.
+
+---
+
 ## [0.1.0-alpha.3] - 2026-11-26
 
 Third Alpha Release of PhairDLNA — responsive 2-column landscape grid, card-based dashboard containers, interactive folder confirmation dialog, library rescan action, and Milestone 4 hardening completion.
