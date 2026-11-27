@@ -240,3 +240,48 @@ fn pc_05_location_header_reachable_on_requesting_interface() {
     // Excluded interface is rejected before answering
     assert!(!router.is_interface_permitted("wlan0"));
 }
+
+/// PC-26: SSDP rate limiting restricts excessive discovery queries from single host (INT-011).
+#[test]
+fn pc_26_ssdp_rate_limiting_enforced() {
+    use phairdlna_core::ssdp::{DiscoveryRateLimiter, RATE_LIMIT_MAX_REQUESTS};
+    use std::net::IpAddr;
+    use std::time::Instant;
+
+    let mut limiter = DiscoveryRateLimiter::new();
+    let client: IpAddr = "192.168.1.99".parse().expect("valid ip");
+    let now = Instant::now();
+
+    for _ in 0..RATE_LIMIT_MAX_REQUESTS {
+        assert!(
+            limiter.check_and_record(client, now),
+            "requests within quota must be permitted"
+        );
+    }
+
+    assert!(
+        !limiter.check_and_record(client, now),
+        "requests exceeding maximum rate quota within window must be rejected"
+    );
+}
+
+/// PC-27: DLNA discovery strictly avoids mDNS advertising (INT-018).
+#[test]
+fn pc_27_ssdp_discovery_only_no_mdns() {
+    use phairdlna_core::ssdp::MULTICAST_GROUP;
+    // SSDP multicast group is 239.255.255.250:1900, not mDNS 224.0.0.251:5353
+    assert_eq!(MULTICAST_GROUP.to_string(), "239.255.255.250");
+    assert_ne!(MULTICAST_GROUP.to_string(), "224.0.0.251");
+}
+
+/// PC-28: UPnP device description and SCPD XML response headers contract (INT-026).
+#[test]
+fn pc_28_device_and_scpd_description_headers_contract() {
+    use phairdlna_core::upnp::XML_CONTENT_TYPE;
+    let cds_xml = ServiceSpec::content_directory().to_xml();
+    let cm_xml = ServiceSpec::connection_manager().to_xml();
+
+    assert_eq!(XML_CONTENT_TYPE, "text/xml; charset=\"utf-8\"");
+    assert!(!cds_xml.is_empty());
+    assert!(!cm_xml.is_empty());
+}

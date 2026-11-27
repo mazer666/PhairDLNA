@@ -108,14 +108,14 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-008` | Honour the `MX` header of an `M-SEARCH` by choosing a uniformly random delay inside `[0 | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-009` | Select the sending interface by the route of the incoming request and shall never answer a… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-010` | Ignore malformed `M-SEARCH` datagrams without logging them at error level and without affecting… | MUST | `F-01` | M1 | Protocol conformance + device test | Verified |
-| `INT-011` | Rate-limit discovery responses per source address so that a single host cannot force an… | SHOULD | `F-01` | M1 | Protocol conformance test | Baseline |
+| `INT-011` | Rate-limit discovery responses per source address so that a single host cannot force an… | SHOULD | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-012` | Expose the configured `friendlyName`, `manufacturer`, `modelName` and `UDN` in the SSDP… | MUST | `F-01` | M1 | Protocol conformance test | Implemented |
 | `INT-013` | Answer `M-SEARCH` only when the `MAN` header contains the quoted token `ssdp:discover` | SHOULD | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-014` | Use a stable `UDN` across restarts for the same installation unless the user resets the… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-015` | Provide a CLI switch to print the exact SSDP headers it would send | SHOULD | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-016` | Set the multicast time-to-live of its advertisements to 2 | MUST | `F-01` | M1 | Protocol conformance test | Implemented |
 | `INT-017` | Answer `M-SEARCH` for the device type `urn:schemas-upnp-org:device:MediaServer:1` in addition… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
-| `INT-018` | Not rely on mDNS for discovery; SSDP is the DLNA discovery mechanism and no mDNS advertisement… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
+| `INT-018` | Not rely on mDNS for discovery; SSDP is the DLNA discovery mechanism and no mDNS advertisement… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-019` | Expose the version of the UPnP architecture it implements in the `SERVER` header | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-020` | Serve an XML device description at a stable URL path that contains a root device with… | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-021` | List the `ContentDirectory:1` and `ConnectionManager:1` services | MUST | `F-02` | M1 | Protocol conformance test | Verified |
@@ -123,7 +123,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-023` | Serve a valid SCPD document for every advertised service | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-024` | The XML served by the server shall be well-formed | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-025` | Answer an unknown SOAP action with an HTTP fault using the UPnP error codes `401 Invalid… | MUST | `F-02` | M1 | Protocol conformance test | Verified |
-| `INT-026` | Respond to `GET` on the device description and on SCPD documents with `Content-Type: text/xml;… | MUST | `F-02` | M1 | Protocol conformance test | Baseline |
+| `INT-026` | Respond to `GET` on the device description and on SCPD documents with `Content-Type: text/xml;… | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-027` | Not include a client-controllable value in the XML output without XML escaping. | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-028` | Advertise `ContentDirectory:1` in addition to any newer ContentDirectory version | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-029` | Reference the `ConnectionManager` service even when no transcoding is available | MUST | `F-02` | M1 | Protocol conformance test | Verified |

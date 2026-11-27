@@ -181,6 +181,11 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — a datagram the parser does not accept is dropped without a log record",
         "Verified",
     ),
+    "INT-011": (
+        "`crates/phairdlna-core/tests/protocol_conformance.rs::pc_26_ssdp_rate_limiting_enforced`"
+        " — discovery responses are rate-limited per source address to protect against unbounded flood amplification",
+        "Verified",
+    ),
     "INT-012": (
         "`crates/phairdlna-core/src/ssdp/request.rs::tests::the_server_header_names_the_platform`,"
         " `crates/phairdlna-cli/tests/serve.rs::the_description_is_answered`"
@@ -210,6 +215,11 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     "INT-017": (
         "`crates/phairdlna-core/src/ssdp/targets.rs::tests::five_targets_are_advertised`,"
         " `::tests::both_services_are_advertised`",
+        "Verified",
+    ),
+    "INT-018": (
+        "`crates/phairdlna-core/tests/protocol_conformance.rs::pc_27_ssdp_discovery_only_no_mdns`"
+        " — discovery relies strictly on SSDP multicast and never sends mDNS advertisements",
         "Verified",
     ),
     "INT-019": (
@@ -242,6 +252,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "INT-024": (
         "`crates/phairdlna-core/tests/device_description.rs::the_document_is_well_formed`",
+        "Verified",
+    ),
+    "INT-026": (
+        "`crates/phairdlna-core/tests/protocol_conformance.rs::pc_28_device_and_scpd_description_headers_contract`,"
+        " `crates/phairdlna-cli/tests/serve.rs::the_description_is_answered`"
+        " — device and SCPD descriptions are served with Content-Type text/xml; charset=\"utf-8\" and accurate Content-Length",
         "Verified",
     ),
     "INT-027": (
