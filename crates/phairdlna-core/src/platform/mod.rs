@@ -21,6 +21,7 @@ mod change;
 mod fs_watcher;
 mod local;
 mod memory;
+pub mod network;
 mod path;
 mod traits;
 mod unsupported;
@@ -29,6 +30,7 @@ pub use change::{ChangeReliability, ChangeWatcher, FileChange};
 pub use fs_watcher::FsChangeWatcher;
 pub use local::{LocalFileSystem, LOCAL_VOLUME};
 pub use memory::{LocalProcessMemory, ProcessMemory};
+pub use network::{select_interfaces, InterfaceDecision, InterfaceRole};
 pub use path::{
     display_name, identity_of, identity_of_with, is_readable_folder, CaseSensitivity, FileId,
     MediaPath, VolumeFingerprint, VolumeId,

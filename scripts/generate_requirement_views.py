@@ -614,6 +614,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — the command starts the daemon in the foreground, and the daemon answers a client on the network",
         "Verified",
     ),
+    "OPS-004": (
+        "`crates/phairdlna-cli/tests/cli_interfaces.rs::default_configuration_evaluates_interfaces`,"
+        " `::interfaces_command_outputs_json`"
+        " — interfaces lists known network interfaces and evaluates discovery and media exposure with exclusion reasons",
+        "Verified",
+    ),
     "OPS-005": (
         "`crates/phairdlna-cli/tests/cli_diagnostics.rs::describe_prints_xml_and_headers`"
         " — describe outputs the device description and the SSDP headers it would advertise offline",

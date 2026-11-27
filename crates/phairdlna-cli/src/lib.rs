@@ -11,6 +11,7 @@ mod catalogue;
 pub mod describe;
 pub mod diagnostics;
 pub mod explain;
+pub mod interfaces;
 pub mod serve;
 pub mod service;
 pub mod setup;
@@ -123,6 +124,13 @@ pub enum Command {
         /// The configuration file to read.
         path: Option<PathBuf>,
     },
+    /// List the known network interfaces and their usage (`OPS-004`).
+    Interfaces {
+        /// The configuration file to read.
+        path: Option<PathBuf>,
+        /// Whether the output is formatted as JSON.
+        json: bool,
+    },
 }
 
 /// The exit code of a command that failed (`OPS-014`).
@@ -215,6 +223,7 @@ pub fn run(command: &Command) -> Outcome {
         }),
         Command::Setup { path, force } => setup::run(path.as_deref(), *force),
         Command::Describe { path } => describe::describe(path.as_deref()),
+        Command::Interfaces { path, json } => interfaces::interfaces(path.as_deref(), *json),
     }
 }
 

@@ -36,6 +36,7 @@ Commands:
   diagnostics              Write the report for a support ticket
   setup                    Ask the questions of the first run and write the configuration
   describe                 Print the device description and SSDP headers (OPS-005)
+  interfaces               List known network interfaces and their exposure (OPS-004)
 
 Options:
   --config <path>          The configuration file to use
@@ -205,6 +206,13 @@ fn command_from(rest: &[&str], options: Options) -> Result<Command, String> {
             check_no_diagnostics_options(&options)?;
             Ok(Command::Describe {
                 path: options.config,
+            })
+        }
+        Some("interfaces") => {
+            check_no_service_options(&options)?;
+            Ok(Command::Interfaces {
+                path: options.config,
+                json: options.json,
             })
         }
         Some(other) => Err(format!("unknown command \"{other}\"")),

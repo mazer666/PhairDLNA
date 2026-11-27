@@ -298,7 +298,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `OPS-001` | Provide a command that runs the daemon in the foreground with structured log output on standard… | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-002` | Provide a command that reports the current status: version | MUST | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-003` | Provide a command that scans a root on demand and reports progress and errors. | MUST | `F-13` | M1 | Automated CLI test | Baseline |
-| `OPS-004` | Provide a command that lists the known network interfaces and which ones would be used for… | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-004` | Provide a command that lists the known network interfaces and which ones would be used for… | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-005` | Provide a command that prints the device description and the SSDP headers it would advertise | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-006` | Write logs with a timestamp, a level, a component and a structured message. | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-007` | Log output shall be redactable: file system paths | MUST | `F-13` | M1 | Automated CLI test | Baseline |
