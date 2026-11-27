@@ -48,6 +48,7 @@
 | `crates/phairdlna-cli/tests/crash_recovery.rs` | Crash and corruption recovery tests verifying immutability of media originals | F-18 |
 | `crates/phairdlna-cli/tests/invalid_configuration.rs` | Atomic validation and rejection tests for invalid configurations | F-18 |
 | `crates/phairdlna-core/src/ssdp/` | The discovery protocol: parsing a search, matching targets, building bytes, and replaying stored M-SEARCH diagnostics requests (`replay.rs`) | F-01, F-07 |
+| `crates/phairdlna-core/src/ssdp/interfaces.rs` | The selection of the sending interface, per-interface LOCATION URLs and discovery rate limiting (`INT-006`, `INT-009`, `INT-011`) | F-01 |
 | `crates/phairdlna-core/src/identity.rs` | The persistent device identity | F-01, F-02 |
 | `crates/phairdlna-core/src/catalogue/` | The catalogue — the model of the items and containers, the scanner of a root, the opaque identifiers, the identity key of a file, the playlists (`playlist.rs`), the subtitle sidecars (`subtitle.rs`), the memory of the volumes of the roots, the assembly of the tree, the sniffer of a file, the registry of the formats the server serves and the index of the catalogue on disk (`index/`) | F-05, F-08, F-09, F-11 |
 | `crates/phairdlna-core/src/media/` | The pictures of the library — the discovery of the artwork of a media file (`artwork/`), the pictures that are embedded in it (`id3/`, `mp4/`), the images that lie next to it (`sidecar.rs`), the thumbnail of a photo (`thumbnail.rs`) and the disposable cache of the pictures that were produced (`cache.rs`) | F-10 |
@@ -190,7 +191,6 @@ belongs.
 
 | Planned path | Responsibility | Feature |
 | --- | --- | --- |
-| `crates/phairdlna-core/src/ssdp/interfaces.rs` | The selection of the sending interface and the rate limiter of the answers | F-01 |
 | `crates/phairdlna-core/src/platform/` | Platform traits and per-OS implementations | F-08, F-13, F-15 |
 | `crates/phairdlna-core/src/lifecycle/` | Server states, sleep/wake and network recovery | F-13 |
 | `crates/phairdlna-core/src/logging/` | Structured logging and redaction | F-13, F-16 |

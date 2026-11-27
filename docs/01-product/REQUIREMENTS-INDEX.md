@@ -103,10 +103,10 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-003` | Send its SSDP response unicast to the address and port of the requester. | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-004` | Send periodic `NOTIFY` advertisements with `NT: upnp:rootdevice` and `NTS: ssdp:alive` | MUST | `F-01` | M1 | Protocol conformance + device test | Implemented |
 | `INT-005` | The `USN` header shall have the form `uuid:<UDN>::<target>` where `<target>` is… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
-| `INT-006` | The `LOCATION` header shall contain an absolute HTTP URL of the device description document… | MUST | `F-01` | M1 | Protocol conformance + device test | Implemented |
+| `INT-006` | The `LOCATION` header shall contain an absolute HTTP URL of the device description document… | MUST | `F-01` | M1 | Protocol conformance + device test | Verified |
 | `INT-007` | Bind SSDP to the IPv4 multicast group `239.255.255.250:1900` and shall support the IPv6… | MUST | `F-01` | M1 | Protocol conformance test | Implemented |
 | `INT-008` | Honour the `MX` header of an `M-SEARCH` by choosing a uniformly random delay inside `[0 | MUST | `F-01` | M1 | Protocol conformance test | Verified |
-| `INT-009` | Select the sending interface by the route of the incoming request and shall never answer a… | MUST | `F-01` | M1 | Protocol conformance test | Baseline |
+| `INT-009` | Select the sending interface by the route of the incoming request and shall never answer a… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-010` | Ignore malformed `M-SEARCH` datagrams without logging them at error level and without affecting… | MUST | `F-01` | M1 | Protocol conformance + device test | Verified |
 | `INT-011` | Rate-limit discovery responses per source address so that a single host cannot force an… | SHOULD | `F-01` | M1 | Protocol conformance test | Baseline |
 | `INT-012` | Expose the configured `friendlyName`, `manufacturer`, `modelName` and `UDN` in the SSDP… | MUST | `F-01` | M1 | Protocol conformance test | Implemented |

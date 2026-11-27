@@ -200,3 +200,43 @@ fn pc_24_and_25_fault_handling_without_panic() {
     let bad_req = dispatcher.dispatch(broken, None);
     assert_eq!(bad_req.status, 500);
 }
+
+/// PC-05: LOCATION header is generated reachable on the requesting interface (INT-006, INT-009).
+#[test]
+fn pc_05_location_header_reachable_on_requesting_interface() {
+    use phairdlna_core::config::Config;
+    use phairdlna_core::platform::{LocalNetworkStatus, NetworkInterface};
+    use phairdlna_core::ssdp::InterfaceRouter;
+    use std::net::{IpAddr, Ipv4Addr};
+
+    let mut config = Config::default();
+    config.server.http_port = 8200;
+    config.network.interfaces = vec!["eth0".to_owned()];
+
+    let ifaces = vec![
+        NetworkInterface {
+            name: "eth0".to_owned(),
+            addresses: vec![IpAddr::V4(Ipv4Addr::new(192, 168, 1, 150))],
+            supports_multicast: true,
+            is_local: true,
+        },
+        NetworkInterface {
+            name: "wlan0".to_owned(),
+            addresses: vec![IpAddr::V4(Ipv4Addr::new(10, 0, 0, 75))],
+            supports_multicast: true,
+            is_local: true,
+        },
+    ];
+
+    let router = InterfaceRouter::new(&ifaces, &config, LocalNetworkStatus::Permitted);
+
+    // Permitted interface gets location on its own reachable IP
+    assert!(router.is_interface_permitted("eth0"));
+    assert_eq!(
+        router.location_for("192.168.1.150"),
+        "http://192.168.1.150:8200/description.xml"
+    );
+
+    // Excluded interface is rejected before answering
+    assert!(!router.is_interface_permitted("wlan0"));
+}

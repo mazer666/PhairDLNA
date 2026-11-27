@@ -20,6 +20,7 @@
 //! ```
 
 mod constants;
+pub mod interfaces;
 mod replay;
 mod request;
 mod targets;
@@ -29,6 +30,9 @@ pub use constants::{
     DEVICE_TYPE_MEDIA_SERVER, MAN_DISCOVER, MAX_MX_SECONDS, METHOD_NOTIFY, METHOD_SEARCH,
     MIN_MX_SECONDS, MULTICAST_GROUP, MULTICAST_GROUP_V6, MULTICAST_TTL, NTS_ALIVE, NTS_BYEBYE,
     NT_ALL, NT_ROOT_DEVICE, PORT, SERVICE_TYPE_CONNECTION_MANAGER, SERVICE_TYPE_CONTENT_DIRECTORY,
+};
+pub use interfaces::{
+    DiscoveryRateLimiter, InterfaceRouter, RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_SECS,
 };
 pub use replay::{replay_datagram, replay_path, FileReplayOutcome, ReplayResult};
 pub use request::{

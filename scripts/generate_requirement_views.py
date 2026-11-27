@@ -154,10 +154,10 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "Verified",
     ),
     "INT-006": (
-        "`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`"
-        " — the answer names the description of the server; the address of the interface the request arrived on"
-        " is not chosen, the daemon has one address",
-        "Implemented",
+        "`crates/phairdlna-core/tests/protocol_conformance.rs::pc_05_location_header_reachable_on_requesting_interface`,"
+        " `crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`"
+        " — LOCATION header URL is generated per reachable request interface address (INT-006, PC-05)",
+        "Verified",
     ),
     "INT-007": (
         "`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`"
@@ -167,6 +167,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     "INT-008": (
         "`crates/phairdlna-core/src/ssdp/request.rs::tests::a_search_without_mx_is_ignored`,"
         " `::tests::an_out_of_range_mx_is_ignored`, `::tests::the_reply_delay_stays_inside_the_window`",
+        "Verified",
+    ),
+    "INT-009": (
+        "`crates/phairdlna-core/tests/protocol_conformance.rs::pc_05_location_header_reachable_on_requesting_interface`,"
+        " `crates/phairdlna-core/src/ssdp/interfaces.rs::tests::excluded_interface_is_rejected`"
+        " — interface routing filters out requests arriving on configuration-excluded interfaces before responding",
         "Verified",
     ),
     "INT-010": (
