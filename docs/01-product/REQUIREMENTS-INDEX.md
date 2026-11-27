@@ -301,7 +301,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `OPS-004` | Provide a command that lists the known network interfaces and which ones would be used for… | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-005` | Provide a command that prints the device description and the SSDP headers it would advertise | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-006` | Write logs with a timestamp, a level, a component and a structured message. | MUST | `F-13` | M1 | Automated CLI test | Verified |
-| `OPS-007` | Log output shall be redactable: file system paths | MUST | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-007` | Log output shall be redactable: file system paths | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-008` | Shut down gracefully on `SIGINT` and `SIGTERM` | MUST | `F-13` | M1 | Automated CLI test | Implemented |
 | `OPS-009` | Support running as a background service on macOS (launchd) | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-010` | Support a configuration file that sets the service identity | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |

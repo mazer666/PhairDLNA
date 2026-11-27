@@ -68,6 +68,7 @@
 | `crates/phairdlna-cli/src/scan.rs` | On-demand library scan command via surface or in-process (`OPS-003`) | F-09, F-13 |
 | `crates/phairdlna-cli/tests/cli_commands.rs` | Acceptance tests for status and scan CLI commands (`OPS-002`, `OPS-003`, `OPS-014`) | F-13, F-14 |
 | `crates/phairdlna-cli/tests/cli_interfaces.rs` | Acceptance tests for network interfaces inspection command | F-12, F-13 |
+| `crates/phairdlna-cli/tests/cli_logging.rs` | Acceptance tests for structured logging and pseudonym redaction (`OPS-006`, `OPS-007`) | F-13, F-16 |
 | `crates/phairdlna-cli/tests/cli_lifecycle.rs` | Acceptance tests for CLI lifecycle, help, version and exit code scheme (`OPS-011`, `OPS-014`) | F-13 |
 | `crates/phairdlna-cli/tests/cli_diagnostics.rs` | Acceptance tests for offline device description and SSDP header blocks | F-01, F-13 |
 | `crates/phairdlna-cli/src/ssdp_cmd.rs` | SSDP CLI command handlers: headers inspection and stored M-SEARCH replay diagnostics | F-01, F-07 |

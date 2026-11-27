@@ -645,8 +645,14 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "OPS-006": (
         "`crates/phairdlna-cli/src/serve/log.rs::tests::a_known_moment_is_read_correctly`,"
-        " `::tests::the_level_has_a_name`"
+        " `::tests::the_level_has_a_name`,"
+        " `crates/phairdlna-cli/tests/cli_logging.rs::log_record_carries_timestamp_level_component_and_fields`"
         " — a record carries a timestamp, a level, a component and a message with named fields",
+        "Verified",
+    ),
+    "OPS-007": (
+        "`crates/phairdlna-cli/tests/cli_logging.rs::log_record_redacts_paths_addresses_and_device_identifiers`"
+        " — log output pseudonymizes filesystem paths, client IP addresses and UDN device identifiers consistently",
         "Verified",
     ),
     "OPS-008": (
