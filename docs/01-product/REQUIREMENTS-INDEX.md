@@ -113,7 +113,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-013` | Answer `M-SEARCH` only when the `MAN` header contains the quoted token `ssdp:discover` | SHOULD | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-014` | Use a stable `UDN` across restarts for the same installation unless the user resets the… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-015` | Provide a CLI switch to print the exact SSDP headers it would send | SHOULD | `F-01` | M1 | Protocol conformance test | Verified |
-| `INT-016` | Set the multicast time-to-live of its advertisements to 2 | MUST | `F-01` | M1 | Protocol conformance test | Implemented |
+| `INT-016` | Set the multicast time-to-live of its advertisements to 2 | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-017` | Answer `M-SEARCH` for the device type `urn:schemas-upnp-org:device:MediaServer:1` in addition… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-018` | Not rely on mDNS for discovery; SSDP is the DLNA discovery mechanism and no mDNS advertisement… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-019` | Expose the version of the UPnP architecture it implements in the `SERVER` header | MUST | `F-01` | M1 | Protocol conformance test | Verified |
@@ -219,17 +219,17 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SEC-010` | Not process a DTD, shall not resolve external entities and shall bound the nesting depth and… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-011` | Bound the size of every accepted HTTP request line | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-012` | Bound the number of concurrent connections and the number of concurrent transfers. | MUST | `F-16` | M1 | Negative security test | Verified |
-| `SEC-013` | Answer an unauthenticated or malformed request with a generic error that reveals no internal… | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-014` | Not follow a redirect to a non-local address, and shall reject a callback URL that is not a… | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-015` | Validate and normalise every URL path segment it accepts | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-013` | Answer an unauthenticated or malformed request with a generic error that reveals no internal… | MUST | `F-16` | M1 | Negative security test | Verified |
+| `SEC-014` | Not follow a redirect to a non-local address, and shall reject a callback URL that is not a… | MUST | `F-16` | M1 | Negative security test | Verified |
+| `SEC-015` | Validate and normalise every URL path segment it accepts | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-016` | Enforce a read and write timeout on every connection. | MUST | `F-16` | M1 | Negative security test | Verified |
-| `SEC-017` | Never bind a non-loopback port other than the media port without an explicit configuration… | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-018` | Treat an SSDP or SOAP peer as untrusted and shall perform no action on its behalf other than… | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-017` | Never bind a non-loopback port other than the media port without an explicit configuration… | MUST | `F-16` | M1 | Negative security test | Verified |
+| `SEC-018` | Treat an SSDP or SOAP peer as untrusted and shall perform no action on its behalf other than… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-060` | Every parser in the server shall have an explicit input size bound and a documented failure… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-061` | Bound the number of entries in a single DIDL-Lite response and the size of the generated XML… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-062` | Run metadata extraction with a time limit per file and shall abandon a file that exceeds it. | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-063` | Bound the number of open file descriptors used by transfers and shall release them on… | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-064` | Bound the size of its on-disk cache and shall evict entries when the limit is exceeded. | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-063` | Bound the number of open file descriptors used by transfers and shall release them on… | MUST | `F-16` | M1 | Negative security test | Verified |
+| `SEC-064` | Bound the size of its on-disk cache and shall evict entries when the limit is exceeded. | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-065` | Never allocate memory proportional to a client-supplied length field without validating it… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-066` | Parse media metadata and generate thumbnails in a separate | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-067` | Bound the declared dimensions of an image before allocating any buffer for it | MUST | `F-16` | M1 | Negative security test | Verified |
@@ -238,13 +238,13 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SEC-070` | Offer the corresponding source of the running build | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-071` | Accept only a `Host` header that matches a configured local host name | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-072` | Require a custom, non-standard request header on every state-changing administration request,… | MUST | `F-16` | M1 | Negative security test | Verified |
-| `SEC-090` | Contain no telemetry, no analytics and no crash reporting to any third party. | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-091` | Make no outbound network connection other than the SSDP multicast announcements and responses | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-092` | Not attempt to configure the user's router, and shall not speak the UPnP Internet Gateway… | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-093` | Store no personal data beyond local configuration | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-094` | Logs and diagnostics shall be redactable, and the redaction shall apply to file system paths,… | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-095` | Be a local file with user-only permissions, and the server shall not create it inside a shared… | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-096` | Ship no third-party service, no advertising identifier and no device fingerprint. | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-090` | Contain no telemetry, no analytics and no crash reporting to any third party. | MUST | `F-16` | M1 | Negative security test | Verified |
+| `SEC-091` | Make no outbound network connection other than the SSDP multicast announcements and responses | MUST | `F-16` | M1 | Negative security test | Verified |
+| `SEC-092` | Not attempt to configure the user's router, and shall not speak the UPnP Internet Gateway… | MUST | `F-16` | M1 | Negative security test | Verified |
+| `SEC-093` | Store no personal data beyond local configuration | MUST | `F-16` | M1 | Negative security test | Verified |
+| `SEC-094` | Logs and diagnostics shall be redactable, and the redaction shall apply to file system paths,… | MUST | `F-16` | M1 | Negative security test | Verified |
+| `SEC-095` | Be a local file with user-only permissions, and the server shall not create it inside a shared… | MUST | `F-16` | M1 | Negative security test | Verified |
+| `SEC-096` | Ship no third-party service, no advertising identifier and no device fingerprint. | MUST | `F-16` | M1 | Negative security test | Verified |
 
 ## PERF — Performance and resources
 

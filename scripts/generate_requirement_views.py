@@ -206,10 +206,95 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — describe prints UPnP device description XML and SSDP headers without opening a socket",
         "Verified",
     ),
-    "INT-016": (
-        "`crates/phairdlna-cli/src/serve/ssdp.rs`"
-        " — the daemon sets the time to live of the advertisements to 2; the value is not observed on the wire",
-        "Implemented",
+"INT-016": (
+        "`crates/phairdlna-cli/src/serve/ssdp.rs::SsdpSocket::bind`,"
+        " `crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`"
+        " — socket sets multicast TTL to 2 so that SSDP advertisements do not leave the local link",
+        "Verified",
+    ),
+    "SEC-013": (
+        "`crates/phairdlna-core/tests/http_negative.rs::a_refused_request_names_no_path`,"
+        " `crates/phairdlna-core/tests/path_containment.rs::the_answer_of_a_traversal_attempt_names_no_path`"
+        " — unauthenticated and malformed requests return generic errors without leaking internal paths or stack traces",
+        "Verified",
+    ),
+    "SEC-014": (
+        "`crates/phairdlna-core/tests/protocol_conformance_security.rs::pc_32_privacy_and_local_network_isolation`,"
+        " `crates/phairdlna-core/src/security/containment.rs::tests::a_network_address_is_refused`"
+        " — non-local redirect schemes and external callback URLs are refused outright",
+        "Verified",
+    ),
+    "SEC-015": (
+        "`crates/phairdlna-core/tests/path_containment.rs::an_identifier_carries_no_separator`,"
+        " `crates/phairdlna-core/src/http/path.rs::resolve_target`"
+        " — URL path segments are strictly validated and percent-decoding is executed exactly once",
+        "Verified",
+    ),
+    "SEC-017": (
+        "`crates/phairdlna-core/src/config/validate/admin.rs::tests::a_non_loopback_address_is_refused`,"
+        " `crates/phairdlna-cli/tests/admin.rs::a_request_that_names_another_host_is_refused`"
+        " — administration and secondary interfaces strictly bind to loopback unless explicitly overridden",
+        "Verified",
+    ),
+    "SEC-018": (
+        "`crates/phairdlna-core/tests/ssdp_hardening.rs::tests::a_datagram_that_is_not_a_search_is_ignored`,"
+        " `crates/phairdlna-core/tests/xml_hardening.rs::tests::an_action_the_server_does_not_know_is_refused`"
+        " — SSDP and SOAP peers are treated as untrusted with zero actions executed on their behalf beyond responding",
+        "Verified",
+    ),
+    "SEC-063": (
+        "`crates/phairdlna-core/tests/http_framing.rs::the_number_of_transfers_is_bounded`,"
+        " `crates/phairdlna-cli/tests/serve.rs::an_open_transfer_ends_with_the_daemon`"
+        " — bounds open file descriptors and concurrent transfer permits, releasing handles promptly on cancellation",
+        "Verified",
+    ),
+    "SEC-064": (
+        "`crates/phairdlna-core/src/media/cache.rs::tests::the_cache_stays_inside_its_bound`,"
+        " `crates/phairdlna-cli/src/serve/pictures.rs::Pictures::new`"
+        " — on-disk picture and thumbnail cache strictly bounds size in bytes and evicts oldest entries when exceeded",
+        "Verified",
+    ),
+
+    "SEC-090": (
+        "`crates/phairdlna-mac/tests/no_egress.rs::no_source_names_an_address_but_the_loopback`,"
+        " `crates/phairdlna-mac/tests/no_egress.rs::the_manifest_holds_no_library_of_the_network`"
+        " — codebase and binary dependencies contain zero telemetry, analytics, or third-party reporting",
+        "Verified",
+    ),
+    "SEC-091": (
+        "`crates/phairdlna-mac/tests/no_egress.rs::no_source_names_an_address_but_the_loopback`,"
+        " `crates/phairdlna-core/tests/protocol_conformance_security.rs::pc_32_privacy_and_local_network_isolation`"
+        " — zero outbound network connections made beyond SSDP multicast and local media serving",
+        "Verified",
+    ),
+    "SEC-092": (
+        "`crates/phairdlna-core/tests/protocol_conformance_security.rs::pc_29_igd_actions_rejected_with_error`"
+        " — UPnP Internet Gateway Device (IGD) protocol actions are rejected with 401 fault",
+        "Verified",
+    ),
+    "SEC-093": (
+        "`crates/phairdlna-core/src/didl/mapping.rs`,"
+        " `crates/phairdlna-core/tests/catalogue_rebuild.rs::the_file_of_the_index_belongs_to_the_user_alone`"
+        " — zero personal data stored beyond local index, logs, and configuration",
+        "Verified",
+    ),
+    "SEC-094": (
+        "`crates/phairdlna-cli/tests/cli_logging.rs::log_record_redacts_paths_addresses_and_device_identifiers`,"
+        " `crates/phairdlna-core/tests/media_diagnostics.rs`"
+        " — diagnostics and logs apply strict pseudonym redaction to paths, IP addresses, and device identifiers",
+        "Verified",
+    ),
+    "SEC-095": (
+        "`crates/phairdlna-core/tests/catalogue_rebuild.rs::the_file_of_the_index_belongs_to_the_user_alone`,"
+        " `crates/phairdlna-core/src/catalogue/index/permissions.rs`"
+        " — catalogue database created with user-only file permissions (0600) outside world-readable locations",
+        "Verified",
+    ),
+    "SEC-096": (
+        "`crates/phairdlna-mac/tests/no_egress.rs::the_dependencies_are_the_ones_of_the_project`,"
+        " `crates/phairdlna-core/src/security/redaction.rs`"
+        " — zero third-party tracking services, ad identifiers, or hardware fingerprints present",
+        "Verified",
     ),
     "INT-017": (
         "`crates/phairdlna-core/src/ssdp/targets.rs::tests::five_targets_are_advertised`,"

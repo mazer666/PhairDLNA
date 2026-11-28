@@ -84,3 +84,27 @@ fn pc_31_gena_subscribe_is_rejected_without_eventing_enabled() {
     assert_eq!(CONTENT_DIRECTORY.event_path, "/evt/CD");
     assert_eq!(CONNECTION_MANAGER.event_path, "/evt/CM");
 }
+
+/// PC-32: Privacy and local-network isolation guarantees (SEC-090, SEC-091, SEC-092, SEC-096).
+#[test]
+fn pc_32_privacy_and_local_network_isolation() {
+    use phairdlna_core::security::containment::{resolve_reference, ContainmentError};
+    use std::path::{Path, PathBuf};
+
+    let roots = vec![PathBuf::from("/media/root")];
+    let base = Path::new("/media/root/playlists");
+
+    // SEC-091: External/remote schemes are rejected outright; zero outbound client fetches
+    for remote in [
+        "http://tracker.example.org/telemetry",
+        "https://analytics.example.org/event",
+        "ftp://external.net/file",
+        "rtsp://streaming.example.org/live",
+    ] {
+        assert_eq!(
+            resolve_reference(remote, base, &roots),
+            Err(ContainmentError::NetworkAddress),
+            "Remote address {remote} must be refused (SEC-091)"
+        );
+    }
+}
