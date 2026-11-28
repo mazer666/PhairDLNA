@@ -808,6 +808,35 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — the bytes come from the file, never from a conversion",
         "Verified",
     ),
+    "FUN-028": (
+        "`crates/phairdlna-core/tests/http_range.rs::an_offset_beyond_four_gigabytes_is_kept`"
+        " — 64-bit offsets and content ranges are preserved accurately across the 4 GiB boundary",
+        "Verified",
+    ),
+    "FUN-042": (
+        "`crates/phairdlna-cli/src/serve/guard/tests.rs::the_transfers_are_bounded`,"
+        " `crates/phairdlna-core/tests/http_framing.rs::the_number_of_transfers_is_bounded`"
+        " — supports multiple simultaneous direct-play streams bounded by configured limit",
+        "Verified",
+    ),
+    "FUN-043": (
+        "`crates/phairdlna-cli/src/serve/guard/tests.rs::the_transfers_are_bounded`,"
+        " `crates/phairdlna-core/tests/http_framing.rs::the_number_of_transfers_is_bounded`"
+        " — bounds concurrent transfers and refuses excess requests rather than exhausting host resources",
+        "Verified",
+    ),
+    "FUN-046": (
+        "`crates/phairdlna-cli/tests/serve.rs::an_open_transfer_ends_with_the_daemon`,"
+        " `crates/phairdlna-core/tests/http_media.rs::a_connection_is_kept_alive_unless_it_asks_to_close`"
+        " — transfers and associated permits are cleaned up safely when connections terminate",
+        "Verified",
+    ),
+    "FUN-050": (
+        "`crates/phairdlna-core/tests/http_framing.rs::a_body_that_is_too_large_is_refused`,"
+        " `crates/phairdlna-core/tests/resource_bounds.rs::a_document_that_grows_past_its_bound_is_not_written`"
+        " — buffer sizes and chunk windows remain strictly bounded to prevent memory exhaustion",
+        "Verified",
+    ),
     "FUN-041": (
         "`crates/phairdlna-core/tests/http_media.rs::the_type_of_the_answer_is_the_type_of_the_file`"
         " — the codec is part of the type and of the DLNA profile token",

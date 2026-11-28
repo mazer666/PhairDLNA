@@ -80,19 +80,19 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-025` | Make a newly added file visible in the catalogue within 30 seconds on a file system that… | SHOULD | `F-09` | M1 | Automated test | Implemented |
 | `FUN-026` | Offer a subtitle sidecar as an additional resource with the MIME type that matches its format | MUST | `F-11` | M2 | Automated test | Verified |
 | `FUN-027` | Deliver a subtitle file in a character set the client can read | MUST | `F-11` | M2 | Automated test | Implemented |
-| `FUN-028` | Serve a file larger than 4 GiB with correct byte offsets across the 4 GiB boundary and at the… | MUST | `F-06` | M1 | Automated test | Baseline |
+| `FUN-028` | Serve a file larger than 4 GiB with correct byte offsets across the 4 GiB boundary and at the… | MUST | `F-06` | M1 | Automated test | Verified |
 | `FUN-029` | Expose each additional audio or subtitle track of a media item as its own resource | MUST | `F-11` | M2 | Automated test | Implemented |
 | `FUN-040` | Serve media by byte range from the original file without transcoding whenever the client… | MUST | `F-06` | M1 | Automated test | Verified |
 | `FUN-041` | Report the container and codec of a file in a way a client can use to decide whether it can… | MUST | `F-06` | M1 | Automated test | Implemented |
-| `FUN-042` | Support multiple simultaneous direct-play streams | MUST | `F-06` | M1 | Automated test | Baseline |
-| `FUN-043` | Bound the number of concurrent transfers and shall refuse further transfers with a clear error… | MUST | `F-06` | M1 | Automated test | Baseline |
+| `FUN-042` | Support multiple simultaneous direct-play streams | MUST | `F-06` | M1 | Automated test | Verified |
+| `FUN-043` | Bound the number of concurrent transfers and shall refuse further transfers with a clear error… | MUST | `F-06` | M1 | Automated test | Verified |
 | `FUN-044` | Apply a per-stream bandwidth limit when configured | SHOULD | `F-06` | M1 | Automated test | Baseline |
 | `FUN-045` | Report the position and duration of the active transfer through the AVTransport service when… | SHOULD | `F-06` | M1 | Automated test | Baseline |
-| `FUN-046` | Cancel a transfer cleanly when the client closes the connection. | MUST | `F-06` | M1 | Automated test | Baseline |
+| `FUN-046` | Cancel a transfer cleanly when the client closes the connection. | MUST | `F-06` | M1 | Automated test | Verified |
 | `FUN-047` | Implement optional transcoding only when the user has explicitly enabled it and selected a… | COULD | `F-17` | M5 | Automated test | Baseline |
 | `FUN-048` | The transcoder, if enabled, shall run in a separate process with an explicit resource budget, a… | COULD | `F-17` | M5 | Automated test | Baseline |
 | `FUN-049` | Never silently fall back to transcoding; a file that cannot be played directly shall be… | MUST | `F-17` | M5 | Automated test | Baseline |
-| `FUN-050` | Keep the buffer size small and bounded so that a slow client cannot consume unbounded memory. | MUST | `F-06` | M1 | Automated test | Baseline |
+| `FUN-050` | Keep the buffer size small and bounded so that a slow client cannot consume unbounded memory. | MUST | `F-06` | M1 | Automated test | Verified |
 
 ## INT — Interoperability (DLNA / UPnP)
 
