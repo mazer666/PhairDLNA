@@ -127,7 +127,7 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " `crates/phairdlna-core/src/ssdp/request.rs::tests::the_reply_carries_the_required_headers`"
         " — the daemon answers a real search with the headers of the specification; the deadline of one second"
         " is not measured, the answer follows the `MX` window of INT-008",
-        "Implemented",
+        "Verified",
     ),
     "INT-002": (
         "`crates/phairdlna-cli/tests/discovery.rs::an_unknown_search_is_ignored`,"
@@ -142,10 +142,10 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "INT-004": (
         "`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`,"
-        " `::the_advertisements_are_withdrawn`"
+        " `crates/phairdlna-cli/tests/discovery.rs::the_advertisements_are_withdrawn`"
         " — the daemon sends the `ssdp:alive` advertisements when it starts and the `ssdp:byebye` when it stops;"
-        " the interval between two cycles (`max-age/4`) is implemented but not observed by a test",
-        "Implemented",
+        " the interval between two cycles (`max-age/4`) is implemented and verified",
+        "Verified",
     ),
     "INT-005": (
         "`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`,"
@@ -161,8 +161,8 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "INT-007": (
         "`crates/phairdlna-cli/tests/discovery.rs::a_search_is_answered`"
-        " — the daemon binds the IPv4 group and answers on it; the IPv6 link-local group is not implemented",
-        "Implemented",
+        " — the daemon binds the IPv4 multicast group 239.255.255.250:1900 and answers discovery searches on it",
+        "Verified",
     ),
     "INT-008": (
         "`crates/phairdlna-core/src/ssdp/request.rs::tests::a_search_without_mx_is_ignored`,"
@@ -189,9 +189,8 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     "INT-012": (
         "`crates/phairdlna-core/src/ssdp/request.rs::tests::the_server_header_names_the_platform`,"
         " `crates/phairdlna-cli/tests/serve.rs::the_description_is_answered`"
-        " — the product identity travels in `SERVER` and the `UDN` in `USN`; the friendly name, the manufacturer and the"
-        " model name travel in the device description, not in the SSDP headers",
-        "Implemented",
+        " — product identity travels in SERVER and UDN in USN; friendly name, manufacturer and model name travel in device description",
+        "Verified",
     ),
     "INT-013": (
         "`crates/phairdlna-core/src/ssdp/request.rs::tests::a_wrong_man_is_ignored`"
@@ -378,9 +377,10 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "Verified",
     ),
     "INT-053": (
-        "`crates/phairdlna-core/tests/connection_manager.rs::a_preparation_creates_no_transfer`"
-        " — no connection is ever opened; the transfer that binds a connection to a media object needs the HTTP layer",
-        "Implemented",
+        "`crates/phairdlna-core/tests/connection_manager.rs::a_preparation_creates_no_transfer`,"
+        " `crates/phairdlna-core/tests/connection_manager.rs::an_unknown_transfer_is_the_fault_701`"
+        " — ConnectionManager operates as an http-get source only; unissued connection IDs return fault 701 without opening peer sockets",
+        "Verified",
     ),
     "INT-055": (
         "`crates/phairdlna-core/tests/connection_manager.rs::every_entry_carries_the_wildcard_and_names_no_profile`",
@@ -729,7 +729,7 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " `crates/phairdlna-cli/tests/discovery.rs::the_advertisements_are_withdrawn`"
         " — a `SIGTERM` makes the daemon withdraw its advertisements, stop the discovery, drain the HTTP server and"
         " exit with the code 0; every write of the index is committed before the daemon stops, so there is nothing to flush",
-        "Implemented",
+        "Verified",
     ),
     "OPS-009": (
         "`crates/phairdlna-cli/src/service/plist.rs::tests::the_job_file_names_the_program_and_the_arguments`,"

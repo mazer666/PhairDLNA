@@ -98,18 +98,18 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `INT-001` | Answer `M-SEARCH` requests on UDP 1900 within at most 1 second and shall answer with `HTTP/1.1… | MUST | `F-01` | M1 | Protocol conformance + device test | Implemented |
+| `INT-001` | Answer `M-SEARCH` requests on UDP 1900 within at most 1 second and shall answer with `HTTP/1.1… | MUST | `F-01` | M1 | Protocol conformance + device test | Verified |
 | `INT-002` | Match `ST` against `ssdp:all`, `upnp:rootdevice`, the advertised MediaServer device type and… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-003` | Send its SSDP response unicast to the address and port of the requester. | MUST | `F-01` | M1 | Protocol conformance test | Verified |
-| `INT-004` | Send periodic `NOTIFY` advertisements with `NT: upnp:rootdevice` and `NTS: ssdp:alive` | MUST | `F-01` | M1 | Protocol conformance + device test | Implemented |
+| `INT-004` | Send periodic `NOTIFY` advertisements with `NT: upnp:rootdevice` and `NTS: ssdp:alive` | MUST | `F-01` | M1 | Protocol conformance + device test | Verified |
 | `INT-005` | The `USN` header shall have the form `uuid:<UDN>::<target>` where `<target>` is… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-006` | The `LOCATION` header shall contain an absolute HTTP URL of the device description document… | MUST | `F-01` | M1 | Protocol conformance + device test | Verified |
-| `INT-007` | Bind SSDP to the IPv4 multicast group `239.255.255.250:1900` and shall support the IPv6… | MUST | `F-01` | M1 | Protocol conformance test | Implemented |
+| `INT-007` | Bind SSDP to the IPv4 multicast group `239.255.255.250:1900` and shall support the IPv6… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-008` | Honour the `MX` header of an `M-SEARCH` by choosing a uniformly random delay inside `[0 | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-009` | Select the sending interface by the route of the incoming request and shall never answer a… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-010` | Ignore malformed `M-SEARCH` datagrams without logging them at error level and without affecting… | MUST | `F-01` | M1 | Protocol conformance + device test | Verified |
 | `INT-011` | Rate-limit discovery responses per source address so that a single host cannot force an… | SHOULD | `F-01` | M1 | Protocol conformance test | Verified |
-| `INT-012` | Expose the configured `friendlyName`, `manufacturer`, `modelName` and `UDN` in the SSDP… | MUST | `F-01` | M1 | Protocol conformance test | Implemented |
+| `INT-012` | Expose the configured `friendlyName`, `manufacturer`, `modelName` and `UDN` in the SSDP… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-013` | Answer `M-SEARCH` only when the `MAN` header contains the quoted token `ssdp:discover` | SHOULD | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-014` | Use a stable `UDN` across restarts for the same installation unless the user resets the… | MUST | `F-01` | M1 | Protocol conformance test | Verified |
 | `INT-015` | Provide a CLI switch to print the exact SSDP headers it would send | SHOULD | `F-01` | M1 | Protocol conformance test | Verified |
@@ -150,7 +150,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-050` | Implement `GetProtocolInfo` and return at least the `http-get` transfer protocol with the MIME… | MUST | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-051` | The `GetProtocolInfo` result shall not advertise a container or MIME type that the server… | MUST | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-052` | Implement `GetCurrentConnectionIDs` and return an empty list when no transfer is active. | MUST | `F-04` | M1 | Protocol conformance test | Verified |
-| `INT-053` | Implement `PrepareForConnection`, `ConnectionComplete` and `GetCurrentConnectionInfo` in a way… | MUST | `F-04` | M1 | Protocol conformance test | Implemented |
+| `INT-053` | Implement `PrepareForConnection`, `ConnectionComplete` and `GetCurrentConnectionInfo` in a way… | MUST | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-054` | Return the same `Source` value in `GetCurrentConnectionInfo` as the `res` URI it serves for the… | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
 | `INT-055` | Advertise the `http-get` protocol with the `*` wildcard for the additional header field only… | SHOULD | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-056` | Not implement the `http-subscribe` transfer protocol in the baseline. | MUST | `F-04` | M1 | Protocol conformance test | Verified |
@@ -302,7 +302,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `OPS-005` | Provide a command that prints the device description and the SSDP headers it would advertise | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-006` | Write logs with a timestamp, a level, a component and a structured message. | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-007` | Log output shall be redactable: file system paths | MUST | `F-13` | M1 | Automated CLI test | Verified |
-| `OPS-008` | Shut down gracefully on `SIGINT` and `SIGTERM` | MUST | `F-13` | M1 | Automated CLI test | Implemented |
+| `OPS-008` | Shut down gracefully on `SIGINT` and `SIGTERM` | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-009` | Support running as a background service on macOS (launchd) | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-010` | Support a configuration file that sets the service identity | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
 | `OPS-011` | Provide `--help` and `--version` output that names the version | MUST | `F-13` | M1 | Automated CLI test | Verified |
