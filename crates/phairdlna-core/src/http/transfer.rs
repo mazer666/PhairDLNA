@@ -32,6 +32,8 @@ pub struct TransferState {
     bytes_sent: u64,
     /// The media duration, if known from container probing / metadata.
     duration: Option<Duration>,
+    /// Optional bandwidth limit in bytes per second for pacing the transfer (FUN-044).
+    bandwidth_limit_bytes_per_sec: Option<u64>,
 }
 
 impl TransferState {
@@ -42,6 +44,31 @@ impl TransferState {
             total_bytes,
             bytes_sent: 0,
             duration,
+            bandwidth_limit_bytes_per_sec: None,
+        }
+    }
+
+    /// Sets the bandwidth limit in bytes per second for this transfer (FUN-044).
+    pub fn with_bandwidth_limit(mut self, limit_bytes_per_sec: Option<u64>) -> Self {
+        self.bandwidth_limit_bytes_per_sec = limit_bytes_per_sec;
+        self
+    }
+
+    /// The bandwidth limit in bytes per second, if configured.
+    pub fn bandwidth_limit(&self) -> Option<u64> {
+        self.bandwidth_limit_bytes_per_sec
+    }
+
+    /// Calculates the minimum required duration to transfer the bytes sent under the configured bandwidth limit.
+    ///
+    /// If a limit of `L` bytes/sec is configured, sending `N` bytes must take at least `N / L` seconds.
+    pub fn minimum_paced_duration(&self) -> Duration {
+        match self.bandwidth_limit_bytes_per_sec {
+            Some(limit) if limit > 0 => {
+                let secs = (self.bytes_sent as f64) / (limit as f64);
+                Duration::from_secs_f64(secs)
+            }
+            _ => Duration::ZERO,
         }
     }
 
@@ -145,5 +172,17 @@ mod tests {
         assert_eq!(state.position(), Duration::ZERO);
         assert_eq!(state.duration_upnp_string(), "00:00:00");
         assert_eq!(state.position_upnp_string(), "00:00:00");
+    }
+
+    #[test]
+    fn calculates_paced_duration_for_bandwidth_limit() {
+        let mut state =
+            TransferState::new("video/mp4", 10_000_000, None).with_bandwidth_limit(Some(1_000_000)); // 1 MB/s limit
+
+        assert_eq!(state.bandwidth_limit(), Some(1_000_000));
+        assert_eq!(state.minimum_paced_duration(), Duration::ZERO);
+
+        state.advance(2_500_000);
+        assert_eq!(state.minimum_paced_duration(), Duration::from_millis(2500));
     }
 }

@@ -60,6 +60,7 @@
 | `qa/device-matrix.toml` | Machine-readable record of observed client device trials, media formats, and outcomes | F-07 |
 | `crates/phairdlna-core/src/didl/` | The DIDL-Lite document — the object model, the `protocolInfo`, the value rules, the policy of the document and the writer | F-05, F-11 |
 | `crates/phairdlna-core/src/http/` | The delivery of media over HTTP — the `Range` header, the headers of a media answer, the containment of a media URL, transfer state reporting (`transfer.rs`) and the evaluator of a request | F-06, F-11 |
+| `crates/phairdlna-core/tests/http_bandwidth_limit.rs` | Acceptance tests for bandwidth limit pacing (`FUN-044`, `AC-12`) | F-06 |
 | `crates/phairdlna-core/tests/http_transfer_state.rs` | Acceptance tests for active transfer position and duration reporting (`FUN-045`, `AC-13`) | F-06 |
 | `crates/phairdlna-core/src/upnp/` | The device description, the service descriptions (SCPD), the SOAP dispatcher and the ContentDirectory and ConnectionManager actions | F-02, F-03, F-04 |
 | `crates/phairdlna-core/src/config/` | The typed, validated, versioned configuration | F-12 |

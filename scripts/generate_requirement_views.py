@@ -992,6 +992,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — bounds concurrent transfers and refuses excess requests rather than exhausting host resources",
         "Verified",
     ),
+    "FUN-044": (
+        "`crates/phairdlna-core/tests/http_bandwidth_limit.rs::per_stream_bandwidth_limit_pacing_calculation`,"
+        " `crates/phairdlna-core/src/http/transfer.rs::tests::calculates_paced_duration_for_bandwidth_limit`"
+        " — per-stream bandwidth limit is enforced via transfer pacing calculation across the full transfer duration",
+        "Verified",
+    ),
     "FUN-045": (
         "`crates/phairdlna-core/tests/http_transfer_state.rs::active_transfer_position_and_duration_reporting`,"
         " `crates/phairdlna-core/src/http/transfer.rs::tests::calculates_position_and_formats_upnp_strings`"

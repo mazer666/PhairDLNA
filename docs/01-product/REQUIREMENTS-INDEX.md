@@ -86,7 +86,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-041` | Report the container and codec of a file in a way a client can use to decide whether it can… | MUST | `F-06` | M1 | Automated test | Verified |
 | `FUN-042` | Support multiple simultaneous direct-play streams | MUST | `F-06` | M1 | Automated test | Verified |
 | `FUN-043` | Bound the number of concurrent transfers and shall refuse further transfers with a clear error… | MUST | `F-06` | M1 | Automated test | Verified |
-| `FUN-044` | Apply a per-stream bandwidth limit when configured | SHOULD | `F-06` | M1 | Automated test | Baseline |
+| `FUN-044` | Apply a per-stream bandwidth limit when configured | SHOULD | `F-06` | M1 | Automated test | Verified |
 | `FUN-045` | Report the position and duration of the active transfer through the AVTransport service when… | SHOULD | `F-06` | M1 | Automated test | Verified |
 | `FUN-046` | Cancel a transfer cleanly when the client closes the connection. | MUST | `F-06` | M1 | Automated test | Verified |
 | `FUN-047` | Implement optional transcoding only when the user has explicitly enabled it and selected a… | COULD | `F-17` | M5 | Automated test | Baseline |
