@@ -208,21 +208,21 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `SEC-001` | Resolve every media path canonically and verify that it is inside an allowed root before… | MUST | `F-08` | M1 | Negative security test | Baseline |
-| `SEC-002` | Reject a path containing `..` segments, encoded separators (`%2f`, `%5c`), or a null byte,… | MUST | `F-08` | M1 | Negative security test | Baseline |
-| `SEC-003` | Resolve a symbolic link and re-check containment after resolution | MUST | `F-08` | M1 | Negative security test | Baseline |
+| `SEC-001` | Resolve every media path canonically and verify that it is inside an allowed root before… | MUST | `F-08` | M1 | Negative security test | Verified |
+| `SEC-002` | Reject a path containing `..` segments, encoded separators (`%2f`, `%5c`), or a null byte,… | MUST | `F-08` | M1 | Negative security test | Verified |
+| `SEC-003` | Resolve a symbolic link and re-check containment after resolution | MUST | `F-08` | M1 | Negative security test | Verified |
 | `SEC-004` | Open files in a way that does not follow a final symbolic link when the file is outside the… | MUST | `F-08` | M1 | Negative security test | Baseline |
 | `SEC-005` | Never construct a shell command from user, client or file metadata input. | MUST | `F-08` | M1 | Negative security test | Baseline |
 | `SEC-006` | Not follow a symbolic link that points outside a root | MUST | `F-08` | M1 | Negative security test | Baseline |
 | `SEC-007` | Treat all file names and metadata as untrusted input | MUST | `F-08` | M1 | Negative security test | Baseline |
 | `SEC-008` | Open media files read-only, without requesting write permission on the containing directory. | MUST | `F-08` | M1 | Negative security test | Baseline |
 | `SEC-010` | Not process a DTD, shall not resolve external entities and shall bound the nesting depth and… | MUST | `F-16` | M1 | Negative security test | Verified |
-| `SEC-011` | Bound the size of every accepted HTTP request line | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-012` | Bound the number of concurrent connections and the number of concurrent transfers. | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-011` | Bound the size of every accepted HTTP request line | MUST | `F-16` | M1 | Negative security test | Verified |
+| `SEC-012` | Bound the number of concurrent connections and the number of concurrent transfers. | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-013` | Answer an unauthenticated or malformed request with a generic error that reveals no internal… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-014` | Not follow a redirect to a non-local address, and shall reject a callback URL that is not a… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-015` | Validate and normalise every URL path segment it accepts | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-016` | Enforce a read and write timeout on every connection. | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-016` | Enforce a read and write timeout on every connection. | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-017` | Never bind a non-loopback port other than the media port without an explicit configuration… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-018` | Treat an SSDP or SOAP peer as untrusted and shall perform no action on its behalf other than… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-060` | Every parser in the server shall have an explicit input size bound and a documented failure… | MUST | `F-16` | M1 | Negative security test | Verified |

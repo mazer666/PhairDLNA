@@ -407,6 +407,42 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — no network self-update mechanism is implemented; updates remain platform-managed",
         "Verified",
     ),
+    "SEC-001": (
+        "`crates/phairdlna-core/tests/path_containment.rs::a_path_inside_a_root_is_inside`,"
+        " `crates/phairdlna-core/tests/http_path_containment.rs::a_path_inside_a_root_is_accepted`"
+        " — every media path is verified canonically to lie inside an allowed root before opening",
+        "Verified",
+    ),
+    "SEC-002": (
+        "`crates/phairdlna-core/tests/path_containment.rs::a_traversal_attempt_names_no_object`,"
+        " `crates/phairdlna-core/tests/http_path_containment.rs::a_traversal_attempt_is_answered_with_404`"
+        " — paths containing traversal segments, encoded separators or NUL bytes are rejected before canonicalisation",
+        "Verified",
+    ),
+    "SEC-003": (
+        "`crates/phairdlna-core/tests/path_containment.rs::a_link_that_points_out_is_refused`,"
+        " `crates/phairdlna-core/tests/symlink_policy.rs::a_link_that_is_repointed_after_the_scan_cannot_escape_the_root`"
+        " — symbolic links are resolved and containment re-checked to resist repointing between scan/check and use",
+        "Verified",
+    ),
+    "SEC-011": (
+        "`crates/phairdlna-core/tests/http_framing.rs::a_request_line_that_is_too_long_is_refused`,"
+        " `crates/phairdlna-core/tests/http_framing.rs::a_header_block_that_is_too_large_is_refused`,"
+        " `crates/phairdlna-core/tests/http_framing.rs::a_body_that_is_too_large_is_refused`"
+        " — sizes of request lines, header blocks and request bodies are strictly bounded",
+        "Verified",
+    ),
+    "SEC-012": (
+        "`crates/phairdlna-core/tests/http_framing.rs::the_number_of_connections_is_bounded`,"
+        " `crates/phairdlna-core/tests/http_framing.rs::the_number_of_transfers_is_bounded`"
+        " — numbers of concurrent connections and active transfers are strictly bounded",
+        "Verified",
+    ),
+    "SEC-016": (
+        "`crates/phairdlna-core/tests/http_framing.rs::a_connection_that_stays_idle_is_closed`"
+        " — read and write timeouts are enforced on connections to mitigate Slowloris resource exhaustion",
+        "Verified",
+    ),
     "SEC-010": (
         "`crates/phairdlna-core/tests/xml_reader.rs::a_document_type_declaration_is_refused`",
         "Verified",
