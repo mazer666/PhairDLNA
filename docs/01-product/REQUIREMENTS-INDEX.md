@@ -259,8 +259,8 @@ Requirement method, ID rules and the traceability chain are defined in
 | `PERF-007` | Memory growth per active stream shall be bounded and documented. | MUST | `F-18` | M1 | Benchmark | Baseline |
 | `PERF-008` | Not perform a full directory scan on a browse request. | MUST | `F-09` | M1 | Benchmark | Baseline |
 | `PERF-009` | Support 100 000 objects with an index scan that stays within a documented budget. | SHOULD | `F-09` | M1 | Benchmark | Baseline |
-| `PERF-010` | The reference hardware for all performance measurements shall be documented | MUST | `F-18` | M1 | Benchmark | Baseline |
-| `PERF-011` | Every performance claim shall report the method | MUST | `F-18` | M1 | Benchmark | Baseline |
+| `PERF-010` | The reference hardware for all performance measurements shall be documented | MUST | `F-18` | M1 | Benchmark | Verified |
+| `PERF-011` | Every performance claim shall report the method | MUST | `F-18` | M1 | Benchmark | Verified |
 | `PERF-012` | Degrade gracefully when a catalogue is larger than the tested envelope: it shall remain… | MUST | `F-09` | M1 | Benchmark | Baseline |
 | `PERF-013` | The CPU usage of an idle server shall be negligible (below 1 % averaged over one minute on the… | SHOULD | `F-18` | M1 | Benchmark | Baseline |
 | `PERF-014` | Survive a scan of a root that contains a broken or slow network share without blocking browse… | MUST | `F-18` | M1 | Benchmark | Baseline |

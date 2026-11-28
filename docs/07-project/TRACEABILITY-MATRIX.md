@@ -240,8 +240,8 @@ that was actually observed; an empty cell means *not implemented*, not *passed*.
 | `PERF-007` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
 | `PERF-008` | `F-09` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
 | `PERF-009` | `F-09` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
-| `PERF-010` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
-| `PERF-011` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
+| `PERF-010` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | `crates/phairdlna-core/tests/performance_reference.rs::reference_hardware_profile_contract_is_defined`, `docs/05-quality/PERFORMANCE-BUDGETS.md` — reference hardware profile is defined under DEC-081 (OD-11) as Apple Silicon arm64 primary tier with >=16 GB RAM and NVMe SSD | Verified |
+| `PERF-011` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | `crates/phairdlna-core/tests/performance_reference.rs::measurement_statistics_contract_requires_median_and_p95`, `docs/05-quality/PERFORMANCE-BUDGETS.md` — measurement reporting methodology requires explicit iteration count, median, and p95 statistics | Verified |
 | `PERF-012` | `F-09` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
 | `PERF-013` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |
 | `PERF-014` | `F-18` | M1 | `crates/phairdlna-core/src/** (benchmarked)` | Benchmark | — | Not implemented |

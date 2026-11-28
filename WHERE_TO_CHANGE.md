@@ -63,6 +63,7 @@
 | `crates/phairdlna-core/tests/http_bandwidth_limit.rs` | Acceptance tests for bandwidth limit pacing (`FUN-044`, `AC-12`) | F-06 |
 | `crates/phairdlna-core/tests/http_transfer_state.rs` | Acceptance tests for active transfer position and duration reporting (`FUN-045`, `AC-13`) | F-06 |
 | `crates/phairdlna-core/src/upnp/` | The device description, the service descriptions (SCPD), the SOAP dispatcher and the ContentDirectory and ConnectionManager actions | F-02, F-03, F-04 |
+| `crates/phairdlna-core/tests/performance_reference.rs` | Acceptance tests for performance reference hardware profile and reporting statistics contract (`PERF-010`, `PERF-011`, `OD-11`, `DEC-081`) | F-18 |
 | `crates/phairdlna-core/src/config/` | The typed, validated, versioned configuration | F-12 |
 | `crates/phairdlna-core/tests/config_resolution.rs` | Acceptance tests for configuration path resolution precedence (`CFG-001`, `AC-01`) | F-12 |
 | `crates/phairdlna-core/src/scheduler/` | The one scheduler of the server — the priority classes, the bounds of the workers and of the queues, the hysteresis of the pressure and the report of the resources | F-18 |

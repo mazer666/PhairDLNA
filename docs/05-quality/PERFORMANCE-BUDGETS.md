@@ -30,18 +30,15 @@ Because results only mean something relative to a machine, the project defines t
 *shape* of a reference profile below. Any measurement on other hardware must state
 its own profile.
 
-**The machine itself is still an open owner decision** (OD-11 in
-`../07-project/OPEN-DECISIONS.md`, and `F-18-Q-03`). Until it is named, no
-measurement may be published as a result against this profile — it is the shape of
-the report, not the report.
+**The reference hardware profile is decided (OD-11, DEC-081):** Apple Silicon (arm64, Apple M-Series, ≥16 GB RAM, NVMe SSD, release build `--release`) is the primary tier for all performance targets. Secondary profiles apply to Linux x86_64 and Windows x86_64.
 
 The block below is the **shape** every performance report embeds. The filled-in
 version lives in `../09-research/qa-performance.md` §5.3.
 
 | Property | Reference value |
 | --- | --- |
-| Platform | macOS on Apple Silicon (primary), macOS on Intel, Linux x86_64, Windows x86_64 |
-| Memory | 16 GB |
+| Platform | macOS on Apple Silicon (primary, DEC-081), macOS on Intel, Linux x86_64, Windows x86_64 |
+| Memory | ≥ 16 GB |
 | Storage | NVMe SSD for the index; the media library on a spinning disk or a NAS is a *separate* profile and must be labelled as such |
 | Library size | 100 000 objects unless stated otherwise |
 | Report shape | The `hardware:` block from `../09-research/qa-performance.md` §5.3, embedded verbatim |

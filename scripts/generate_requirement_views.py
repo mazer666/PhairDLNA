@@ -616,6 +616,18 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — unauthenticated HTTP route serves exact source archive, provenance, and complete Cargo.lock dependency tree under AGPL §13",
         "Verified",
     ),
+    "PERF-010": (
+        "`crates/phairdlna-core/tests/performance_reference.rs::reference_hardware_profile_contract_is_defined`,"
+        " `docs/05-quality/PERFORMANCE-BUDGETS.md`"
+        " — reference hardware profile is defined under DEC-081 (OD-11) as Apple Silicon arm64 primary tier with >=16 GB RAM and NVMe SSD",
+        "Verified",
+    ),
+    "PERF-011": (
+        "`crates/phairdlna-core/tests/performance_reference.rs::measurement_statistics_contract_requires_median_and_p95`,"
+        " `docs/05-quality/PERFORMANCE-BUDGETS.md`"
+        " — measurement reporting methodology requires explicit iteration count, median, and p95 statistics",
+        "Verified",
+    ),
     "REL-001": (
         "`crates/phairdlna-cli/tests/crash_recovery.rs`"
         " — abrupt termination never modifies media originals and catalogue is consistently rebuilt on restart",
