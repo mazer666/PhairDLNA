@@ -31,6 +31,7 @@ pub mod pictures;
 pub mod resources;
 pub mod setup;
 pub mod signal;
+pub mod source_offer;
 pub mod ssdp;
 pub mod stream;
 pub mod transfers;

@@ -235,7 +235,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SEC-067` | Bound the declared dimensions of an image before allocating any buffer for it | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-068` | Treat playlist entries as untrusted paths, shall resolve and contain them, and shall refuse… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-069` | Not resolve or follow a macOS Finder alias as if it were a symbolic link; aliases shall be… | MUST | `F-16` | M1 | Negative security test | Verified |
-| `SEC-070` | Offer the corresponding source of the running build | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-070` | Offer the corresponding source of the running build | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-071` | Accept only a `Host` header that matches a configured local host name | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-072` | Require a custom, non-standard request header on every state-changing administration request,… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-090` | Contain no telemetry, no analytics and no crash reporting to any third party. | MUST | `F-16` | M1 | Negative security test | Verified |
@@ -310,7 +310,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `OPS-013` | Write a structured diagnostic report (anonymised) that a user can attach to a bug report. | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-014` | Return a distinct exit code for configuration errors | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-015` | Never require root privileges to serve media from the user's own directories. | MUST | `F-13` | M1 | Automated CLI test | Verified |
-| `OPS-016` | Expose an unauthenticated route that serves the corresponding source of the exact running build | MUST | `F-14` | M2 | Automated CLI test | Baseline |
+| `OPS-016` | Expose an unauthenticated route that serves the corresponding source of the exact running build | MUST | `F-14` | M2 | Automated CLI test | Verified |
 | `OPS-017` | Report the exact source revision it was built from in its status output and in the source offer. | MUST | `F-14` | M2 | Automated CLI test | Implemented |
 | `OPS-020` | Bind to the loopback interface only by default and shall refuse to start when configured… | MUST | `F-14` | M2 | Automated CLI test | Verified |
 | `OPS-021` | Require a per-installation random token for every state-changing request. | MUST | `F-14` | M2 | Automated CLI test | Verified |

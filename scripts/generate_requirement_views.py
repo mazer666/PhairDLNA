@@ -610,6 +610,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — macOS Finder aliases treated according to same containment rules as symbolic links and refused if pointing outside roots",
         "Verified",
     ),
+    "SEC-070": (
+        "`crates/phairdlna-cli/tests/source_offer.rs::unauthenticated_source_offer_route_returns_ok_and_provenance`,"
+        " `crates/phairdlna-cli/tests/source_offer.rs::head_source_offer_route_returns_ok_without_body`"
+        " — unauthenticated HTTP route serves exact source archive, provenance, and complete Cargo.lock dependency tree under AGPL §13",
+        "Verified",
+    ),
     "REL-001": (
         "`crates/phairdlna-cli/tests/crash_recovery.rs`"
         " — abrupt termination never modifies media originals and catalogue is consistently rebuilt on restart",
@@ -910,6 +916,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     "OPS-015": (
         "`crates/phairdlna-cli/tests/serve_command.rs::the_server_answers_a_client`"
         " — the daemon serves on a port above 1024 and needs no privilege",
+        "Verified",
+    ),
+    "OPS-016": (
+        "`crates/phairdlna-cli/tests/source_offer.rs::unauthenticated_source_offer_route_returns_ok_and_provenance`,"
+        " `crates/phairdlna-cli/tests/source_offer.rs::head_source_offer_route_returns_ok_without_body`"
+        " — unauthenticated /source HTTP route delivers exact corresponding source, repository URL and Cargo.lock dependency tree at no charge",
         "Verified",
     ),
     "LIFE-001": (

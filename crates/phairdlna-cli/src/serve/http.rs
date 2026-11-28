@@ -31,6 +31,7 @@ use super::media::MediaLibrary;
 use super::media_route::{artwork, media};
 use super::pictures::Pictures;
 use super::resources::Resources;
+use super::source_offer::source_offer;
 use super::transfers::Transfers;
 
 /// What the handlers of the daemon share.
@@ -96,6 +97,7 @@ pub fn router(context: Arc<ServerContext>) -> Router {
         .route(manager.definition().event_path, any(event_subscription))
         .route("/media/{id}", get(media).head(media))
         .route("/art/{id}", get(artwork))
+        .route("/source", get(source_offer).head(source_offer))
         .layer(DefaultBodyLimit::max(limits.body_bytes))
         .layer(TimeoutLayer::with_status_code(
             StatusCode::REQUEST_TIMEOUT,

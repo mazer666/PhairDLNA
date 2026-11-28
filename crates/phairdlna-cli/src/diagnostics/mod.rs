@@ -136,12 +136,13 @@ fn fill_paths(facts: &mut Diagnostics, config: &Config) {
 /// The context of the report.
 fn report_of(config: &Config, state: &str, facts: &Diagnostics) -> Report {
     let _ = facts;
+    let base = format!("http://127.0.0.1:{}/source", config.server.http_port);
     Report {
         generated_at: time::now_utc(),
         platform: platform(),
         server_state: state.to_owned(),
         configuration: configuration_of(config),
-        source_offer: None,
+        source_offer: Some(base),
     }
 }
 
