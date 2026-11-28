@@ -1265,6 +1265,32 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — these checks cover only the server job. No approved per-user UI LaunchAgent is packaged, and the requirement conflicts with the regular Dock app in DEC-076; OD-15 must resolve the process model",
         "Not implemented",
     ),
+    "CFG-001": (
+        "`crates/phairdlna-core/tests/config_resolution.rs::cli_switch_takes_precedence_over_env_and_default`,"
+        " `crates/phairdlna-core/tests/config_resolution.rs::env_var_takes_precedence_when_no_cli_switch`,"
+        " `crates/phairdlna-core/tests/config_resolution.rs::default_path_used_when_neither_cli_nor_env_set`"
+        " — single configuration path is resolved in order of precedence: CLI switch, environment variable, or platform default",
+        "Verified",
+    ),
+    "CFG-002": (
+        "`crates/phairdlna-cli/tests/invalid_configuration.rs::invalid_configuration_rejected_with_offending_field_named`,"
+        " `crates/phairdlna-core/tests/config.rs::an_empty_device_name_is_refused`,"
+        " `crates/phairdlna-core/tests/config.rs::the_port_bounds_are_enforced`"
+        " — schema is strictly typed and validated at start-up; invalid values abort start-up naming the offending field",
+        "Verified",
+    ),
+    "CFG-003": (
+        "`crates/phairdlna-core/tests/config.rs::an_older_schema_version_is_migrated`,"
+        " `crates/phairdlna-core/tests/config.rs::a_newer_schema_version_is_refused`"
+        " — schema version is verified; older known schema versions are migrated automatically and newer versions are safely rejected",
+        "Verified",
+    ),
+    "CFG-004": (
+        "`crates/phairdlna-core/tests/config.rs::an_empty_document_yields_a_safe_server`,"
+        " `crates/phairdlna-core/tests/config.rs::a_partial_section_uses_the_documented_defaults`"
+        " — documented defaults ensure that an empty or minimal configuration file yields a safe, working server",
+        "Verified",
+    ),
     "CFG-005": (
         "`crates/phairdlna-core/src/config/validate/admin.rs::tests::a_non_loopback_address_is_refused`,"
         " `crates/phairdlna-core/src/config/validate/admin.rs::tests::the_user_may_override_the_refusal`"

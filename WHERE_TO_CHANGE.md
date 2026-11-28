@@ -63,6 +63,7 @@
 | `crates/phairdlna-core/tests/http_transfer_state.rs` | Acceptance tests for active transfer position and duration reporting (`FUN-045`, `AC-13`) | F-06 |
 | `crates/phairdlna-core/src/upnp/` | The device description, the service descriptions (SCPD), the SOAP dispatcher and the ContentDirectory and ConnectionManager actions | F-02, F-03, F-04 |
 | `crates/phairdlna-core/src/config/` | The typed, validated, versioned configuration | F-12 |
+| `crates/phairdlna-core/tests/config_resolution.rs` | Acceptance tests for configuration path resolution precedence (`CFG-001`, `AC-01`) | F-12 |
 | `crates/phairdlna-core/src/scheduler/` | The one scheduler of the server — the priority classes, the bounds of the workers and of the queues, the hysteresis of the pressure and the report of the resources | F-18 |
 | `crates/phairdlna-cli/src/lib.rs` | The commands, as pure functions over their arguments | F-13 |
 | `crates/phairdlna-cli/src/describe.rs` | Device description and SSDP header inspection command offline (`OPS-005`, `INT-015`) | F-01, F-02, F-13 |

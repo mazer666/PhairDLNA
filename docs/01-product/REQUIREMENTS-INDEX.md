@@ -325,10 +325,10 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `CFG-001` | Read its configuration from a single, versioned configuration file whose path is given by an… | MUST | `F-12` | M2 | Automated configuration test | Baseline |
-| `CFG-002` | Be typed and validated at start-up; an invalid value shall abort start-up with a message naming… | MUST | `F-12` | M2 | Automated configuration test | Baseline |
-| `CFG-003` | Carry a `schema_version`, and the server shall migrate an older known schema version… | MUST | `F-12` | M2 | Automated configuration test | Baseline |
-| `CFG-004` | Provide documented defaults for every setting such that an empty configuration file yields a… | MUST | `F-12` | M2 | Automated configuration test | Baseline |
+| `CFG-001` | Read its configuration from a single, versioned configuration file whose path is given by an… | MUST | `F-12` | M2 | Automated configuration test | Verified |
+| `CFG-002` | Be typed and validated at start-up; an invalid value shall abort start-up with a message naming… | MUST | `F-12` | M2 | Automated configuration test | Verified |
+| `CFG-003` | Carry a `schema_version`, and the server shall migrate an older known schema version… | MUST | `F-12` | M2 | Automated configuration test | Verified |
+| `CFG-004` | Provide documented defaults for every setting such that an empty configuration file yields a… | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-005` | Refuse to start when the configuration would expose an administration interface to a… | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-006` | Support selecting the network interfaces used for discovery and for media delivery. | MUST | `F-12` | M2 | Automated configuration test | Baseline |
 | `CFG-007` | Support a per-root setting for symbolic link following | MUST | `F-12` | M2 | Automated configuration test | Verified |
