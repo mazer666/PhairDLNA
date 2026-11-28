@@ -1313,6 +1313,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " socket; a client that is not on the list is refused with 403 before a handler sees the request",
         "Verified",
     ),
+    "CFG-011": (
+        "`crates/phairdlna-cli/tests/cli.rs::a_valid_configuration_passes`,"
+        " `crates/phairdlna-cli/tests/cli.rs::a_broken_configuration_is_reported`,"
+        " `crates/phairdlna-cli/tests/cli_lifecycle.rs::a_broken_configuration_exits_with_the_configuration_exit_code`"
+        " — validation command checks a configuration file without binding sockets or starting the server, reporting errors and status codes",
+        "Verified",
+    ),
     "CFG-012": (
         "`crates/phairdlna-cli/tests/cli.rs::the_effective_configuration_is_exported`,"
         " `crates/phairdlna-cli/tests/cli.rs::a_configuration_file_is_imported`,"
