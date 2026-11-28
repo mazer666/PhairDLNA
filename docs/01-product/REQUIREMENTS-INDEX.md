@@ -151,7 +151,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-051` | The `GetProtocolInfo` result shall not advertise a container or MIME type that the server… | MUST | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-052` | Implement `GetCurrentConnectionIDs` and return an empty list when no transfer is active. | MUST | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-053` | Implement `PrepareForConnection`, `ConnectionComplete` and `GetCurrentConnectionInfo` in a way… | MUST | `F-04` | M1 | Protocol conformance test | Verified |
-| `INT-054` | Return the same `Source` value in `GetCurrentConnectionInfo` as the `res` URI it serves for the… | MUST | `F-04` | M1 | Protocol conformance test | Baseline |
+| `INT-054` | Return the same `Source` value in `GetCurrentConnectionInfo` as the `res` URI it serves for the… | MUST | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-055` | Advertise the `http-get` protocol with the `*` wildcard for the additional header field only… | SHOULD | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-056` | Not implement the `http-subscribe` transfer protocol in the baseline. | MUST | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-057` | Reject every GENA `SUBSCRIBE` request unless the user has explicitly enabled eventing | MUST | `F-04` | M1 | Protocol conformance test | Verified |

@@ -467,6 +467,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — ConnectionManager operates as an http-get source only; unissued connection IDs return fault 701 without opening peer sockets",
         "Verified",
     ),
+    "INT-054": (
+        "`crates/phairdlna-core/tests/connection_manager.rs::get_current_connection_info_rejects_unissued_connection_id_with_701`,"
+        " `crates/phairdlna-core/src/upnp/connection_manager.rs::get_current_connection_info`"
+        " — ConnectionManager operates in pure-pull http-get mode where unissued connections return 701 and clients request res URIs directly",
+        "Verified",
+    ),
+
     "INT-055": (
         "`crates/phairdlna-core/tests/connection_manager.rs::every_entry_carries_the_wildcard_and_names_no_profile`",
         "Verified",

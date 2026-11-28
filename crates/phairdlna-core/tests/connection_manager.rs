@@ -209,3 +209,12 @@ fn the_sink_is_present_and_empty() {
         );
     }
 }
+
+/// An unknown or unissued connection ID yields UPnP fault 701 No Such Object,
+/// consistent with pure-pull http-get delivery where the client requests res URIs directly (INT-054).
+#[test]
+fn get_current_connection_info_rejects_unissued_connection_id_with_701() {
+    let body = answer("GetCurrentConnectionInfo", &[("ConnectionID", "0")]);
+    assert!(body.contains("<errorCode>701</errorCode>"));
+    assert!(body.contains("<errorDescription>No Such Object</errorDescription>"));
+}
