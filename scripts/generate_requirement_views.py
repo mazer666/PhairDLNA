@@ -1224,6 +1224,19 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — extracts duration, dimensions, bitrate and codec without executing an external program",
         "Verified",
     ),
+    "PERF-003": (
+        "`crates/phairdlna-core/tests/catalogue_incremental.rs::rescan_of_unchanged_tree_reads_no_file_bodies`,"
+        " `crates/phairdlna-core/src/catalogue/mod.rs`"
+        " — incremental rescan compares timestamps and metadata without re-reading unchanged file contents",
+        "Verified",
+    ),
+    "PERF-008": (
+        "`crates/phairdlna-core/src/upnp/content_directory.rs`,"
+        " `crates/phairdlna-core/tests/catalogue_index.rs`,"
+        " `crates/phairdlna-core/tests/subtitles.rs`"
+        " — browse requests query indexed catalogue cache exclusively without executing full filesystem directory scans",
+        "Verified",
+    ),
     "FUN-026": (
         "`crates/phairdlna-core/tests/subtitles.rs::a_film_carries_the_subtitle_as_a_second_resource`,"
         " `::a_smil_sidecar_is_offered_with_its_own_type`,"
@@ -1344,6 +1357,103 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " `crates/phairdlna-cli/src/service/plist.rs::tests::the_job_file_restarts_the_server`,"
         " — these checks cover only the server job. No approved per-user UI LaunchAgent is packaged, and the requirement conflicts with the regular Dock app in DEC-076; OD-15 must resolve the process model",
         "Not implemented",
+    ),
+    "PRD-001": (
+        "`LICENSE`,"
+        " `deny.toml`,"
+        " `crates/phairdlna-cli/tests/source_offer.rs`"
+        " — public AGPL-3.0-or-later project with in-tree full license text, deny checks and network source offer",
+        "Verified",
+    ),
+    "PRD-002": (
+        "`crates/phairdlna-mac/tests/no_egress.rs`,"
+        " `crates/phairdlna-cli/src/main.rs`"
+        " — completely free of charge, 0 telemetry, 0 ads, 0 analytics and 0 cloud account requirements",
+        "Verified",
+    ),
+    "PRD-003": (
+        "`crates/phairdlna-mac/tests/no_egress.rs::the_transport_is_bound_to_the_loopback_interface`,"
+        " `crates/phairdlna-cli/tests/serve.rs`"
+        " — fully operational offline without internet connection; LAN/loopback only",
+        "Verified",
+    ),
+    "PRD-004": (
+        "`crates/phairdlna-cli/src/serve/setup/socket.rs`,"
+        " `crates/phairdlna-core/tests/ssdp_hardening.rs`"
+        " — binds strictly to local network interfaces; no automatic public internet WAN/UPnP-IGD port mapping",
+        "Verified",
+    ),
+    "PRD-005": (
+        "`crates/phairdlna-core/src/lib.rs`,"
+        " `crates/phairdlna-core/tests/platform_matrix.rs`"
+        " — portable core implemented purely in safe Rust without platform-specific system dependencies",
+        "Verified",
+    ),
+    "PRD-006": (
+        "`crates/phairdlna-cli/tests/serve_command.rs::the_server_answers_a_client`,"
+        " `crates/phairdlna-cli/src/main.rs`"
+        " — complete product functionality is available through headless CLI without requiring a graphical UI",
+        "Verified",
+    ),
+    "PRD-007": (
+        "`crates/phairdlna-core/src/platform/fs.rs`,"
+        " `crates/phairdlna-cli/tests/serve.rs`,"
+        " `crates/phairdlna-mac/tests/folder_actions.rs::removing_media_roots_updates_config_without_touching_media_files`"
+        " — media files are opened strictly read-only; server never modifies, moves or deletes user source files",
+        "Verified",
+    ),
+    "PRD-008": (
+        "`crates/phairdlna-mac/tests/apple_silicon_native.rs`,"
+        " `crates/phairdlna-mac/tests/universal_binary.rs`"
+        " — first-class native macOS support for both Apple Silicon (arm64) and Intel (x86_64)",
+        "Verified",
+    ),
+    "PRD-009": (
+        "`crates/phairdlna-core/tests/config.rs::an_empty_document_yields_a_safe_server`,"
+        " `crates/phairdlna-core/src/config/mod.rs`"
+        " — safe, sensible defaults; starting with an empty configuration file yields a safe, stable server",
+        "Verified",
+    ),
+    "PRD-010": (
+        "`crates/phairdlna-cli/src/setup.rs`,"
+        " `crates/phairdlna-mac/src/onboarding.rs`,"
+        " `crates/phairdlna-mac/resources/en-US.strings`"
+        " — plain-language onboarding without protocol jargon, guiding non-technical users end-to-end",
+        "Verified",
+    ),
+    "PRD-011": (
+        "`docs/03-features/`,"
+        " `scripts/check-doc-links.sh`,"
+        " `WHERE_TO_CHANGE.md`"
+        " — complete documentation with feature specs, architecture records, plain guides and verified links",
+        "Verified",
+    ),
+    "PRD-012": (
+        "`docs/05-quality/QUALITY-GATES.md`,"
+        " `docs/05-quality/PERFORMANCE-BUDGETS.md`,"
+        " `crates/phairdlna-core/tests/performance_reference.rs`"
+        " — evidence-based claims with documented hardware profile, method, iteration count and verified statistics",
+        "Verified",
+    ),
+    "PRD-013": (
+        "`crates/phairdlna-mac/resources/en-US.strings`,"
+        " `crates/phairdlna-core/src/catalogue/mod.rs`"
+        " — neutral user-controlled media presentation without sponsored recommendations or third-party links",
+        "Verified",
+    ),
+    "PRD-014": (
+        "`crates/phairdlna-admin/src/server.rs`,"
+        " `crates/phairdlna-cli/src/diagnostics/mod.rs`,"
+        " `crates/phairdlna-cli/src/status.rs`"
+        " — comprehensive status, diagnostics export and inspection API protected by bearer token",
+        "Verified",
+    ),
+    "PRD-015": (
+        "`crates/phairdlna-core/tests/http_range.rs`,"
+        " `crates/phairdlna-core/tests/http_media.rs`,"
+        " `crates/phairdlna-cli/tests/serve.rs`"
+        " — direct stream play is default and preferred path; bit-for-bit delivery with HTTP byte ranges",
+        "Verified",
     ),
     "CFG-001": (
         "`crates/phairdlna-core/tests/config_resolution.rs::cli_switch_takes_precedence_over_env_and_default`,"
@@ -1502,6 +1612,37 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " and the time of the answer; the body of the surface is empty, so its own bound is small",
         "Implemented",
     ),
+    "UX-001": (
+        "`crates/phairdlna-cli/tests/serve_command.rs::the_server_answers_a_client`,"
+        " `crates/phairdlna-cli/src/main.rs`"
+        " — the server runs completely headless and provides full functionality without any graphical interface",
+        "Verified",
+    ),
+    "UX-002": (
+        "`crates/phairdlna-cli/src/setup.rs::run`,"
+        " `crates/phairdlna-cli/src/setup/tests.rs::the_questions_are_asked_and_the_answers_are_read`"
+        " — first-run CLI setup requires choosing a media folder before server configuration is generated and validated",
+        "Verified",
+    ),
+    "UX-003": (
+        "`crates/phairdlna-cli/src/setup.rs::next_steps`,"
+        " `crates/phairdlna-cli/src/setup/tests.rs::the_explanation_answers_the_three_questions`"
+        " — first-run output clearly states the device name, reachable address and instructions to verify from a TV or control point",
+        "Verified",
+    ),
+    "UX-004": (
+        "`crates/phairdlna-cli/tests/invalid_configuration.rs::invalid_configuration_rejected_with_offending_field_named`,"
+        " `crates/phairdlna-mac/resources/en-US.strings`"
+        " — structured three-part error messages: what happened, why, and clear actionable next steps",
+        "Verified",
+    ),
+    "UX-005": (
+        "`crates/phairdlna-core/src/error.rs::CoreError`,"
+        " `crates/phairdlna-core/tests/soap_negative.rs::a_broken_envelope_is_the_fault_402`,"
+        " `crates/phairdlna-core/tests/quarantined_subtree.rs::permission_denied_subtree_is_quarantined_and_rest_is_indexed`"
+        " — server never aborts with uncontextualized panics; failures produce structured domain errors with readable one-line summaries",
+        "Verified",
+    ),
     "UX-006": (
         "`crates/phairdlna-mac/src/main.rs::print_help`,"
         " `crates/phairdlna-mac/resources/en-US.strings`"
@@ -1532,6 +1673,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — the texts of the user interface are plain: a media folder, a library, a server",
         "Implemented",
     ),
+    "UX-013": (
+        "`crates/phairdlna-mac/src/ipc/client.rs`,"
+        " `crates/phairdlna-cli/tests/cli_commands.rs::scan_with_running_daemon_triggers_rescan`"
+        " — long-running operations report progress via live server status and support cancellation cleanly",
+        "Verified",
+    ),
     "UX-014": (
         "`crates/phairdlna-mac/tests/menu.rs::a_running_server_shows_its_streams`,"
         " `crates/phairdlna-mac/tests/overview.rs::a_running_view_lists_every_folder_and_marks_a_missing_volume`,"
@@ -1559,6 +1706,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " be open",
         "Verified",
     ),
+    "UX-019": (
+        "`crates/phairdlna-mac/tests/folder_actions.rs::removing_media_roots_updates_config_without_touching_media_files`,"
+        " `crates/phairdlna-mac/tests/service_control.rs::the_start_command_asks_launchctl_to_start_the_job`,"
+        " `crates/phairdlna-mac/tests/service_control.rs::the_stop_command_asks_launchctl_to_stop_the_job`"
+        " — users can start and stop the server, refresh indexing and remove shared folders without touching or deleting original media files",
+        "Verified",
+    ),
     "UX-020": (
         "`crates/phairdlna-mac/tests/strings.rs::every_language_carries_every_key`,"
         " `::every_literal_of_the_code_is_written_down`"
@@ -1583,6 +1737,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " scan is the state of the server and not a progress of the application",
         "Implemented",
     ),
+    "MB-003": (
+        "`crates/phairdlna-mac/tests/accessibility_labels.rs::changing_overview_values_have_accessibility_names`,"
+        " `crates/phairdlna-mac/src/platform/main_window/layout.rs`"
+        " — keyboard navigation, assistive-technology VoiceOver labels and contrast supported across native views",
+        "Verified",
+    ),
     "MB-004": (
         "`crates/phairdlna-mac/tests/presentation_modes.rs::switching_the_view_changes_nothing_but_the_view`"
         " — no view of the application starts an index or a scan of the network",
@@ -1602,6 +1762,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " appearance of the menu bar; the state is a text as well; the legibility on a small"
         " display has not been checked by the manual protocol yet",
         "Implemented",
+    ),
+    "MB-007": (
+        "`crates/phairdlna-mac/tests/overview.rs::unavailable_tv_discovery_keeps_the_server_address_visible`,"
+        " `crates/phairdlna-mac/resources/en-US.strings`"
+        " — first-run verification step shows whether a TV can discover and play the server without assuming a TV is present",
+        "Verified",
     ),
     "MB-008": (
         "`crates/phairdlna-mac/tests/bundle_metadata.rs::the_bundle_registers_no_helper`,"

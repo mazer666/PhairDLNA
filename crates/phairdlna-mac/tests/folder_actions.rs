@@ -114,3 +114,44 @@ fn adding_media_roots_updates_config_file() {
         test_dir.to_string_lossy().to_string()
     );
 }
+
+#[test]
+fn removing_media_roots_updates_config_without_touching_media_files() {
+    let folder = tempfile::tempdir().expect("a temporary folder");
+    let (config, preferences) = paths(folder.path());
+    Config::default()
+        .save(&config)
+        .expect("save a valid configuration");
+    let mut app = app(&config, &preferences);
+
+    let test_dir = folder.path().join("Videos");
+    std::fs::create_dir(&test_dir).expect("create video directory");
+    let sample_file = test_dir.join("clip.mp4");
+    std::fs::write(&sample_file, b"sample content").expect("write video file");
+
+    app.add_media_roots(std::slice::from_ref(&test_dir))
+        .expect("add media roots");
+
+    // UX-019: Remove shared folder from configuration without touching original files on disk
+    let removed = app
+        .remove_media_root(&test_dir.to_string_lossy())
+        .expect("remove media root");
+    assert!(removed, "folder must be reported removed");
+
+    let reloaded = Config::load(&config).expect("reload configuration");
+    assert_eq!(
+        reloaded.library.roots.len(),
+        0,
+        "root must be removed from config"
+    );
+
+    // Source files must remain intact
+    assert!(
+        sample_file.exists(),
+        "original media file must not be touched (UX-019)"
+    );
+    assert_eq!(
+        std::fs::read(&sample_file).expect("read file"),
+        b"sample content"
+    );
+}

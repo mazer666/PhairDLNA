@@ -33,21 +33,21 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `PRD-001` | Be public and licensed AGPL-3.0-or-later, with the complete unmodified licence text shipped in… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-002` | Be free of charge, with no advertising, no telemetry, no analytics and no vendor account. | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-003` | Normal operation shall not require an internet connection; no component shall contact a… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-004` | Never expose the host to the public internet automatically; no router configuration (port… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-005` | Be implemented in Rust and shall be free of platform-specific code; platform integration shall… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-006` | Provide the complete product function; no capability shall require the graphical application to… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-007` | Media files shall be opened read-only by default; the server shall never modify | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-008` | Run on macOS (Apple Silicon and Intel) as the first supported platform | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-009` | Use sensible, safe defaults: a new installation shall serve the LAN without configuration,… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-010` | Remain usable end-to-end for a person who has never used a DLNA server | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-011` | Documentation shall be part of the product: every feature shall have a specification | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-012` | Every claim about performance, compatibility or security shall be backed by a recorded… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-013` | Not contain advertising, "recommended" content, telemetry endpoints or promotional network… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-014` | Expose its own status, diagnostics and configuration locally to the person who installed it,… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
-| `PRD-015` | Direct play shall be the default and preferred playback path; transcoding shall be optional | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Baseline |
+| `PRD-001` | Be public and licensed AGPL-3.0-or-later, with the complete unmodified licence text shipped in… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-002` | Be free of charge, with no advertising, no telemetry, no analytics and no vendor account. | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-003` | Normal operation shall not require an internet connection; no component shall contact a… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-004` | Never expose the host to the public internet automatically; no router configuration (port… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-005` | Be implemented in Rust and shall be free of platform-specific code; platform integration shall… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-006` | Provide the complete product function; no capability shall require the graphical application to… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-007` | Media files shall be opened read-only by default; the server shall never modify | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-008` | Run on macOS (Apple Silicon and Intel) as the first supported platform | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-009` | Use sensible, safe defaults: a new installation shall serve the LAN without configuration,… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-010` | Remain usable end-to-end for a person who has never used a DLNA server | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-011` | Documentation shall be part of the product: every feature shall have a specification | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-012` | Every claim about performance, compatibility or security shall be backed by a recorded… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-013` | Not contain advertising, "recommended" content, telemetry endpoints or promotional network… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-014` | Expose its own status, diagnostics and configuration locally to the person who installed it,… | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
+| `PRD-015` | Direct play shall be the default and preferred playback path; transcoding shall be optional | MUST | `cross-cutting` | M0 | Manual acceptance protocol | Verified |
 
 ## FUN — Functional behaviour
 
@@ -252,12 +252,12 @@ Requirement method, ID rules and the traceability chain are defined in
 | --- | --- | --- | --- | --- | --- | --- |
 | `PERF-001` | Keep its resident memory below 50 MB while idle with 10 000 indexed objects. | SHOULD | `F-18` | M1 | Benchmark | Baseline |
 | `PERF-002` | Reach the "ready to answer discovery" state within 2 seconds of start-up on the reference… | SHOULD | `F-18` | M1 | Benchmark | Baseline |
-| `PERF-003` | An incremental rescan of a tree with 10 000 unchanged files shall complete without re-reading… | MUST | `F-09` | M1 | Benchmark | Baseline |
+| `PERF-003` | An incremental rescan of a tree with 10 000 unchanged files shall complete without re-reading… | MUST | `F-09` | M1 | Benchmark | Verified |
 | `PERF-004` | Index at least 200 media files per second on the reference hardware when metadata extraction is… | SHOULD | `F-09` | M1 | Benchmark | Baseline |
 | `PERF-005` | A `Browse` request over a container with 10 000 children shall return its first page within 100… | MUST | `F-09` | M1 | Benchmark | Baseline |
 | `PERF-006` | Sustain 10 simultaneous direct-play streams without unbounded memory growth. | SHOULD | `F-18` | M1 | Benchmark | Baseline |
 | `PERF-007` | Memory growth per active stream shall be bounded and documented. | MUST | `F-18` | M1 | Benchmark | Baseline |
-| `PERF-008` | Not perform a full directory scan on a browse request. | MUST | `F-09` | M1 | Benchmark | Baseline |
+| `PERF-008` | Not perform a full directory scan on a browse request. | MUST | `F-09` | M1 | Benchmark | Verified |
 | `PERF-009` | Support 100 000 objects with an index scan that stays within a documented budget. | SHOULD | `F-09` | M1 | Benchmark | Baseline |
 | `PERF-010` | The reference hardware for all performance measurements shall be documented | MUST | `F-18` | M1 | Benchmark | Verified |
 | `PERF-011` | Every performance claim shall report the method | MUST | `F-18` | M1 | Benchmark | Verified |
@@ -270,11 +270,11 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `UX-001` | Be fully operable without any graphical interface. | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-002` | A first run shall require no more than one action (choosing a folder) before the server is… | SHOULD | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-003` | The first-run output shall name the device name | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-004` | Every error message shall state what happened | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
-| `UX-005` | Never abort with a panic message that lacks context; unexpected failures shall produce a… | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-001` | Be fully operable without any graphical interface. | MUST | `F-15` | M2 | Manual usability protocol | Verified |
+| `UX-002` | A first run shall require no more than one action (choosing a folder) before the server is… | SHOULD | `F-15` | M2 | Manual usability protocol | Verified |
+| `UX-003` | The first-run output shall name the device name | MUST | `F-15` | M2 | Manual usability protocol | Verified |
+| `UX-004` | Every error message shall state what happened | MUST | `F-15` | M2 | Manual usability protocol | Verified |
+| `UX-005` | Never abort with a panic message that lacks context; unexpected failures shall produce a… | MUST | `F-15` | M2 | Manual usability protocol | Verified |
 | `UX-006` | Provide `--help` for every subcommand. | MUST | `F-15` | M2 | Manual usability protocol | Implemented |
 | `UX-007` | Be accessible with the keyboard alone and shall expose the status of the server as text | MUST | `F-15` | M2 | Manual usability protocol | Implemented |
 | `UX-008` | Respect the system accessibility settings for contrast and motion and let users enlarge app… | SHOULD | `F-15` | M2 | Manual usability protocol | Scheduled |
@@ -282,13 +282,13 @@ Requirement method, ID rules and the traceability chain are defined in
 | `UX-010` | Use plain language and avoid protocol jargon in the user-facing text. | MUST | `F-15` | M2 | Manual usability protocol | Implemented |
 | `UX-011` | Diagnostics shall be copyable in one action and shall not contain personal data unless the user… | SHOULD | `F-14` | M2 | Manual usability protocol | Implemented |
 | `UX-012` | Tell the user which client is currently connected and what it is streaming. | SHOULD | `F-14` | M2 | Manual usability protocol | Implemented |
-| `UX-013` | Long-running operations shall report progress and allow cancellation. | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-013` | Long-running operations shall report progress and allow cancellation. | MUST | `F-15` | M2 | Manual usability protocol | Verified |
 | `UX-014` | Present the server state, the scan progress, the shared folders and the last observed client… | SHOULD | `F-15` | M2 | Manual usability protocol | Implemented |
 | `UX-015` | Provide a simple presentation mode and an advanced presentation mode over one configuration… | SHOULD | `F-15` | M2 | Manual usability protocol | Verified |
 | `UX-016` | A safety-critical warning raised in the advanced mode shall remain visible in the simple mode. | MUST | `F-15` | M2 | Manual usability protocol | Verified |
 | `UX-017` | Be operable with the keyboard alone, shall expose accessible labels and a deterministic focus… | MUST | `F-15` | M2 | Manual usability protocol | Scheduled |
 | `UX-018` | Expose the status of the server as text for assistive technologies | MUST | `F-15` | M2 | Manual usability protocol | Verified |
-| `UX-019` | Be able to start and stop the server, pause and resume indexing, and remove a shared folder… | MUST | `F-15` | M2 | Manual usability protocol | Baseline |
+| `UX-019` | Be able to start and stop the server, pause and resume indexing, and remove a shared folder… | MUST | `F-15` | M2 | Manual usability protocol | Verified |
 | `UX-020` | All user-facing strings shall be prepared for translation | SHOULD | `F-15` | M2 | Manual usability protocol | Verified |
 
 ## OPS — Operations and administration
@@ -442,11 +442,11 @@ Requirement method, ID rules and the traceability chain are defined in
 | --- | --- | --- | --- | --- | --- | --- |
 | `MB-001` | Be able to run headless independently of the user interface; the interface shall reconnect and… | MUST | `F-15` | M2 | Manual macOS usability protocol | Verified |
 | `MB-002` | Acknowledge every action visibly, report progress and explain errors, and shall never block its… | MUST | `F-15` | M2 | Manual macOS usability protocol | Implemented |
-| `MB-003` | Support keyboard navigation, assistive-technology labels, scalable text, sufficient contrast… | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-003` | Support keyboard navigation, assistive-technology labels, scalable text, sufficient contrast… | MUST | `F-15` | M2 | Manual macOS usability protocol | Verified |
 | `MB-004` | Open no popover or settings view that starts an index or a network scan it does not need. | MUST | `F-15` | M2 | Manual macOS usability protocol | Verified |
 | `MB-005` | Communicate with the server only over the local administration surface by default | MUST | `F-15` | M2 | Manual macOS usability protocol | Verified |
 | `MB-006` | Remain legible in light and dark appearance, on a small display and when the menu bar is… | SHOULD | `F-15` | M2 | Manual macOS usability protocol | Implemented |
-| `MB-007` | The first-run assistant shall offer an optional verification step that shows whether a… | SHOULD | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-007` | The first-run assistant shall offer an optional verification step that shows whether a… | SHOULD | `F-15` | M2 | Manual macOS usability protocol | Verified |
 | `MB-008` | Uninstalling and stopping shall be safe and obvious | MUST | `F-15` | M2 | Manual macOS usability protocol | Verified |
 | `MB-009` | Ship as a bundle with the metadata the operating system requires for its local-network and… | MUST | `F-15` | M2 | Manual macOS usability protocol | Implemented |
 
