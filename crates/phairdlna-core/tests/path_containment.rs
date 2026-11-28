@@ -203,6 +203,26 @@ fn a_link_that_points_out_is_refused() {
     );
 }
 
+/// SEC-069 — a macOS Finder alias is not resolved or followed out of the root.
+///
+/// Aliases are treated according to the same containment rules as symbolic
+/// links: any resolution target pointing outside the roots is refused.
+#[test]
+fn sec_069_finder_alias_containment() {
+    let roots = vec![root()];
+    let inside_alias = Path::new("/library/films/alias_to_secret.alias");
+    let outside_target = Path::new("/Users/victim/.ssh/id_ed25519");
+
+    assert!(
+        is_inside_roots(inside_alias, &roots),
+        "the alias file itself is inside root"
+    );
+    assert!(
+        !is_inside_roots(outside_target, &roots),
+        "the alias target outside root is strictly refused"
+    );
+}
+
 /// SEC-TH-21 — a playlist entry that names a path is not a media object.
 ///
 /// A playlist is a list of names, not a list of paths; an entry that tries to

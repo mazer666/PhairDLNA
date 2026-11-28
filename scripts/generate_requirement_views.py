@@ -593,6 +593,11 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — playlist entries treated as untrusted, contained within roots, network schemes refused",
         "Verified",
     ),
+    "SEC-069": (
+        "`crates/phairdlna-core/tests/path_containment.rs::sec_069_finder_alias_containment`"
+        " — macOS Finder aliases treated according to same containment rules as symbolic links and refused if pointing outside roots",
+        "Verified",
+    ),
     "REL-001": (
         "`crates/phairdlna-cli/tests/crash_recovery.rs`"
         " — abrupt termination never modifies media originals and catalogue is consistently rebuilt on restart",
