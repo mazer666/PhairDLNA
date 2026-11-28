@@ -18,9 +18,11 @@ pub mod artwork;
 pub mod cache;
 pub mod id3;
 pub mod mp4;
+pub mod probe;
 pub mod sidecar;
 pub mod thumbnail;
 
 pub use artwork::{cache_key, Artwork, ArtworkFinder, ArtworkSource, PictureLimits, RootBoundary};
 pub use cache::PictureCache;
+pub use probe::{probe_file, ProbedMetadata};
 pub use sidecar::mime_type_of;

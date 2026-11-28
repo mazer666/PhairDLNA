@@ -222,6 +222,17 @@ fn file_item(
     item.metadata.mime_type = entry.mime_type.clone();
     item.metadata.size = entry.size;
     item.metadata.modified = modified_seconds_of(entry);
+    if let Some(probed) = crate::media::probe_file(&entry.path) {
+        if let Some(dur) = probed.duration {
+            item.metadata.duration = Some(dur);
+        }
+        if let Some(res) = probed.resolution {
+            item.metadata.resolution = Some(res);
+        }
+        if let Some(br) = probed.bitrate {
+            item.metadata.bitrate = Some(br);
+        }
+    }
     if let Some(sidecar) = &entry.subtitle {
         item.metadata.subtitle = register_subtitle(catalogue, sidecar, id, context);
     }

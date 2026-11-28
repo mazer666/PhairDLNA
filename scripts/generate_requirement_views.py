@@ -1128,6 +1128,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — assigns deterministic, stable and path-opaque object identifiers preserved across rescans and library moves",
         "Verified",
     ),
+    "FUN-012": (
+        "`crates/phairdlna-core/tests/catalogue_metadata.rs::probes_mp4_duration_and_bitrate`,"
+        " `crates/phairdlna-core/tests/catalogue_metadata.rs::probes_png_dimensions`,"
+        " `crates/phairdlna-core/tests/catalogue_metadata.rs::unsupported_or_broken_file_yields_none`"
+        " — extracts duration, dimensions, bitrate and codec without executing an external program",
+        "Verified",
+    ),
     "FUN-026": (
         "`crates/phairdlna-core/tests/subtitles.rs::a_film_carries_the_subtitle_as_a_second_resource`,"
         " `::a_smil_sidecar_is_offered_with_its_own_type`,"

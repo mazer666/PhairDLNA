@@ -14,13 +14,13 @@ use std::io::{Read, Seek, SeekFrom};
 const HEADER: u64 = 8;
 
 /// One atom of a container.
-pub(super) struct Atom {
+pub(crate) struct Atom {
     /// The name of the atom.
-    pub(super) name: [u8; 4],
+    pub(crate) name: [u8; 4],
     /// Where the content of the atom begins.
-    pub(super) payload_start: u64,
+    pub(crate) payload_start: u64,
     /// Where the atom ends.
-    pub(super) end: u64,
+    pub(crate) end: u64,
 }
 
 /// Reads the header of the atom at the given place.
@@ -28,7 +28,7 @@ pub(super) struct Atom {
 /// Nothing comes back when the atom does not fit into the container, or when
 /// its size is smaller than its own header: such an atom is broken, and a
 /// broken atom ends the walk.
-pub(super) fn read_atom(file: &mut File, offset: u64, limit: u64) -> Option<Atom> {
+pub(crate) fn read_atom(file: &mut File, offset: u64, limit: u64) -> Option<Atom> {
     let header_end = offset.checked_add(HEADER)?;
     if header_end > limit {
         return None;

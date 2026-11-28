@@ -64,7 +64,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-009` | Store its catalogue in a local SQLite database that can be deleted and rebuilt without data… | MUST | `F-09` | M2 | Automated test | Verified |
 | `FUN-010` | Recover from a corrupted index database by rebuilding it automatically | MUST | `F-09` | M2 | Automated test | Verified |
 | `FUN-011` | Assign stable object identifiers that do not change when the catalogue is rebuilt. | MUST | `F-09` | M1 | Automated test | Verified |
-| `FUN-012` | Extract duration, dimensions, bitrate and codec information for media files where it can do so… | SHOULD | `F-09` | M1 | Automated test | Baseline |
+| `FUN-012` | Extract duration, dimensions, bitrate and codec information for media files where it can do so… | SHOULD | `F-09` | M1 | Automated test | Verified |
 | `FUN-013` | Extract embedded artwork from audio files and use a sidecar image when one exists. | SHOULD | `F-10` | M2 | Automated test | Implemented |
 | `FUN-014` | Generate thumbnails for image files and video posters on demand and cache them in a disposable… | SHOULD | `F-10` | M2 | Automated test | Implemented |
 | `FUN-015` | Support playlists in M3U, M3U8 and PLS format, resolving entries relative to the playlist file. | SHOULD | `F-11` | M2 | Automated test | Verified |

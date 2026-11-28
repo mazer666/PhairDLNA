@@ -185,7 +185,7 @@ fn cover_in_data(file: &mut File, data: &Atom) -> Option<Cover> {
     })
 }
 
-mod atom;
+pub(crate) mod atom;
 
 #[cfg(test)]
 mod tests;
