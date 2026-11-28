@@ -1355,6 +1355,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " socket; a client that is not on the list is refused with 403 before a handler sees the request",
         "Verified",
     ),
+    "CFG-010": (
+        "`crates/phairdlna-core/tests/config_schema.rs::ac_13_trusted_client_profile_validation`,"
+        " `crates/phairdlna-core/src/profile.rs`"
+        " — trusted client list validation ensures entries map to known device profiles and rejects unknown profiles",
+        "Verified",
+    ),
     "CFG-011": (
         "`crates/phairdlna-cli/tests/cli.rs::a_valid_configuration_passes`,"
         " `crates/phairdlna-cli/tests/cli.rs::a_broken_configuration_is_reported`,"

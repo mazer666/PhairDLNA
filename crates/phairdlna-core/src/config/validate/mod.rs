@@ -174,7 +174,43 @@ fn validate_security(security: &SecuritySection) -> Result<(), ConfigError> {
         validate_host_name(index, name)?;
     }
     validate_clients(security)?;
+    validate_trusted_clients(security)?;
     validate_admin(security)
+}
+
+/// The validation of trusted client entries (CFG-010, INT-100, AC-13).
+///
+/// An entry can be either a profile id or a "client_address=profile_id" mapping.
+/// If an unknown profile id is specified, validation fails naming the unknown
+/// profile and listing the known profile ids.
+fn validate_trusted_clients(security: &SecuritySection) -> Result<(), ConfigError> {
+    for (index, entry) in security.trusted_clients.iter().enumerate() {
+        let trimmed = entry.trim();
+        if trimmed.is_empty() {
+            return Err(ConfigError::field(
+                "security.trusted_clients",
+                format!(
+                    "field \"security.trusted_clients[{index}]\" is empty; expected a known device profile identifier or client=profile mapping"
+                ),
+            ));
+        }
+        let profile_id = if let Some((_client, prof)) = trimmed.split_once('=') {
+            prof.trim()
+        } else {
+            trimmed
+        };
+
+        if !crate::profile::is_known_profile(profile_id) {
+            let known = crate::profile::KNOWN_PROFILE_IDS.join(", ");
+            return Err(ConfigError::field(
+                "security.trusted_clients",
+                format!(
+                    "field \"security.trusted_clients[{index}]\" names unknown device profile \"{profile_id}\"; known profiles are: [{known}]"
+                ),
+            ));
+        }
+    }
+    Ok(())
 }
 
 /// The rules of the list of the clients that may talk to the server.

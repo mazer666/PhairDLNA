@@ -334,7 +334,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `CFG-007` | Support a per-root setting for symbolic link following | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-008` | Support resource limits: maximum concurrent streams | SHOULD | `F-12` | M2 | Automated configuration test | Implemented |
 | `CFG-009` | Support an optional access-control list of client addresses allowed to browse or to stream. | SHOULD | `F-12` | M2 | Automated configuration test | Verified |
-| `CFG-010` | Support a "trusted client" list whose quirks are handled by a specific device profile. | SHOULD | `F-12` | M2 | Automated configuration test | Baseline |
+| `CFG-010` | Support a "trusted client" list whose quirks are handled by a specific device profile. | SHOULD | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-011` | Provide a command that validates a configuration file without starting the server. | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-012` | Provide a command that exports the effective configuration and one that imports it | SHOULD | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-013` | Unknown configuration keys shall be reported as errors rather than ignored | MUST | `F-12` | M2 | Automated configuration test | Verified |

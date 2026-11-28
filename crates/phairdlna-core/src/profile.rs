@@ -80,6 +80,19 @@ impl ClientProfile {
     }
 }
 
+/// List of built-in known device profile identifiers supported by the server.
+pub const KNOWN_PROFILE_IDS: &[&str] = &[
+    "legacy-renderer",
+    "smart-tv-2018",
+    "quirky-client",
+    "sample-tv",
+];
+
+/// Returns true if the profile id is a known built-in device profile.
+pub fn is_known_profile(id: &str) -> bool {
+    KNOWN_PROFILE_IDS.contains(&id)
+}
+
 /// Profile registry and matcher.
 #[derive(Debug, Clone, Default)]
 pub struct ProfileStore {
