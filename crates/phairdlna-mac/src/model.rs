@@ -94,6 +94,14 @@ pub struct ServerSnapshot {
     pub transfers: Vec<TransferInfo>,
     /// What the last scan of the library found.
     pub last_scan: Option<String>,
+    /// The effective interface (LIFE-009).
+    pub effective_interface: Option<String>,
+    /// The effective address the server is reachable at (LIFE-009).
+    pub effective_address: Option<String>,
+    /// The state of the socket listener (LIFE-009).
+    pub listener_state: Option<String>,
+    /// The last recovery event (LIFE-009).
+    pub last_recovery_event: Option<String>,
 }
 
 impl ServerSnapshot {

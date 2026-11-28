@@ -43,8 +43,20 @@ pub fn spawn(
     logger: Logger,
     resources: Resources,
     lifecycle: LifecycleController,
+    schedule: phairdlna_core::config::ScanSchedule,
 ) -> (tokio::sync::watch::Sender<bool>, JoinHandle<()>) {
-    spawn_with_interval(library, logger, resources, lifecycle, WATCH_INTERVAL)
+    let interval = match schedule {
+        phairdlna_core::config::ScanSchedule::Interval(secs) => Duration::from_secs(secs),
+        phairdlna_core::config::ScanSchedule::ManualOnly => WATCH_INTERVAL,
+    };
+    spawn_scheduled(
+        library,
+        logger,
+        resources,
+        lifecycle,
+        interval,
+        schedule.is_automatic(),
+    )
 }
 
 /// Builds the change watcher for the media roots of the library.
@@ -78,6 +90,18 @@ pub fn spawn_with_interval(
     lifecycle: LifecycleController,
     interval: Duration,
 ) -> (tokio::sync::watch::Sender<bool>, JoinHandle<()>) {
+    spawn_scheduled(library, logger, resources, lifecycle, interval, true)
+}
+
+/// Starts the watch with explicit interval and auto-scan control (FUN-024).
+pub fn spawn_scheduled(
+    library: Library,
+    logger: Logger,
+    resources: Resources,
+    lifecycle: LifecycleController,
+    interval: Duration,
+    auto_rescan: bool,
+) -> (tokio::sync::watch::Sender<bool>, JoinHandle<()>) {
     let fs_watcher = build_fs_watcher(&library, &logger);
     let (stop, mut stopped) = tokio::sync::watch::channel(false);
     let task = tokio::spawn(async move {
@@ -94,7 +118,7 @@ pub fn spawn_with_interval(
                     let lifecycle = lifecycle.clone();
                     let fs_watcher = fs_watcher.clone();
                     if let Err(error) = resources.submit_background(move || {
-                        watch_once(&library, &logger, &lifecycle, fs_watcher.as_deref());
+                        watch_once(&library, &logger, &lifecycle, fs_watcher.as_deref(), auto_rescan);
                     }) {
                         resources.explain(&error);
                     }
@@ -112,6 +136,7 @@ fn watch_once(
     logger: &Logger,
     lifecycle: &LifecycleController,
     fs_watcher: Option<&FsChangeWatcher>,
+    auto_rescan: bool,
 ) {
     let roots_changed = library.changed(&LocalFileSystem);
     let fs_changed = fs_watcher
@@ -119,7 +144,7 @@ fn watch_once(
         .map(|changes| !changes.is_empty())
         .unwrap_or(false);
 
-    if !roots_changed && !fs_changed {
+    if !roots_changed && (!auto_rescan || !fs_changed) {
         return;
     }
     if fs_changed {

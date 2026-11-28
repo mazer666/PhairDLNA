@@ -49,6 +49,14 @@ pub struct Status {
     pub system_update_id: u32,
     /// The roots of the library.
     pub roots: Vec<RootState>,
+    /// The effective network interface (LIFE-009).
+    pub effective_interface: Option<String>,
+    /// The effective address the server is reachable at (LIFE-009).
+    pub effective_address: Option<String>,
+    /// The state of the socket listener (LIFE-009).
+    pub listener_state: Option<String>,
+    /// The last recovery event (LIFE-009).
+    pub last_recovery_event: Option<String>,
 }
 
 impl Default for Status {
@@ -68,6 +76,10 @@ impl Default for Status {
             cache_bytes: 0,
             system_update_id: 0,
             roots: Vec::new(),
+            effective_interface: None,
+            effective_address: None,
+            listener_state: None,
+            last_recovery_event: None,
         }
     }
 }

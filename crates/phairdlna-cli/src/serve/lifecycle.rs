@@ -18,6 +18,7 @@ use super::log::Logger;
 #[derive(Debug, Clone)]
 pub struct LifecycleController {
     current: Arc<Mutex<Transition>>,
+    last_recovery: Arc<Mutex<Option<String>>>,
     timeline: Arc<Timeline>,
     logger: Logger,
 }
@@ -31,6 +32,7 @@ impl LifecycleController {
         let _ = timeline.append(&initial);
         Self {
             current: Arc::new(Mutex::new(initial)),
+            last_recovery: Arc::new(Mutex::new(None)),
             timeline,
             logger,
         }
@@ -75,6 +77,13 @@ impl LifecycleController {
 
         let transition = Transition::new(next, reason_str.clone());
         let _ = self.timeline.append(&transition);
+        if next == LifecycleState::Recovering || guard.state == LifecycleState::Recovering {
+            let mut rec = self
+                .last_recovery
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
+            *rec = Some(format!("{}: {reason_str}", next.as_str()));
+        }
         *guard = transition;
 
         self.logger.info(
@@ -86,5 +95,23 @@ impl LifecycleController {
     /// The lines of the timeline for diagnostics export.
     pub fn read_timeline(&self) -> std::io::Result<String> {
         self.timeline.read()
+    }
+
+    /// The last observed recovery event, if any (LIFE-009).
+    pub fn last_recovery(&self) -> Option<String> {
+        self.last_recovery
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .clone()
+    }
+
+    /// Records an explicit recovery event note (LIFE-009, LIFE-011).
+    pub fn record_recovery(&self, event: &str) {
+        let _ = self.timeline.append_note(event);
+        let mut rec = self
+            .last_recovery
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        *rec = Some(event.to_owned());
     }
 }

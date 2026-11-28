@@ -152,6 +152,14 @@ fn expert_storage_settings() -> Vec<SettingDoc> {
             default_value: "None (OS user data)".to_owned(),
         },
         SettingDoc {
+            key: "library.scan_schedule".to_owned(),
+            label: "Background Library Scan Schedule".to_owned(),
+            tier: SettingTier::Expert,
+            summary: "Controls automatic periodic rescans or manual-only scanning (FUN-024).".to_owned(),
+            tooltip: "Configures interval in seconds (default 900) or manual_only so scans run only via explicit trigger.".to_owned(),
+            default_value: "interval(900)".to_owned(),
+        },
+        SettingDoc {
             key: "logging.level".to_owned(),
             label: "Log Level".to_owned(),
             tier: SettingTier::Expert,

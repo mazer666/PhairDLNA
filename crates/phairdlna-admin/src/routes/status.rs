@@ -10,9 +10,9 @@ use phairdlna_core::security::Redactor;
 use crate::backend::{RootState, Status};
 use crate::json::Json;
 
-/// The state of the server, as JSON.
-pub(super) fn json_of_status(status: &Status, redactor: &Redactor) -> Json {
-    Json::map(vec![
+/// The core identity and metric fields of the status.
+fn status_core_fields(status: &Status) -> Vec<(String, Json)> {
+    vec![
         (
             "lifecycle_state".to_owned(),
             Json::text(status.lifecycle_state.as_str().to_owned()),
@@ -63,8 +63,53 @@ pub(super) fn json_of_status(status: &Status, redactor: &Redactor) -> Json {
             "system_update_id".to_owned(),
             Json::uint(u64::from(status.system_update_id)),
         ),
-        ("roots".to_owned(), json_of_roots(&status.roots, redactor)),
-    ])
+    ]
+}
+
+/// The network and recovery fields of the status (LIFE-009).
+fn status_network_fields(status: &Status, redactor: &Redactor) -> Vec<(String, Json)> {
+    vec![
+        (
+            "effective_interface".to_owned(),
+            status
+                .effective_interface
+                .as_ref()
+                .map(|i| Json::text(i.clone()))
+                .unwrap_or(Json::Null),
+        ),
+        (
+            "effective_address".to_owned(),
+            status
+                .effective_address
+                .as_ref()
+                .map(|a| Json::text(redactor.value(a)))
+                .unwrap_or(Json::Null),
+        ),
+        (
+            "listener_state".to_owned(),
+            status
+                .listener_state
+                .as_ref()
+                .map(|s| Json::text(s.clone()))
+                .unwrap_or(Json::Null),
+        ),
+        (
+            "last_recovery_event".to_owned(),
+            status
+                .last_recovery_event
+                .as_ref()
+                .map(|e| Json::text(redactor.value(e)))
+                .unwrap_or(Json::Null),
+        ),
+    ]
+}
+
+/// The state of the server, as JSON.
+pub(super) fn json_of_status(status: &Status, redactor: &Redactor) -> Json {
+    let mut fields = status_core_fields(status);
+    fields.push(("roots".to_owned(), json_of_roots(&status.roots, redactor)));
+    fields.extend(status_network_fields(status, redactor));
+    Json::map(fields)
 }
 
 /// The roots of the library, as JSON.

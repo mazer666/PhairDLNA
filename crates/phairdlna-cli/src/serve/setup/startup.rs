@@ -3,6 +3,7 @@
 use std::net::Ipv4Addr;
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
+use tokio::task::JoinHandle;
 
 use phairdlna_core::config::Config;
 use phairdlna_core::identity;
@@ -26,43 +27,91 @@ use super::configuration::{address_and_port, device_info, load_config, load_iden
 use super::discovery::start_ssdp;
 use super::socket::{open_the_socket, start_capped_http};
 
-/// Starts the daemon: the configuration, the identity, the catalogue, the
-/// HTTP server and the discovery socket.
-pub async fn start(options: ServeOptions) -> Result<Daemon, String> {
-    let config = load_config(&options.config_path)?;
-    let prepared = prepare(&config, &options)?;
-    let logger = prepared.logger.clone();
-    let identity = prepared.identity.clone();
-    let library = prepared.library.clone();
-    let resources = prepared.resources.clone();
-    let lifecycle = LifecycleController::new(Arc::clone(&prepared.redactor), logger.clone());
-    let (host, port) = address_and_port(&options, &config);
-    let discovery_available = Arc::new(AtomicBool::new(false));
-    let (listener, address, base_url) = open_the_socket(host, port).await?;
-    let transfers = Transfers::new();
-    let (context, limits) = build_server_context(&config, &prepared, base_url, transfers.clone())?;
+/// Starts the HTTP media server and announces readiness.
+fn finalize_daemon(
+    context: Arc<http::ServerContext>,
+    address: std::net::SocketAddr,
+    prepared: Prepared,
+    limits: phairdlna_core::security::Limits,
+    listener: tokio::net::TcpListener,
+    bg: BackgroundTasks,
+) -> Daemon {
     let server = start_capped_http(listener, &limits, context.clone());
+    announce(&prepared.logger, &address, &context.base_url);
+    let _ = crate::service::notify::notify_ready(&format!("the server is listening on {address}"));
+    Daemon {
+        context,
+        address,
+        ssdp: bg.ssdp,
+        logger: prepared.logger,
+        server: Some(server),
+        stop_ssdp: bg.stop_ssdp,
+        ssdp_task: bg.ssdp_task,
+        stop_watch: Some(bg.stop_watch),
+        watch_task: Some(bg.watch_task),
+        #[cfg(feature = "admin")]
+        admin: bg.admin,
+    }
+}
+
+/// The handles of background services started alongside the daemon.
+struct BackgroundTasks {
+    #[cfg(feature = "admin")]
+    admin: Option<phairdlna_admin::AdminServer>,
+    ssdp: Option<Arc<crate::serve::ssdp::SsdpSocket>>,
+    stop_ssdp: Option<tokio::sync::watch::Sender<bool>>,
+    ssdp_task: Option<JoinHandle<()>>,
+    stop_watch: tokio::sync::watch::Sender<bool>,
+    watch_task: JoinHandle<()>,
+}
+
+/// Parameters required to launch background support tasks.
+struct BackgroundInputs<'a> {
+    options: &'a ServeOptions,
+    config: &'a Config,
+    prepared: &'a Prepared,
+    context: &'a Arc<http::ServerContext>,
+    host: Ipv4Addr,
+    address: std::net::SocketAddr,
+    transfers: Transfers,
+    discovery_available: Arc<AtomicBool>,
+    lifecycle: LifecycleController,
+}
+
+/// Starts background tasks including admin, discovery and filesystem watcher.
+async fn start_background_tasks(inputs: BackgroundInputs<'_>) -> Result<BackgroundTasks, String> {
+    let BackgroundInputs {
+        options,
+        config,
+        prepared,
+        context,
+        host,
+        address,
+        transfers,
+        discovery_available,
+        lifecycle,
+    } = inputs;
     #[cfg(feature = "admin")]
     let admin = start_admin(AdminInputs {
-        config: &config,
-        prepared: &prepared,
-        context: &context,
-        logger: &logger,
+        config,
+        prepared,
+        context,
+        logger: &prepared.logger,
         host,
         port: options.admin_port,
         transfers,
         discovery_available: &discovery_available,
         lifecycle: lifecycle.clone(),
-        resources: resources.clone(),
+        resources: prepared.resources.clone(),
     })
     .await?;
     let (ssdp, stop_ssdp, ssdp_task) = start_ssdp(
-        &options,
-        &identity,
-        &config,
+        options,
+        &prepared.identity,
+        config,
         host,
         address.port(),
-        &logger,
+        &prepared.logger,
         discovery_available,
     )
     .await;
@@ -70,23 +119,51 @@ pub async fn start(options: ServeOptions) -> Result<Daemon, String> {
         phairdlna_core::lifecycle::LifecycleState::Ready,
         format!("the server is listening on {address}"),
     );
-    let (stop_watch, watch_task) =
-        watch::spawn(library, logger.clone(), resources, lifecycle.clone());
-    announce(&logger, &address, &context.base_url);
-    let _ = crate::service::notify::notify_ready(&format!("the server is listening on {address}"));
-    Ok(Daemon {
-        context,
-        address,
-        ssdp,
-        logger,
-        server: Some(server),
-        stop_ssdp,
-        ssdp_task,
-        stop_watch: Some(stop_watch),
-        watch_task: Some(watch_task),
+    let (stop_watch, watch_task) = watch::spawn(
+        prepared.library.clone(),
+        prepared.logger.clone(),
+        prepared.resources.clone(),
+        lifecycle,
+        config.library.scan_schedule,
+    );
+    Ok(BackgroundTasks {
         #[cfg(feature = "admin")]
         admin,
+        ssdp,
+        stop_ssdp,
+        ssdp_task,
+        stop_watch,
+        watch_task,
     })
+}
+
+/// Starts the daemon: the configuration, the identity, the catalogue, the
+/// HTTP server and the discovery socket.
+pub async fn start(options: ServeOptions) -> Result<Daemon, String> {
+    let config = load_config(&options.config_path)?;
+    let prepared = prepare(&config, &options)?;
+    let lifecycle =
+        LifecycleController::new(Arc::clone(&prepared.redactor), prepared.logger.clone());
+    let (host, port) = address_and_port(&options, &config);
+    let discovery_available = Arc::new(AtomicBool::new(false));
+    let (listener, address, base_url) = open_the_socket(host, port).await?;
+    let transfers = Transfers::new();
+    let (context, limits) = build_server_context(&config, &prepared, base_url, transfers.clone())?;
+    let bg = start_background_tasks(BackgroundInputs {
+        options: &options,
+        config: &config,
+        prepared: &prepared,
+        context: &context,
+        host,
+        address,
+        transfers,
+        discovery_available,
+        lifecycle,
+    })
+    .await?;
+    Ok(finalize_daemon(
+        context, address, prepared, limits, listener, bg,
+    ))
 }
 
 /// Starts the optional authenticated administration API.

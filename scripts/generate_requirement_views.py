@@ -975,6 +975,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — server recovers cleanly from abrupt crashes or damaged index files by safely moving corrupt files aside and rebuilding a consistent catalogue headlessly",
         "Verified",
     ),
+    "LIFE-009": (
+        "`crates/phairdlna-core/tests/life_009_admin_reporting.rs::life_009_diagnostics_contract_for_effective_interface_and_recovery`,"
+        " `crates/phairdlna-cli/tests/cli_status.rs::cli_status_text_and_json_render_effective_interface_and_recovery`"
+        " — the administration surface and CLI status reflect the effective interface, address, listener state and last recovery event in text and JSON",
+        "Verified",
+    ),
     "LIFE-011": (
         "`crates/phairdlna-cli/tests/recovery_timeline.rs::recovery_timeline_records_ordered_events_with_redaction`,"
         " `crates/phairdlna-core/src/lifecycle/timeline.rs::tests::a_path_in_the_timeline_is_hidden`"
@@ -1053,6 +1059,11 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "`crates/phairdlna-core/tests/media_roots_multiple.rs::the_path_of_a_file_is_the_path_of_the_disk`"
         " — the path of the catalogue is the path of the disk, byte for byte; the identity is a separate,"
         " derived value",
+        "Verified",
+    ),
+    "FUN-024": (
+        "`crates/phairdlna-cli/tests/cli_scan.rs::ac_09_scan_schedule_configuration_and_semantics`"
+        " — scan schedule is configurable as positive interval in seconds or manual_only, validated and wired to background watching",
         "Verified",
     ),
     "FUN-015": (

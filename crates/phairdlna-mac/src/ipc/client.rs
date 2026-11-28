@@ -152,6 +152,22 @@ impl<T: Transport> AdminClient<T> {
             active_streams: number_of(&document, "active_streams"),
             catalogue_objects: number_of(&document, "catalogue_objects"),
             roots: roots_of(&document),
+            effective_interface: document
+                .get("effective_interface")
+                .and_then(Json::as_str)
+                .map(str::to_owned),
+            effective_address: document
+                .get("effective_address")
+                .and_then(Json::as_str)
+                .map(str::to_owned),
+            listener_state: document
+                .get("listener_state")
+                .and_then(Json::as_str)
+                .map(str::to_owned),
+            last_recovery_event: document
+                .get("last_recovery_event")
+                .and_then(Json::as_str)
+                .map(str::to_owned),
         })
     }
 

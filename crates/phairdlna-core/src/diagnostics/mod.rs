@@ -53,6 +53,14 @@ pub struct Diagnostics {
     pub timeline: Option<String>,
     /// When the library was scanned the last time.
     pub last_scan: Option<String>,
+    /// The effective network interface the server operates on (LIFE-009).
+    pub effective_interface: Option<String>,
+    /// The effective address the server is actually reachable at (LIFE-009).
+    pub effective_address: Option<String>,
+    /// The state of the socket listener (e.g. "open", "degraded", "recovering") (LIFE-009).
+    pub listener_state: Option<String>,
+    /// The plain-language description of the last recovery event (LIFE-009).
+    pub last_recovery_event: Option<String>,
 }
 
 /// One root of the library.
@@ -115,6 +123,32 @@ pub fn redact(diagnostics: &Diagnostics, report: &Report) -> (Diagnostics, Repor
     (facts, context)
 }
 
+/// Redacts active stream information with pseudonyms.
+fn redact_transfers(transfers: &[TransferInfo], redactor: &Redactor) -> Vec<TransferInfo> {
+    transfers
+        .iter()
+        .map(|transfer| TransferInfo {
+            client: transfer.client.clone(),
+            address: redactor.value(&transfer.address),
+            title: transfer.title.clone(),
+            running_seconds: transfer.running_seconds,
+        })
+        .collect()
+}
+
+/// Redacts root state paths with pseudonyms.
+fn redact_roots(roots: &[RootState], redactor: &Redactor) -> Vec<RootState> {
+    roots
+        .iter()
+        .map(|root| RootState {
+            name: root.name.clone(),
+            path: redactor.value(&root.path),
+            mounted: root.mounted,
+            objects: root.objects,
+        })
+        .collect()
+}
+
 /// Replaces private places in the server diagnostics with pseudonyms.
 fn redact_diagnostics(diagnostics: &Diagnostics, redactor: &Redactor) -> Diagnostics {
     Diagnostics {
@@ -124,26 +158,8 @@ fn redact_diagnostics(diagnostics: &Diagnostics, redactor: &Redactor) -> Diagnos
         catalogue_objects: diagnostics.catalogue_objects,
         resident_bytes: diagnostics.resident_bytes,
         system_update_id: diagnostics.system_update_id,
-        roots: diagnostics
-            .roots
-            .iter()
-            .map(|root| RootState {
-                name: root.name.clone(),
-                path: redactor.value(&root.path),
-                mounted: root.mounted,
-                objects: root.objects,
-            })
-            .collect(),
-        transfers: diagnostics
-            .transfers
-            .iter()
-            .map(|transfer| TransferInfo {
-                client: transfer.client.clone(),
-                address: redactor.value(&transfer.address),
-                title: transfer.title.clone(),
-                running_seconds: transfer.running_seconds,
-            })
-            .collect(),
+        roots: redact_roots(&diagnostics.roots, redactor),
+        transfers: redact_transfers(&diagnostics.transfers, redactor),
         records: diagnostics
             .records
             .iter()
@@ -167,6 +183,16 @@ fn redact_diagnostics(diagnostics: &Diagnostics, redactor: &Redactor) -> Diagnos
         resources: diagnostics.resources.clone(),
         timeline: diagnostics.timeline.as_ref().map(|tl| redactor.value(tl)),
         last_scan: diagnostics.last_scan.clone(),
+        effective_interface: diagnostics.effective_interface.clone(),
+        effective_address: diagnostics
+            .effective_address
+            .as_ref()
+            .map(|a| redactor.value(a)),
+        listener_state: diagnostics.listener_state.clone(),
+        last_recovery_event: diagnostics
+            .last_recovery_event
+            .as_ref()
+            .map(|e| redactor.value(e)),
     }
 }
 
@@ -205,6 +231,10 @@ pub fn from_json(document: &Json) -> Diagnostics {
         resources: optional_text_of(document, "resources"),
         timeline: optional_text_of(document, "timeline"),
         last_scan: optional_text_of(document, "last_scan"),
+        effective_interface: optional_text_of(document, "effective_interface"),
+        effective_address: optional_text_of(document, "effective_address"),
+        listener_state: optional_text_of(document, "listener_state"),
+        last_recovery_event: optional_text_of(document, "last_recovery_event"),
     }
 }
 

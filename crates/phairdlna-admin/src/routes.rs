@@ -149,6 +149,40 @@ fn json_of_rescan(outcome: &RescanOutcome) -> Json {
     ])
 }
 
+/// The network and recovery fields of the diagnostics (LIFE-009).
+fn diagnostics_network_fields(d: &Diagnostics, redactor: &Redactor) -> Vec<(String, Json)> {
+    vec![
+        (
+            "effective_interface".to_owned(),
+            d.effective_interface
+                .as_ref()
+                .map(|i| Json::text(i.clone()))
+                .unwrap_or(Json::Null),
+        ),
+        (
+            "effective_address".to_owned(),
+            d.effective_address
+                .as_ref()
+                .map(|a| Json::text(redactor.value(a)))
+                .unwrap_or(Json::Null),
+        ),
+        (
+            "listener_state".to_owned(),
+            d.listener_state
+                .as_ref()
+                .map(|s| Json::text(s.clone()))
+                .unwrap_or(Json::Null),
+        ),
+        (
+            "last_recovery_event".to_owned(),
+            d.last_recovery_event
+                .as_ref()
+                .map(|e| Json::text(redactor.value(e)))
+                .unwrap_or(Json::Null),
+        ),
+    ]
+}
+
 /// The diagnostics of the server, as JSON.
 fn json_of_diagnostics(diagnostics: &Diagnostics, redactor: &Redactor) -> Json {
     let mut fields = core_diagnostics_fields(diagnostics, redactor);
@@ -182,6 +216,7 @@ fn json_of_diagnostics(diagnostics: &Diagnostics, redactor: &Redactor) -> Json {
             .map(|s| Json::text(s.clone()))
             .unwrap_or(Json::Null),
     ));
+    fields.extend(diagnostics_network_fields(diagnostics, redactor));
     Json::map(fields)
 }
 

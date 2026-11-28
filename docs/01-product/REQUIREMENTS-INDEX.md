@@ -76,7 +76,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-021` | Provide a way to exclude subdirectories of a root. | SHOULD | `F-11` | M2 | Protocol conformance + device test | Implemented |
 | `FUN-022` | Support multiple roots that point to the same underlying volume without producing duplicate… | SHOULD | `F-11` | M2 | Protocol conformance + device test | Implemented |
 | `FUN-023` | Expose the free space of a root through the ContentDirectory service when the file system… | COULD | `F-08` | M2 | Automated test | Baseline |
-| `FUN-024` | Allow the user to configure a scan schedule (interval | SHOULD | `F-08` | M2 | Automated test | Baseline |
+| `FUN-024` | Allow the user to configure a scan schedule (interval | SHOULD | `F-08` | M2 | Automated test | Verified |
 | `FUN-025` | Make a newly added file visible in the catalogue within 30 seconds on a file system that… | SHOULD | `F-09` | M1 | Automated test | Verified |
 | `FUN-026` | Offer a subtitle sidecar as an additional resource with the MIME type that matches its format | MUST | `F-11` | M2 | Automated test | Verified |
 | `FUN-027` | Deliver a subtitle file in a character set the client can read | MUST | `F-11` | M2 | Automated test | Implemented |
@@ -432,7 +432,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `LIFE-006` | A transfer interrupted by a real sleep or a real network loss shall end in a way that is… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 | `LIFE-007` | Retry discovery and rebinding with a bounded backoff and jitter | MUST | `F-13` | M2 | Lifecycle and recovery test | Scheduled |
 | `LIFE-008` | Recover from an abnormal termination with an atomic state and either a consistent catalogue or… | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
-| `LIFE-009` | The administration surface and the user interface shall reflect the effective interface | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-009` | The administration surface and the user interface shall reflect the effective interface | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
 | `LIFE-010` | The installation of the login-item service and the permissions it needs shall be explicit and… | MUST | `F-15` | M2 | Lifecycle and recovery test | Verified |
 | `LIFE-011` | Keep a local, redacted timeline of network changes and recovery events that the user may export… | SHOULD | `F-13` | M2 | Lifecycle and recovery test | Implemented |
 

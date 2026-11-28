@@ -70,6 +70,10 @@ impl AdminBackend for Fake {
                 mounted: true,
                 objects: 7,
             }],
+            effective_interface: Some("en0".to_owned()),
+            effective_address: Some("192.168.1.20:8200".to_owned()),
+            listener_state: Some("open".to_owned()),
+            last_recovery_event: Some("rebound listeners on en0".to_owned()),
         }
     }
 
@@ -105,6 +109,10 @@ impl AdminBackend for Fake {
             resources: Some("4 workers, machine calm".to_owned()),
             timeline: Some("2026-11-26T08:00:00Z ready reason=\"listening\"".to_owned()),
             last_scan: Some("7 objects".to_owned()),
+            effective_interface: Some("en0".to_owned()),
+            effective_address: Some("192.168.1.20:8200".to_owned()),
+            listener_state: Some("open".to_owned()),
+            last_recovery_event: Some("rebound listeners on en0".to_owned()),
         }
     }
 

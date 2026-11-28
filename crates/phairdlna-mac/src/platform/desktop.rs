@@ -190,7 +190,7 @@ impl Desktop {
     fn take(&mut self, answer: Answer) {
         match answer {
             Answer::State(snapshot) => {
-                self.app.take_state(snapshot);
+                self.app.take_state(*snapshot);
             }
             Answer::Scanned(report) => {
                 self.app.take_rescan(&report);

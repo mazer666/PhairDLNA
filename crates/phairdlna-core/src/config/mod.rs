@@ -19,6 +19,7 @@ mod defaults;
 mod error;
 mod load;
 mod paths;
+pub mod schedule;
 pub mod schema;
 mod sections;
 mod validate;
@@ -32,6 +33,7 @@ pub use load::{resolve_path, CONFIG_PATH_ENV, DEFAULT_CONFIG_FILE_NAME};
 pub use paths::{
     default_database_path, home_directory, user_config_dir, user_data_dir, PROJECT_DIRECTORY,
 };
+pub use schedule::{ScanSchedule, DEFAULT_SCAN_INTERVAL_SECS};
 pub use sections::{
     LibrarySection, LimitsSection, LogLevel, LoggingSection, MediaRoot, NetworkSection,
     SecuritySection, ServerSection, SymlinkPolicy,

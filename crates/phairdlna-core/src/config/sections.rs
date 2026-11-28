@@ -101,6 +101,9 @@ pub struct LibrarySection {
     /// read again (`FUN-009`).
     #[serde(default)]
     pub database_path: Option<String>,
+    /// The scan schedule for periodic automatic indexing (FUN-024).
+    #[serde(default)]
+    pub scan_schedule: super::schedule::ScanSchedule,
 }
 
 impl LibrarySection {
@@ -125,6 +128,7 @@ impl Default for LibrarySection {
             extract_artwork: true,
             cache_directory: None,
             database_path: None,
+            scan_schedule: super::schedule::ScanSchedule::default(),
         }
     }
 }

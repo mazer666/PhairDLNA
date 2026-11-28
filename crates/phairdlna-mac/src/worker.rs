@@ -39,7 +39,7 @@ pub enum Command {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Answer {
     /// The state of the server.
-    State(ServerSnapshot),
+    State(Box<ServerSnapshot>),
     /// What the scan of the library found.
     Scanned(RescanReport),
     /// The raw diagnostics JSON report.
@@ -157,7 +157,7 @@ fn run<T: Transport>(
 fn answer_of<T: Transport>(client: &mut AdminClient<T>, command: Command) -> Answer {
     match command {
         Command::Refresh => match client.status() {
-            Ok(status) => Answer::State(state_of(&status, client)),
+            Ok(status) => Answer::State(Box::new(state_of(&status, client))),
             Err(error) => Answer::Failed(error),
         },
         Command::Rescan => match client.rescan() {
@@ -182,6 +182,10 @@ fn state_of<T: Transport>(status: &StatusSnapshot, client: &mut AdminClient<T>) 
         active_streams: status.active_streams,
         catalogue_objects: status.catalogue_objects,
         roots: status.roots.iter().map(root_of).collect(),
+        effective_interface: status.effective_interface.clone(),
+        effective_address: status.effective_address.clone(),
+        listener_state: status.listener_state.clone(),
+        last_recovery_event: status.last_recovery_event.clone(),
         ..ServerSnapshot::default()
     };
     if let Ok(diagnostics) = client.diagnostics() {

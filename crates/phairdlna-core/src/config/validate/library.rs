@@ -16,7 +16,21 @@ pub(super) fn validate_library(library: &LibrarySection) -> Result<(), ConfigErr
     }
     validate_distinct_roots(&library.roots)?;
     validate_cache_directory(library)?;
-    validate_database_path(library)
+    validate_database_path(library)?;
+    validate_scan_schedule(library)
+}
+
+/// A scan schedule with an interval must have a positive duration.
+fn validate_scan_schedule(library: &LibrarySection) -> Result<(), ConfigError> {
+    if let crate::config::ScanSchedule::Interval(secs) = library.scan_schedule {
+        if secs == 0 {
+            return Err(ConfigError::field(
+                "library.scan_schedule",
+                "field \"library.scan_schedule\" interval is 0; expected a positive number of seconds or \"manual_only\"",
+            ));
+        }
+    }
+    Ok(())
 }
 
 /// The cache of the pictures needs a folder of its own.

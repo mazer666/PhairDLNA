@@ -43,6 +43,14 @@ pub struct StatusSnapshot {
     pub catalogue_objects: u64,
     /// The roots of the library.
     pub roots: Vec<RootSnapshot>,
+    /// The effective interface (LIFE-009).
+    pub effective_interface: Option<String>,
+    /// The effective address the server is reachable at (LIFE-009).
+    pub effective_address: Option<String>,
+    /// The state of the socket listener (LIFE-009).
+    pub listener_state: Option<String>,
+    /// The last recovery event (LIFE-009).
+    pub last_recovery_event: Option<String>,
 }
 
 /// One stream that is running.

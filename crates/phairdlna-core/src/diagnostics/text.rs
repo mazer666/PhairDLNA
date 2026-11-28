@@ -285,6 +285,10 @@ mod tests {
             resources: Some("3 workers, machine calm".to_owned()),
             timeline: Some("2026-11-26T08:00:00Z ready reason=\"listening\"".to_owned()),
             last_scan: Some("10:00:00".to_owned()),
+            effective_interface: Some("en0".to_owned()),
+            effective_address: Some("192.168.1.50:8200".to_owned()),
+            listener_state: Some("ready".to_owned()),
+            last_recovery_event: Some("rebound listeners on en0".to_owned()),
         }
     }
 

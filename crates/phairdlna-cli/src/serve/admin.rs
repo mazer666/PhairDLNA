@@ -140,6 +140,10 @@ impl AdminBackend for DaemonAdmin {
             cache_bytes: self.pictures.cache().size(),
             system_update_id: self.update_id(),
             roots: self.roots(),
+            effective_interface: self.effective_interface(),
+            effective_address: self.device_address.clone(),
+            listener_state: Some(self.lifecycle.state().as_str().to_owned()),
+            last_recovery_event: self.lifecycle.last_recovery(),
         }
     }
 
@@ -178,6 +182,10 @@ impl AdminBackend for DaemonAdmin {
             resources: Some(self.resources.report().summary()),
             timeline: self.lifecycle.read_timeline().ok(),
             last_scan: None,
+            effective_interface: self.effective_interface(),
+            effective_address: self.device_address.clone(),
+            listener_state: Some(self.lifecycle.state().as_str().to_owned()),
+            last_recovery_event: self.lifecycle.last_recovery(),
         }
     }
 
@@ -209,6 +217,11 @@ impl AdminBackend for DaemonAdmin {
 }
 
 impl DaemonAdmin {
+    /// The effective interface if an address is advertised.
+    fn effective_interface(&self) -> Option<String> {
+        self.device_address.as_ref().map(|_| "default".to_owned())
+    }
+
     /// The transfers that are running, as the surface shows them.
     fn transfers_of_the_clients(&self) -> Vec<TransferInfo> {
         self.transfers
