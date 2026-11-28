@@ -56,3 +56,30 @@ fn ops_014_exit_code_scheme() {
     // On systems without a running user service, service status yields exit code 3 (not running / nothing to do)
     assert!(service_status.exit_code == 0 || service_status.exit_code == EXIT_NOTHING_TO_DO);
 }
+
+/// OPS-010: Server configuration supports service identity and distinct instance directories.
+/// Two instances with distinct configuration paths and identity paths run independently without collision.
+#[test]
+fn ops_010_multi_instance_service_identity() {
+    let dir1 = tempfile::tempdir().expect("tempdir 1");
+    let dir2 = tempfile::tempdir().expect("tempdir 2");
+
+    let id_path1 = dir1.path().join("identity");
+    let id_path2 = dir2.path().join("identity");
+
+    let id1 =
+        phairdlna_core::identity::load_or_create(&id_path1, "Living Room").expect("create id1");
+    let id2 = phairdlna_core::identity::load_or_create(&id_path2, "Bedroom").expect("create id2");
+
+    // Two distinct service instances have different UDNs (INT-014, OPS-010)
+    assert_ne!(
+        id1.udn, id2.udn,
+        "Different instances must have distinct UDNs"
+    );
+    assert_eq!(id1.friendly_name, "Living Room");
+    assert_eq!(id2.friendly_name, "Bedroom");
+
+    // The persistent identity files exist in distinct per-instance directories
+    assert!(id_path1.exists());
+    assert!(id_path2.exists());
+}

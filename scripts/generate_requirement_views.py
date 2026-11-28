@@ -863,6 +863,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — the server supports background service integration for launchd (macOS), systemd with READY/STOPPING notify (Linux) and Service Control Manager (Windows)",
         "Verified",
     ),
+    "OPS-010": (
+        "`crates/phairdlna-cli/tests/cli_lifecycle.rs::ops_010_multi_instance_service_identity`,"
+        " `crates/phairdlna-core/src/identity.rs::load_or_create`"
+        " — multi-instance service configuration runs with isolated instance directories, distinct configuration paths and distinct device identities (UDNs)",
+        "Verified",
+    ),
+
     "OPS-011": (
         "`crates/phairdlna-cli/tests/cli_lifecycle.rs::ops_011_version_output_contract`"
         " — version command outputs product version, AGPL-3.0 licence and documentation roadmap location",

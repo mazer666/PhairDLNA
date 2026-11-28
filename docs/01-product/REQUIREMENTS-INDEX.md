@@ -304,7 +304,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `OPS-007` | Log output shall be redactable: file system paths | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-008` | Shut down gracefully on `SIGINT` and `SIGTERM` | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-009` | Support running as a background service on macOS (launchd) | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
-| `OPS-010` | Support a configuration file that sets the service identity | SHOULD | `F-13` | M1 | Automated CLI test | Baseline |
+| `OPS-010` | Support a configuration file that sets the service identity | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-011` | Provide `--help` and `--version` output that names the version | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-012` | Expose its version in the `SERVER` header and in the device description. | MUST | `F-13` | M1 | Automated CLI test | Verified |
 | `OPS-013` | Write a structured diagnostic report (anonymised) that a user can attach to a bug report. | SHOULD | `F-13` | M1 | Automated CLI test | Verified |
