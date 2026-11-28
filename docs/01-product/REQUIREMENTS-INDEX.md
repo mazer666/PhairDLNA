@@ -349,11 +349,11 @@ Requirement method, ID rules and the traceability chain are defined in
 | `PLT-002` | Provide a build matrix covering macOS (arm64, x86_64), Linux (x86_64) and Windows (x86_64). | MUST | `F-22` | M0 | Build matrix | Verified |
 | `PLT-003` | All OS-specific behaviour shall be reachable through a documented trait with a default… | MUST | `F-22` | M0 | Build matrix | Verified |
 | `PLT-004` | Support macOS Apple Silicon natively without a Rosetta translation requirement. | MUST | `F-15` | M0 | Build matrix | Verified |
-| `PLT-005` | Detect the case sensitivity, the Unicode normalisation behaviour and the volume identity of… | MUST | `F-22` | M0 | Build matrix | Baseline |
-| `PLT-006` | Run correctly when the user's home directory or a media root contains spaces | MUST | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-005` | Detect the case sensitivity, the Unicode normalisation behaviour and the volume identity of… | MUST | `F-22` | M0 | Build matrix | Verified |
+| `PLT-006` | Run correctly when the user's home directory or a media root contains spaces | MUST | `F-22` | M0 | Build matrix | Verified |
 | `PLT-007` | Windows path handling shall support long paths and shall reject path traversal attempts using… | MUST | `F-22` | M0 | Build matrix | Verified |
-| `PLT-008` | Not expose absolute file system paths to clients. | MUST | `F-22` | M0 | Build matrix | Baseline |
-| `PLT-009` | Not require a C toolchain beyond what the platform already provides | SHOULD | `F-22` | M0 | Build matrix | Baseline |
+| `PLT-008` | Not expose absolute file system paths to clients. | MUST | `F-22` | M0 | Build matrix | Verified |
+| `PLT-009` | Not require a C toolchain beyond what the platform already provides | SHOULD | `F-22` | M0 | Build matrix | Verified |
 | `PLT-010` | Behave identically on all platforms with respect to protocol behaviour | MUST | `F-22` | M0 | Build matrix | Verified |
 | `PLT-011` | Treat the mount, unmount and remount of a volume as a first-class event and shall re-key the… | MUST | `F-22` | M2 | Build matrix | Implemented |
 | `PLT-012` | Treat a permission error on a subtree as a quarantined subtree that needs consent | MUST | `F-22` | M3 | Build matrix | Verified |
@@ -368,32 +368,32 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `DOC-001` | Every feature shall have a specification with the ten mandatory sections and stable requirement… | MUST | `F-19` | M0 | Documentation gate | Baseline |
-| `DOC-002` | Every performance, compatibility or security claim in the documentation shall link to an… | MUST | `F-19` | M0 | Documentation gate | Baseline |
-| `DOC-003` | `WHERE_TO_CHANGE.md` shall list every source path a newcomer may need to change and shall stay… | MUST | `F-19` | M0 | Documentation gate | Baseline |
-| `DOC-004` | Every public module shall have a doc comment stating what it is | MUST | `F-19` | M0 | Documentation gate | Baseline |
-| `DOC-005` | Be readable by a programming beginner: acronyms explained | MUST | `F-19` | M0 | Documentation gate | Baseline |
-| `DOC-006` | Contain no duplicated normative statement; the canonical location shall be linked from… | MUST | `F-19` | M0 | Documentation gate | Baseline |
-| `DOC-007` | Superseded baselines shall be preserved unchanged in the archive with a manifest and a digest. | MUST | `F-19` | M0 | Documentation gate | Baseline |
-| `DOC-008` | Every document shall carry a status, an owner role, a version and a date. | MUST | `F-19` | M0 | Documentation gate | Baseline |
-| `DOC-009` | The getting-started guide shall contain commands that a reader can execute verbatim. | MUST | `F-19` | M0 | Documentation gate | Baseline |
-| `DOC-010` | Contain a single navigation path from README to the relevant feature specification and source… | MUST | `F-19` | M0 | Documentation gate | Baseline |
-| `DOC-011` | Broken internal links shall be detected by an automated gate. | MUST | `F-19` | M0 | Documentation gate | Baseline |
-| `DOC-012` | Contribution guidance shall state the standards | MUST | `F-19` | M0 | Documentation gate | Baseline |
+| `DOC-001` | Every feature shall have a specification with the ten mandatory sections and stable requirement… | MUST | `F-19` | M0 | Documentation gate | Verified |
+| `DOC-002` | Every performance, compatibility or security claim in the documentation shall link to an… | MUST | `F-19` | M0 | Documentation gate | Verified |
+| `DOC-003` | `WHERE_TO_CHANGE.md` shall list every source path a newcomer may need to change and shall stay… | MUST | `F-19` | M0 | Documentation gate | Verified |
+| `DOC-004` | Every public module shall have a doc comment stating what it is | MUST | `F-19` | M0 | Documentation gate | Verified |
+| `DOC-005` | Be readable by a programming beginner: acronyms explained | MUST | `F-19` | M0 | Documentation gate | Verified |
+| `DOC-006` | Contain no duplicated normative statement; the canonical location shall be linked from… | MUST | `F-19` | M0 | Documentation gate | Verified |
+| `DOC-007` | Superseded baselines shall be preserved unchanged in the archive with a manifest and a digest. | MUST | `F-19` | M0 | Documentation gate | Verified |
+| `DOC-008` | Every document shall carry a status, an owner role, a version and a date. | MUST | `F-19` | M0 | Documentation gate | Verified |
+| `DOC-009` | The getting-started guide shall contain commands that a reader can execute verbatim. | MUST | `F-19` | M0 | Documentation gate | Verified |
+| `DOC-010` | Contain a single navigation path from README to the relevant feature specification and source… | MUST | `F-19` | M0 | Documentation gate | Verified |
+| `DOC-011` | Broken internal links shall be detected by an automated gate. | MUST | `F-19` | M0 | Documentation gate | Verified |
+| `DOC-012` | Contribution guidance shall state the standards | MUST | `F-19` | M0 | Documentation gate | Verified |
 
 ## SUP — Supply chain and licensing
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `SUP-001` | Contain the complete, unmodified AGPL-3.0 licence text and the licence metadata shall match it. | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
-| `SUP-002` | Every direct dependency shall be recorded with its licence and its purpose before it is used. | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
-| `SUP-003` | Fail the build if a dependency uses a licence that is incompatible with AGPL-3.0-or-later. | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
-| `SUP-004` | Run over the dependency graph and its result shall be recorded. | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
+| `SUP-001` | Contain the complete, unmodified AGPL-3.0 licence text and the licence metadata shall match it. | MUST | `F-19` | M0 | Licence and advisory gate | Verified |
+| `SUP-002` | Every direct dependency shall be recorded with its licence and its purpose before it is used. | MUST | `F-19` | M0 | Licence and advisory gate | Verified |
+| `SUP-003` | Fail the build if a dependency uses a licence that is incompatible with AGPL-3.0-or-later. | MUST | `F-19` | M0 | Licence and advisory gate | Verified |
+| `SUP-004` | Run over the dependency graph and its result shall be recorded. | MUST | `F-19` | M0 | Licence and advisory gate | Verified |
 | `SUP-005` | Release artefacts shall be accompanied by a software bill of materials and a checksum. | MUST | `F-19` | M0 | Licence and advisory gate | Verified |
-| `SUP-006` | Any dependency that requires a native toolchain or ships a licence with distribution… | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
-| `SUP-007` | Not vendor third-party source code into the repository without a record of its licence and… | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
-| `SUP-008` | Carry no `unsafe` code unless an ADR approves it with a written safety argument. | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
-| `SUP-009` | Carry a defined code-signing and notarisation plan before the first stable release | MUST | `F-19` | M0 | Licence and advisory gate | Baseline |
+| `SUP-006` | Any dependency that requires a native toolchain or ships a licence with distribution… | MUST | `F-19` | M0 | Licence and advisory gate | Verified |
+| `SUP-007` | Not vendor third-party source code into the repository without a record of its licence and… | MUST | `F-19` | M0 | Licence and advisory gate | Verified |
+| `SUP-008` | Carry no `unsafe` code unless an ADR approves it with a written safety argument. | MUST | `F-19` | M0 | Licence and advisory gate | Verified |
+| `SUP-009` | Carry a defined code-signing and notarisation plan before the first stable release | MUST | `F-19` | M0 | Licence and advisory gate | Verified |
 
 ## REL — Reliability
 

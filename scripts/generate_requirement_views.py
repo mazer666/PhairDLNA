@@ -1300,6 +1300,28 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " of the index workers are the work of M2.4",
         "Implemented",
     ),
+    "PLT-005": (
+        "`crates/phairdlna-core/tests/catalogue_identity.rs::an_exact_byte_spelling_keeps_its_identity`,"
+        " `crates/phairdlna-core/src/platform/local.rs`"
+        " — case sensitivity, Unicode normalization behavior, and volume fingerprinting are detected per media root",
+        "Verified",
+    ),
+    "PLT-006": (
+        "`crates/phairdlna-core/tests/media_roots.rs::a_root_with_an_awkward_name_is_scanned`"
+        " — paths containing spaces, non-ASCII Unicode characters and emoji are scanned and indexed cleanly",
+        "Verified",
+    ),
+    "PLT-008": (
+        "`crates/phairdlna-core/src/catalogue/identifier.rs`,"
+        " `crates/phairdlna-core/src/didl/uri.rs`"
+        " — media and metadata URI schemes strictly use opaque identifiers and never expose absolute filesystem paths",
+        "Verified",
+    ),
+    "PLT-009": (
+        "`Cargo.toml`, `deny.toml`, `docs/04-security/DEPENDENCY-LICENSE-REVIEW.md`"
+        " — build toolchain requirements and native dependencies (bundled SQLite per DEC-074) are explicitly reviewed and recorded",
+        "Verified",
+    ),
     "PLT-011": (
         "`crates/phairdlna-core/tests/volume_platform_events.rs::a_volume_that_was_unmounted_takes_its_files_with_it`,"
         " `::a_volume_that_was_mounted_again_is_published_again`,"
@@ -1768,10 +1790,111 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " the wake do not release the workers of the scheduler yet",
         "Implemented",
     ),
+    "SUP-001": (
+        "`LICENSE`, `Cargo.toml`, `deny.toml`"
+        " — repository contains complete unmodified AGPL-3.0 licence text and workspace package metadata specifies matching AGPL-3.0-or-later",
+        "Verified",
+    ),
+    "SUP-002": (
+        "`docs/04-security/DEPENDENCY-LICENSE-REVIEW.md`, `Cargo.lock`"
+        " — every direct dependency is recorded with approved license and architectural purpose in security review",
+        "Verified",
+    ),
+    "SUP-003": (
+        "`deny.toml`, `scripts/local-ci.sh (QG-08)`"
+        " — automated cargo-deny license check strictly fails on any license incompatible with AGPL-3.0-or-later",
+        "Verified",
+    ),
+    "SUP-004": (
+        "`scripts/local-ci.sh (QG-09)`"
+        " — automated security vulnerability scanning runs over full dependency tree via RustSec advisory-db in local CI",
+        "Verified",
+    ),
     "SUP-005": (
         "`scripts/generate-release-artefacts.sh`,"
         " `crates/phairdlna-cli/tests/release_artefacts.rs::release_packaging_script_exists_and_implements_sbom_and_checksums`"
         " — release packaging script generates SHA-256 checksums and dependency SBOM metadata for distribution packages",
+        "Verified",
+    ),
+    "SUP-006": (
+        "`deny.toml`, `docs/04-security/DEPENDENCY-LICENSE-REVIEW.md`"
+        " — dependencies with native toolchain requirements or restrictive distribution clauses are governed by explicit deny rules and review",
+        "Verified",
+    ),
+    "SUP-007": (
+        "`Cargo.toml`, `crates/**`"
+        " — third-party code is strictly managed via Cargo dependencies with verified license records rather than unrecorded in-tree vendoring",
+        "Verified",
+    ),
+    "SUP-008": (
+        "`scripts/check-no-unsafe.sh (QG-03)`,"
+        " `crates/phairdlna-mac/src/platform/bridge.rs` (ADR-0013)"
+        " — core crates forbid unsafe code; the only exempt block in the workspace is the macOS Objective-C bridge governed by ADR-0013",
+        "Verified",
+    ),
+    "SUP-009": (
+        "`docs/08-releases/RELEASE-POLICY.md`, `scripts/package-macos-app.sh`"
+        " — defined code-signing and notarisation plan is documented and enforced with strict ad-hoc code signature in packaging",
+        "Verified",
+    ),
+    "DOC-001": (
+        "`docs/03-features/`"
+        " — every feature has a specification with mandatory sections and stable normative requirement identifiers",
+        "Verified",
+    ),
+    "DOC-002": (
+        "`docs/05-quality/TEST-STRATEGY.md`, `docs/05-quality/QUALITY-GATES.md`"
+        " — performance, compatibility and security claims link to recorded evidence and repeatable quality gates",
+        "Verified",
+    ),
+    "DOC-003": (
+        "`WHERE_TO_CHANGE.md`, `scripts/check-doc-links.sh (QG-11)`"
+        " — WHERE_TO_CHANGE.md maps every source path to its owning feature and stays in sync with repository tree",
+        "Verified",
+    ),
+    "DOC-004": (
+        "`crates/**/src/lib.rs`, `cargo test --doc`"
+        " — public modules carry doc comments explaining purpose, design rationale and compiled runnable examples",
+        "Verified",
+    ),
+    "DOC-005": (
+        "`docs/00-governance/DOCUMENTATION-POLICY.md`, `docs/01-product/FEATURE-CATALOG.md`"
+        " — technical writing follows beginner-readable rules with defined terminology, plain sentences and concrete examples",
+        "Verified",
+    ),
+    "DOC-006": (
+        "`docs/00-governance/DOCUMENTATION-POLICY.md`"
+        " — normative statements reside in canonical requirement definitions with cross-references rather than duplicate text",
+        "Verified",
+    ),
+    "DOC-007": (
+        "`docs/99-archive/`"
+        " — superseded baselines are preserved immutably with release manifests and SHA-256 digests",
+        "Verified",
+    ),
+    "DOC-008": (
+        "`docs/**`"
+        " — documentation policy mandates explicit status, owner role, version and date on every project document",
+        "Verified",
+    ),
+    "DOC-009": (
+        "`README.md`, `docs/00-governance/PROJECT-STANDARDS.md`"
+        " — getting-started guide and developer instructions contain verbatim executable commands",
+        "Verified",
+    ),
+    "DOC-010": (
+        "`README.md`, `WHERE_TO_CHANGE.md`"
+        " — single canonical navigation path links README directly to architecture, feature specifications and source code",
+        "Verified",
+    ),
+    "DOC-011": (
+        "`scripts/check-doc-links.sh (QG-11)`"
+        " — automated quality gate checks all relative documentation links and source paths offline in local CI",
+        "Verified",
+    ),
+    "DOC-012": (
+        "`CONTRIBUTING.md`, `docs/00-governance/PROJECT-STANDARDS.md`, `docs/05-quality/QUALITY-GATES.md`"
+        " — contribution guidance explicitly defines project standards, quality gates and evidence criteria",
         "Verified",
     ),
 
