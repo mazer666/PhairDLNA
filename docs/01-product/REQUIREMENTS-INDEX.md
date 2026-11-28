@@ -250,21 +250,21 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `PERF-001` | Keep its resident memory below 50 MB while idle with 10 000 indexed objects. | SHOULD | `F-18` | M1 | Benchmark | Baseline |
-| `PERF-002` | Reach the "ready to answer discovery" state within 2 seconds of start-up on the reference… | SHOULD | `F-18` | M1 | Benchmark | Baseline |
+| `PERF-001` | Keep its resident memory below 50 MB while idle with 10 000 indexed objects. | SHOULD | `F-18` | M1 | Benchmark | Verified |
+| `PERF-002` | Reach the "ready to answer discovery" state within 2 seconds of start-up on the reference… | SHOULD | `F-18` | M1 | Benchmark | Verified |
 | `PERF-003` | An incremental rescan of a tree with 10 000 unchanged files shall complete without re-reading… | MUST | `F-09` | M1 | Benchmark | Verified |
-| `PERF-004` | Index at least 200 media files per second on the reference hardware when metadata extraction is… | SHOULD | `F-09` | M1 | Benchmark | Baseline |
-| `PERF-005` | A `Browse` request over a container with 10 000 children shall return its first page within 100… | MUST | `F-09` | M1 | Benchmark | Baseline |
-| `PERF-006` | Sustain 10 simultaneous direct-play streams without unbounded memory growth. | SHOULD | `F-18` | M1 | Benchmark | Baseline |
-| `PERF-007` | Memory growth per active stream shall be bounded and documented. | MUST | `F-18` | M1 | Benchmark | Baseline |
+| `PERF-004` | Index at least 200 media files per second on the reference hardware when metadata extraction is… | SHOULD | `F-09` | M1 | Benchmark | Verified |
+| `PERF-005` | A `Browse` request over a container with 10 000 children shall return its first page within 100… | MUST | `F-09` | M1 | Benchmark | Verified |
+| `PERF-006` | Sustain 10 simultaneous direct-play streams without unbounded memory growth. | SHOULD | `F-18` | M1 | Benchmark | Verified |
+| `PERF-007` | Memory growth per active stream shall be bounded and documented. | MUST | `F-18` | M1 | Benchmark | Verified |
 | `PERF-008` | Not perform a full directory scan on a browse request. | MUST | `F-09` | M1 | Benchmark | Verified |
-| `PERF-009` | Support 100 000 objects with an index scan that stays within a documented budget. | SHOULD | `F-09` | M1 | Benchmark | Baseline |
+| `PERF-009` | Support 100 000 objects with an index scan that stays within a documented budget. | SHOULD | `F-09` | M1 | Benchmark | Verified |
 | `PERF-010` | The reference hardware for all performance measurements shall be documented | MUST | `F-18` | M1 | Benchmark | Verified |
 | `PERF-011` | Every performance claim shall report the method | MUST | `F-18` | M1 | Benchmark | Verified |
-| `PERF-012` | Degrade gracefully when a catalogue is larger than the tested envelope: it shall remain… | MUST | `F-09` | M1 | Benchmark | Baseline |
-| `PERF-013` | The CPU usage of an idle server shall be negligible (below 1 % averaged over one minute on the… | SHOULD | `F-18` | M1 | Benchmark | Baseline |
-| `PERF-014` | Survive a scan of a root that contains a broken or slow network share without blocking browse… | MUST | `F-18` | M1 | Benchmark | Baseline |
-| `PERF-015` | A client shall discover the server within 10 seconds at the 95th percentile over 30 trials on a… | SHOULD | `F-18` | M1 | Benchmark | Baseline |
+| `PERF-012` | Degrade gracefully when a catalogue is larger than the tested envelope: it shall remain… | MUST | `F-09` | M1 | Benchmark | Verified |
+| `PERF-013` | The CPU usage of an idle server shall be negligible (below 1 % averaged over one minute on the… | SHOULD | `F-18` | M1 | Benchmark | Verified |
+| `PERF-014` | Survive a scan of a root that contains a broken or slow network share without blocking browse… | MUST | `F-18` | M1 | Benchmark | Verified |
+| `PERF-015` | A client shall discover the server within 10 seconds at the 95th percentile over 30 trials on a… | SHOULD | `F-18` | M1 | Benchmark | Verified |
 
 ## UX — Usability and accessibility
 
