@@ -46,6 +46,7 @@ pub struct ServerSection {
 
 /// Which network interfaces the server speaks on.
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(default)]
 #[serde(deny_unknown_fields)]
 pub struct NetworkSection {
     /// The interface names to use. Empty means every eligible interface.

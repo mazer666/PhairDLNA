@@ -1335,6 +1335,12 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " accepted",
         "Verified",
     ),
+    "CFG-006": (
+        "`crates/phairdlna-cli/tests/cli_config.rs::ac_08_interface_selection_and_role_split`,"
+        " `crates/phairdlna-core/src/platform/network.rs::tests`"
+        " — selection of network interfaces for discovery and media roles is supported and verified",
+        "Verified",
+    ),
     "CFG-007": (
         "`crates/phairdlna-core/tests/symlink_policy.rs::a_link_is_not_followed_by_default`,"
         " `crates/phairdlna-core/tests/symlink_policy.rs::a_root_may_have_a_policy_of_its_own`"
@@ -1374,6 +1380,11 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " `crates/phairdlna-cli/tests/admin.rs::the_token_file_belongs_to_its_owner_alone`"
         " — the file that holds the token of the administration surface has the permissions 600 inside a"
         " folder with the permissions 700, and a file that others may read stops the surface",
+        "Verified",
+    ),
+    "CFG-015": (
+        "`crates/phairdlna-core/tests/config_schema.rs::ac_17_environment_variable_literal_protection`"
+        " — values containing environment variable syntax remain unexpanded literals preventing unauthorized injection",
         "Verified",
     ),
     "OPS-017": (

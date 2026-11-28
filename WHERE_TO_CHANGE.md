@@ -75,6 +75,8 @@
 | `crates/phairdlna-cli/tests/cli_commands.rs` | Acceptance tests for status and scan CLI commands (`OPS-002`, `OPS-003`, `OPS-014`) | F-13, F-14 |
 | `crates/phairdlna-cli/tests/cli_interfaces.rs` | Acceptance tests for network interfaces inspection command | F-12, F-13 |
 | `crates/phairdlna-cli/tests/cli_logging.rs` | Acceptance tests for structured logging and pseudonym redaction (`OPS-006`, `OPS-007`) | F-13, F-16 |
+| `crates/phairdlna-cli/tests/cli_config.rs` | Acceptance tests for network interface selection and role splitting (`CFG-006`, `AC-08`) | F-12 |
+| `crates/phairdlna-core/tests/config_schema.rs` | Acceptance tests for configuration schema, literal environment variables (`CFG-015`, `AC-17`) | F-12 |
 | `crates/phairdlna-cli/tests/cli_lifecycle.rs` | Acceptance tests for CLI lifecycle, help, version and exit code scheme (`OPS-011`, `OPS-014`) | F-13 |
 | `crates/phairdlna-cli/tests/cli_status.rs` | Acceptance tests for CLI status reporting of effective interface, address and recovery (`LIFE-009`, `OPS-002`) | F-13 |
 | `crates/phairdlna-cli/tests/cli_scan.rs` | Acceptance tests for scan schedule configuration and background watching semantics (`FUN-024`) | F-08 |

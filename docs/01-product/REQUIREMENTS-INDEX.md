@@ -330,7 +330,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `CFG-003` | Carry a `schema_version`, and the server shall migrate an older known schema version… | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-004` | Provide documented defaults for every setting such that an empty configuration file yields a… | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-005` | Refuse to start when the configuration would expose an administration interface to a… | MUST | `F-12` | M2 | Automated configuration test | Verified |
-| `CFG-006` | Support selecting the network interfaces used for discovery and for media delivery. | MUST | `F-12` | M2 | Automated configuration test | Baseline |
+| `CFG-006` | Support selecting the network interfaces used for discovery and for media delivery. | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-007` | Support a per-root setting for symbolic link following | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-008` | Support resource limits: maximum concurrent streams | SHOULD | `F-12` | M2 | Automated configuration test | Implemented |
 | `CFG-009` | Support an optional access-control list of client addresses allowed to browse or to stream. | SHOULD | `F-12` | M2 | Automated configuration test | Verified |
@@ -339,7 +339,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `CFG-012` | Provide a command that exports the effective configuration and one that imports it | SHOULD | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-013` | Unknown configuration keys shall be reported as errors rather than ignored | MUST | `F-12` | M2 | Automated configuration test | Verified |
 | `CFG-014` | Secrets (such as an administration token) shall be readable from a file with owner-only… | MUST | `F-12` | M2 | Automated configuration test | Verified |
-| `CFG-015` | Never contain a value that is expanded from an environment variable without an explicit opt-in | SHOULD | `F-12` | M2 | Automated configuration test | Baseline |
+| `CFG-015` | Never contain a value that is expanded from an environment variable without an explicit opt-in | SHOULD | `F-12` | M2 | Automated configuration test | Verified |
 
 ## PLT — Platform and portability
 
