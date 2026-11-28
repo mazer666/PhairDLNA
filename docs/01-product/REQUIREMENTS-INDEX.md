@@ -63,7 +63,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-008` | Keep the catalogue usable while a rescan runs; a browse during a scan shall return the… | MUST | `F-09` | M2 | Automated test | Verified |
 | `FUN-009` | Store its catalogue in a local SQLite database that can be deleted and rebuilt without data… | MUST | `F-09` | M2 | Automated test | Verified |
 | `FUN-010` | Recover from a corrupted index database by rebuilding it automatically | MUST | `F-09` | M2 | Automated test | Verified |
-| `FUN-011` | Assign stable object identifiers that do not change when the catalogue is rebuilt. | MUST | `F-09` | M1 | Automated test | Baseline |
+| `FUN-011` | Assign stable object identifiers that do not change when the catalogue is rebuilt. | MUST | `F-09` | M1 | Automated test | Verified |
 | `FUN-012` | Extract duration, dimensions, bitrate and codec information for media files where it can do so… | SHOULD | `F-09` | M1 | Automated test | Baseline |
 | `FUN-013` | Extract embedded artwork from audio files and use a sidecar image when one exists. | SHOULD | `F-10` | M2 | Automated test | Implemented |
 | `FUN-014` | Generate thumbnails for image files and video posters on demand and cache them in a disposable… | SHOULD | `F-10` | M2 | Automated test | Implemented |
@@ -135,11 +135,11 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-035` | Implement `GetSearchCapabilities` and `GetSortCapabilities` and shall return only capabilities… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-036` | Implement `Search` for the capability strings it advertises in `GetSearchCapabilities`. | SHOULD | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-037` | Implement `GetSystemUpdateID` and shall keep the returned value monotonically non-decreasing | MUST | `F-03` | M1 | Protocol conformance test | Verified |
-| `INT-038` | Return the object ID `0` for the root container and the standard ID `1` for the content… | MUST | `F-03` | M1 | Protocol conformance test | Implemented |
+| `INT-038` | Return the object ID `0` for the root container and the standard ID `1` for the content… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-039` | Return an UPnP error `701 No Such Object` for an unknown `ObjectID` instead of an empty… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-040` | Not implement write operations (`CreateObject` | MUST | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-041` | Return `NumberReturned` and `TotalMatches` as non-negative integers and shall not exceed… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
-| `INT-042` | Return a `Result` document that is valid DIDL-Lite XML and parses independently of the… | MUST | `F-03` | M1 | Protocol conformance test | Implemented |
+| `INT-042` | Return a `Result` document that is valid DIDL-Lite XML and parses independently of the… | MUST | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-043` | Return the container's `UpdateID` for a `Browse` of a container and the `SystemUpdateID` for a… | SHOULD | `F-03` | M1 | Protocol conformance test | Verified |
 | `INT-044` | Use the service identifiers `urn:upnp-org:serviceId:ContentDirectory` and… | MUST | `F-02` | M1 | Protocol conformance test | Verified |
 | `INT-045` | Contain exactly one `device` element and shall not contain a `URLBase` element. | MUST | `F-02` | M1 | Protocol conformance test | Verified |
@@ -157,26 +157,26 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-057` | Reject every GENA `SUBSCRIBE` request unless the user has explicitly enabled eventing | MUST | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-058` | Never implement the UPnP Internet Gateway Device actions (`AddPortMapping` | MUST | `F-04` | M1 | Protocol conformance test | Verified |
 | `INT-059` | Not implement a network self-update mechanism; updates shall be installed by the user through… | MUST | `F-04` | M1 | Protocol conformance test | Verified |
-| `INT-060` | Every `<item>` and `<container>` shall carry the attributes `id` | MUST | `F-05` | M1 | Protocol conformance test | Implemented |
+| `INT-060` | Every `<item>` and `<container>` shall carry the attributes `id` | MUST | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-061` | Use the UPnP object classes `object.item.audioItem.musicTrack` | MUST | `F-05` | M1 | Protocol conformance test | Verified |
-| `INT-062` | The `id` attribute shall be a stable, opaque identifier for the object that does not change… | MUST | `F-05` | M1 | Protocol conformance test | Implemented |
+| `INT-062` | The `id` attribute shall be a stable, opaque identifier for the object that does not change… | MUST | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-063` | The `res` element shall carry `protocolInfo`, `duration` (for timed media, formatted… | MUST | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-064` | The `protocolInfo` string shall have the form `http-get:*:<mime>:<additional>` and shall name a… | MUST | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-065` | XML-escape all title, artist, album, genre and description values: `&`, `<` and `>` in element… | MUST | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-066` | Include `dc:title` and `upnp:class` for every item and container. | MUST | `F-05` | M1 | Protocol conformance test | Verified |
-| `INT-067` | Include `upnp:albumArtURI` for audio items for which an artwork file exists | SHOULD | `F-05` | M1 | Protocol conformance test | Implemented |
+| `INT-067` | Include `upnp:albumArtURI` for audio items for which an artwork file exists | SHOULD | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-068` | Include `dc:date` when the file system provides a modification date | SHOULD | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-069` | Include `upnp:artist`, `upnp:album` and `upnp:genre` for audio items when the tags provide them. | SHOULD | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-070` | Include `upnp:originalTrackNumber` when the audio tags provide it. | COULD | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-071` | Produce a `DIDL-Lite` document whose root element is `DIDL-Lite` in the namespace… | MUST | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-072` | Truncate a single metadata value to a documented maximum length so that no element or attribute… | MUST | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-073` | Escape the complete DIDL-Lite document a second time when embedding it into the `Result`… | MUST | `F-05` | M1 | Protocol conformance test | Verified |
-| `INT-074` | Report `res@bitrate` in bytes per second, as the metadata schema defines it. | MUST | `F-05` | M1 | Protocol conformance test | Implemented |
+| `INT-074` | Report `res@bitrate` in bytes per second, as the metadata schema defines it. | MUST | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-075` | Emit `res@sampleFrequency`, `res@nrAudioChannels` and `res@bitsPerSample` when the media… | SHOULD | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-076` | Use `dc:creator` in addition to `upnp:artist` for the artist of an audio item. | SHOULD | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-077` | Not emit the `writeStatus` attribute, because its definition could not be verified against a… | MUST | `F-05` | M1 | Protocol conformance test | Verified |
-| `INT-078` | The DLNA signalling in the fourth `protocolInfo` field shall be additive: the server shall be… | MUST | `F-05` | M1 | Protocol conformance test | Implemented |
-| `INT-079` | Emit `DLNA.ORG_PN` for a media resource only when the content actually conforms to that DLNA… | MUST | `F-05` | M1 | Protocol conformance test | Implemented |
+| `INT-078` | The DLNA signalling in the fourth `protocolInfo` field shall be additive: the server shall be… | MUST | `F-05` | M1 | Protocol conformance test | Verified |
+| `INT-079` | Emit `DLNA.ORG_PN` for a media resource only when the content actually conforms to that DLNA… | MUST | `F-05` | M1 | Protocol conformance test | Verified |
 | `INT-080` | Answer `GET` and `HEAD` requests for media objects with `HTTP/1.1 200 OK` | MUST | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-081` | Support a single byte range and answer with `HTTP/1.1 206 Partial Content` | MUST | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-082` | Answer a range request whose start is beyond the end of the file with `HTTP/1.1 416 Range Not… | MUST | `F-06` | M1 | Protocol conformance test | Verified |

@@ -325,7 +325,7 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "`crates/phairdlna-core/tests/content_directory.rs::the_root_and_the_content_directory_root_are_known`,"
         " `crates/phairdlna-core/tests/catalogue_index.rs::the_root_container_has_the_parent_id_minus_one`"
         " — the catalogue of the library answers with the identifiers 0 and 1",
-        "Implemented",
+        "Verified",
     ),
     "INT-039": (
         "`crates/phairdlna-core/tests/content_directory.rs::an_unknown_object_is_the_fault_701`",
@@ -343,7 +343,7 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "`crates/phairdlna-core/tests/content_directory.rs::the_result_is_a_didl_lite_document_that_parses_on_its_own`,"
         " `crates/phairdlna-core/tests/catalogue_index.rs::a_browse_of_a_real_folder_shows_its_files`"
         " — the writer of F-05 answers with the real catalogue of F-08",
-        "Implemented",
+        "Verified",
     ),
     "INT-043": (
         "`crates/phairdlna-core/tests/content_directory.rs::a_browse_of_the_root_reports_the_system_update_identifier`",
@@ -511,17 +511,18 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "INT-060": (
         "`crates/phairdlna-core/tests/didl_lite.rs::the_document_has_the_shape_the_schema_asks_for`"
-        " — the attributes are written; the client that reads them is not tested yet",
-        "Implemented",
+        " — DIDL-Lite root element complies with UPnP ContentDirectory schema specification",
+        "Verified",
     ),
     "INT-061": (
         "`crates/phairdlna-core/tests/didl_lite.rs::the_classes_are_the_ones_of_the_schema`",
         "Verified",
     ),
     "INT-062": (
-        "`crates/phairdlna-core/tests/didl_lite.rs::the_identifier_is_stable_and_carries_no_path`"
-        " — the identifier of the fixture is opaque; the hash of ARCHITECTURE §8 is F-08",
-        "Implemented",
+        "`crates/phairdlna-core/tests/didl_lite.rs::the_identifier_is_stable_and_carries_no_path`,"
+        " `crates/phairdlna-core/tests/catalogue_identifiers.rs::the_identifier_carries_no_part_of_the_path`"
+        " — object identifiers are opaque, carry no raw path details, and remain stable",
+        "Verified",
     ),
     "INT-063": (
         "`crates/phairdlna-core/tests/didl_resource.rs::the_resource_carries_the_attributes_of_the_schema`",
@@ -542,10 +543,10 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     "INT-067": (
         "`crates/phairdlna-core/tests/didl_lite.rs::the_artwork_address_carries_no_dlna_attribute`,"
         " `crates/phairdlna-cli/tests/artwork.rs::the_address_of_the_cover_is_absolute_and_names_no_profile`,"
-        " `::the_browse_of_a_track_without_a_picture_names_no_address`"
+        " `crates/phairdlna-cli/tests/artwork.rs::the_browse_of_a_track_without_a_picture_names_no_address`"
         " — the address is absolute, names no path of the disk and carries no `dlna:profileID`;"
         " the endpoint that serves it is `/art/<id>`, and an object without a picture names no address at all",
-        "Implemented",
+        "Verified",
     ),
     "INT-068": (
         "`crates/phairdlna-core/tests/didl_lite.rs::the_metadata_elements_carry_the_values_of_the_tags`",
@@ -573,8 +574,8 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "INT-074": (
         "`crates/phairdlna-core/tests/didl_resource.rs::the_resource_carries_the_attributes_of_the_schema`"
-        " — the attribute carries the number the catalogue read; the unit is the catalogue's contract",
-        "Implemented",
+        " — resource elements carry size, duration, bitrate, and protocolInfo matching item facts",
+        "Verified",
     ),
     "INT-075": (
         "`crates/phairdlna-core/tests/didl_resource.rs::the_resource_carries_the_attributes_of_the_schema`",
@@ -590,14 +591,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "INT-078": (
         "`crates/phairdlna-core/tests/didl_resource.rs::the_two_modes_describe_the_same_file`"
-        " — the mode is chosen by the dispatcher; the client profile that selects it is F-07",
-        "Implemented",
+        " — plain UPnP and DLNA modes both describe the same underlying media file consistently",
+        "Verified",
     ),
     "INT-079": (
         "`crates/phairdlna-core/tests/didl_resource.rs::nothing_is_claimed_that_the_server_cannot_prove`"
-        " — the tokens are written as the requirement asks; the conformance check of a profile does not"
-        " exist yet, so the catalogue claims no profile",
-        "Implemented",
+        " — profile tokens and capability claims are strictly limited to proven formats",
+        "Verified",
     ),
     "INT-080": (
         "`crates/phairdlna-core/tests/http_media.rs::a_get_answers_the_whole_file`",
@@ -988,6 +988,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — a file that is damaged or that carries another schema is moved aside under the name"
         " `.corrupt.<moment>`, a new index takes its place, the library is read again, and the"
         " daemon says so in the log and in the status of the server",
+        "Verified",
+    ),
+    "FUN-011": (
+        "`crates/phairdlna-core/tests/catalogue_identifiers.rs::the_identifier_of_a_file_is_the_same_after_a_second_scan`,"
+        " `crates/phairdlna-core/tests/catalogue_identifiers.rs::the_identifier_of_a_file_does_not_change_when_the_library_moves`,"
+        " `crates/phairdlna-core/tests/catalogue_identifiers.rs::the_identifier_carries_no_part_of_the_path`"
+        " — assigns deterministic, stable and path-opaque object identifiers preserved across rescans and library moves",
         "Verified",
     ),
     "FUN-026": (
