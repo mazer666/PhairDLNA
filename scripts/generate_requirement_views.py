@@ -985,6 +985,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — bounds concurrent transfers and refuses excess requests rather than exhausting host resources",
         "Verified",
     ),
+    "FUN-045": (
+        "`crates/phairdlna-core/tests/http_transfer_state.rs::active_transfer_position_and_duration_reporting`,"
+        " `crates/phairdlna-core/src/http/transfer.rs::tests::calculates_position_and_formats_upnp_strings`"
+        " — active transfer progress and media duration are tracked, position is computed proportionally, and"
+        " formatted according to UPnP/AVTransport requirements",
+        "Verified",
+    ),
     "FUN-046": (
         "`crates/phairdlna-cli/tests/serve.rs::an_open_transfer_ends_with_the_daemon`,"
         " `crates/phairdlna-core/tests/http_media.rs::a_connection_is_kept_alive_unless_it_asks_to_close`"

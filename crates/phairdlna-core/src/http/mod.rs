@@ -33,6 +33,7 @@ pub mod request;
 pub mod resolver;
 pub mod response;
 pub mod source;
+pub mod transfer;
 
 pub use delivery::evaluate;
 pub use headers::{
@@ -47,3 +48,4 @@ pub use request::{MediaRequest, Method};
 pub use resolver::{resolve as resolve_range, ByteRange};
 pub use response::{Body, MediaResponse, Status};
 pub use source::{ContentKind, MediaObject, MediaSource};
+pub use transfer::TransferState;
