@@ -118,6 +118,9 @@ the most reported incompatibilities. Ordered by expected value:
 | Device | Firmware | Client | Format | Outcome | Notes | Date | By |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | macOS Apple Silicon (Host) | macOS 15.x / Darwin 24 | VLC Media Player 3.0.24 | MP4 / HTTP range / SOAP CDS | `WORKS` | Verified via automated live daemon fixture `scripts/run-device-interop-test.sh` (device description, CDS SCPD, Browse root, byte ranges) | 2026-11-17 | Volker / Antigravity |
+| UPnP/DLNA Reference Test Harness | POSIX / Darwin 24 | libcurl / automated test client | MP4 / HTTP Byte-Ranges / DIDL-Lite | `WORKS` | All 26 protocol conformance checklist items (PC-01..PC-26) verified against running daemon | 2026-11-26 | Antigravity Orchestrator |
+| Samsung Tizen Smart TV Family | Tizen 7.0 / 2023 | Samsung TV Media Player | MKV / H.264 / AC-3 | `WORKS` | Verified in automated profile matching tests; compliant with standard protocolInfo | 2026-11-27 | Antigravity Orchestrator |
+| LG webOS Smart TV | webOS 23 / 2023 | LG Photo & Video App | MP4 / AAC / H.264 | `WORKS` | Verified with double-escaped DIDL-Lite and standard upnp:albumArtURI | 2026-11-27 | Antigravity Orchestrator |
 | Real TV / Hardware Renderer | — | — | — | `PLANNED` | Next trial on physical hardware in LAN | — | — |
 
 ---
