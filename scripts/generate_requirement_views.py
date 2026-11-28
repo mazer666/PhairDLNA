@@ -592,6 +592,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — memory allocation is never proportional to untrusted client-supplied length field without validation",
         "Verified",
     ),
+    "SEC-066": (
+        "`crates/phairdlna-core/tests/artwork.rs::a_broken_file_gives_no_picture_and_no_panic`,"
+        " `crates/phairdlna-core/tests/artwork.rs::a_tag_that_lies_about_its_size_is_refused`,"
+        " `crates/phairdlna-core/tests/catalogue_metadata.rs::unsupported_or_broken_file_yields_none`"
+        " — pure-Rust bounded in-process media parsing and quarantine per ADR-0011/DEC-042, broken files yield no data and no panic",
+        "Verified",
+    ),
     "SEC-068": (
         "`crates/phairdlna-core/tests/playlists.rs`,"
         " `crates/phairdlna-core/tests/parser_fuzz_bounds.rs::playlist_network_and_traversal_paths_contained`"

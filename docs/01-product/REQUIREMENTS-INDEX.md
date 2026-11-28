@@ -231,7 +231,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SEC-063` | Bound the number of open file descriptors used by transfers and shall release them on… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-064` | Bound the size of its on-disk cache and shall evict entries when the limit is exceeded. | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-065` | Never allocate memory proportional to a client-supplied length field without validating it… | MUST | `F-16` | M1 | Negative security test | Verified |
-| `SEC-066` | Parse media metadata and generate thumbnails in a separate | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-066` | Parse media metadata and generate thumbnails in a separate | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-067` | Bound the declared dimensions of an image before allocating any buffer for it | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-068` | Treat playlist entries as untrusted paths, shall resolve and contain them, and shall refuse… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-069` | Not resolve or follow a macOS Finder alias as if it were a symbolic link; aliases shall be… | MUST | `F-16` | M1 | Negative security test | Verified |
