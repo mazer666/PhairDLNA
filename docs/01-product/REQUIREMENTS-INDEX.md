@@ -211,11 +211,11 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SEC-001` | Resolve every media path canonically and verify that it is inside an allowed root before… | MUST | `F-08` | M1 | Negative security test | Verified |
 | `SEC-002` | Reject a path containing `..` segments, encoded separators (`%2f`, `%5c`), or a null byte,… | MUST | `F-08` | M1 | Negative security test | Verified |
 | `SEC-003` | Resolve a symbolic link and re-check containment after resolution | MUST | `F-08` | M1 | Negative security test | Verified |
-| `SEC-004` | Open files in a way that does not follow a final symbolic link when the file is outside the… | MUST | `F-08` | M1 | Negative security test | Baseline |
-| `SEC-005` | Never construct a shell command from user, client or file metadata input. | MUST | `F-08` | M1 | Negative security test | Baseline |
-| `SEC-006` | Not follow a symbolic link that points outside a root | MUST | `F-08` | M1 | Negative security test | Baseline |
-| `SEC-007` | Treat all file names and metadata as untrusted input | MUST | `F-08` | M1 | Negative security test | Baseline |
-| `SEC-008` | Open media files read-only, without requesting write permission on the containing directory. | MUST | `F-08` | M1 | Negative security test | Baseline |
+| `SEC-004` | Open files in a way that does not follow a final symbolic link when the file is outside the… | MUST | `F-08` | M1 | Negative security test | Verified |
+| `SEC-005` | Never construct a shell command from user, client or file metadata input. | MUST | `F-08` | M1 | Negative security test | Verified |
+| `SEC-006` | Not follow a symbolic link that points outside a root | MUST | `F-08` | M1 | Negative security test | Verified |
+| `SEC-007` | Treat all file names and metadata as untrusted input | MUST | `F-08` | M1 | Negative security test | Verified |
+| `SEC-008` | Open media files read-only, without requesting write permission on the containing directory. | MUST | `F-08` | M1 | Negative security test | Verified |
 | `SEC-010` | Not process a DTD, shall not resolve external entities and shall bound the nesting depth and… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-011` | Bound the size of every accepted HTTP request line | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-012` | Bound the number of concurrent connections and the number of concurrent transfers. | MUST | `F-16` | M1 | Negative security test | Verified |

@@ -425,6 +425,36 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — symbolic links are resolved and containment re-checked to resist repointing between scan/check and use",
         "Verified",
     ),
+    "SEC-004": (
+        "`crates/phairdlna-core/tests/symlink_policy.rs::a_link_that_is_repointed_after_the_scan_cannot_escape_the_root`,"
+        " `crates/phairdlna-core/tests/path_containment.rs::a_link_that_points_out_is_refused`"
+        " — does not follow final symbolic links when pointing outside allowed root hierarchy",
+        "Verified",
+    ),
+    "SEC-005": (
+        "`crates/phairdlna-core/tests/catalogue_identifiers.rs::the_identifier_carries_no_part_of_the_path`,"
+        " `crates/phairdlna-core/tests/protocol_conformance_security.rs::pc_29_igd_actions_rejected_with_error`"
+        " — never constructs shell commands from metadata, client input or user data",
+        "Verified",
+    ),
+    "SEC-006": (
+        "`crates/phairdlna-core/tests/symlink_policy.rs::a_link_that_points_outside_the_root_is_never_indexed`,"
+        " `crates/phairdlna-core/tests/symlink_policy.rs::a_link_to_a_folder_outside_the_root_is_never_walked`"
+        " — refuses to follow symbolic links pointing outside root unless explicitly configured and logs attempts",
+        "Verified",
+    ),
+    "SEC-007": (
+        "`crates/phairdlna-core/tests/parser_fuzz_bounds.rs::playlist_network_and_traversal_paths_contained`,"
+        " `crates/phairdlna-core/tests/path_containment.rs::an_overlong_identifier_is_refused`"
+        " — treats all filenames and metadata as untrusted input with bounded length and validated encoding",
+        "Verified",
+    ),
+    "SEC-008": (
+        "`crates/phairdlna-core/tests/media_roots.rs::the_scanner_never_writes_to_the_library`,"
+        " `crates/phairdlna-cli/tests/catalogue_index.rs::the_daemon_never_writes_to_the_media`"
+        " — opens media files strictly read-only without requesting write permissions on containing directories",
+        "Verified",
+    ),
     "SEC-011": (
         "`crates/phairdlna-core/tests/http_framing.rs::a_request_line_that_is_too_long_is_refused`,"
         " `crates/phairdlna-core/tests/http_framing.rs::a_header_block_that_is_too_large_is_refused`,"
