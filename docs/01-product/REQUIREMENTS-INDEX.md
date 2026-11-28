@@ -447,7 +447,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `MB-005` | Communicate with the server only over the local administration surface by default | MUST | `F-15` | M2 | Manual macOS usability protocol | Verified |
 | `MB-006` | Remain legible in light and dark appearance, on a small display and when the menu bar is… | SHOULD | `F-15` | M2 | Manual macOS usability protocol | Implemented |
 | `MB-007` | The first-run assistant shall offer an optional verification step that shows whether a… | SHOULD | `F-15` | M2 | Manual macOS usability protocol | Baseline |
-| `MB-008` | Uninstalling and stopping shall be safe and obvious | MUST | `F-15` | M2 | Manual macOS usability protocol | Baseline |
+| `MB-008` | Uninstalling and stopping shall be safe and obvious | MUST | `F-15` | M2 | Manual macOS usability protocol | Verified |
 | `MB-009` | Ship as a bundle with the metadata the operating system requires for its local-network and… | MUST | `F-15` | M2 | Manual macOS usability protocol | Implemented |
 
 ---

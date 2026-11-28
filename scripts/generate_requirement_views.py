@@ -1513,6 +1513,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " display has not been checked by the manual protocol yet",
         "Implemented",
     ),
+    "MB-008": (
+        "`crates/phairdlna-mac/tests/bundle_metadata.rs::the_bundle_registers_no_helper`,"
+        " `crates/phairdlna-cli/tests/service.rs::the_status_of_a_service_that_is_not_installed_says_so`,"
+        " `crates/phairdlna-cli/src/service/commands.rs::uninstall`"
+        " — uninstalling and stopping are safe and explicit; no hidden persistent helper or privileged background agent remains in the system",
+        "Verified",
+    ),
     "MB-009": (
         "`crates/phairdlna-mac/tests/bundle_metadata.rs::the_bundle_is_a_regular_application`,"
         " `::the_bundle_explains_the_permission_of_the_local_network`"
