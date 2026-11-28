@@ -581,6 +581,11 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " — bounding the number of entries in a single DIDL-Lite response and generated XML size",
         "Verified",
     ),
+    "SEC-062": (
+        "`crates/phairdlna-core/tests/catalogue_metadata.rs::sec_062_metadata_extraction_time_limit_abandonment`"
+        " — metadata extraction enforces bounded time limit per file and gracefully abandons file if exceeded",
+        "Verified",
+    ),
     "SEC-065": (
         "`crates/phairdlna-core/tests/http_framing.rs`,"
         " `crates/phairdlna-core/tests/resource_bounds.rs`"

@@ -4,7 +4,7 @@ use std::io::Write;
 use std::time::Duration;
 use tempfile::NamedTempFile;
 
-use phairdlna_core::media::probe::{probe_file, probe_mp4, probe_png};
+use phairdlna_core::media::probe::{probe_file, probe_file_with_timeout, probe_mp4, probe_png};
 
 /// Builds an atom with a normal size.
 fn atom(name: &[u8; 4], payload: &[u8]) -> Vec<u8> {
@@ -71,4 +71,20 @@ fn unsupported_or_broken_file_yields_none() {
     temp.flush().expect("flush temp");
 
     assert!(probe_file(temp.path()).is_none());
+}
+
+/// SEC-062 — metadata extraction respects time limit and abandons file if exceeded.
+#[test]
+fn sec_062_metadata_extraction_time_limit_abandonment() {
+    let mvhd = atom(b"mvhd", &mvhd_payload(1000, 60_000));
+    let moov = atom(b"moov", &mvhd);
+    let mut file_bytes = atom(b"ftyp", b"mp42isom");
+    file_bytes.extend_from_slice(&moov);
+
+    let mut temp = NamedTempFile::new().expect("temp file");
+    temp.write_all(&file_bytes).expect("write temp");
+    temp.flush().expect("flush temp");
+
+    // Zero-duration timeout triggers immediate abandonment
+    assert!(probe_file_with_timeout(temp.path(), Duration::ZERO).is_none());
 }

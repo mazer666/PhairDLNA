@@ -24,5 +24,5 @@ pub mod thumbnail;
 
 pub use artwork::{cache_key, Artwork, ArtworkFinder, ArtworkSource, PictureLimits, RootBoundary};
 pub use cache::PictureCache;
-pub use probe::{probe_file, ProbedMetadata};
+pub use probe::{probe_file, probe_file_with_timeout, ProbedMetadata, DEFAULT_METADATA_TIMEOUT};
 pub use sidecar::mime_type_of;

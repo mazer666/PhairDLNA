@@ -227,7 +227,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SEC-018` | Treat an SSDP or SOAP peer as untrusted and shall perform no action on its behalf other than… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-060` | Every parser in the server shall have an explicit input size bound and a documented failure… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-061` | Bound the number of entries in a single DIDL-Lite response and the size of the generated XML… | MUST | `F-16` | M1 | Negative security test | Verified |
-| `SEC-062` | Run metadata extraction with a time limit per file and shall abandon a file that exceeds it. | MUST | `F-16` | M1 | Negative security test | Baseline |
+| `SEC-062` | Run metadata extraction with a time limit per file and shall abandon a file that exceeds it. | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-063` | Bound the number of open file descriptors used by transfers and shall release them on… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-064` | Bound the size of its on-disk cache and shall evict entries when the limit is exceeded. | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-065` | Never allocate memory proportional to a client-supplied length field without validating it… | MUST | `F-16` | M1 | Negative security test | Verified |

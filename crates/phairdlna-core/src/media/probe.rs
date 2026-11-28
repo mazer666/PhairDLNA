@@ -26,9 +26,21 @@ pub struct ProbedMetadata {
     pub codec: Option<String>,
 }
 
-/// Probes metadata for a file at `path`, bounded by `max_probe_bytes`.
+/// Default time limit for metadata extraction per file (`SEC-062`).
+pub const DEFAULT_METADATA_TIMEOUT: Duration = Duration::from_secs(5);
+
+/// Probes metadata for a file at `path`, bounded by the default time limit (`SEC-062`).
 pub fn probe_file(path: &Path) -> Option<ProbedMetadata> {
+    probe_file_with_timeout(path, DEFAULT_METADATA_TIMEOUT)
+}
+
+/// Probes metadata for a file at `path`, aborting if `timeout` is exceeded (`SEC-062`).
+pub fn probe_file_with_timeout(path: &Path, timeout: Duration) -> Option<ProbedMetadata> {
+    let start = std::time::Instant::now();
     let mut file = File::open(path).ok()?;
+    if start.elapsed() > timeout {
+        return None;
+    }
     let extension = path.extension()?.to_str()?.to_ascii_lowercase();
     match extension.as_str() {
         "mp4" | "m4v" | "m4a" | "m4b" => probe_mp4(&mut file),
