@@ -956,6 +956,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " rebinding do not use it for runtime retries",
         "Scheduled",
     ),
+    "LIFE-008": (
+        "`crates/phairdlna-cli/tests/crash_recovery.rs::abrupt_crash_and_corrupt_index_preserves_media_originals`,"
+        " `crates/phairdlna-core/tests/catalogue_recovery.rs::the_damaged_file_is_moved_aside`,"
+        " `crates/phairdlna-core/tests/catalogue_rebuild.rs::the_catalogue_rebuilds_on_schema_mismatch`"
+        " — server recovers cleanly from abrupt crashes or damaged index files by safely moving corrupt files aside and rebuilding a consistent catalogue headlessly",
+        "Verified",
+    ),
     "LIFE-011": (
         "`crates/phairdlna-cli/tests/recovery_timeline.rs::recovery_timeline_records_ordered_events_with_redaction`,"
         " `crates/phairdlna-core/src/lifecycle/timeline.rs::tests::a_path_in_the_timeline_is_hidden`"

@@ -431,7 +431,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `LIFE-005` | Detect the loss and the return of a network or removable volume | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 | `LIFE-006` | A transfer interrupted by a real sleep or a real network loss shall end in a way that is… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 | `LIFE-007` | Retry discovery and rebinding with a bounded backoff and jitter | MUST | `F-13` | M2 | Lifecycle and recovery test | Scheduled |
-| `LIFE-008` | Recover from an abnormal termination with an atomic state and either a consistent catalogue or… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-008` | Recover from an abnormal termination with an atomic state and either a consistent catalogue or… | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
 | `LIFE-009` | The administration surface and the user interface shall reflect the effective interface | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
 | `LIFE-010` | The installation of the login-item service and the permissions it needs shall be explicit and… | MUST | `F-15` | M2 | Lifecycle and recovery test | Verified |
 | `LIFE-011` | Keep a local, redacted timeline of network changes and recovery events that the user may export… | SHOULD | `F-13` | M2 | Lifecycle and recovery test | Implemented |
