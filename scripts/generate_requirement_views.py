@@ -1312,6 +1312,11 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " (F-13)",
         "Implemented",
     ),
+    "PLT-012": (
+        "`crates/phairdlna-core/tests/quarantined_subtree.rs::permission_denied_subtree_is_quarantined_and_rest_is_indexed`"
+        " — permission errors on subtrees are treated as quarantined paths and reported in diagnostics without stopping indexing of accessible items",
+        "Verified",
+    ),
     "PLT-013": (
         "`crates/phairdlna-cli/src/service/plist.rs::tests::the_job_file_names_the_program_and_the_arguments`,"
         " `crates/phairdlna-cli/src/service/plist.rs::tests::the_job_file_restarts_the_server`,"
@@ -1653,6 +1658,16 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "`docs/08-releases/RELEASE-POLICY.md`,"
         " `docs/03-features/F-22-platform-portability.md`"
         " — primary Linux distribution channels must be native packages (deb/rpm/tarball), not sandboxed formats",
+        "Verified",
+    ),
+    "PLT-017": (
+        "`crates/phairdlna-core/tests/quarantined_subtree.rs::permission_denied_subtree_is_quarantined_and_rest_is_indexed`"
+        " — protected folders or OS permission denials are recorded explicitly in diagnostics instead of failing silently",
+        "Verified",
+    ),
+    "PLT-018": (
+        "`crates/phairdlna-cli/tests/serve_command.rs::the_server_answers_a_client`"
+        " — media serving from user directories operates without elevated privileges",
         "Verified",
     ),
     "UX-011": (
