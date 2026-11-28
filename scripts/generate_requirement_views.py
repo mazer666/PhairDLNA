@@ -889,6 +889,46 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " that shows it on a television is still missing",
         "Implemented",
     ),
+    "FUN-001": (
+        "`crates/phairdlna-core/tests/media_roots.rs::a_root_is_scanned_into_a_tree`,"
+        " `crates/phairdlna-core/tests/media_roots_multiple.rs::two_roots_are_browsable_and_keep_apart`"
+        " — supports configuring one or more media roots with custom display name and absolute filesystem path",
+        "Verified",
+    ),
+    "FUN-002": (
+        "`crates/phairdlna-core/tests/media_roots_multiple.rs::the_same_name_in_two_roots_is_two_files`,"
+        " `crates/phairdlna-core/tests/media_roots_multiple.rs::a_root_inside_another_root_is_published_once`"
+        " — serves the union of all configured media roots as a unified catalogue",
+        "Verified",
+    ),
+    "FUN-003": (
+        "`crates/phairdlna-core/tests/symlink_policy.rs::a_link_is_not_followed_by_default`,"
+        " `crates/phairdlna-core/tests/symlink_policy.rs::a_link_that_points_outside_the_root_is_never_indexed`"
+        " — does not follow symbolic links pointing outside root unless explicitly enabled in configuration",
+        "Verified",
+    ),
+    "FUN-004": (
+        "`crates/phairdlna-core/tests/media_roots.rs::a_hidden_file_is_not_indexed`"
+        " — ignores hidden files and macOS resource-fork sidecar files (._*) during catalogue building",
+        "Verified",
+    ),
+    "FUN-005": (
+        "`crates/phairdlna-core/tests/media_roots.rs::a_file_of_an_unknown_kind_stays_out_of_the_tree`,"
+        " `crates/phairdlna-core/tests/media_roots.rs::a_file_without_a_name_is_placed_by_its_content`"
+        " — indexes audio, video, image and playlist files by extension and sniffed content type",
+        "Verified",
+    ),
+    "FUN-006": (
+        "`crates/phairdlna-core/tests/catalogue_incremental.rs::incremental_scan_does_not_read_content_of_unchanged_files`"
+        " — incremental scanner detects added, modified and removed files without full re-read of unchanged items",
+        "Verified",
+    ),
+    "FUN-007": (
+        "`crates/phairdlna-core/tests/media_roots.rs::a_missing_root_is_reported_and_the_library_stays_browsable`,"
+        " `crates/phairdlna-core/tests/offline_volume.rs::offline_media_root_reported_unavailable_and_preserved`"
+        " — unmounted or missing roots are reported as unavailable in diagnostics while remaining catalogue stays browsable",
+        "Verified",
+    ),
     "FUN-008": (
         "`crates/phairdlna-core/tests/catalogue_rebuild.rs::a_browse_during_a_rescan_sees_the_previous_catalogue`"
         " — the reader of the index has a connection of its own and the writer writes the whole"

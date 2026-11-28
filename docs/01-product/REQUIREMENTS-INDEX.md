@@ -53,13 +53,13 @@ Requirement method, ID rules and the traceability chain are defined in
 
 | ID | Requirement | Priority | Feature | Milestone | Verification | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `FUN-001` | Be able to configure one or more media roots; each root shall have a name shown to clients and… | MUST | `F-08` | M1 | Automated test | Baseline |
-| `FUN-002` | Serve the union of all configured roots as one catalogue. | MUST | `F-08` | M1 | Automated test | Baseline |
-| `FUN-003` | Not follow a symbolic link that points outside its root unless the user explicitly allows it. | MUST | `F-08` | M1 | Automated test | Baseline |
-| `FUN-004` | Ignore hidden files and macOS resource-fork sidecar files (`._*`) when building the catalogue. | MUST | `F-08` | M1 | Automated test | Baseline |
-| `FUN-005` | Index audio, video, image and playlist files by extension and by sniffed content type. | MUST | `F-08` | M1 | Automated test | Baseline |
-| `FUN-006` | Re-scan a root incrementally and detect added | MUST | `F-08` | M1 | Automated test | Baseline |
-| `FUN-007` | Detect a root that is unmounted, inaccessible or replaced by a different volume, and shall… | MUST | `F-08` | M1 | Automated test | Baseline |
+| `FUN-001` | Be able to configure one or more media roots; each root shall have a name shown to clients and… | MUST | `F-08` | M1 | Automated test | Verified |
+| `FUN-002` | Serve the union of all configured roots as one catalogue. | MUST | `F-08` | M1 | Automated test | Verified |
+| `FUN-003` | Not follow a symbolic link that points outside its root unless the user explicitly allows it. | MUST | `F-08` | M1 | Automated test | Verified |
+| `FUN-004` | Ignore hidden files and macOS resource-fork sidecar files (`._*`) when building the catalogue. | MUST | `F-08` | M1 | Automated test | Verified |
+| `FUN-005` | Index audio, video, image and playlist files by extension and by sniffed content type. | MUST | `F-08` | M1 | Automated test | Verified |
+| `FUN-006` | Re-scan a root incrementally and detect added | MUST | `F-08` | M1 | Automated test | Verified |
+| `FUN-007` | Detect a root that is unmounted, inaccessible or replaced by a different volume, and shall… | MUST | `F-08` | M1 | Automated test | Verified |
 | `FUN-008` | Keep the catalogue usable while a rescan runs; a browse during a scan shall return the… | MUST | `F-09` | M2 | Automated test | Verified |
 | `FUN-009` | Store its catalogue in a local SQLite database that can be deleted and rebuilt without data… | MUST | `F-09` | M2 | Automated test | Verified |
 | `FUN-010` | Recover from a corrupted index database by rebuilding it automatically | MUST | `F-09` | M2 | Automated test | Verified |
