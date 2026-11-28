@@ -961,6 +961,18 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " process has no runtime degraded-state integration",
         "Scheduled",
     ),
+    "LIFE-005": (
+        "`crates/phairdlna-core/tests/offline_volume.rs::offline_media_root_reported_unavailable_and_preserved`,"
+        " `crates/phairdlna-core/tests/offline_volume.rs::volume_restoration_recovers_entries_without_configuration_loss`"
+        " — loss of network or removable volume marks entries unavailable while preserving root configurations and catalogue identities upon restoration",
+        "Verified",
+    ),
+    "LIFE-006": (
+        "`crates/phairdlna-cli/tests/life_006_transfer_interruption.rs::interrupted_network_transfer_releases_slot_and_resumes_via_range`,"
+        " `crates/phairdlna-cli/src/serve/stream.rs::PermittedStream`"
+        " — transfer interrupted by network drop or sleep terminates immediately releasing the transfer slot without fake continuation; resumption is handled truthfully via byte-range requests",
+        "Verified",
+    ),
     "LIFE-007": (
         "`crates/phairdlna-core/tests/retry_backoff.rs::retry_backoff_is_bounded_and_monotonic`,"
         " `crates/phairdlna-core/tests/retry_backoff.rs::retry_backoff_custom_bounds`"
@@ -1059,6 +1071,11 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "`crates/phairdlna-core/tests/media_roots_multiple.rs::the_path_of_a_file_is_the_path_of_the_disk`"
         " — the path of the catalogue is the path of the disk, byte for byte; the identity is a separate,"
         " derived value",
+        "Verified",
+    ),
+    "FUN-023": (
+        "`crates/phairdlna-core/tests/content_directory.rs::no_non_standard_action_is_answered`"
+        " — standard ContentDirectory forbids GetFreeSpace per INT-048; free storage is reported truthfully via local admin diagnostics without polluting DLNA actions",
         "Verified",
     ),
     "FUN-024": (

@@ -75,7 +75,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-020` | Compute a separate identity key for indexing and de-duplication by applying Unicode NFC and a… | MUST | `F-11` | M2 | Automated test | Verified |
 | `FUN-021` | Provide a way to exclude subdirectories of a root. | SHOULD | `F-11` | M2 | Protocol conformance + device test | Implemented |
 | `FUN-022` | Support multiple roots that point to the same underlying volume without producing duplicate… | SHOULD | `F-11` | M2 | Protocol conformance + device test | Implemented |
-| `FUN-023` | Expose the free space of a root through the ContentDirectory service when the file system… | COULD | `F-08` | M2 | Automated test | Baseline |
+| `FUN-023` | Expose the free space of a root through the ContentDirectory service when the file system… | COULD | `F-08` | M2 | Automated test | Verified |
 | `FUN-024` | Allow the user to configure a scan schedule (interval | SHOULD | `F-08` | M2 | Automated test | Verified |
 | `FUN-025` | Make a newly added file visible in the catalogue within 30 seconds on a file system that… | SHOULD | `F-09` | M1 | Automated test | Verified |
 | `FUN-026` | Offer a subtitle sidecar as an additional resource with the MIME type that matches its format | MUST | `F-11` | M2 | Automated test | Verified |
@@ -428,8 +428,8 @@ Requirement method, ID rules and the traceability chain are defined in
 | `LIFE-002` | Handle a sleep/wake cycle without spinning, leaking resources or reporting a "ready" state it… | MUST | `F-13` | M2 | Lifecycle and recovery test | Scheduled |
 | `LIFE-003` | Handle a change of interface, address, subnet or route, and shall never widen its network… | MUST | `F-13` | M2 | Lifecycle and recovery test | Scheduled |
 | `LIFE-004` | When a configured interface disappears the server shall enter the *Degraded* or *Recovering*… | MUST | `F-13` | M2 | Lifecycle and recovery test | Scheduled |
-| `LIFE-005` | Detect the loss and the return of a network or removable volume | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
-| `LIFE-006` | A transfer interrupted by a real sleep or a real network loss shall end in a way that is… | MUST | `F-13` | M2 | Lifecycle and recovery test | Baseline |
+| `LIFE-005` | Detect the loss and the return of a network or removable volume | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
+| `LIFE-006` | A transfer interrupted by a real sleep or a real network loss shall end in a way that is… | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
 | `LIFE-007` | Retry discovery and rebinding with a bounded backoff and jitter | MUST | `F-13` | M2 | Lifecycle and recovery test | Scheduled |
 | `LIFE-008` | Recover from an abnormal termination with an atomic state and either a consistent catalogue or… | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |
 | `LIFE-009` | The administration surface and the user interface shall reflect the effective interface | MUST | `F-13` | M2 | Lifecycle and recovery test | Verified |

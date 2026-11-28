@@ -45,7 +45,8 @@
 | `crates/phairdlna-core/tests/protocol_conformance_security.rs` | Acceptance tests for IGD action refusal, GENA restrictions, and update contracts (`INT-057`..`INT-059`) | F-04, F-16 |
 | `crates/phairdlna-core/tests/platform_matrix.rs` | Acceptance tests for build matrix coverage and platform targets | F-22 |
 | `crates/phairdlna-core/tests/parser_fuzz_bounds.rs` | Parser robustness, SSDP datagram fuzzing, boundary limits and path containment tests | F-16 |
-| `crates/phairdlna-core/tests/offline_volume.rs` | Offline media root non-destructive handling and availability reporting | F-18 |
+| `crates/phairdlna-core/tests/offline_volume.rs` | Offline media root non-destructive handling, availability reporting, and volume restoration (`LIFE-005`, `REL-002`) | F-13, F-18 |
+| `crates/phairdlna-cli/tests/life_006_transfer_interruption.rs` | Abrupt network interruption, slot release, and truthful byte-range resumption (`LIFE-006`, `INT-089`) | F-13 |
 | `crates/phairdlna-cli/tests/crash_recovery.rs` | Crash and corruption recovery tests verifying immutability of media originals | F-18 |
 | `crates/phairdlna-cli/tests/invalid_configuration.rs` | Atomic validation and rejection tests for invalid configurations | F-18 |
 | `crates/phairdlna-core/src/ssdp/` | The discovery protocol: parsing a search, matching targets, building bytes, and replaying stored M-SEARCH diagnostics requests (`replay.rs`) | F-01, F-07 |
