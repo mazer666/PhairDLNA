@@ -77,13 +77,13 @@ Requirement method, ID rules and the traceability chain are defined in
 | `FUN-022` | Support multiple roots that point to the same underlying volume without producing duplicate… | SHOULD | `F-11` | M2 | Protocol conformance + device test | Implemented |
 | `FUN-023` | Expose the free space of a root through the ContentDirectory service when the file system… | COULD | `F-08` | M2 | Automated test | Baseline |
 | `FUN-024` | Allow the user to configure a scan schedule (interval | SHOULD | `F-08` | M2 | Automated test | Baseline |
-| `FUN-025` | Make a newly added file visible in the catalogue within 30 seconds on a file system that… | SHOULD | `F-09` | M1 | Automated test | Implemented |
+| `FUN-025` | Make a newly added file visible in the catalogue within 30 seconds on a file system that… | SHOULD | `F-09` | M1 | Automated test | Verified |
 | `FUN-026` | Offer a subtitle sidecar as an additional resource with the MIME type that matches its format | MUST | `F-11` | M2 | Automated test | Verified |
 | `FUN-027` | Deliver a subtitle file in a character set the client can read | MUST | `F-11` | M2 | Automated test | Implemented |
 | `FUN-028` | Serve a file larger than 4 GiB with correct byte offsets across the 4 GiB boundary and at the… | MUST | `F-06` | M1 | Automated test | Verified |
 | `FUN-029` | Expose each additional audio or subtitle track of a media item as its own resource | MUST | `F-11` | M2 | Automated test | Implemented |
 | `FUN-040` | Serve media by byte range from the original file without transcoding whenever the client… | MUST | `F-06` | M1 | Automated test | Verified |
-| `FUN-041` | Report the container and codec of a file in a way a client can use to decide whether it can… | MUST | `F-06` | M1 | Automated test | Implemented |
+| `FUN-041` | Report the container and codec of a file in a way a client can use to decide whether it can… | MUST | `F-06` | M1 | Automated test | Verified |
 | `FUN-042` | Support multiple simultaneous direct-play streams | MUST | `F-06` | M1 | Automated test | Verified |
 | `FUN-043` | Bound the number of concurrent transfers and shall refuse further transfers with a clear error… | MUST | `F-06` | M1 | Automated test | Verified |
 | `FUN-044` | Apply a per-stream bandwidth limit when configured | SHOULD | `F-06` | M1 | Automated test | Baseline |
@@ -184,11 +184,11 @@ Requirement method, ID rules and the traceability chain are defined in
 | `INT-084` | Advertise `Accept-Ranges: bytes` on media responses. | MUST | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-085` | Not implement `multipart/byteranges`; for a multi-range request it shall serve the first… | MUST | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-086` | Answer a `HEAD` request with the same headers as the corresponding `GET` | MUST | `F-06` | M1 | Protocol conformance test | Verified |
-| `INT-087` | Use the extension of the file, refined by the sniffed content, to determine the `Content-Type`;… | MUST | `F-06` | M1 | Protocol conformance test | Implemented |
+| `INT-087` | Use the extension of the file, refined by the sniffed content, to determine the `Content-Type`;… | MUST | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-088` | Not use chunked transfer encoding for media objects and shall always send a `Content-Length`. | MUST | `F-06` | M1 | Protocol conformance test | Verified |
-| `INT-089` | Close a connection that a client abandoned mid-transfer without leaking the transfer slot. | MUST | `F-06` | M1 | Protocol conformance test | Implemented |
+| `INT-089` | Close a connection that a client abandoned mid-transfer without leaking the transfer slot. | MUST | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-090` | Serve the media URI that it advertised in the DIDL-Lite `res` element | MUST | `F-06` | M1 | Protocol conformance test | Verified |
-| `INT-091` | Keep the file open for the duration of the transfer when possible | SHOULD | `F-06` | M1 | Protocol conformance test | Implemented |
+| `INT-091` | Keep the file open for the duration of the transfer when possible | SHOULD | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-092` | Ignore a `Range` header on a method other than `GET` | MUST | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-093` | Honour `If-Range`: when its condition does not hold | MUST | `F-06` | M1 | Protocol conformance test | Verified |
 | `INT-094` | Answer `404` for an unknown media identifier, `405` for an unsupported method and `400` for a… | MUST | `F-06` | M1 | Protocol conformance test | Verified |
@@ -232,7 +232,7 @@ Requirement method, ID rules and the traceability chain are defined in
 | `SEC-064` | Bound the size of its on-disk cache and shall evict entries when the limit is exceeded. | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-065` | Never allocate memory proportional to a client-supplied length field without validating it… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-066` | Parse media metadata and generate thumbnails in a separate | MUST | `F-16` | M1 | Negative security test | Baseline |
-| `SEC-067` | Bound the declared dimensions of an image before allocating any buffer for it | MUST | `F-16` | M1 | Negative security test | Implemented |
+| `SEC-067` | Bound the declared dimensions of an image before allocating any buffer for it | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-068` | Treat playlist entries as untrusted paths, shall resolve and contain them, and shall refuse… | MUST | `F-16` | M1 | Negative security test | Verified |
 | `SEC-069` | Not resolve or follow a macOS Finder alias as if it were a symbolic link; aliases shall be… | MUST | `F-16` | M1 | Negative security test | Baseline |
 | `SEC-070` | Offer the corresponding source of the running build | MUST | `F-16` | M1 | Negative security test | Baseline |

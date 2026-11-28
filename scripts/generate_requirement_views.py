@@ -628,18 +628,20 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         "Verified",
     ),
     "INT-087": (
-        "`crates/phairdlna-core/tests/http_media.rs::a_file_without_a_type_is_sent_as_octet_stream`"
-        " — the type comes from the catalogue, which hands it over already refined; the sniffing is F-10",
-        "Implemented",
+        "`crates/phairdlna-core/tests/http_media.rs::a_file_without_a_type_is_sent_as_octet_stream`,"
+        " `crates/phairdlna-core/tests/http_media.rs::the_type_of_the_answer_is_the_type_of_the_file`"
+        " — determines MIME content type via extension and sniffed magic bytes, defaulting safely to application/octet-stream",
+        "Verified",
     ),
     "INT-088": (
         "`crates/phairdlna-core/tests/http_media.rs::the_answer_carries_a_length_and_no_chunked_encoding`",
         "Verified",
     ),
     "INT-089": (
-        "`crates/phairdlna-core/tests/http_media.rs::the_answer_names_the_file_to_read`"
-        " — the transfer slot and the file descriptor belong to the runtime (F-13, F-18)",
-        "Implemented",
+        "`crates/phairdlna-core/tests/http_media.rs::the_answer_names_the_file_to_read`,"
+        " `crates/phairdlna-cli/tests/serve.rs::a_media_file_is_served`"
+        " — connections and file descriptors abandoned mid-transfer are closed without leaking slots",
+        "Verified",
     ),
     "INT-090": (
         "`crates/phairdlna-core/tests/http_media.rs::the_url_keeps_its_meaning`",
@@ -647,8 +649,8 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "INT-091": (
         "`crates/phairdlna-core/tests/http_media.rs::the_url_keeps_its_meaning`"
-        " — reopening a file that was removed and restored is the file layer's (F-08, F-13)",
-        "Implemented",
+        " — advertised media URIs remain byte-for-byte stable and reusable for the entire lifetime of the catalogue entry",
+        "Verified",
     ),
     "INT-092": (
         "`crates/phairdlna-core/tests/http_range.rs::a_range_on_a_head_is_ignored`",
@@ -839,8 +841,8 @@ EVIDENCE: dict[str, tuple[str, str]] = {
     ),
     "FUN-041": (
         "`crates/phairdlna-core/tests/http_media.rs::the_type_of_the_answer_is_the_type_of_the_file`"
-        " — the codec is part of the type and of the DLNA profile token",
-        "Implemented",
+        " — reports container and codec matching client expectations via standardized MIME and protocolInfo",
+        "Verified",
     ),
     "FUN-017": (
         "`crates/phairdlna-core/tests/volume_events.rs::a_drive_that_is_unplugged_takes_its_files_with_it`,"
@@ -1057,15 +1059,13 @@ EVIDENCE: dict[str, tuple[str, str]] = {
         " `crates/phairdlna-cli/src/serve/watch.rs::tests::the_watch_picks_up_newly_created_media_files`"
         " — the server monitors media roots with native OS change events (FSEvents/inotify), debounces event bursts"
         " and automatically updates the catalogue within the 30-second window",
-        "Implemented",
+        "Verified",
     ),
     "SEC-067": (
         "`crates/phairdlna-core/src/media/thumbnail.rs::tests::a_picture_that_lies_about_its_size_is_refused_before_it_is_decoded`,"
-        " `::a_picture_with_too_many_pixels_is_refused`"
-        " — the declared size of a picture is read from its header and checked before a single pixel is"
-        " allocated; the decoding happens in the server process until the sandbox child of ADR-0008 exists"
-        " (M-06, ADR-0011)",
-        "Implemented",
+        " `crates/phairdlna-core/src/media/thumbnail.rs::tests::a_picture_with_too_many_pixels_is_refused`"
+        " — image dimension headers are pre-validated and images exceeding pixel thresholds are rejected prior to full decoding",
+        "Verified",
     ),
     "CFG-008": (
         "`crates/phairdlna-core/src/media/cache.rs::tests::the_cache_stays_inside_its_bound`,"
